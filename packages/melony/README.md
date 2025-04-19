@@ -17,20 +17,20 @@ pnpm add melony
 Melony provides a simple, declarative API for building data applications. Instead of writing JSX, you use JavaScript functions to create UI components.
 
 ```javascript
-import { root, vstack, table, text } from 'melony';
+import { root, vstack, table, text } from "melony";
 
 // Create a simple data app
 export default function App() {
   return root([
     vstack([
-      text('Hello, Melony!', { level: 'h1' }),
+      text("Hello, Melony!", { level: "h1" }),
       table(data, {
         columns: [
-          { header: 'Name', accessorKey: 'name' },
-          { header: 'Age', accessorKey: 'age' }
-        ]
-      })
-    ])
+          { header: "Name", accessorKey: "name" },
+          { header: "Age", accessorKey: "age" },
+        ],
+      }),
+    ]),
   ]);
 }
 ```
@@ -42,7 +42,7 @@ export default function App() {
 - `root(children, config)`: The root component for your app
 - `vstack(children, config)`: Vertical stack layout
 - `hstack(children, config)`: Horizontal stack layout
-- `tabs(config)`: Create tabbed interface
+- `tabs(tabs, config)`: Create tabbed interface
 
 ### Content Components
 
@@ -52,34 +52,34 @@ export default function App() {
 
 ### Form Components
 
-- `form(children, config)`: Create forms
-- `formField(config)`: Create form fields (supports various types)
-- `button(config)`: Create buttons
+- `formTextField(name, config)`: Create form text input field
+- `formDateField(name, config)`: Create form date input field
+- `button(label, config)`: Create buttons
 
 ### Data Components
 
-- `query(config)`: Fetch and display data
-- `mutation(config)`: Execute data mutations
+- `query(render, config)`: Fetch and display data
+- `mutation(render, config)`: Execute data mutations
 
 ## Examples
 
 ### Creating a Data Table
 
 ```javascript
-import { table } from 'melony';
+import { table } from "melony";
 
 const data = [
-  { id: 1, name: 'John', age: 30 },
-  { id: 2, name: 'Jane', age: 25 }
+  { id: 1, name: "John", age: 30 },
+  { id: 2, name: "Jane", age: 25 },
 ];
 
 export const UserTable = () => {
   return table(data, {
     columns: [
-      { header: 'ID', accessorKey: 'id' },
-      { header: 'Name', accessorKey: 'name' },
-      { header: 'Age', accessorKey: 'age' }
-    ]
+      { header: "ID", accessorKey: "id" },
+      { header: "Name", accessorKey: "name" },
+      { header: "Age", accessorKey: "age" },
+    ],
   });
 };
 ```
@@ -87,29 +87,17 @@ export const UserTable = () => {
 ### Building a Form
 
 ```javascript
-import { form, button } from 'melony';
+import { form, button } from "melony";
 
 export const UserForm = () => {
-  return form([
-    formField({
-      name: 'name',
-      label: 'Name',
-      type: 'text'
-    }),
-    formField({
-      name: 'email',
-      label: 'Email',
-      type: 'email'
-    }),
-    button({
-      label: 'Submit',
-      submit: true
-    })
-  ], {
-    onSubmit: async (data) => {
-      console.log('Form submitted:', data);
+  return form(
+    [formDateField("date"), formTextField("title"), button("Submit")],
+    {
+      onSubmit: async (data) => {
+        console.log("Form submitted:", data);
+      },
     }
-  });
+  );
 };
 ```
 
