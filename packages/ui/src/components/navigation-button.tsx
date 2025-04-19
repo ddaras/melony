@@ -3,12 +3,7 @@
 import { Button as ButtonComponent } from "./ui/button";
 import { useMelony } from "./melony-provider";
 
-export function NavigationButton({
-  label,
-  href,
-  className,
-  variant,
-}: {
+export type NavigationButtonProps = {
   label: string;
   href: string;
   className?: string;
@@ -21,7 +16,14 @@ export function NavigationButton({
     | "ghost"
     | null
     | undefined;
-}) {
+};
+
+export function NavigationButton({
+  label,
+  href,
+  className,
+  variant,
+}: NavigationButtonProps) {
   const { navigate } = useMelony();
 
   return (

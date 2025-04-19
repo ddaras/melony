@@ -8,32 +8,42 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useFormContext } from "react-hook-form";
-import { Combobox } from "@/components/ui/combobox";
+import { VirtualizedCombobox } from "@/components/ui/virtualized-combobox";
 
-export function ComboboxFormField({ field }: { field: ComboboxFieldConfig }) {
+export function ComboboxFormField({
+  field,
+  onSearch,
+  isLoading,
+  className,
+}: {
+  field: ComboboxFieldConfig;
+  onSearch?: (value: string) => void;
+  isLoading?: boolean;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
-  // TODO: add a query request to fetch the options
   return (
     <FormField
       control={control}
       name={field.name}
       render={({ field: rhfField }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
             <div>
-              <Combobox
-                options={[].map((record: Record<string, unknown>) => ({
-                  label:
-                    field.config?.displayField &&
-                    record?.[field.config?.displayField]
-                      ? (record?.[field.config?.displayField] as string)
-                      : (record?.title as string) || (record?.name as string),
-                  value: (record.id as string) || "",
-                }))}
+              <VirtualizedCombobox
+                options={field.config?.options || []}
                 value={rhfField.value}
-                onChange={rhfField.onChange}
+                onChange={(value) => {
+                  rhfField.onChange(value);
+                }}
+                onSearch={(value) => {
+                  if (onSearch) {
+                    onSearch(value);
+                  }
+                }}
+                isLoading={isLoading}
               />
             </div>
           </FormControl>

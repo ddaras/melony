@@ -11,7 +11,7 @@ export const form = ({
   children,
   onSubmit,
 }: {
-  children: React.JSX.Element[];
+  children: React.ReactNode;
   onSubmit: (data: any) => Promise<any>;
 }) => {
   return (

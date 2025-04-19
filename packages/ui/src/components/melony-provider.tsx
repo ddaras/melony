@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { VariablesProvider } from "./variables-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./ui/sonner";
@@ -20,7 +20,7 @@ export const MelonyProvider = ({
   navigate,
 }: {
   children: React.ReactNode;
-  appName: string;
+  appName?: string;
   navigate?: (path: string) => void;
 }) => {
   const [queryClient] = useState(
@@ -39,10 +39,16 @@ export const MelonyProvider = ({
   return (
     <QueryClientProvider client={queryClient}>
       <MelonyContext.Provider
-        value={{ navigate: navigate ?? (() => {}), appName }}
+        value={{ navigate: navigate ?? (() => {}), appName: appName ?? "" }}
       >
         <VariablesProvider>
-          <ModalProvider>{children}</ModalProvider>
+          <ModalProvider>
+            {Array.isArray(children)
+              ? children.map((child, index) => (
+                  <React.Fragment key={index}>{child}</React.Fragment>
+                ))
+              : children}
+          </ModalProvider>
           <Toaster />
         </VariablesProvider>
       </MelonyContext.Provider>

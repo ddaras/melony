@@ -1,4 +1,4 @@
-import { ImageFieldConfig, UploadFieldConfig } from "@/lib/types/fields";
+import { UploadFieldConfig } from "@/lib/types/fields";
 import {
   FormControl,
   FormDescription,
@@ -12,7 +12,6 @@ import { Input } from "../ui/input";
 import { useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Loader2, UploadIcon } from "lucide-react";
-import { ImageDisplayField } from "../display-fields/image-display-field";
 
 export function UploadFormField({ field }: { field: UploadFieldConfig }) {
   const { control } = useFormContext();
@@ -53,7 +52,7 @@ export function UploadFormField({ field }: { field: UploadFieldConfig }) {
     <FormField
       control={control}
       name={field.name}
-      render={({ field: { onChange, value } }) => (
+      render={({ field: { onChange } }) => (
         <FormItem>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
@@ -64,12 +63,6 @@ export function UploadFormField({ field }: { field: UploadFieldConfig }) {
                 onChange={(e) => handleFileUpload(e, onChange)}
                 disabled={isUploading}
                 className="hidden file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-              />
-
-              <ImageDisplayField
-                field={field as unknown as ImageFieldConfig}
-                value={value}
-                large
               />
 
               <div>

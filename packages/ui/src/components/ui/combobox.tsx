@@ -18,17 +18,30 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export function Combobox({
   options,
   value,
   onChange,
+  onSearch,
 }: {
   options: { label: string; value: string }[];
   value: string;
   onChange: (value: string) => void;
+  onSearch: (value: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
+  const debouncedSearchValue = useDebounce(searchValue, 300);
+  const prevSearchValueRef = React.useRef(debouncedSearchValue);
+
+  React.useEffect(() => {
+    if (debouncedSearchValue !== prevSearchValueRef.current) {
+      onSearch(debouncedSearchValue);
+      prevSearchValueRef.current = debouncedSearchValue;
+    }
+  }, [debouncedSearchValue, onSearch]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,7 +65,11 @@ export function Combobox({
         align="start"
       >
         <Command>
-          <CommandInput placeholder="Search..." />
+          <CommandInput
+            placeholder="Search..."
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
           <CommandList>
             <CommandEmpty>Not found.</CommandEmpty>
             <CommandGroup>

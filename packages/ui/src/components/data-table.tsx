@@ -23,13 +23,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CallbackConfig } from "@/lib/types/actions";
+import { useCallback } from "@/hooks/use-callback";
+
+export type { ColumnDef };
 
 export type DataTableProps = {
   data?: any[];
   columns?: ColumnDef<any>[];
+  onRowClick?: (config: CallbackConfig) => void;
 };
 
-export function DataTable({ data = [], columns = [] }: DataTableProps) {
+export function DataTable({
+  data = [],
+  columns = [],
+  onRowClick,
+}: DataTableProps) {
+  const callback = useCallback();
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -66,7 +77,17 @@ export function DataTable({ data = [], columns = [] }: DataTableProps) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width:
+                          header.column.columnDef.size === 150
+                            ? "auto"
+                            : header.column.columnDef.size,
+                        minWidth: header.column.columnDef.size,
+                        maxWidth: header.column.columnDef.size,
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -85,9 +106,25 @@ export function DataTable({ data = [], columns = [] }: DataTableProps) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() =>
+                    onRowClick?.({
+                      data: row.original,
+                      ...callback,
+                    })
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width:
+                          cell.column.columnDef.size === 150
+                            ? "auto"
+                            : cell.column.columnDef.size,
+                        minWidth: cell.column.columnDef.size,
+                        maxWidth: cell.column.columnDef.size,
+                      }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

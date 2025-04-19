@@ -8,45 +8,66 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useFormContext } from "react-hook-form";
-import { Input } from "../ui/input";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "../ui/calendar";
 
-export function DateFormField({ field }: { field: DateFieldConfig }) {
+export function DateFormField({
+  field,
+  className,
+}: {
+  field: DateFieldConfig;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
   return (
     <FormField
       control={control}
       name={field.name}
-      render={({ field: rhfField }) => {
-        const hasTime = field.config?.hasTime ?? false;
-
-        const value = rhfField.value
-          ? hasTime
-            ? new Date(rhfField.value).toISOString().slice(0, 16)
-            : new Date(rhfField.value).toISOString().split("T")[0]
-          : "";
-
-        return (
-          <FormItem>
-            <FormLabel>{field?.label || field.name}</FormLabel>
-            <FormControl>
-              <Input
-                type={hasTime ? "datetime-local" : "date"}
-                value={value}
-                onChange={(e) => rhfField.onChange(e.target.value)}
-                min={field.config?.minDate?.toISOString().split("T")[0]}
-                max={field.config?.maxDate?.toISOString().split("T")[0]}
-                disabled={field.disabled}
-                required={field.required}
+      render={({ field: rhfField }) => (
+        <FormItem className={cn("flex flex-col", className)}>
+          <FormLabel>{field?.label || field.name}</FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <FormControl>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] pl-3 text-left font-normal",
+                    !rhfField.value && "text-muted-foreground"
+                  )}
+                >
+                  {rhfField.value ? (
+                    format(rhfField.value, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </FormControl>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={rhfField.value}
+                onSelect={rhfField.onChange}
+                // disabled={(date) =>
+                //   date > new Date() || date < new Date("1900-01-01")
+                // }
+                initialFocus
               />
-            </FormControl>
-            {field?.description && (
-              <FormDescription>{field?.description}</FormDescription>
-            )}
-            <FormMessage />
-          </FormItem>
-        );
-      }}
+            </PopoverContent>
+          </Popover>
+          {field?.description && (
+            <FormDescription>{field?.description}</FormDescription>
+          )}
+          <FormMessage />
+        </FormItem>
+      )}
     />
   );
 }

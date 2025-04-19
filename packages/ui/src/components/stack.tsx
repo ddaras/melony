@@ -3,15 +3,11 @@ import { cn } from "@/lib/utils";
 
 export type StackProps = {
   children: React.ReactNode;
-  direction?: "row" | "column";
+  direction?: "row" | "col";
   className?: string;
 };
 
-export function Stack({
-  children,
-  direction = "column",
-  className,
-}: StackProps) {
+export function Stack({ children, direction = "col", className }: StackProps) {
   return (
     <div
       className={cn(

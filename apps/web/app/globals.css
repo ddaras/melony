@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@source "../node_modules/@melony/node_modules/@melony/ui/dist/**/*.{js,ts,jsx,tsx,mdx}";
+@plugin "@tailwindcss/typography";
+
+@source "../node_modules/@melony/ui/dist/**/*.{js,ts,jsx,tsx,mdx}";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -90,6 +90,7 @@ export interface ComboboxFieldConfig extends BaseFieldConfig {
   config?: {
     query?: string;
     displayField?: string;
+    options?: Array<{ label: string; value: string }>;
   };
 }
 

@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { rootLayout } from "melony";
+import { root } from "melony";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "MentalConnect",
@@ -13,12 +14,12 @@ export default function RootLayout({
 }: {
   children: React.JSX.Element;
 }) {
-  return rootLayout({
-    appName: "MentalConnect",
-    navigate: async (path) => {
+  return root()
+    .appName("MentalConnect")
+    .child(children)
+    .shouldRenderHtml(true)
+    .navigate(async (path) => {
       "use server";
       redirect(path);
-    },
-    children,
-  });
+    });
 }

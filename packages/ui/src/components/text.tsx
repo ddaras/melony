@@ -7,5 +7,5 @@ export const Text = ({
   children: React.ReactNode;
   className?: string;
 }) => {
-  return <p className={cn("text-sm", className)}>{children}</p>;
+  return <p className={cn("", className)}>{children}</p>;
 };

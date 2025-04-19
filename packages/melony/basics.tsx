@@ -5,21 +5,28 @@ import {
   Heading,
   Text,
   PrimaryButton,
-  CallbackConfig,
+  RichText,
+  RichTextProps,
+  NavigationButtonProps,
+  PrimaryButtonProps,
+  GhostButtonProps,
+  GhostButton,
+  IconProps,
+  Icon,
 } from "@melony/ui";
 
 export const primaryButton = ({
   label,
   onClick,
   className,
-}: {
-  label: string;
-  onClick: (config: CallbackConfig) => void;
-  className?: string;
-}) => {
+}: PrimaryButtonProps) => {
   return (
     <PrimaryButton className={className} onClick={onClick} label={label} />
   );
+};
+
+export const ghostButton = (props: GhostButtonProps) => {
+  return <GhostButton {...props} />;
 };
 
 export function navigationButton({
@@ -27,20 +34,7 @@ export function navigationButton({
   href,
   className,
   variant,
-}: {
-  label: string;
-  href: string;
-  variant?:
-    | "link"
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | null
-    | undefined;
-  className?: string;
-}) {
+}: NavigationButtonProps) {
   return (
     <NavigationButton
       label={label}
@@ -69,4 +63,12 @@ export function text({
   className?: string;
 }) {
   return <Text className={className}>{children}</Text>;
+}
+
+export function richText(props: RichTextProps) {
+  return <RichText {...props} />;
+}
+
+export function icon(props: IconProps) {
+  return <Icon {...props} />;
 }

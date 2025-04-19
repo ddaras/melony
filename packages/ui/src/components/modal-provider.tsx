@@ -79,13 +79,14 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
           open={!!modal.id}
           onOpenChange={() => closeModal(modal?.id || "")}
         >
-          <DialogContent>
-            <DialogHeader>
+          <DialogContent className="lg:max-w-[98vw] overflow-y-scroll max-h-[98vh]">
+            <DialogHeader className="sticky top-0 bg-background">
               <DialogTitle>{modal.title}</DialogTitle>
               {modal.description && (
                 <DialogDescription>{modal.description}</DialogDescription>
               )}
             </DialogHeader>
+
             {modal.content}
           </DialogContent>
         </Dialog>

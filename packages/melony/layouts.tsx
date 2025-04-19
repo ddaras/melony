@@ -2,17 +2,21 @@ import React from "react";
 
 import { Stack, RootLayout, MelonyProvider, Spacer } from "@melony/ui";
 
-export function rootLayout({
+export function root({
   children,
   appName,
   navigate,
+  shouldRenderHtml,
+  className,
 }: {
-  children: React.JSX.Element;
+  children: React.ReactNode;
   appName: string;
   navigate?: (path: string) => void;
+  shouldRenderHtml?: boolean;
+  className?: string;
 }) {
   return (
-    <RootLayout>
+    <RootLayout shouldRenderHtml={shouldRenderHtml} className={className}>
       <MelonyProvider appName={appName} navigate={navigate}>
         {children}
       </MelonyProvider>
@@ -24,7 +28,7 @@ export function vstack({
   children,
   className,
 }: {
-  children: React.JSX.Element | React.JSX.Element[];
+  children: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -42,7 +46,7 @@ export function hstack({
   children,
   className,
 }: {
-  children: React.JSX.Element | React.JSX.Element[];
+  children: React.ReactNode;
   className?: string;
 }) {
   return (
