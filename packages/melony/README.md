@@ -1,62 +1,116 @@
 # Melony
 
-A modern React component library for building beautiful user interfaces.
+Melony is an experimental UI library that lets you build data apps rapidly without writing JSX or traditional frontend code.
+
+## Motivation
+
+I love React, but I hate JSX. So I decided to build a simple UI library to build data apps faster without writing a single line of "frontend code".
 
 ## Installation
 
 ```bash
-npm install melony
+pnpm add melony
 ```
 
 ## Usage
 
-```tsx
-import { Button, Card, Input } from 'melony';
+Melony provides a simple, declarative API for building data applications. Instead of writing JSX, you use JavaScript functions to create UI components.
 
-function App() {
-  return (
-    <Card>
-      <Input placeholder="Enter your name" />
-      <Button>Submit</Button>
-    </Card>
-  );
+```javascript
+import { root, vstack, table, text } from 'melony';
+
+// Create a simple data app
+export default function App() {
+  return root([
+    vstack([
+      text('Hello, Melony!', { level: 'h1' }),
+      table(data, {
+        columns: [
+          { header: 'Name', accessorKey: 'name' },
+          { header: 'Age', accessorKey: 'age' }
+        ]
+      })
+    ])
+  ]);
 }
 ```
 
-## Features
+## API Reference
 
-- 🎨 Modern and clean UI components
-- 📦 Lightweight and performant
-- 🔧 TypeScript support
-- 🎯 Built with React 18
-- 🛠️ Easy to customize
+### Layout Components
 
-## Available Components
+- `root(children, config)`: The root component for your app
+- `vstack(children, config)`: Vertical stack layout
+- `hstack(children, config)`: Horizontal stack layout
+- `tabs(config)`: Create tabbed interface
 
-- Basics (Button, Text, etc.)
-- Layouts (Grid, Stack, etc.)
-- Inputs (TextInput, Select, etc.)
-- Feedback (Alert, Toast, etc.)
-- Presentation (Card, Modal, etc.)
-- Data (Table, List, etc.)
-- Overlays (Tooltip, Popover, etc.)
+### Content Components
 
-## Development
+- `table(data, config)`: Display tabular data
+- `text(content, config)`: Display text content
+- `heading(content, config)`: Display headings
 
-```bash
-# Install dependencies
-npm install
+### Form Components
 
-# Start development mode
-npm run dev
+- `form(children, config)`: Create forms
+- `formField(config)`: Create form fields (supports various types)
+- `button(config)`: Create buttons
 
-# Build the package
-npm run build
+### Data Components
 
-# Publish new version
-npm run publish:patch  # for patch version
-npm run publish:minor  # for minor version
-npm run publish:major  # for major version
+- `query(config)`: Fetch and display data
+- `mutation(config)`: Execute data mutations
+
+## Examples
+
+### Creating a Data Table
+
+```javascript
+import { table } from 'melony';
+
+const data = [
+  { id: 1, name: 'John', age: 30 },
+  { id: 2, name: 'Jane', age: 25 }
+];
+
+export const UserTable = () => {
+  return table(data, {
+    columns: [
+      { header: 'ID', accessorKey: 'id' },
+      { header: 'Name', accessorKey: 'name' },
+      { header: 'Age', accessorKey: 'age' }
+    ]
+  });
+};
+```
+
+### Building a Form
+
+```javascript
+import { form, button } from 'melony';
+
+export const UserForm = () => {
+  return form([
+    formField({
+      name: 'name',
+      label: 'Name',
+      type: 'text'
+    }),
+    formField({
+      name: 'email',
+      label: 'Email',
+      type: 'email'
+    }),
+    button({
+      label: 'Submit',
+      submit: true
+    })
+  ], {
+    onSubmit: async (data) => {
+      console.log('Form submitted:', data);
+    }
+  });
+};
 ```
 
 ## License

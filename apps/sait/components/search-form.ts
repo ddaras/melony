@@ -23,11 +23,17 @@ export const searchForm = ({
         ],
         { className: "gap-8" }
       ),
-      hstack([formDateField("departure", {
-        className: "w-1/2"
-      }), formDateField("arrival")], {
-        className: "gap-8",
-      }),
+      hstack(
+        [
+          formDateField("departure", {
+            className: "w-1/2",
+          }),
+          formDateField("arrival"),
+        ],
+        {
+          className: "gap-8",
+        }
+      ),
       button("Search", {
         isLoading: isPending,
         submit: true,
