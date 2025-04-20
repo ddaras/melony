@@ -19,6 +19,7 @@ export default function PeoplePage() {
       );
     },
     {
+      queryKey: "people",
       action: getPeopleTwentyAction,
     }
   );

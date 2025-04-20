@@ -11,5 +11,6 @@ export * from "./api/mutation";
 export * from "./api/query";
 export * from "./api/typo";
 export * from "./api/avatar";
+export * from "./api/chip";
 
 export * from "./render/ui";

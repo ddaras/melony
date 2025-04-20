@@ -1,4 +1,4 @@
-import { ButtonConfig } from "../builder/types";
+import { ButtonConfig, NavigationButtonConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
 export const button = (
@@ -7,6 +7,17 @@ export const button = (
 ) => {
   return renderUI({
     type: "button",
+    label,
+    ...config,
+  });
+};
+
+export const navigationButton = (
+  label: string,
+  config?: Omit<NavigationButtonConfig, "type" | "label">
+) => {
+  return renderUI({
+    type: "navigation-button",
     label,
     ...config,
   });

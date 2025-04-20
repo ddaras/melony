@@ -27,5 +27,9 @@ export default function RootLayout({
 }>) {
   return root([children], {
     shouldRenderHtml: true,
+    navigate: async (path) => {
+      "use server";
+      redirect(path);
+    },
   });
 }

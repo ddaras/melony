@@ -7,6 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  Chip,
   ComboboxFormField,
   DataTable,
   DateFormField,
@@ -15,6 +16,7 @@ import {
   Heading,
   MelonyProvider,
   MutationContainer,
+  NavigationButton,
   QueryContainer,
   RootLayout,
   Stack,
@@ -42,7 +44,9 @@ export const renderUI = (config: UIConfig) => {
         shouldRenderHtml={compiled.shouldRenderHtml}
         className={compiled.className}
       >
-        <MelonyProvider>{compiled.children}</MelonyProvider>
+        <MelonyProvider navigate={compiled.navigate}>
+          {compiled.children}
+        </MelonyProvider>
       </RootLayout>
     );
   }
@@ -202,6 +206,21 @@ export const renderUI = (config: UIConfig) => {
         className={config.className}
       />
     );
+  }
+
+  if (config.type === "navigation-button") {
+    return (
+      <NavigationButton
+        label={config.label}
+        href={config?.href || "/"}
+        className={config.className}
+        variant={config.variant}
+      />
+    );
+  }
+
+  if (config.type === "chip") {
+    return <Chip label={config.label} className={config.className} />;
   }
 
   return null;

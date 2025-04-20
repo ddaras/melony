@@ -1,4 +1,4 @@
-import { avatar, table, text } from "melony";
+import { avatar, chip, table, text } from "melony";
 
 export function peopleList({ people }: { people: any[] }) {
   return table(people, {
@@ -24,6 +24,13 @@ export function peopleList({ people }: { people: any[] }) {
       {
         header: "City",
         accessorKey: "city",
+      },
+      {
+        header: "Company",
+        accessorKey: "company",
+        cell: ({ row }) => {
+          return chip(row.original.company?.name);
+        },
       },
     ],
   });

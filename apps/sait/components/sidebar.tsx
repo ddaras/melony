@@ -1,35 +1,32 @@
-"use client";
+import { navigationButton, vstack } from "melony";
+import { headers } from "next/headers";
 
-import { button, vstack } from "melony";
-import { useRouter } from "next/navigation";
-
-export const sidebar = () => {
-  const router = useRouter();
+export const sidebar = async () => {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "/";
 
   return vstack(
     [
       vstack([
-        button("People", {
-          variant: "ghost",
+        navigationButton("People", {
+          variant: pathname === "/people" ? "secondary" : "ghost",
           className: "justify-start",
-          onClick: () => {
-            router.push("/people");
-          },
+          href: "/people",
         }),
-        button("Companies", {
-          variant: "ghost",
+        navigationButton("Companies", {
+          variant: pathname === "/companies" ? "secondary" : "ghost",
           className: "justify-start",
-          onClick: () => {
-            router.push("/companies");
-          },
+          href: "/companies",
         }),
-        button("Opportunities", {
-          variant: "ghost",
+        navigationButton("Opportunities", {
+          variant: pathname === "/opportunities" ? "secondary" : "ghost",
           className: "justify-start",
+          href: "/opportunities",
         }),
-        button("Tasks", {
-          variant: "ghost",
+        navigationButton("Tasks", {
+          variant: pathname === "/tasks" ? "secondary" : "ghost",
           className: "justify-start",
+          href: "/tasks",
         }),
       ]),
     ],

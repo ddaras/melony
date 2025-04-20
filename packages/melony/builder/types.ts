@@ -28,6 +28,7 @@ export type ColumnConfig = {
 export type RootConfig = {
   type: "root";
   shouldRenderHtml?: boolean;
+  navigate?: (path: string) => void;
   className?: string;
   children?: React.ReactNode[];
 };
@@ -92,6 +93,20 @@ export type ButtonConfig = {
   isLoading?: boolean;
 };
 
+export type NavigationButtonConfig = {
+  type: "navigation-button";
+  label: string;
+  href?: string;
+  className?: string;
+  variant?:
+    | "default"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "destructive";
+};
+
 export type MutationConfig = {
   type: "mutation";
   mutationKey?: string;
@@ -126,6 +141,12 @@ export type AvatarConfig = {
   className?: string;
 };
 
+export type ChipConfig = {
+  type: "chip";
+  label: string;
+  className?: string;
+};
+
 export type UIConfig =
   | StackConfig
   | TableConfig
@@ -141,7 +162,9 @@ export type UIConfig =
   | HeadingConfig
   | FormComboboxFieldConfig
   | FormDateFieldConfig
-  | AvatarConfig;
+  | AvatarConfig
+  | NavigationButtonConfig
+  | ChipConfig;
 
 export type UiBuilder = {
   build(): UIConfig;

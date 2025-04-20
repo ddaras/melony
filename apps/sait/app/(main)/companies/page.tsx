@@ -37,6 +37,7 @@ export default function CompaniesPage() {
       );
     },
     {
+      queryKey: "companies",
       action: getCompaniesTwentyAction,
     }
   );

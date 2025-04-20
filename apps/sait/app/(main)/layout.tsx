@@ -1,5 +1,3 @@
-"use client";
-
 import { sidebarLayout } from "@/components/sidebar-layout";
 
 export default function MainLayout({

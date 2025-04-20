@@ -61,6 +61,9 @@ export default function App() {
 - `query(render, config)`: Fetch and display data
 - `mutation(render, config)`: Execute data mutations
 
+### Presentational Components
+- `avatar(src, config)`: Avatar
+
 ## Examples
 
 ### Creating a Data Table
