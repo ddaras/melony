@@ -17,6 +17,7 @@ export * from "./components/rich-text";
 export * from "./components/chip";
 export * from "./components/dropdown";
 export * from "./components/icon";
+export * from "./components/avatar";
 
 export * from "./components/field-renderer";
 

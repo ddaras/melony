@@ -119,6 +119,13 @@ export type HeadingConfig = {
   className?: string;
 };
 
+export type AvatarConfig = {
+  type: "avatar";
+  src: string;
+  name?: string;
+  className?: string;
+};
+
 export type UIConfig =
   | StackConfig
   | TableConfig
@@ -133,7 +140,8 @@ export type UIConfig =
   | TextConfig
   | HeadingConfig
   | FormComboboxFieldConfig
-  | FormDateFieldConfig;
+  | FormDateFieldConfig
+  | AvatarConfig;
 
 export type UiBuilder = {
   build(): UIConfig;

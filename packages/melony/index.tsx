@@ -10,5 +10,6 @@ export * from "./api/button";
 export * from "./api/mutation";
 export * from "./api/query";
 export * from "./api/typo";
+export * from "./api/avatar";
 
 export * from "./render/ui";

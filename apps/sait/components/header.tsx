@@ -6,20 +6,22 @@ import { hstack } from "melony";
 export const header = () => {
   return hstack(
     [
-      text("YourApp", {
+      text("TwentyCRMClone", {
         className: "font-bold",
       }),
       hstack(
         [
           button("Home", {
+            variant: "ghost",
             className: "flex-1 gap-1",
           }),
           button("Docs", {
+            variant: "ghost",
             className: "flex-1 gap-1",
           }),
         ],
         {
-          className: "flex-1 gap-1",
+          className: "gap-1",
         }
       ),
     ],

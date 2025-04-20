@@ -4,7 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:partial": "turbo run dev --filter=apps/sait",
+    "dev:partial": "turbo run dev --filter=!docs --filter=!vite --filter=!web",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Card,
   CardContent,
@@ -189,6 +190,16 @@ export const renderUI = (config: UIConfig) => {
         level={config.level}
         className={config.className}
         content={config.content}
+      />
+    );
+  }
+
+  if (config.type === "avatar") {
+    return (
+      <Avatar
+        src={config.src}
+        name={config.name}
+        className={config.className}
       />
     );
   }

@@ -28,7 +28,9 @@ export const searchForm = ({
           formDateField("departure", {
             className: "w-1/2",
           }),
-          formDateField("arrival"),
+          formDateField("arrival", {
+            className: "w-1/2",
+          }),
         ],
         {
           className: "gap-8",
