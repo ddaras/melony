@@ -18,6 +18,7 @@ export * from "./components/chip";
 export * from "./components/dropdown";
 export * from "./components/icon";
 export * from "./components/avatar";
+export * from "./components/modal-button";
 
 export * from "./components/field-renderer";
 

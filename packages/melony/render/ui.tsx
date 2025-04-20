@@ -11,10 +11,10 @@ import {
   ComboboxFormField,
   DataTable,
   DateFormField,
-  FieldRenderer,
   Form,
   Heading,
   MelonyProvider,
+  ModalButton,
   MutationContainer,
   NavigationButton,
   QueryContainer,
@@ -25,6 +25,7 @@ import {
   TabsList,
   TabsTrigger,
   Text,
+  TextFormField,
 } from "@melony/ui";
 import { compile } from "../builder/compile";
 import { UIConfig } from "../builder/types";
@@ -115,6 +116,20 @@ export const renderUI = (config: UIConfig) => {
           </TabsContent>
         ))}
       </Tabs>
+    );
+  }
+
+  if (config.type === "form-text-field") {
+    return (
+      <TextFormField
+        field={{
+          name: config.name,
+          label: config.label,
+          type: "text",
+          config: {},
+        }}
+        className={config.className}
+      />
     );
   }
 
@@ -221,6 +236,18 @@ export const renderUI = (config: UIConfig) => {
 
   if (config.type === "chip") {
     return <Chip label={config.label} className={config.className} />;
+  }
+
+  if (config.type === "modal-button") {
+    return (
+      <ModalButton
+        label={config.label}
+        title={config.title}
+        description={config.description}
+      >
+        {config.content}
+      </ModalButton>
+    );
   }
 
   return null;

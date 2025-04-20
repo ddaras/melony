@@ -1,32 +1,19 @@
 import {
-  FormFieldConfig,
   FormComboboxFieldConfig,
   FormDateFieldConfig,
+  FormTextFieldConfig,
 } from "../builder/types";
-import { FieldType } from "@melony/ui";
 import { renderUI } from "../render/ui";
-
-export const formField = (
-  name: string,
-  type: FieldType = "text",
-  config?: Omit<FormFieldConfig, "type">
-) => {
-  return renderUI({
-    type: "form-field",
-    field: {
-      type,
-      name,
-      ...config?.field,
-    },
-    ...config,
-  });
-};
 
 export const formTextField = (
   name: string,
-  config?: Omit<FormFieldConfig, "type">
+  config?: Omit<FormTextFieldConfig, "type">
 ) => {
-  return formField(name, "text", config);
+  return renderUI({
+    type: "form-text-field",
+    name,
+    ...config,
+  });
 };
 
 export const formComboboxField = (

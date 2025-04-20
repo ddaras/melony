@@ -1,4 +1,4 @@
-import { button } from "melony";
+import { navigationButton } from "melony";
 
 import { text } from "melony";
 import { hstack } from "melony";
@@ -11,11 +11,11 @@ export const header = () => {
       }),
       hstack(
         [
-          button("Home", {
+          navigationButton("Home", {
             variant: "ghost",
             className: "flex-1 gap-1",
           }),
-          button("Docs", {
+          navigationButton("Docs", {
             variant: "ghost",
             className: "flex-1 gap-1",
           }),

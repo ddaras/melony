@@ -12,5 +12,6 @@ export * from "./api/query";
 export * from "./api/typo";
 export * from "./api/avatar";
 export * from "./api/chip";
+export * from "./api/modal-button";
 
 export * from "./render/ui";

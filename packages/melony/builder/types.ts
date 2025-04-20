@@ -54,11 +54,13 @@ export type TabConfig = {
   footer?: React.ReactNode;
 };
 
-export type FormFieldConfig = {
-  type: "form-field";
-  field: FieldConfig;
+export type FormTextFieldConfig = {
+  type: "form-text-field";
+  name: string;
+  label?: string;
   onSearch?: (value: string) => void;
   isLoading?: boolean;
+  className?: string;
 };
 
 export type FormComboboxFieldConfig = {
@@ -112,6 +114,8 @@ export type MutationConfig = {
   mutationKey?: string;
   action: (data: any) => Promise<any>;
   render: (mutation: UseMutationResult<any, any, any>) => React.ReactNode;
+  onSuccess?: (data: any) => void;
+  onError?: (error: any) => void;
 };
 
 export type QueryConfig = {
@@ -147,6 +151,14 @@ export type ChipConfig = {
   className?: string;
 };
 
+export type ModalButtonConfig = {
+  type: "modal-button";
+  label: string;
+  title: string;
+  content: React.ReactNode;
+  description?: string;
+};
+
 export type UIConfig =
   | StackConfig
   | TableConfig
@@ -154,7 +166,7 @@ export type UIConfig =
   | RootConfig
   | FormConfig
   | TabsConfig
-  | FormFieldConfig
+  | FormTextFieldConfig
   | ButtonConfig
   | MutationConfig
   | QueryConfig
@@ -164,7 +176,8 @@ export type UIConfig =
   | FormDateFieldConfig
   | AvatarConfig
   | NavigationButtonConfig
-  | ChipConfig;
+  | ChipConfig
+  | ModalButtonConfig;
 
 export type UiBuilder = {
   build(): UIConfig;
