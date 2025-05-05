@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -18,9 +18,6 @@
     "publish:patch": "npm version patch && npm publish --access public",
     "publish:minor": "npm version minor && npm publish --access public",
     "publish:major": "npm version major && npm publish --access public"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0"
   },
   "dependencies": {
     "@melony/ui": "workspace:*"
