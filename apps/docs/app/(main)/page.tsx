@@ -90,8 +90,7 @@ export default function Home() {
     className: "gap-8 container max-w-4xl mx-auto p-8",
     children: [
       heading({
-        content:
-          "Flutter inspired React library for building consistent and scalable UIs",
+        content: "Flutter inspired React UI library",
       }),
       text({
         content:
@@ -99,12 +98,7 @@ export default function Home() {
       }),
       text({
         content:
-          "This entire website is built with Melony, showing you how easy it can be.",
-      }),
-      heading({ content: "Table" }),
-      text({
-        content:
-          "Now I will show you how to build a simple table using Melony.",
+          "Let's build a table with Melony to demonstrate how easy it is to use.",
       }),
       card({
         className: "flex flex-col gap-8",

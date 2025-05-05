@@ -2,6 +2,12 @@
 
 import { chip } from "melony";
 
-export const statusCell = ({ row }: { row: any }) => {
-  return chip(row.original.status);
+export const statusCell = ({
+  row,
+}: {
+  row: { original: { status: string } };
+}) => {
+  return chip({
+    label: row.original.status,
+  });
 };

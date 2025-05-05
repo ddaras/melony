@@ -1,14 +1,4 @@
-import {
-  button,
-  card,
-  codeBlock,
-  heading,
-  hstack,
-  table,
-  tabs,
-  text,
-  vstack,
-} from "melony";
+import { card, codeBlock, heading, table, tabs, text, vstack } from "melony";
 
 const exmapleCode = `tabs({
   tabs: [
