@@ -1,6 +1,6 @@
 {
   "name": "@melony/ui",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -31,6 +31,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.1.4",
     "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/react-tooltip": "^1.2.5",
     "@tanstack/react-query": "^5.72.2",
     "@tanstack/react-table": "^8.21.2",
     "@tanstack/react-virtual": "^3.13.6",

@@ -10,7 +10,13 @@ import {
 import { useFormContext } from "react-hook-form";
 import { Checkbox } from "../ui/checkbox";
 
-export function BooleanFormField({ field }: { field: BooleanFieldConfig }) {
+export function BooleanFormField({
+  field,
+  className,
+}: {
+  field: BooleanFieldConfig;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
   return (
@@ -18,7 +24,7 @@ export function BooleanFormField({ field }: { field: BooleanFieldConfig }) {
       control={control}
       name={field.name}
       render={({ field: rhfField }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
             <div>

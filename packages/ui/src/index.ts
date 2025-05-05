@@ -46,6 +46,7 @@ export * from "./components/ui/tabs";
 export * from "./components/ui/card";
 export * from "./components/ui/button";
 export * from "./components/ui/stepper";
+export * from "./components/ui/tooltip";
 
 export { toast } from "sonner";
 

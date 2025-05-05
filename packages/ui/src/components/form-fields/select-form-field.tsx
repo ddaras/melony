@@ -16,7 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function SelectFormField({ field }: { field: SelectFieldConfig }) {
+export function SelectFormField({ field,
+  className,
+}: {
+  field: SelectFieldConfig;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
   const options = field.config?.options || [];
@@ -26,7 +31,7 @@ export function SelectFormField({ field }: { field: SelectFieldConfig }) {
       control={control}
       name={field.name}
       render={({ field: rhfField }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
             <Select

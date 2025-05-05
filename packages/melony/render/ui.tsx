@@ -1,12 +1,9 @@
 import {
   Avatar,
+  BooleanFormField,
   Button,
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
   Chip,
   CodeBlock,
   ComboboxFormField,
@@ -18,8 +15,11 @@ import {
   ModalButton,
   MutationContainer,
   NavigationButton,
+  NumberFormField,
+  PasswordFormField,
   QueryContainer,
   RootLayout,
+  SelectFormField,
   Spacer,
   Stack,
   Step,
@@ -29,8 +29,15 @@ import {
   TabsList,
   TabsTrigger,
   Text,
+  TextareaFormField,
   TextFormField,
   ThemeToggle,
+  Tooltip,
+  TooltipTrigger,
+  TooltipProvider,
+  TooltipContent,
+  Progress,
+  Loader,
 } from "@melony/ui";
 import { compile } from "../builder/compile";
 import { UIConfig } from "../builder/types";
@@ -309,6 +316,80 @@ export const renderUI = (config: UIConfig) => {
         </Stepper>
       </div>
     );
+  }
+
+  if (config.type === "form-boolean-field") {
+    return (
+      <BooleanFormField
+        field={{ name: config.name, label: config.label, type: "boolean" }}
+        className={config.className}
+      />
+    );
+  }
+
+  if (config.type === "form-number-field") {
+    return (
+      <NumberFormField
+        field={{ name: config.name, label: config.label, type: "number" }}
+        className={config.className}
+      />
+    );
+  }
+
+  if (config.type === "form-password-field") {
+    return (
+      <PasswordFormField
+        field={{ name: config.name, label: config.label, type: "password" }}
+        className={config.className}
+      />
+    );
+  }
+
+  if (config.type === "form-select-field") {
+    return (
+      <SelectFormField
+        field={{ name: config.name, label: config.label, type: "select" }}
+        className={config.className}
+      />
+    );
+  }
+
+  if (config.type === "form-textarea-field") {
+    return (
+      <TextareaFormField
+        field={{ name: config.name, label: config.label, type: "textarea" }}
+        className={config.className}
+      />
+    );
+  }
+
+  if (config.type === "tooltip") {
+    return (
+      // @ts-ignore - React 19 compatibility issue
+      <TooltipProvider>
+        {/* @ts-ignore - React 19 compatibility issue */}
+        <Tooltip>
+          {/* @ts-ignore - React 19 compatibility issue */}
+          <TooltipTrigger asChild>{config.children}</TooltipTrigger>
+          {/* @ts-ignore - React 19 compatibility issue */}
+          <TooltipContent
+            side={config.side}
+            align={config.align}
+            className={config.className}
+          >
+            {config.content}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  if (config.type === "loader") {
+    return <Loader className={config.className} />;
+  }
+
+  if (config.type === "progress") {
+    return <Progress value={config.value} className={config.className} />;
   }
 
   return null;

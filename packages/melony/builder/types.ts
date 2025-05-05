@@ -76,6 +76,13 @@ export type FormComboboxFieldConfig = {
   className?: string;
 };
 
+export type FormBooleanFieldConfig = {
+  type: "form-boolean-field";
+  name: string;
+  label?: string;
+  className?: string;
+};
+
 export type FormDateFieldConfig = {
   type: "form-date-field";
   name: string;
@@ -203,6 +210,61 @@ export type StepperConfig = {
   className?: string;
 };
 
+export type FormNumberFieldConfig = {
+  type: "form-number-field";
+  name: string;
+  label?: string;
+  className?: string;
+};
+
+export type FormPasswordFieldConfig = {
+  type: "form-password-field";
+  name: string;
+  label?: string;
+  className?: string;
+};
+
+export type FormSelectFieldConfig = {
+  type: "form-select-field";
+  name: string;
+  label?: string;
+  options?: {
+    label: string;
+    value: string;
+  }[];
+  className?: string;
+};
+
+export type FormTextareaFieldConfig = {
+  type: "form-textarea-field";
+  name: string;
+  label?: string;
+  className?: string;
+};
+
+export type TooltipConfig = {
+  type: "tooltip";
+  content: string;
+  children: React.ReactNode;
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "start" | "center" | "end";
+  className?: string;
+};
+
+export type LoaderConfig = {
+  type: "loader";
+  size?: "default" | "sm" | "lg";
+  variant?: "default" | "secondary" | "destructive";
+  className?: string;
+};
+
+export type ProgressConfig = {
+  type: "progress";
+  value: number;
+  max?: number;
+  className?: string;
+};
+
 export type UIConfig =
   | StackConfig
   | TableConfig
@@ -226,7 +288,15 @@ export type UIConfig =
   | ThemeToggleConfig
   | CardConfig
   | SpacerConfig
-  | StepperConfig;
+  | StepperConfig
+  | FormBooleanFieldConfig
+  | FormNumberFieldConfig
+  | FormPasswordFieldConfig
+  | FormSelectFieldConfig
+  | FormTextareaFieldConfig
+  | TooltipConfig
+  | LoaderConfig
+  | ProgressConfig;
 
 export type UiBuilder = {
   build(): UIConfig;

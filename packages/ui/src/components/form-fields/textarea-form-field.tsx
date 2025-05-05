@@ -10,7 +10,12 @@ import {
 import { useFormContext } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
 
-export function TextareaFormField({ field }: { field: TextareaFieldConfig }) {
+export function TextareaFormField({ field,
+  className,
+}: {
+  field: TextareaFieldConfig;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
   return (
@@ -18,7 +23,7 @@ export function TextareaFormField({ field }: { field: TextareaFieldConfig }) {
       control={control}
       name={field.name}
       render={({ field: rhfField }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
             <Textarea

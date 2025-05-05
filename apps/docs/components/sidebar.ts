@@ -33,6 +33,36 @@ export const Sidebar = () => {
       }),
       spacer(),
       heading({
+        content: "Layout",
+        variant: "h6",
+        className: "p-4 border-b opacity-50",
+      }),
+      navigationButton({
+        label: "vstack",
+        className: "justify-start",
+        href: "/docs/components/vstack",
+        variant: pathname.includes("/docs/components/vstack")
+          ? "secondary"
+          : "ghost",
+      }),
+      navigationButton({
+        label: "hstack",
+        className: "justify-start",
+        href: "/docs/components/hstack",
+        variant: pathname.includes("/docs/components/hstack")
+          ? "secondary"
+          : "ghost",
+      }),
+      navigationButton({
+        label: "spacer",
+        className: "justify-start",
+        href: "/docs/components/spacer",
+        variant: pathname.includes("/docs/components/spacer")
+          ? "secondary"
+          : "ghost",
+      }),
+      spacer(),
+      heading({
         content: "Basics",
         variant: "h6",
         className: "p-4 border-b opacity-50",
@@ -121,29 +151,45 @@ export const Sidebar = () => {
           ? "secondary"
           : "ghost",
       }),
-      spacer(),
-      heading({
-        content: "Layout",
-        variant: "h6",
-        className: "p-4 border-b opacity-50",
+      navigationButton({
+        label: "formBooleanField",
+        className: "justify-start",
+        href: "/docs/components/form-boolean-field",
+        variant: pathname.includes("/docs/components/form-boolean-field")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
-        label: "vstack",
-        variant: "ghost",
+        label: "formNumberField",
         className: "justify-start",
-        href: "/docs/components/vstack",
+        href: "/docs/components/form-number-field",
+        variant: pathname.includes("/docs/components/form-number-field")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
-        label: "hstack",
-        variant: "ghost",
+        label: "formSelectField",
         className: "justify-start",
-        href: "/docs/components/hstack",
+        href: "/docs/components/form-select-field",
+        variant: pathname.includes("/docs/components/form-select-field")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
-        label: "spacer",
-        variant: "ghost",
+        label: "formTextareaField",
         className: "justify-start",
-        href: "/docs/components/spacer",
+        href: "/docs/components/form-textarea-field",
+        variant: pathname.includes("/docs/components/form-textarea-field")
+          ? "secondary"
+          : "ghost",
+      }),
+      navigationButton({
+        label: "formPasswordField",
+        className: "justify-start",
+        href: "/docs/components/form-password-field",
+        variant: pathname.includes("/docs/components/form-password-field")
+          ? "secondary"
+          : "ghost",
       }),
       spacer(),
       heading({
@@ -153,9 +199,11 @@ export const Sidebar = () => {
       }),
       navigationButton({
         label: "table",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/table",
+        variant: pathname.includes("/docs/components/table")
+          ? "secondary"
+          : "ghost",
       }),
       spacer(),
       heading({
@@ -165,27 +213,35 @@ export const Sidebar = () => {
       }),
       navigationButton({
         label: "avatar",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/avatar",
+        variant: pathname.includes("/docs/components/avatar")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "chip",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/chip",
+        variant: pathname.includes("/docs/components/chip")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "codeBlock",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/code-block",
+        variant: pathname.includes("/docs/components/code-block")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "image",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/image",
+        variant: pathname.includes("/docs/components/image")
+          ? "secondary"
+          : "ghost",
       }),
       spacer(),
       heading({
@@ -195,15 +251,19 @@ export const Sidebar = () => {
       }),
       navigationButton({
         label: "modalButton",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/modal-button",
+        variant: pathname.includes("/docs/components/modal-button")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "tooltip",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/tooltip",
+        variant: pathname.includes("/docs/components/tooltip")
+          ? "secondary"
+          : "ghost",
       }),
       spacer(),
       heading({
@@ -213,21 +273,27 @@ export const Sidebar = () => {
       }),
       navigationButton({
         label: "loader",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/loader",
+        variant: pathname.includes("/docs/components/loader")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "progress",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/progress",
+        variant: pathname.includes("/docs/components/progress")
+          ? "secondary"
+          : "ghost",
       }),
       navigationButton({
         label: "toast",
-        variant: "ghost",
         className: "justify-start",
         href: "/docs/components/toast",
+        variant: pathname.includes("/docs/components/toast")
+          ? "secondary"
+          : "ghost",
       }),
     ],
   });

@@ -20,5 +20,8 @@ export * from "./api/spacer";
 export * from "./api/heading";
 export * from "./api/text";
 export * from "./api/stepper";
+export * from "./api/tooltip";
+export * from "./api/loader";
+export * from "./api/progress";
 
 export * from "./render/ui";

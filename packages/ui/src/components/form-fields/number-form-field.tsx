@@ -10,7 +10,12 @@ import {
 import { useFormContext } from "react-hook-form";
 import { Input } from "../ui/input";
 
-export function NumberFormField({ field }: { field: NumberFieldConfig }) {
+export function NumberFormField({ field,
+  className,
+}: {
+  field: NumberFieldConfig;
+  className?: string;
+}) {
   const { control } = useFormContext();
 
   return (
@@ -18,7 +23,7 @@ export function NumberFormField({ field }: { field: NumberFieldConfig }) {
       control={control}
       name={field.name}
       render={({ field: rhfField }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{field?.label || field.name}</FormLabel>
           <FormControl>
             <Input
