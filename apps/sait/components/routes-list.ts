@@ -1,33 +1,23 @@
-import { table } from "melony";
+import { vstack } from "melony";
+import { routeCard } from "./route-card";
+import { useBookingStore } from "@/lib/stores/booking";
+import { useRouter } from "next/navigation";
 
-const columns = [
-  {
-    header: "From",
-    accessorKey: "fromCity",
-  },
-  {
-    header: "To",
-    accessorKey: "toCity",
-  },
-  {
-    header: "Departure Time",
-    accessorKey: "departureTime",
-  },
-  {
-    header: "Arrival Time",
-    accessorKey: "arrivalTime",
-  },
-  {
-    header: "Price",
-    accessorKey: "price",
-  },
-  {
-    header: "Available Seats",
-    accessorKey: "availableSeats",
-  },
-];
+export const routesList = ({ data = [] }: { data: any[] }) => {
+  const { setRoute } = useBookingStore();
+  const router = useRouter();
 
-export const routesList = ({ data }: { data: any[] }) =>
-  table(data, {
-    columns,
-  });
+  const routes = Array.isArray(data) ? data : [];
+
+  const onClickBuyTicket = ({ route }: { route: any }) => {
+    setRoute(route);
+    router.push(`/booking/data-entry`);
+  };
+
+  return vstack(
+    routes.map((route) => routeCard({ route, onClickBuyTicket })),
+    {
+      className: "w-full gap-2",
+    }
+  );
+};

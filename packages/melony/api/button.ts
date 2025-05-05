@@ -1,24 +1,20 @@
 import { ButtonConfig, NavigationButtonConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const button = (
-  label: string,
-  config?: Omit<ButtonConfig, "type" | "label">
-) => {
+export const button = (config?: Omit<ButtonConfig, "type">) => {
   return renderUI({
     type: "button",
-    label,
+    label: config?.label || "Button",
     ...config,
   });
 };
 
 export const navigationButton = (
-  label: string,
-  config?: Omit<NavigationButtonConfig, "type" | "label">
+  config?: Omit<NavigationButtonConfig, "type">
 ) => {
   return renderUI({
     type: "navigation-button",
-    label,
+    label: config?.label || "Navigate",
     ...config,
   });
 };

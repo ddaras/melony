@@ -1,5 +1,9 @@
-export const getPointsClientAction = async ({ value }: { value: string }) => {
-  const res = await fetch("/api/v1/points", {
+export const searchPointsClientAction = async ({
+  value,
+}: {
+  value: string;
+}) => {
+  const res = await fetch("http://localhost:3000/bus-system/search", {
     method: "POST",
     body: JSON.stringify({ autocomplete: value }),
     headers: {

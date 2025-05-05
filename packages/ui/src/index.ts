@@ -19,8 +19,8 @@ export * from "./components/dropdown";
 export * from "./components/icon";
 export * from "./components/avatar";
 export * from "./components/modal-button";
-
-export * from "./components/field-renderer";
+export * from "./components/code-block";
+export * from "./components/theme-toggle";
 
 export * from "./components/form-fields/array-form-field";
 export * from "./components/form-fields/badge-form-field";
@@ -45,6 +45,7 @@ export type { UseQueryResult } from "@tanstack/react-query";
 export * from "./components/ui/tabs";
 export * from "./components/ui/card";
 export * from "./components/ui/button";
+export * from "./components/ui/stepper";
 
 export { toast } from "sonner";
 

@@ -1,14 +1,10 @@
-import { FieldConfig } from "@melony/ui";
-import { ColumnConfig, TableConfig } from "../builder/types";
+import { TableConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export function table(
-  data: any[],
-  config?: Omit<TableConfig, "type" | "data">
-) {
+export function table(config?: Omit<TableConfig, "type">) {
   return renderUI({
     type: "table",
     ...config,
-    data,
+    data: config?.data || [],
   });
 }

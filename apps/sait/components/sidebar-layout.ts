@@ -3,15 +3,20 @@ import { header } from "./header";
 import { sidebar } from "./sidebar";
 
 export const sidebarLayout = ({ children }: { children: React.ReactNode }) => {
-  return vstack(
-    [
+  return vstack({
+    className: "h-screen",
+    children: [
       header(),
-      hstack([sidebar(), vstack([children], { className: "flex-1 p-4" })], {
+      hstack({
+        children: [
+          sidebar(),
+          vstack({
+            children: [children],
+            className: "flex-1 p-4",
+          }),
+        ],
         className: "w-full h-full",
       }),
     ],
-    {
-      className: "h-screen",
-    }
-  );
+  });
 };

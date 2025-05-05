@@ -7,49 +7,58 @@ import {
   text,
   vstack,
   hstack,
-  button,
   mutation,
   modalButton,
+  toast,
 } from "melony";
 import { peopleList } from "@/components/people-list";
 import { addPersonForm } from "@/components/add-person-form";
 
 export default function PeoplePage() {
-  return query(
-    ({ data, isPending, error }) => {
+  return query({
+    queryKey: "people",
+    action: getPeopleTwentyAction,
+    render: ({ data, isPending, error }) => {
       if (isPending) {
-        return text("Loading...");
+        return text({ content: "Loading..." });
       }
 
-      return vstack(
-        [
-          hstack(
-            [
-              heading("People"),
-              modalButton("Add Person", {
+      return vstack({
+        className: "gap-8",
+        children: [
+          hstack({
+            className: "justify-between",
+            children: [
+              heading({ content: "People" }),
+              modalButton({
+                label: "Add Person",
                 title: "New Person",
                 description: "Add a new person to the list",
-                content: mutation(addPersonForm, {
-                  action: async (data) => {
-                    console.log(data);
-                  },
-                }),
+                content: ({ close }) =>
+                  mutation({
+                    action: async (data) => {
+                      console.log(data);
+
+                      await new Promise((resolve) => setTimeout(resolve, 1000));
+                    },
+                    render: addPersonForm,
+                    onSuccess: () => {
+                      close();
+                      toast("Person added successfully");
+                    },
+                    onError: () => {
+                      toast("Error adding person", {
+                        description: "Please try again",
+                        variant: "error",
+                      });
+                    },
+                  }),
               }),
             ],
-            {
-              className: "justify-between",
-            }
-          ),
+          }),
           peopleList({ people: data?.data?.people || [] }),
         ],
-        {
-          className: "gap-8",
-        }
-      );
+      });
     },
-    {
-      queryKey: "people",
-      action: getPeopleTwentyAction,
-    }
-  );
+  });
 }

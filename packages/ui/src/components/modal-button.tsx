@@ -6,20 +6,23 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Dialog, DialogTrigger } from "./ui/dialog";
+import { useState } from "react";
 
 export const ModalButton = ({
-  children,
+  content,
   title,
   description,
   label,
 }: {
-  children: React.ReactNode;
+  content: ({ close }: { close: () => void }) => React.ReactNode;
   title: string;
   description?: string;
   label: string;
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">{label}</Button>
       </DialogTrigger>
@@ -28,7 +31,7 @@ export const ModalButton = ({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {children}
+        {content({ close: () => setIsOpen(false) })}
       </DialogContent>
     </Dialog>
   );

@@ -1,13 +1,10 @@
 import { FormConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const form = (
-  children: React.ReactNode[],
-  config?: Omit<FormConfig, "type" | "children">
-) => {
+export const form = (config?: Omit<FormConfig, "type">) => {
   return renderUI({
     type: "form",
+    children: config?.children || [],
     ...config,
-    children,
   });
 };

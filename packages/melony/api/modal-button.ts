@@ -1,15 +1,12 @@
 import { ModalButtonConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const modalButton = (
-  label: string,
-  config?: Omit<ModalButtonConfig, "type" | "label">
-) => {
+export const modalButton = (config?: Omit<ModalButtonConfig, "type">) => {
   return renderUI({
     type: "modal-button",
-    label,
+    label: config?.label || "Modal Button",
     title: config?.title || "Untitled",
-    content: config?.content || "Empty content",
+    content: config?.content || (() => null),
     description: config?.description,
   });
 };

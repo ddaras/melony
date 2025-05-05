@@ -1,25 +1,22 @@
 "use client";
 
-import { heading, hstack, mutation, vstack } from "melony";
+import { mutation, vstack } from "melony";
 import { routesList } from "@/components/routes-list";
-import { getMockRoutesClientAction } from "@/lib/client-actions/mock-routes";
+import { searchRoutesClientAction } from "@/lib/client-actions/routes";
 import { buyingTicketTabsSection } from "./sections/buying-ticket-tabs-section";
+import { bookingStepper } from "@/components/booking-stepper";
 
 export default function Home() {
-  return mutation(
-    ({ data, isPending, mutate }) =>
-      vstack(
-        [
-          hstack([heading("Search of routes")]),
+  return mutation({
+    action: searchRoutesClientAction,
+    render: ({ data, isPending, mutate }) =>
+      vstack({
+        children: [
+          bookingStepper({ activeStep: 0 }),
           buyingTicketTabsSection({ isPending, mutate }),
           routesList({ data }),
         ],
-        {
-          className: "gap-8",
-        }
-      ),
-    {
-      action: getMockRoutesClientAction,
-    }
-  );
+        className: "gap-8",
+      }),
+  });
 }

@@ -1,5 +1,4 @@
 import { ColumnConfig } from "../builder/types";
-import { renderUI } from "../render/ui";
 
 export function column(key: string, label?: string) {
   const config: ColumnConfig = { key, label: label || key };

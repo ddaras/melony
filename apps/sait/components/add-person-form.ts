@@ -7,27 +7,26 @@ export const addPersonForm = ({
   mutate: any;
   isPending: boolean;
 }) => {
-  return vstack(
-    [
-      form(
-        [
-          formTextField("name"),
-          button("Add Person", {
+  return vstack({
+    className: "w-full p-4",
+    children: [
+      form({
+        onSubmit: (data) => {
+          mutate(data);
+        },
+        children: [
+          formTextField({
+            name: "name",
+          }),
+          button({
+            label: "Add Person",
             isLoading,
             onClick: () => {
               mutate({ name: "John Doe" });
             },
           }),
         ],
-        {
-          onSubmit: (data) => {
-            mutate(data);
-          },
-        }
-      ),
+      }),
     ],
-    {
-      className: "w-full p-4 mb-2",
-    }
-  );
+  });
 };

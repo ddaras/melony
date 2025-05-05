@@ -9,9 +9,16 @@ export * from "./api/form-field";
 export * from "./api/button";
 export * from "./api/mutation";
 export * from "./api/query";
-export * from "./api/typo";
 export * from "./api/avatar";
 export * from "./api/chip";
 export * from "./api/modal-button";
+export * from "./api/toast";
+export * from "./api/code-block";
+export * from "./api/theme-toggle";
+export * from "./api/card";
+export * from "./api/spacer";
+export * from "./api/heading";
+export * from "./api/text";
+export * from "./api/stepper";
 
 export * from "./render/ui";

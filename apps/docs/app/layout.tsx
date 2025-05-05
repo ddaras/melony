@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { root, UIBuilder } from "melony";
+import { root } from "melony";
 import { redirect } from "next/navigation";
 
 const geistSans = Geist({
@@ -22,16 +22,15 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: UIBuilder;
+  children: React.ReactNode;
 }>) {
-  return root()
-    .appName("Melony Docs")
-    .child(children)
-    .shouldRenderHtml()
-    .className(geistSans.className + " " + geistMono.className)
-    .navigate(async (path) => {
+  return root({
+    children: [children],
+    shouldRenderHtml: true,
+    // className: geistSans.className + " " + geistMono.className,
+    navigate: async (path) => {
       "use server";
       redirect(path);
-    })
-    .build();
+    },
+  });
 }

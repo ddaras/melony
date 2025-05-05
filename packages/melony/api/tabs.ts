@@ -1,10 +1,10 @@
-import { TabConfig, TabsConfig } from "../builder/types";
+import { TabsConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const tabs = (tabs: TabConfig[], config?: Omit<TabsConfig, "type">) => {
+export const tabs = (config?: Omit<TabsConfig, "type">) => {
   return renderUI({
     type: "tabs",
-    tabs,
+    tabs: config?.tabs || [],
     ...config,
   });
 };

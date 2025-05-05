@@ -1,9 +1,9 @@
-import { sidebarLayout } from "@/components/sidebar-layout";
+import { stackedLayout } from "@/components/stacked-layout";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return sidebarLayout({ children });
+  return stackedLayout({ children });
 }

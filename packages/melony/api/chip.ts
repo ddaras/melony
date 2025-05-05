@@ -1,13 +1,10 @@
 import { ChipConfig } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const chip = (
-  label: string,
-  config?: Omit<ChipConfig, "type" | "label">
-) => {
+export const chip = (config?: Omit<ChipConfig, "type">) => {
   return renderUI({
     type: "chip",
-    label,
+    label: config?.label || "Chip",
     ...config,
   });
 };

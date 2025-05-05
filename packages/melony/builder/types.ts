@@ -116,6 +116,7 @@ export type MutationConfig = {
   render: (mutation: UseMutationResult<any, any, any>) => React.ReactNode;
   onSuccess?: (data: any) => void;
   onError?: (error: any) => void;
+  onSettled?: (data: any) => void;
 };
 
 export type QueryConfig = {
@@ -134,13 +135,13 @@ export type TextConfig = {
 export type HeadingConfig = {
   type: "heading";
   content: string;
-  level: 1 | 2 | 3 | 4;
+  variant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "caption";
   className?: string;
 };
 
 export type AvatarConfig = {
   type: "avatar";
-  src: string;
+  src?: string;
   name?: string;
   className?: string;
 };
@@ -148,6 +149,7 @@ export type AvatarConfig = {
 export type ChipConfig = {
   type: "chip";
   label: string;
+  variant?: "default" | "outline";
   className?: string;
 };
 
@@ -155,8 +157,50 @@ export type ModalButtonConfig = {
   type: "modal-button";
   label: string;
   title: string;
-  content: React.ReactNode;
+  content: ({ close }: { close: () => void }) => React.ReactNode;
   description?: string;
+};
+
+export type CodeBlockConfig = {
+  type: "code-block";
+  code: string;
+  title?: string;
+  lang?: string;
+  className?: string;
+  keepBackground?: boolean;
+  allowCopy?: boolean;
+};
+
+export type ThemeToggleConfig = {
+  type: "theme-toggle";
+  className?: string;
+};
+
+export type CardConfig = {
+  type: "card";
+  title?: string;
+  description?: string;
+  children?: React.ReactNode[];
+  className?: string;
+};
+
+export type SpacerConfig = {
+  type: "spacer";
+  content?: string;
+  className?: string;
+};
+
+export type StepConfig = {
+  title: string;
+  description?: string;
+  showConnector?: boolean;
+};
+
+export type StepperConfig = {
+  type: "stepper";
+  steps: StepConfig[];
+  activeStep?: number;
+  className?: string;
 };
 
 export type UIConfig =
@@ -177,7 +221,12 @@ export type UIConfig =
   | AvatarConfig
   | NavigationButtonConfig
   | ChipConfig
-  | ModalButtonConfig;
+  | ModalButtonConfig
+  | CodeBlockConfig
+  | ThemeToggleConfig
+  | CardConfig
+  | SpacerConfig
+  | StepperConfig;
 
 export type UiBuilder = {
   build(): UIConfig;

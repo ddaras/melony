@@ -5,35 +5,28 @@ import {
 } from "../builder/types";
 import { renderUI } from "../render/ui";
 
-export const formTextField = (
-  name: string,
-  config?: Omit<FormTextFieldConfig, "type">
-) => {
+export const formTextField = (config?: Omit<FormTextFieldConfig, "type">) => {
   return renderUI({
     type: "form-text-field",
-    name,
+    name: config?.name || "fieldName",
     ...config,
   });
 };
 
 export const formComboboxField = (
-  name: string,
   config?: Omit<FormComboboxFieldConfig, "type">
 ) => {
   return renderUI({
     type: "form-combobox-field",
-    name,
+    name: config?.name || "fieldName",
     ...config,
   });
 };
 
-export const formDateField = (
-  name: string,
-  config?: Omit<FormDateFieldConfig, "type" | "name">
-) => {
+export const formDateField = (config?: Omit<FormDateFieldConfig, "type">) => {
   return renderUI({
     type: "form-date-field",
-    name,
+    name: config?.name || "fieldName",
     ...config,
   });
 };

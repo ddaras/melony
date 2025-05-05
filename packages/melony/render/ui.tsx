@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Chip,
+  CodeBlock,
   ComboboxFormField,
   DataTable,
   DateFormField,
@@ -19,13 +20,17 @@ import {
   NavigationButton,
   QueryContainer,
   RootLayout,
+  Spacer,
   Stack,
+  Step,
+  Stepper,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
   Text,
   TextFormField,
+  ThemeToggle,
 } from "@melony/ui";
 import { compile } from "../builder/compile";
 import { UIConfig } from "../builder/types";
@@ -103,16 +108,7 @@ export const renderUI = (config: UIConfig) => {
         </TabsList>
         {config.tabs.map((tab) => (
           <TabsContent key={tab.label} value={tab.label}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{tab.label}</CardTitle>
-                {tab.description && (
-                  <CardDescription>{tab.description}</CardDescription>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-2">{tab.content}</CardContent>
-              {tab.footer && <CardFooter>{tab.footer}</CardFooter>}
-            </Card>
+            {tab.content}
           </TabsContent>
         ))}
       </Tabs>
@@ -185,6 +181,9 @@ export const renderUI = (config: UIConfig) => {
         action={config.action}
         render={config.render}
         mutationKey={config.mutationKey}
+        onSuccess={config.onSuccess}
+        onError={config.onError}
+        onSettled={config.onSettled}
       />
     );
   }
@@ -206,7 +205,7 @@ export const renderUI = (config: UIConfig) => {
   if (config.type === "heading") {
     return (
       <Heading
-        level={config.level}
+        variant={config.variant || "h1"}
         className={config.className}
         content={config.content}
       />
@@ -216,7 +215,7 @@ export const renderUI = (config: UIConfig) => {
   if (config.type === "avatar") {
     return (
       <Avatar
-        src={config.src}
+        src={config.src || ""}
         name={config.name}
         className={config.className}
       />
@@ -235,7 +234,13 @@ export const renderUI = (config: UIConfig) => {
   }
 
   if (config.type === "chip") {
-    return <Chip label={config.label} className={config.className} />;
+    return (
+      <Chip
+        label={config.label}
+        variant={config.variant}
+        className={config.className}
+      />
+    );
   }
 
   if (config.type === "modal-button") {
@@ -244,9 +249,65 @@ export const renderUI = (config: UIConfig) => {
         label={config.label}
         title={config.title}
         description={config.description}
+        content={config.content}
+      />
+    );
+  }
+
+  if (config.type === "code-block") {
+    return (
+      // @ts-ignore - React 19 compatibility issue
+      <CodeBlock
+        title={config.title}
+        lang={config.lang}
+        className={config.className}
+        keepBackground={config.keepBackground}
+        allowCopy={config.allowCopy}
       >
-        {config.content}
-      </ModalButton>
+        {config.code}
+      </CodeBlock>
+    );
+  }
+
+  if (config.type === "theme-toggle") {
+    return <ThemeToggle className={config.className} />;
+  }
+
+  if (config.type === "card") {
+    return (
+      <Card>
+        <CardContent className={config.className}>
+          {Array.isArray(config.children)
+            ? config.children.map((child, index) => (
+                <React.Fragment key={`card-child-${index}`}>
+                  {child}
+                </React.Fragment>
+              ))
+            : config.children}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (config.type === "spacer") {
+    return <Spacer className={config.className} />;
+  }
+
+  if (config.type === "stepper") {
+    return (
+      <div className="w-full">
+        <Stepper activeStep={config.activeStep || 0} className="w-full">
+          {config.steps.map((step, index) => (
+            <Step
+              key={index}
+              index={index}
+              title={step.title}
+              description={step.description}
+              showConnector={step.showConnector}
+            />
+          ))}
+        </Stepper>
+      </div>
     );
   }
 

@@ -5,33 +5,19 @@ export const sidebar = async () => {
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "/";
 
-  return vstack(
-    [
-      vstack([
-        navigationButton("People", {
-          variant: pathname === "/people" ? "secondary" : "ghost",
-          className: "justify-start",
-          href: "/people",
-        }),
-        navigationButton("Companies", {
-          variant: pathname === "/companies" ? "secondary" : "ghost",
-          className: "justify-start",
-          href: "/companies",
-        }),
-        navigationButton("Opportunities", {
-          variant: pathname === "/opportunities" ? "secondary" : "ghost",
-          className: "justify-start",
-          href: "/opportunities",
-        }),
-        navigationButton("Tasks", {
-          variant: pathname === "/tasks" ? "secondary" : "ghost",
-          className: "justify-start",
-          href: "/tasks",
-        }),
-      ]),
+  return vstack({
+    className: "w-64 p-4 border-r h-full",
+    children: [
+      vstack({
+        children: [
+          navigationButton({
+            label: "Search routes",
+            variant: pathname === "/" ? "secondary" : "ghost",
+            className: "justify-start",
+            href: "/",
+          }),
+        ],
+      }),
     ],
-    {
-      className: "w-64 p-4 border-r h-full",
-    }
-  );
+  });
 };

@@ -1,7 +1,8 @@
 import { avatar, chip, table, text } from "melony";
 
 export function peopleList({ people }: { people: any[] }) {
-  return table(people, {
+  return table({
+    data: people,
     columns: [
       {
         header: "Avatar",
@@ -16,9 +17,9 @@ export function peopleList({ people }: { people: any[] }) {
         accessorKey: "name",
         size: 340,
         cell: ({ row }) => {
-          return text(
-            `${row.original.name?.firstName} ${row.original.name?.lastName}`
-          );
+          return text({
+            content: `${row.original.name?.firstName} ${row.original.name?.lastName}`,
+          });
         },
       },
       {
