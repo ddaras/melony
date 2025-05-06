@@ -1,6 +1,5 @@
 "use client";
 
-import { exampleForm } from "@/components/example-form";
 import {
   avatar,
   button,
@@ -15,8 +14,6 @@ import {
   text,
   vstack,
 } from "melony";
-import { avatarCell } from "@/components/avatar-cell";
-import { statusCell } from "@/components/status-cell";
 
 const tableCodeExample = `table({
   columns: [
@@ -119,33 +116,6 @@ const tableCodeExample = `table({
   ],
 })`;
 
-const formCodeExample = `form({
-  onSubmit: (data) => console.log(data),
-  children: [
-    formTextField({
-      name: "name",
-      label: "Name",
-    }),
-    formComboboxField({
-      name: "country",
-      label: "Country",
-      options: [
-        { label: "United States", value: "US" },
-        { label: "Canada", value: "CA" },
-        { label: "Australia", value: "AU" },
-      ],
-    }),
-    formDateField({
-      name: "birthday",
-      label: "Birthday",
-    }),
-    button({
-      label: "Submit",
-      submit: true,
-    }),
-  ],
-})`;
-
 export default function Home() {
   return vstack({
     className: "gap-8 container max-w-4xl mx-auto p-8",
@@ -200,7 +170,7 @@ export default function Home() {
                 header: "Actions",
                 accessorKey: "actions",
                 size: 80,
-                cell: ({ row }) =>
+                cell: () =>
                   modal({
                     label: "Edit",
                     title: "Edit User",
