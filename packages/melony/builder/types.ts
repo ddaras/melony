@@ -1,9 +1,4 @@
-import {
-  ColumnDef,
-  FieldConfig,
-  UseMutationResult,
-  UseQueryResult,
-} from "@melony/ui";
+import { ColumnDef, UseMutationResult, UseQueryResult } from "@melony/ui";
 
 export type StackConfig = {
   type: "stack";
@@ -102,20 +97,6 @@ export type ButtonConfig = {
   isLoading?: boolean;
 };
 
-export type NavigationButtonConfig = {
-  type: "navigation-button";
-  label: string;
-  href?: string;
-  className?: string;
-  variant?:
-    | "default"
-    | "secondary"
-    | "outline"
-    | "ghost"
-    | "link"
-    | "destructive";
-};
-
 export type MutationConfig = {
   type: "mutation";
   mutationKey?: string;
@@ -160,8 +141,8 @@ export type ChipConfig = {
   className?: string;
 };
 
-export type ModalButtonConfig = {
-  type: "modal-button";
+export type ModalConfig = {
+  type: "modal";
   label: string;
   title: string;
   content: ({ close }: { close: () => void }) => React.ReactNode;
@@ -281,9 +262,8 @@ export type UIConfig =
   | FormComboboxFieldConfig
   | FormDateFieldConfig
   | AvatarConfig
-  | NavigationButtonConfig
   | ChipConfig
-  | ModalButtonConfig
+  | ModalConfig
   | CodeBlockConfig
   | ThemeToggleConfig
   | CardConfig

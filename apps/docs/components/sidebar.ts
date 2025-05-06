@@ -1,34 +1,41 @@
 "use client";
 
-import { heading, spacer } from "melony";
-import { navigationButton, vstack } from "melony";
-import { usePathname } from "next/navigation";
+import { button, heading, spacer } from "melony";
+import { vstack } from "melony";
+import { usePathname, useRouter } from "next/navigation";
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   return vstack({
     className:
       "w-64 px-4 pb-20 pt-4 fixed top-12 left-0 bottom-0 overflow-y-auto",
     children: [
-      navigationButton({
+      button({
         label: "Introduction",
         className: "justify-start",
-        href: "/docs",
-        variant: pathname === "/docs" ? "secondary" : "ghost",
+        onClick: () => {
+          router.push("/docs");
+        },
+        variant: pathname === "/docs" ? "outline" : "ghost",
       }),
-      navigationButton({
+      button({
         label: "Installation",
         className: "justify-start",
-        href: "/docs/install",
-        variant: pathname.includes("/docs/install") ? "secondary" : "ghost",
+        onClick: () => {
+          router.push("/docs/install");
+        },
+        variant: pathname.includes("/docs/install") ? "outline" : "ghost",
       }),
-      navigationButton({
+      button({
         label: "Core Concepts",
         className: "justify-start",
-        href: "/docs/core-concepts",
+        onClick: () => {
+          router.push("/docs/core-concepts");
+        },
         variant: pathname.includes("/docs/core-concepts")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -37,28 +44,34 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "vstack",
         className: "justify-start",
-        href: "/docs/components/vstack",
+        onClick: () => {
+          router.push("/docs/components/vstack");
+        },
         variant: pathname.includes("/docs/components/vstack")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "hstack",
         className: "justify-start",
-        href: "/docs/components/hstack",
+        onClick: () => {
+          router.push("/docs/components/hstack");
+        },
         variant: pathname.includes("/docs/components/hstack")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "spacer",
         className: "justify-start",
-        href: "/docs/components/spacer",
+        onClick: () => {
+          router.push("/docs/components/spacer");
+        },
         variant: pathname.includes("/docs/components/spacer")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -67,52 +80,64 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "text",
-        href: "/docs/components/text",
+        onClick: () => {
+          router.push("/docs/components/text");
+        },
         className: "justify-start",
         variant: pathname.includes("/docs/components/text")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "heading",
-        href: "/docs/components/heading",
+        onClick: () => {
+          router.push("/docs/components/heading");
+        },
         className: "justify-start",
         variant: pathname.includes("/docs/components/heading")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "button",
         className: "justify-start",
-        href: "/docs/components/button",
+        onClick: () => {
+          router.push("/docs/components/button");
+        },
         variant: pathname.includes("/docs/components/button")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "tabs",
         className: "justify-start",
-        href: "/docs/components/tabs",
+        onClick: () => {
+          router.push("/docs/components/tabs");
+        },
         variant: pathname.includes("/docs/components/tabs")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "card",
         className: "justify-start",
-        href: "/docs/components/card",
+        onClick: () => {
+          router.push("/docs/components/card");
+        },
         variant: pathname.includes("/docs/components/card")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "themeToggle",
         className: "justify-start",
-        href: "/docs/components/theme-toggle",
+        onClick: () => {
+          router.push("/docs/components/theme-toggle");
+        },
         variant: pathname.includes("/docs/components/theme-toggle")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -121,74 +146,92 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "form",
         className: "justify-start",
-        href: "/docs/components/form",
-        variant: pathname === "/docs/components/form" ? "secondary" : "ghost",
+        onClick: () => {
+          router.push("/docs/components/form");
+        },
+        variant: pathname === "/docs/components/form" ? "outline" : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formTextField",
         className: "justify-start",
-        href: "/docs/components/form-text-field",
+        onClick: () => {
+          router.push("/docs/components/form-text-field");
+        },
         variant: pathname.includes("/docs/components/form-text-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formComboboxField",
         className: "justify-start",
-        href: "/docs/components/form-combobox-field",
+        onClick: () => {
+          router.push("/docs/components/form-combobox-field");
+        },
         variant: pathname.includes("/docs/components/form-combobox-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formDateField",
         className: "justify-start",
-        href: "/docs/components/form-date-field",
+        onClick: () => {
+          router.push("/docs/components/form-date-field");
+        },
         variant: pathname.includes("/docs/components/form-date-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formBooleanField",
         className: "justify-start",
-        href: "/docs/components/form-boolean-field",
+        onClick: () => {
+          router.push("/docs/components/form-boolean-field");
+        },
         variant: pathname.includes("/docs/components/form-boolean-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formNumberField",
         className: "justify-start",
-        href: "/docs/components/form-number-field",
+        onClick: () => {
+          router.push("/docs/components/form-number-field");
+        },
         variant: pathname.includes("/docs/components/form-number-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formSelectField",
         className: "justify-start",
-        href: "/docs/components/form-select-field",
+        onClick: () => {
+          router.push("/docs/components/form-select-field");
+        },
         variant: pathname.includes("/docs/components/form-select-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formTextareaField",
         className: "justify-start",
-        href: "/docs/components/form-textarea-field",
+        onClick: () => {
+          router.push("/docs/components/form-textarea-field");
+        },
         variant: pathname.includes("/docs/components/form-textarea-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "formPasswordField",
         className: "justify-start",
-        href: "/docs/components/form-password-field",
+        onClick: () => {
+          router.push("/docs/components/form-password-field");
+        },
         variant: pathname.includes("/docs/components/form-password-field")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -197,12 +240,14 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "table",
         className: "justify-start",
-        href: "/docs/components/table",
+        onClick: () => {
+          router.push("/docs/components/table");
+        },
         variant: pathname.includes("/docs/components/table")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -211,36 +256,44 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "avatar",
         className: "justify-start",
-        href: "/docs/components/avatar",
+        onClick: () => {
+          router.push("/docs/components/avatar");
+        },
         variant: pathname.includes("/docs/components/avatar")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "chip",
         className: "justify-start",
-        href: "/docs/components/chip",
+        onClick: () => {
+          router.push("/docs/components/chip");
+        },
         variant: pathname.includes("/docs/components/chip")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "codeBlock",
         className: "justify-start",
-        href: "/docs/components/code-block",
+        onClick: () => {
+          router.push("/docs/components/code-block");
+        },
         variant: pathname.includes("/docs/components/code-block")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "image",
         className: "justify-start",
-        href: "/docs/components/image",
+        onClick: () => {
+          router.push("/docs/components/image");
+        },
         variant: pathname.includes("/docs/components/image")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -249,20 +302,24 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
-        label: "modalButton",
+      button({
+        label: "modal",
         className: "justify-start",
-        href: "/docs/components/modal-button",
-        variant: pathname.includes("/docs/components/modal-button")
-          ? "secondary"
+        onClick: () => {
+          router.push("/docs/components/modal");
+        },
+        variant: pathname.includes("/docs/components/modal")
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "tooltip",
         className: "justify-start",
-        href: "/docs/components/tooltip",
+        onClick: () => {
+          router.push("/docs/components/tooltip");
+        },
         variant: pathname.includes("/docs/components/tooltip")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
       spacer(),
@@ -271,28 +328,34 @@ export const Sidebar = () => {
         variant: "h6",
         className: "p-4 border-b opacity-50",
       }),
-      navigationButton({
+      button({
         label: "loader",
         className: "justify-start",
-        href: "/docs/components/loader",
+        onClick: () => {
+          router.push("/docs/components/loader");
+        },
         variant: pathname.includes("/docs/components/loader")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "progress",
         className: "justify-start",
-        href: "/docs/components/progress",
+        onClick: () => {
+          router.push("/docs/components/progress");
+        },
         variant: pathname.includes("/docs/components/progress")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
-      navigationButton({
+      button({
         label: "toast",
         className: "justify-start",
-        href: "/docs/components/toast",
+        onClick: () => {
+          router.push("/docs/components/toast");
+        },
         variant: pathname.includes("/docs/components/toast")
-          ? "secondary"
+          ? "outline"
           : "ghost",
       }),
     ],

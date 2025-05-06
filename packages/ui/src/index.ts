@@ -5,7 +5,6 @@ export * from "./components/layouts/root-layout";
 
 export * from "./components/data-table";
 export * from "./components/stack";
-export * from "./components/navigation-button";
 export * from "./components/heading";
 export * from "./components/text";
 export * from "./components/spacer";

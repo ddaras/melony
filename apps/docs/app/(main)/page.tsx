@@ -1,9 +1,96 @@
+"use client";
+
 import { exampleForm } from "@/components/example-form";
-import { card, codeBlock, heading, table, text, vstack } from "melony";
+import {
+  avatar,
+  button,
+  card,
+  chip,
+  codeBlock,
+  form,
+  formTextField,
+  heading,
+  modal,
+  table,
+  text,
+  vstack,
+} from "melony";
 import { avatarCell } from "@/components/avatar-cell";
 import { statusCell } from "@/components/status-cell";
 
 const tableCodeExample = `table({
+  columns: [
+    {
+      header: "Avatar",
+      accessorKey: "avatar",
+      cell: ({ row }) =>
+        avatar({
+          src: row.original.avatar,
+        }),
+      size: 80,
+    },
+    {
+      header: "Name",
+      accessorKey: "name",
+    },
+    {
+      header: "Email",
+      accessorKey: "email",
+    },
+    {
+      header: "Phone",
+      accessorKey: "phone",
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) =>
+        chip({
+          label: row.original.status,
+        }),
+      size: 100,
+    },
+    {
+      header: "Actions",
+      accessorKey: "actions",
+      size: 80,
+      cell: ({ row }) =>
+        modal({
+          label: "Edit",
+          title: "Edit User",
+          content: ({ close }) =>
+            vstack({
+              className: "gap-4 p-4",
+              children: [
+                form({
+                  onSubmit: (data) => {
+                    console.log(data);
+                    close();
+                  },
+                  children: [
+                    formTextField({
+                      name: "name",
+                      label: "Name",
+                    }),
+                    formTextField({
+                      name: "email",
+                      label: "Email",
+                    }),
+                    formTextField({
+                      name: "phone",
+                      label: "Phone",
+                    }),
+                    button({
+                      label: "Save",
+                      submit: true,
+                    }),
+                  ],
+                }),
+              ],
+            }),
+        }),
+    },
+  ],
   data: [
     {
       name: "John Doe",
@@ -28,32 +115,6 @@ const tableCodeExample = `table({
       avatar:
         "https://cdn.jsdelivr.net/gh/alohe/avatars/png/vibrent_2.png",
       status: "Active",
-    },
-  ],
-  columns: [
-    {
-      header: "Avatar",
-      accessorKey: "avatar",
-      cell: avatarCell,
-      size: 80,
-    },
-    {
-      header: "Name",
-      accessorKey: "name",
-    },
-    {
-      header: "Email",
-      accessorKey: "email",
-    },
-    {
-      header: "Phone",
-      accessorKey: "phone",
-    },
-    {
-      header: "Status",
-      accessorKey: "status",
-      cell: statusCell,
-      size: 100,
     },
   ],
 })`;
@@ -104,6 +165,78 @@ export default function Home() {
         className: "flex flex-col gap-8",
         children: [
           table({
+            columns: [
+              {
+                header: "Avatar",
+                accessorKey: "avatar",
+                cell: ({ row }) =>
+                  avatar({
+                    src: row.original.avatar,
+                  }),
+                size: 80,
+              },
+              {
+                header: "Name",
+                accessorKey: "name",
+              },
+              {
+                header: "Email",
+                accessorKey: "email",
+              },
+              {
+                header: "Phone",
+                accessorKey: "phone",
+              },
+              {
+                header: "Status",
+                accessorKey: "status",
+                cell: ({ row }) =>
+                  chip({
+                    label: row.original.status,
+                  }),
+                size: 100,
+              },
+              {
+                header: "Actions",
+                accessorKey: "actions",
+                size: 80,
+                cell: ({ row }) =>
+                  modal({
+                    label: "Edit",
+                    title: "Edit User",
+                    content: ({ close }) =>
+                      vstack({
+                        className: "gap-4 p-4",
+                        children: [
+                          form({
+                            onSubmit: (data) => {
+                              console.log(data);
+                              close();
+                            },
+                            children: [
+                              formTextField({
+                                name: "name",
+                                label: "Name",
+                              }),
+                              formTextField({
+                                name: "email",
+                                label: "Email",
+                              }),
+                              formTextField({
+                                name: "phone",
+                                label: "Phone",
+                              }),
+                              button({
+                                label: "Save",
+                                submit: true,
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                  }),
+              },
+            ],
             data: [
               {
                 name: "John Doe",
@@ -130,32 +263,6 @@ export default function Home() {
                 status: "Active",
               },
             ],
-            columns: [
-              {
-                header: "Avatar",
-                accessorKey: "avatar",
-                cell: avatarCell,
-                size: 80,
-              },
-              {
-                header: "Name",
-                accessorKey: "name",
-              },
-              {
-                header: "Email",
-                accessorKey: "email",
-              },
-              {
-                header: "Phone",
-                accessorKey: "phone",
-              },
-              {
-                header: "Status",
-                accessorKey: "status",
-                cell: statusCell,
-                size: 100,
-              },
-            ],
           }),
           codeBlock({
             lang: "ts",
@@ -163,20 +270,20 @@ export default function Home() {
           }),
         ],
       }),
-      heading({ content: "Form" }),
-      text({
-        content: "Now I will show you how to build a simple form using Melony.",
-      }),
-      card({
-        className: "flex flex-col gap-8",
-        children: [
-          exampleForm,
-          codeBlock({
-            lang: "ts",
-            code: formCodeExample,
-          }),
-        ],
-      }),
+      // heading({ content: "Form" }),
+      // text({
+      //   content: "Now I will show you how to build a simple form using Melony.",
+      // }),
+      // card({
+      //   className: "flex flex-col gap-8",
+      //   children: [
+      //     exampleForm,
+      //     codeBlock({
+      //       lang: "ts",
+      //       code: formCodeExample,
+      //     }),
+      //   ],
+      // }),
     ],
   });
 }

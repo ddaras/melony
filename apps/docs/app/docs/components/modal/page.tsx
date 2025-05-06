@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  modalButton,
   card,
   codeBlock,
   heading,
@@ -9,11 +8,12 @@ import {
   table,
   text,
   vstack,
+  modal,
 } from "melony";
 
-const exampleCode = `modalButton({
+const exampleCode = `modal({
   label: "Open Settings",
-  title: "Settings",
+  title: "Settings", 
   description: "Configure your application settings",
   content: ({ close }) => (
     <div className="space-y-4">
@@ -50,7 +50,7 @@ export default function Page() {
         children: [
           hstack({
             children: [
-              modalButton({
+              modal({
                 label: "Open Modal",
                 title: "Example Modal",
                 description: "This is an example modal",
@@ -90,7 +90,8 @@ export default function Page() {
           {
             name: "content",
             type: "({ close: () => void }) => React.ReactNode",
-            description: "A function that receives a close function and returns the modal content",
+            description:
+              "A function that receives a close function and returns the modal content",
           },
         ],
         columns: [
@@ -112,4 +113,4 @@ export default function Page() {
       }),
     ],
   });
-} 
+}

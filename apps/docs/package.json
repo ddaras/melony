@@ -9,12 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@melony/ui": "^0.4.1",
+    "@melony/ui": "^0.4.3",
     "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.487.0",
-    "melony": "^1.4.4",
+    "melony": "^1.4.7",
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

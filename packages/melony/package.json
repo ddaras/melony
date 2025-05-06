@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.4.4",
+  "version": "1.4.7",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -20,7 +20,7 @@
     "publish:major": "npm version major && npm publish --access public"
   },
   "dependencies": {
-    "@melony/ui": "workspace:*"
+    "@melony/ui": "^0.4.3"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

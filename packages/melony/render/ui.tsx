@@ -14,7 +14,6 @@ import {
   MelonyProvider,
   ModalButton,
   MutationContainer,
-  NavigationButton,
   NumberFormField,
   PasswordFormField,
   QueryContainer,
@@ -229,17 +228,6 @@ export const renderUI = (config: UIConfig) => {
     );
   }
 
-  if (config.type === "navigation-button") {
-    return (
-      <NavigationButton
-        label={config.label}
-        href={config?.href || "/"}
-        className={config.className}
-        variant={config.variant}
-      />
-    );
-  }
-
   if (config.type === "chip") {
     return (
       <Chip
@@ -250,7 +238,7 @@ export const renderUI = (config: UIConfig) => {
     );
   }
 
-  if (config.type === "modal-button") {
+  if (config.type === "modal") {
     return (
       <ModalButton
         label={config.label}

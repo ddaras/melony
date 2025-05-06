@@ -11,7 +11,7 @@ export * from "./api/mutation";
 export * from "./api/query";
 export * from "./api/avatar";
 export * from "./api/chip";
-export * from "./api/modal-button";
+export * from "./api/modal";
 export * from "./api/toast";
 export * from "./api/code-block";
 export * from "./api/theme-toggle";

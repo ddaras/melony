@@ -1,5 +1,5 @@
 import { hstack, vstack } from "melony";
-import { header } from "./header";
+import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 
 export const stackedLayout = ({
@@ -11,7 +11,7 @@ export const stackedLayout = ({
 }) => {
   return vstack({
     children: [
-      header(),
+      Header(),
       hstack({
         children: [
           showSidebar ? Sidebar() : null,
@@ -19,10 +19,6 @@ export const stackedLayout = ({
             children: [children],
             className: `p-20 ${showSidebar ? "ml-64" : ""} w-full`,
           }),
-          // vstack({
-          //   children: [text({ content: "Right Sidebar" })],
-          //   className: "w-64 p-4",
-          // }),
         ],
       }),
     ],
