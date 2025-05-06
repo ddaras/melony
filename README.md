@@ -4,7 +4,7 @@ Melony is an experimental UI library that lets you build data apps rapidly witho
 
 ## Motivation
 
-I love React, but I hate JSX. So I decided to build a simple UI library to build data apps faster without writing a single line of "frontend code".
+I love React, but I hate JSX. So I decided to build a simple UI library to build frontends faster without writing a single line of "frontend code".
 
 ## Installation
 
@@ -21,17 +21,22 @@ import { root, vstack, table, text } from "melony";
 
 // Create a simple data app
 export default function App() {
-  return root([
-    vstack([
-      text("Hello, Melony!", { level: "h1" }),
-      table(data, {
-        columns: [
-          { header: "Name", accessorKey: "name" },
-          { header: "Age", accessorKey: "age" },
+  return root({
+    children: [
+      vstack({
+        children: [
+          text({ content: "Hello, Melony!", level: "h1" }),
+          table({
+            columns: [
+              { header: "Name", accessorKey: "name" },
+              { header: "Age", accessorKey: "age" },
+            ],
+            data,
+          }),
         ],
       }),
-    ]),
-  ]);
+    ],
+  });
 }
 ```
 
@@ -62,6 +67,7 @@ export default function App() {
 - `mutation(render, config)`: Execute data mutations
 
 ### Presentational Components
+
 - `avatar(src, config)`: Avatar
 
 ## Examples
