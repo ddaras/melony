@@ -1,16 +1,28 @@
 # Melony
 
-Melony is an experimental UI library that lets you build data apps rapidly without writing JSX or traditional frontend code.
+Melony is an experimental UI library, highly inspired by Flutter, that lets you build web apps rapidly without writing JSX or traditional frontend code.
 
 ## Motivation
 
-I love React, but I hate JSX. So I decided to build a simple UI library to build frontends faster without writing a single line of "frontend code".
+We want to create a React wrapper that uses pure JavaScript functions to build consistent UI without JSX, combining React's power with functional programming simplicity.
 
 ## Installation
 
+Melony is based on Shadcn UI. First, install it (see https://ui.shadcn.com/docs/installation).
+
+Install Melony with your preferred package manager:
+
 ```bash
-pnpm add melony
+pnpm add melony @melony/ui
 ```
+
+Include the following code snippet in your global CSS file:
+
+```css
+@source "../node_modules/@melony/ui/dist/**/*.{js,ts,jsx,tsx,mdx}";
+```
+
+That's it!
 
 ## Usage
 
@@ -19,17 +31,28 @@ Melony provides a simple, declarative API for building data applications. Instea
 ```javascript
 import { root, vstack, table, text } from "melony";
 
-// Create a simple data app
+// Create a simple app
+import { root, vstack, text, table, avatar } from "melony";
+
 export default function App() {
   return root({
     children: [
       vstack({
+        className: "gap-4",
         children: [
           text({ content: "Hello, Melony!", level: "h1" }),
           table({
             columns: [
               { header: "Name", accessorKey: "name" },
               { header: "Age", accessorKey: "age" },
+              {
+                header: "Avatar",
+                accessorKey: "avatar",
+                cell: ({ row }) =>
+                  avatar({
+                    src: row.original.avatar,
+                  }),
+              },
             ],
             data,
           }),
