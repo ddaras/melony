@@ -1,5 +1,9 @@
 # Melony
 
+[![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
 Melony is an experimental UI library, highly inspired by Flutter, that lets you build web apps rapidly without writing JSX or traditional frontend code.
 
 ## Motivation
