@@ -71,31 +71,51 @@ export default function App() {
 
 ### Layout Components
 
-- `root(children, config)`: The root component for your app
-- `vstack(children, config)`: Vertical stack layout
-- `hstack(children, config)`: Horizontal stack layout
-- `tabs(tabs, config)`: Create tabbed interface
+- `root(config)`: The root component for your app
+- `vstack(config)`: Vertical stack layout
+- `hstack(config)`: Horizontal stack layout
+- `spacer(config)`: Flexible space between elements
 
-### Content Components
+### Basic Components
 
-- `table(data, config)`: Display tabular data
-- `text(content, config)`: Display text content
-- `heading(content, config)`: Display headings
+- `text(config)`: Display text content
+- `heading(config)`: Display headings
+- `button(config)`: Create buttons
+- `tabs(config)`: Create tabbed interface
+- `card(config)`: Display card
+- `themeToggle(config)`: Display card
 
 ### Form Components
 
-- `formTextField(name, config)`: Create form text input field
-- `formDateField(name, config)`: Create form date input field
-- `button(label, config)`: Create buttons
+- `form(config)`: Form provider
+- `formComboboxField(config)`: Create combobox input field
+- `formTextField(config)`: Create form text input field
+- `formDateField(config)`: Create form date input field
+- `formBooleanField(config)`: Create boolean input field
+- `formNumberField(config)`: Create boolean input field
+- `formSelectField(config)`: Create select field
+- `formTextareaField(config)`: Create textarea input field
+- `formPasswordField(config)`: Create textarea input field
 
 ### Data Components
 
-- `query(render, config)`: Fetch and display data
-- `mutation(render, config)`: Execute data mutations
+- `table(config)`: Display tabular data
+
+### Data Fetching Components
+
+- `query(config)`: Fetch and display data
+- `mutation(config)`: Execute data mutations
 
 ### Presentational Components
 
-- `avatar(src, config)`: Avatar
+- `avatar(config)`: Avatar
+- `chip(config)`: Chip, label
+- `codeBlock(config)`: Display code snippets
+- `image(config)`: Display image
+
+### Overlay Components
+- `modal(config)`: Display dialog popup
+- `tooltip(config)`: Display tooltip
 
 ## Examples
 
@@ -110,12 +130,13 @@ const data = [
 ];
 
 export const UserTable = () => {
-  return table(data, {
+  return table({
     columns: [
       { header: "ID", accessorKey: "id" },
       { header: "Name", accessorKey: "name" },
       { header: "Age", accessorKey: "age" },
     ],
+    data,
   });
 };
 ```
@@ -126,14 +147,16 @@ export const UserTable = () => {
 import { form, button } from "melony";
 
 export const UserForm = () => {
-  return form(
-    [formDateField("date"), formTextField("title"), button("Submit")],
-    {
-      onSubmit: async (data) => {
-        console.log("Form submitted:", data);
-      },
-    }
-  );
+  return form({
+    children: [
+      formDateField({ name: "date" }),
+      formTextField({ name: "title" }),
+      button({ label: "Submit" }),
+    ],
+    onSubmit: async (data) => {
+      console.log("Form submitted:", data);
+    },
+  });
 };
 ```
 
