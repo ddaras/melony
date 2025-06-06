@@ -240,20 +240,6 @@ export default function Home() {
           }),
         ],
       }),
-      // heading({ content: "Form" }),
-      // text({
-      //   content: "Now I will show you how to build a simple form using Melony.",
-      // }),
-      // card({
-      //   className: "flex flex-col gap-8",
-      //   children: [
-      //     exampleForm,
-      //     codeBlock({
-      //       lang: "ts",
-      //       code: formCodeExample,
-      //     }),
-      //   ],
-      // }),
     ],
   });
 }

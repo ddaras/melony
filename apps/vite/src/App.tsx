@@ -1,10 +1,22 @@
-import { heading, root, vstack } from "melony";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router";
+import Home from "./pages/home";
+import { mainLayout } from "./components/layout";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: mainLayout({ children: <Outlet /> }),
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  return root()
-    .appName("MentalConnect")
-    .child(vstack().children([heading("MentalConnect")]))
-    .shouldRenderHtml(true);
+  return <RouterProvider router={router} />;
 }
 
 export default App;
