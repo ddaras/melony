@@ -76,19 +76,6 @@ export function MessageItem({
         style={bubbleClassName ? undefined : bubbleStyle}
       >
         {message.parts.map((part, index) => {
-          if (message.streamingState?.isStreaming) {
-            return (
-              <Thinking
-                key={index}
-                text={"Give me a second..."}
-                isStreaming={
-                  message.streamingState?.isStreaming &&
-                  message.streamingState?.currentStep === "thinking"
-                }
-              />
-            );
-          }
-
           if (part.type === "text") {
             return <p key={index}>{part.text}</p>;
           }
@@ -111,6 +98,8 @@ export function MessageItem({
           }
         })}
       </div>
+
+      {message.streamingState?.isStreaming && <>...</>}
     </div>
   );
 }
