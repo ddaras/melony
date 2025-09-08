@@ -1,21 +1,29 @@
-import React, { createContext, useContext } from 'react';
-import type { FlowState } from '../core/flows';
-import { useFlow } from '../hooks/useFlow';
+import React, { createContext, useState, useEffect, ReactNode } from "react";
+import { Message } from "../core/messages";
+import { useConversation } from "../hooks/useConversation";
 
-interface FlowContextValue {
-  state: FlowState;
-  to: (s: FlowState) => void;
-}
+type FlowContextType = {
+  latestMessage: Message | null;
+  history: Message[];
+};
 
-const FlowContext = createContext<FlowContextValue | null>(null);
+export const FlowContext = createContext<FlowContextType | null>(null);
 
-export function FlowProvider({ children }: { children?: React.ReactNode }) {
-  const value = useFlow('idle');
+export const FlowProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const { messages } = useConversation();
+  const [latestMessage, setLatestMessage] = useState<Message | null>(null);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+    setLatestMessage(messages[messages.length - 1]);
+  }, [messages]);
+
+  const value: FlowContextType = {
+    latestMessage,
+    history: messages,
+  };
+
   return <FlowContext.Provider value={value}>{children}</FlowContext.Provider>;
-}
-
-export function useFlowContext() {
-  const ctx = useContext(FlowContext);
-  if (!ctx) throw new Error('useFlowContext must be used within FlowProvider');
-  return ctx;
-}
+};

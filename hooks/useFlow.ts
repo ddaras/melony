@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
-import type { FlowState } from '../core/flows';
+import { useContext } from "react";
+import { FlowContext } from "../providers/FlowProvider";
 
-export function useFlow(initial: FlowState = 'idle') {
-  const [state, setState] = useState<FlowState>(initial);
-  const to = useCallback((next: FlowState) => setState(next), []);
-  return { state, to };
-}
+export const useFlow = () => {
+  const ctx = useContext(FlowContext);
+  if (!ctx) throw new Error("useFlow must be used inside FlowProvider");
+  return ctx;
+};
