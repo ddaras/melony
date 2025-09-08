@@ -1,0 +1,36 @@
+# Source files - only publish built dist files
+src/
+components/
+core/
+hooks/
+providers/
+examples/
+*.ts
+*.tsx
+!dist/**/*.ts
+!dist/**/*.tsx
+
+# Development files
+tsconfig.json
+tsup.config.ts
+.env*
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Node
+node_modules/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
