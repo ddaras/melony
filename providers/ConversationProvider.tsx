@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { Message } from "../core/messages";
+import { AIAdapter } from "../core/client";
 
 type ConversationContextType = {
   messages: Message[];
@@ -11,23 +12,23 @@ export const ConversationContext =
 
 export function ConversationProvider({
   children,
-  client,
+  adapter,
 }: {
   children: React.ReactNode;
-  client: any;
+  adapter: AIAdapter;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
 
   // Listen to backend stream
   useEffect(() => {
-    if (!client) return;
-    const subscription = client.subscribe((msg: Message) => {
+    if (!adapter) return;
+    const subscription = adapter.subscribe((msg: Message) => {
       setMessages((prev) => {
         // Check if this is an update to an existing assistant message
         const existingIndex = prev.findIndex(
-          (m) => m.role === 'assistant' && m.id === msg.id
+          (m) => m.role === "assistant" && m.id === msg.id
         );
-        
+
         if (existingIndex >= 0) {
           // Update existing message
           const updated = [...prev];
@@ -40,7 +41,7 @@ export function ConversationProvider({
       });
     });
     return () => subscription.unsubscribe();
-  }, [client]);
+  }, [adapter]);
 
   const send = (msg: Omit<Message, "id" | "createdAt">) => {
     const full: Message = {
@@ -49,7 +50,7 @@ export function ConversationProvider({
       ...msg,
     };
     setMessages((m) => [...m, full]);
-    client.send(full); // AI SDK backend (HTTP)
+    adapter.send(full); // AI SDK backend (HTTP)
   };
 
   return (

@@ -23,3 +23,6 @@ export * from "./hooks/useAgent";
 // Providers
 export * from "./providers/ConversationProvider";
 export * from "./providers/FlowProvider";
+
+// AI Adapters
+export * from "./adapters/ai/ai-sdk";

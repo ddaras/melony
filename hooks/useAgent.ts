@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { DefaultAIClient } from "../core/client";
+import { AISDKAdapter } from "../adapters/ai/ai-sdk";
 
-export function useAgent(baseUrl: string) {
-  const client = useMemo(
-    () => new DefaultAIClient({ endpoint: baseUrl }),
-    [baseUrl]
+export function useAgent(baseUrl: string, debug?: boolean) {
+  const adapter = useMemo(
+    () => new AISDKAdapter({ endpoint: baseUrl, debug }),
+    [baseUrl, debug]
   );
-  return { client };
+  return { adapter };
 }

@@ -18,17 +18,18 @@ import {
   MessageList,
   MessageInput,
   ConversationProvider,
-  DefaultAIClient,
+  AISDKAdapter,
 } from "melony";
 
-// AI SDK backend (HTTP only)
-const client = new DefaultAIClient({
-  endpoint: "/api/ai", // Your AI SDK route that accepts POST and returns a Message
+// AI SDK backend with streaming support
+const adapter = new AISDKAdapter({
+  endpoint: "/api/ai", // Your AI SDK route that accepts POST and returns streaming SSE
+  debug: true, // Enable debug logging (optional)
 });
 
 function Chat() {
   return (
-    <ConversationProvider client={client}>
+    <ConversationProvider adapter={adapter}>
       <Conversation>
         <MessageList />
         <MessageInput />
