@@ -2,8 +2,8 @@ import { ToolCall, ToolResult } from "./tools";
 
 export type Role = "user" | "assistant" | "system" | "tool";
 
-export type UIBlock =
-  | { type: "text"; value: string }
+export type MessagePart =
+  | { type: "text"; text: string }
   | { type: "image"; url: string; alt?: string }
   | { type: "table"; columns: string[]; rows: any[][] }
   | { type: "form"; fields: FormField[] }
@@ -13,7 +13,7 @@ export type UIBlock =
 export type Message = {
   id: string;
   role: Role;
-  content: string | UIBlock[];
+  parts: MessagePart[];
   toolCall?: ToolCall;
   toolResult?: ToolResult;
   createdAt: number;

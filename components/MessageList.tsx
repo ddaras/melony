@@ -88,7 +88,11 @@ export function MessageList({
               className={bubbleClassName}
               style={bubbleClassName ? undefined : bubbleStyle}
             >
-              {typeof m.content === "string" ? m.content : "[rich content]"}
+              {m.parts.map((p, index) => {
+                if (p.type === "text") {
+                  return <p key={index}>{p.text}</p>;
+                }
+              })}
             </div>
           </div>
         );

@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { Message } from "../core/messages";
 
 type ConversationContextType = {
@@ -17,6 +17,15 @@ export function ConversationProvider({
   client: any;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
+
+  // Listen to backend stream
+  useEffect(() => {
+    if (!client) return;
+    const subscription = client.subscribe((msg: Message) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+    return () => subscription.unsubscribe();
+  }, [client]);
 
   const send = (msg: Omit<Message, "id" | "createdAt">) => {
     const full: Message = {

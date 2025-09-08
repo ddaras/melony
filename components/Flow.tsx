@@ -23,8 +23,8 @@ export const FlowWhen: React.FC<FlowWhenProps> = ({
   if (tool && latest.toolCall?.name === tool) return <>{children}</>;
 
   // Check block match
-  if (block && Array.isArray(latest.content)) {
-    const hasBlock = latest.content.some((b: any) => b.type === block);
+  if (block && Array.isArray(latest.parts)) {
+    const hasBlock = latest.parts.some((b: any) => b.type === block);
     if (hasBlock) return <>{children}</>;
   }
 
