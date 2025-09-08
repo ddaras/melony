@@ -22,7 +22,22 @@ export function ConversationProvider({
   useEffect(() => {
     if (!client) return;
     const subscription = client.subscribe((msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        // Check if this is an update to an existing assistant message
+        const existingIndex = prev.findIndex(
+          (m) => m.role === 'assistant' && m.id === msg.id
+        );
+        
+        if (existingIndex >= 0) {
+          // Update existing message
+          const updated = [...prev];
+          updated[existingIndex] = msg;
+          return updated;
+        } else {
+          // Add new message
+          return [...prev, msg];
+        }
+      });
     });
     return () => subscription.unsubscribe();
   }, [client]);
