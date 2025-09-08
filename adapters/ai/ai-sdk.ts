@@ -166,6 +166,10 @@ export class AISDKAdapter implements AIAdapter {
             isStreaming: true,
             currentStep: 'thinking',
           };
+          // Add thinking part when starting thinking step
+          if (!currentMessage.parts?.find(p => p.type === 'thinking')) {
+            currentMessage.parts = [...(currentMessage.parts || []), { type: 'thinking', text: '' }];
+          }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
@@ -283,6 +287,10 @@ export class AISDKAdapter implements AIAdapter {
       case 'finish-step':
         if (currentMessage?.streamingState) {
           currentMessage.streamingState.currentStep = 'response';
+          // Remove thinking part when finishing thinking step
+          if (currentMessage.parts) {
+            currentMessage.parts = currentMessage.parts.filter(p => p.type !== 'thinking');
+          }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 

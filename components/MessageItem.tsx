@@ -1,4 +1,5 @@
 import { ToolResponse } from "./ToolResponse";
+import { Thinking } from "./Thinking";
 import type { Message } from "../core/messages";
 
 type MessageItemProps = {
@@ -65,14 +66,44 @@ export function MessageItem({
   }
 
   return (
-    <div key={message.id} data-role={message.role} data-type={(message as any).type}>
+    <div
+      key={message.id}
+      data-role={message.role}
+      data-type={(message as any).type}
+    >
       <div
         className={bubbleClassName}
         style={bubbleClassName ? undefined : bubbleStyle}
       >
         {message.parts.map((part, index) => {
+          if (message.streamingState?.isStreaming) {
+            return (
+              <Thinking
+                key={index}
+                text={"Give me a second..."}
+                isStreaming={
+                  message.streamingState?.isStreaming &&
+                  message.streamingState?.currentStep === "thinking"
+                }
+              />
+            );
+          }
+
           if (part.type === "text") {
             return <p key={index}>{part.text}</p>;
+          }
+
+          if (part.type === "thinking") {
+            return (
+              <Thinking
+                key={index}
+                text={part.text}
+                isStreaming={
+                  message.streamingState?.isStreaming &&
+                  message.streamingState?.currentStep === "thinking"
+                }
+              />
+            );
           }
 
           if (part.type === "tool") {
