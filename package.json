@@ -11,7 +11,6 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",
-    "publish": "npm run version:patch && npm publish --access public",
     "version:patch": "npm version patch"
   },
   "keywords": [],
