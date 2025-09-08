@@ -1,0 +1,50 @@
+{
+  "name": "melony",
+  "version": "1.5.18",
+  "main": "dist/index.cjs",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build",
+    "publish": "npm publish --access public",
+    "version:patch": "npm version patch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "type": "module",
+  "private": false,
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "core",
+    "components",
+    "hooks",
+    "providers",
+    "index.ts"
+  ],
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  }
+}
