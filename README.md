@@ -1,24 +1,29 @@
-## ai-frontend (work-in-progress)
+## melony (work-in-progress)
 
 TypeScript-first, headless React toolkit for building AI chat/agent frontends.
 
 ### Install
 
 ```bash
-npm i ai-frontend
+pnpm add melony
 ```
 
 ### Usage (quick peek)
 
 ```tsx
-import { Conversation, MessageList, MessageInput, ConversationProvider } from 'ai-frontend';
+import {
+  Conversation,
+  MessageList,
+  MessageInput,
+  ConversationProvider,
+} from "melony";
 
 function Chat() {
   return (
     <ConversationProvider>
       <Conversation>
-        <MessageList messages={[]} />
-        <MessageInput value={''} onChange={() => {}} onSubmit={() => {}} />
+        <MessageList />
+        <MessageInput />
       </Conversation>
     </ConversationProvider>
   );
@@ -40,4 +45,3 @@ This package is configured with ESM + CJS outputs and types. To publish:
 npm version patch # or minor/major
 npm publish --access public
 ```
-

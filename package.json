@@ -1,7 +1,7 @@
 {
   "name": "melony",
   "version": "1.5.19",
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "directories": {
     "example": "examples"
   },
@@ -24,19 +24,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
-  "module": "dist/index.mjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "core",
-    "components",
-    "hooks",
-    "providers",
-    "index.ts"
+    "dist"
   ],
   "devDependencies": {
     "@types/react": "^19.1.12",

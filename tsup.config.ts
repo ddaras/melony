@@ -11,4 +11,9 @@ export default defineConfig({
   treeshake: true,
   skipNodeModulesBundle: true,
   external: ['react', 'react-dom'],
+  outExtension({ format }) {
+    return {
+      js: format === 'esm' ? '.js' : '.cjs',
+    }
+  },
 });
