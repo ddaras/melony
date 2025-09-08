@@ -179,6 +179,15 @@ export class AISDKAdapter implements AIAdapter {
           };
           toolCalls.set(event.toolCallId, toolCall);
           
+          // Create tool message part
+          const toolPart = {
+            type: 'tool' as const,
+            toolCallId: event.toolCallId,
+            status: 'streaming',
+            inputStream: '',
+          };
+          currentMessage.parts = [...(currentMessage.parts || []), toolPart];
+          
           currentMessage.streamingState = {
             isStreaming: true,
             currentStep: 'tool-input',
@@ -195,6 +204,15 @@ export class AISDKAdapter implements AIAdapter {
           
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
+            
+            // Update tool message part with input stream
+            const toolPart = currentMessage.parts?.find(
+              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
+            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
+            
+            if (toolPart) {
+              toolPart.inputStream = (toolPart.inputStream || '') + event.inputTextDelta;
+            }
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
@@ -208,6 +226,16 @@ export class AISDKAdapter implements AIAdapter {
           
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
+            
+            // Update tool message part status
+            const toolPart = currentMessage.parts?.find(
+              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
+            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
+            
+            if (toolPart) {
+              toolPart.status = 'pending';
+            }
+            
             currentMessage.streamingState = {
               isStreaming: true,
               currentStep: 'tool-execution',
@@ -233,6 +261,16 @@ export class AISDKAdapter implements AIAdapter {
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
             currentMessage.toolResults = [...(currentMessage.toolResults || []), toolResult];
+            
+            // Update tool message part status
+            const toolPart = currentMessage.parts?.find(
+              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
+            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
+            
+            if (toolPart) {
+              toolPart.status = 'completed';
+            }
+            
             currentMessage.streamingState = {
               isStreaming: true,
               currentStep: 'tool-output',

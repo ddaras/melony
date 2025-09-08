@@ -9,7 +9,7 @@ export type MessagePart =
   | { type: "form"; fields: FormField[] }
   | { type: "detail"; data: Record<string, any> }
   | { type: "chart"; kind: "bar" | "line" | "pie"; data: any }
-  | { type: "tool-stream"; toolCallId: string; status: string; inputStream?: string };
+  | { type: "tool"; toolCallId: string; status: string; inputStream?: string };
 
 export type Message = {
   id: string;
@@ -21,7 +21,12 @@ export type Message = {
   metadata?: Record<string, any>;
   streamingState?: {
     isStreaming: boolean;
-    currentStep?: 'thinking' | 'tool-input' | 'tool-execution' | 'tool-output' | 'response';
+    currentStep?:
+      | "thinking"
+      | "tool-input"
+      | "tool-execution"
+      | "tool-output"
+      | "response";
     activeToolCallId?: string;
   };
 };
