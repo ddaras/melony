@@ -1,10 +1,38 @@
-import React from 'react';
+import React from "react";
+import { useConversation } from "../hooks/useConversation";
 
-export interface FlowProps {
-  state: string;
-  children?: React.ReactNode;
-}
+type FlowWhenProps = {
+  tool?: string;
+  block?: string;
+  children: React.ReactNode;
+};
 
-export function Flow({ state, children }: FlowProps) {
-  return <section data-ai-flow-state={state}>{children}</section>;
-}
+export const FlowWhen: React.FC<FlowWhenProps> = ({
+  tool,
+  block,
+  children,
+}) => {
+  const { messages } = useConversation();
+
+  // Get latest message
+  const latest = messages[messages.length - 1];
+
+  if (!latest) return null;
+
+  // Check tool match
+  if (tool && latest.toolCall?.name === tool) return <>{children}</>;
+
+  // Check block match
+  if (block && Array.isArray(latest.content)) {
+    const hasBlock = latest.content.some((b: any) => b.type === block);
+    if (hasBlock) return <>{children}</>;
+  }
+
+  return null;
+};
+
+export const Flow = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
+};
+
+Flow.When = FlowWhen;

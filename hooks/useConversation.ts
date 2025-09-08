@@ -1,13 +1,9 @@
-import { useState, useCallback } from 'react';
-import type { Message } from '../core/messages';
+import { useContext } from "react";
+import { ConversationContext } from "../providers/ConversationProvider";
 
-export function useConversation() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-
-  const append = useCallback((m: Message) => {
-    setMessages((prev) => [...prev, m]);
-  }, []);
-
-  return { messages, input, setInput, append };
-}
+export const useConversation = () => {
+  const ctx = useContext(ConversationContext);
+  if (!ctx)
+    throw new Error("useConversation must be used inside ConversationProvider");
+  return ctx;
+};

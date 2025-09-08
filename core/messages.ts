@@ -1,30 +1,28 @@
-export type Role = 'user' | 'assistant' | 'tool' | 'system';
+import { ToolCall, ToolResult } from "./tools";
 
-export interface BaseMessage {
+export type Role = "user" | "assistant" | "system" | "tool";
+
+export type UIBlock =
+  | { type: "text"; value: string }
+  | { type: "image"; url: string; alt?: string }
+  | { type: "table"; columns: string[]; rows: any[][] }
+  | { type: "form"; fields: FormField[] }
+  | { type: "detail"; data: Record<string, any> }
+  | { type: "chart"; kind: "bar" | "line" | "pie"; data: any };
+
+export type Message = {
   id: string;
   role: Role;
+  content: string | UIBlock[];
+  toolCall?: ToolCall;
+  toolResult?: ToolResult;
   createdAt: number;
-}
+  metadata?: Record<string, any>;
+};
 
-export interface TextMessage extends BaseMessage {
-  type: 'text';
-  content: string;
-}
-
-export interface ToolCallMessage extends BaseMessage {
-  type: 'tool-call';
-  toolName: string;
-  args: unknown;
-}
-
-export interface ToolResultMessage extends BaseMessage {
-  type: 'tool-result';
-  toolName: string;
-  result: unknown;
-}
-
-export type Message = TextMessage | ToolCallMessage | ToolResultMessage;
-
-export function isTextMessage(m: Message): m is TextMessage {
-  return m.type === 'text';
-}
+export type FormField = {
+  name: string;
+  label: string;
+  type: "text" | "number" | "select" | "checkbox";
+  options?: string[];
+};

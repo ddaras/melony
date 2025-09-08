@@ -1,23 +1,36 @@
-import React, { createContext, useContext } from 'react';
-import type { Message } from '../core/messages';
-import { useConversation } from '../hooks/useConversation';
+import React, { createContext, useContext, useState } from "react";
+import { Message } from "../core/messages";
 
-interface ConversationContextValue {
+type ConversationContextType = {
   messages: Message[];
-  input: string;
-  setInput: (v: string) => void;
-  append: (m: Message) => void;
-}
+  send: (msg: Omit<Message, "id" | "createdAt">) => void;
+};
 
-const ConversationContext = createContext<ConversationContextValue | null>(null);
+export const ConversationContext =
+  createContext<ConversationContextType | null>(null);
 
-export function ConversationProvider({ children }: { children?: React.ReactNode }) {
-  const value = useConversation();
-  return <ConversationContext.Provider value={value}>{children}</ConversationContext.Provider>;
-}
+export function ConversationProvider({
+  children,
+  client,
+}: {
+  children: React.ReactNode;
+  client: any;
+}) {
+  const [messages, setMessages] = useState<Message[]>([]);
 
-export function useConversationContext() {
-  const ctx = useContext(ConversationContext);
-  if (!ctx) throw new Error('useConversationContext must be used within ConversationProvider');
-  return ctx;
+  const send = (msg: Omit<Message, "id" | "createdAt">) => {
+    const full: Message = {
+      id: crypto.randomUUID(),
+      createdAt: Date.now(),
+      ...msg,
+    };
+    setMessages((m) => [...m, full]);
+    client.send(full); // SSE/WS/HTTP call
+  };
+
+  return (
+    <ConversationContext.Provider value={{ messages, send }}>
+      {children}
+    </ConversationContext.Provider>
+  );
 }

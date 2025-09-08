@@ -1,30 +1,99 @@
-export type Transport = 'sse' | 'ws' | 'http';
+// src/core/client.ts
+import { Message } from "./messages";
 
-export interface AgentClientOptions {
-  baseUrl: string;
-  transport?: Transport;
-  apiKey?: string;
+type SubscribeCallback = (msg: Message) => void;
+
+export interface AIClient {
+  send: (message: Message) => void;
+  subscribe: (cb: SubscribeCallback) => { unsubscribe: () => void };
 }
 
-export class AgentClient {
-  private readonly baseUrl: string;
-  private readonly transport: Transport;
-  private readonly apiKey?: string;
+export interface AIClientOptions {
+  endpoint: string;
+  headers?: Record<string, string>;
+  method?: "ws" | "sse" | "http";
+}
 
-  constructor(options: AgentClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/$/, '');
-    this.transport = options.transport ?? 'sse';
-    this.apiKey = options.apiKey;
+// Simple in-memory subscription manager
+class SubscriptionManager {
+  private callbacks = new Set<SubscribeCallback>();
+  subscribe(cb: SubscribeCallback) {
+    this.callbacks.add(cb);
+    return { unsubscribe: () => this.callbacks.delete(cb) };
+  }
+  emit(msg: Message) {
+    this.callbacks.forEach((cb) => cb(msg));
+  }
+}
+
+export class DefaultAIClient implements AIClient {
+  private endpoint: string;
+  private headers?: Record<string, string>;
+  private method: "ws" | "sse" | "http";
+  private subs = new SubscriptionManager();
+  private ws?: WebSocket;
+  private sse?: EventSource;
+
+  constructor(opts: AIClientOptions) {
+    this.endpoint = opts.endpoint;
+    this.headers = opts.headers;
+    this.method = opts.method || "sse";
+
+    if (this.method === "ws") this.initWS();
+    if (this.method === "sse") this.initSSE();
   }
 
-  // Placeholder: connect to an agent stream
-  connect(conversationId: string): void {
-    void conversationId; // placeholder
+  private initWS() {
+    this.ws = new WebSocket(this.endpoint);
+    this.ws.onmessage = (e) => {
+      try {
+        const msg: Message = JSON.parse(e.data);
+        this.subs.emit(msg);
+      } catch (err) {
+        console.error("Failed to parse WS message", err);
+      }
+    };
   }
 
-  // Placeholder: send a user message
-  async sendMessage(conversationId: string, content: string): Promise<void> {
-    void conversationId;
-    void content;
+  private initSSE() {
+    this.sse = new EventSource(this.endpoint);
+    this.sse.onmessage = (e) => {
+      try {
+        const msg: Message = JSON.parse(e.data);
+        this.subs.emit(msg);
+      } catch (err) {
+        console.error("Failed to parse SSE message", err);
+      }
+    };
+  }
+
+  send(message: Message) {
+    if (this.method === "ws" && this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+    } else if (this.method === "http") {
+      fetch(this.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.headers,
+        },
+        body: JSON.stringify(message),
+      })
+        .then((res) => res.json())
+        .then((msg: Message) => this.subs.emit(msg));
+    } else if (this.method === "sse") {
+      // SSE is read-only; you send via HTTP fallback
+      fetch(this.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...this.headers },
+        body: JSON.stringify(message),
+      })
+        .then((res) => res.json())
+        .then((msg: Message) => this.subs.emit(msg));
+    }
+  }
+
+  subscribe(cb: SubscribeCallback) {
+    return this.subs.subscribe(cb);
   }
 }

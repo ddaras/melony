@@ -1,17 +1,14 @@
-import React from 'react';
-import type { Message } from '../core/messages';
+import { useConversation } from "../hooks/useConversation";
 
-export interface MessageListProps {
-  messages: Message[];
-  renderMessage?: (m: Message) => React.ReactNode;
-}
+export function MessageList() {
+  const { messages } = useConversation();
 
-export function MessageList({ messages, renderMessage }: MessageListProps) {
   return (
     <div data-ai-message-list="">
       {messages.map((m) => (
         <div key={m.id} data-role={m.role} data-type={(m as any).type}>
-          {renderMessage ? renderMessage(m) : null}
+          <strong>{m.role}:</strong>{" "}
+          {typeof m.content === "string" ? m.content : "[rich content]"}
         </div>
       ))}
     </div>

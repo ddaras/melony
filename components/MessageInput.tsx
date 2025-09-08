@@ -1,27 +1,26 @@
-import React from 'react';
+import React, { useState } from "react";
+import { useConversation } from "../hooks/useConversation";
 
-export interface MessageInputProps {
-  value: string;
-  onChange: (v: string) => void;
-  onSubmit: () => void;
-  placeholder?: string;
-}
+export const MessageInput: React.FC<{ placeholder?: string }> = ({
+  placeholder,
+}) => {
+  const [text, setText] = useState("");
+  const { send } = useConversation();
 
-export function MessageInput({ value, onChange, onSubmit, placeholder }: MessageInputProps) {
+  const handleSend = () => {
+    if (!text) return;
+    send({ role: "user", content: text });
+    setText("");
+  };
+
   return (
-    <form
-      data-ai-message-input=""
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
+    <div>
       <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
         placeholder={placeholder}
       />
-      <button type="submit">Send</button>
-    </form>
+      <button onClick={handleSend}>Send</button>
+    </div>
   );
-}
+};
