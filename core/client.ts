@@ -45,7 +45,7 @@ export class DefaultAIClient implements AIClient {
         "Content-Type": "application/json",
         ...this.headers,
       },
-      body: JSON.stringify(message),
+      body: JSON.stringify({ message }),
     })
       .then((res) => res.json())
       .then((msg: Message) => this.subs.emit(msg));

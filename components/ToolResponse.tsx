@@ -7,30 +7,102 @@ type ToolResponseProps = {
 };
 
 export const ToolResponse: React.FC<ToolResponseProps> = ({ blocks, className }) => {
+  const defaultContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem', // gap-3
+  };
+
   return (
-    <div className={className ?? "flex flex-col gap-3"}>
+    <div 
+      className={className}
+      style={className ? undefined : defaultContainerStyle}
+    >
       {blocks.map((b, i) => {
         switch (b.type) {
           case "text":
-            return <p key={i} className="text-sm text-gray-900 dark:text-gray-100">{b.value}</p>;
+            return (
+              <p 
+                key={i} 
+                style={{
+                  fontSize: '0.875rem', // text-sm
+                  color: '#111827', // text-gray-900
+                }}
+              >
+                {b.value}
+              </p>
+            );
           case "table":
             return (
-              <div key={i} className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-md border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
+              <div 
+                key={i} 
+                style={{
+                  overflowX: 'auto', // overflow-x-auto
+                }}
+              >
+                <table 
+                  style={{
+                    minWidth: '100%', // min-w-full
+                    borderCollapse: 'separate',
+                    borderSpacing: 0,
+                    overflow: 'hidden', // overflow-hidden
+                    borderRadius: '0.375rem', // rounded-md
+                    border: '1px solid #e5e7eb', // border border-gray-200
+                  }}
+                >
+                  <thead 
+                    style={{
+                      backgroundColor: '#f9fafb', // bg-gray-50
+                    }}
+                  >
                     <tr>
                       {b.columns.map((c) => (
-                        <th key={c} className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        <th 
+                          key={c} 
+                          style={{
+                            paddingLeft: '0.75rem', // px-3
+                            paddingRight: '0.75rem',
+                            paddingTop: '0.5rem', // py-2
+                            paddingBottom: '0.5rem',
+                            textAlign: 'left', // text-left
+                            fontSize: '0.75rem', // text-xs
+                            fontWeight: '500', // font-medium
+                            textTransform: 'uppercase', // uppercase
+                            letterSpacing: '0.05em', // tracking-wider
+                            color: '#4b5563', // text-gray-600
+                          }}
+                        >
                           {c}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+                  <tbody 
+                    style={{
+                      backgroundColor: '#ffffff', // bg-white
+                    }}
+                  >
                     {b.rows.map((row, ri) => (
-                      <tr key={ri}>
+                      <tr 
+                        key={ri}
+                        style={{
+                          borderTop: ri > 0 ? '1px solid #e5e7eb' : undefined, // divide-y divide-gray-200
+                        }}
+                      >
                         {row.map((cell, ci) => (
-                          <td key={ci} className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">{cell}</td>
+                          <td 
+                            key={ci} 
+                            style={{
+                              paddingLeft: '0.75rem', // px-3
+                              paddingRight: '0.75rem',
+                              paddingTop: '0.5rem', // py-2
+                              paddingBottom: '0.5rem',
+                              fontSize: '0.875rem', // text-sm
+                              color: '#111827', // text-gray-900
+                            }}
+                          >
+                            {cell}
+                          </td>
                         ))}
                       </tr>
                     ))}
@@ -40,12 +112,30 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({ blocks, className })
             );
           case "form":
             return (
-              <form key={i} className="flex flex-col gap-2">
+              <form 
+                key={i} 
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem', // gap-2
+                }}
+              >
                 {b.fields.map((f) => (
                   <input
                     key={f.name}
                     placeholder={f.label}
-                    className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    style={{
+                      borderRadius: '0.375rem', // rounded-md
+                      border: '1px solid #d1d5db', // border border-gray-300
+                      backgroundColor: '#ffffff', // bg-white
+                      paddingLeft: '0.75rem', // px-3
+                      paddingRight: '0.75rem',
+                      paddingTop: '0.5rem', // py-2
+                      paddingBottom: '0.5rem',
+                      fontSize: '0.875rem', // text-sm
+                      color: '#111827', // text-gray-900
+                      outline: 'none', // focus:outline-none
+                    }}
                   />
                 ))}
               </form>
@@ -54,7 +144,15 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({ blocks, className })
             return (
               <pre
                 key={i}
-                className="overflow-x-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-900 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100"
+                style={{
+                  overflowX: 'auto', // overflow-x-auto
+                  borderRadius: '0.375rem', // rounded-md
+                  border: '1px solid #e5e7eb', // border border-gray-200
+                  backgroundColor: '#f9fafb', // bg-gray-50
+                  padding: '0.75rem', // p-3
+                  fontSize: '0.75rem', // text-xs
+                  color: '#111827', // text-gray-900
+                }}
               >
                 {JSON.stringify(b.data, null, 2)}
               </pre>
@@ -63,7 +161,14 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({ blocks, className })
             return (
               <div
                 key={i}
-                className="rounded-md border border-dashed border-gray-300 p-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
+                style={{
+                  borderRadius: '0.375rem', // rounded-md
+                  border: '1px dashed #d1d5db', // border border-dashed border-gray-300
+                  padding: '1rem', // p-4
+                  textAlign: 'center', // text-center
+                  fontSize: '0.875rem', // text-sm
+                  color: '#6b7280', // text-gray-500
+                }}
               >
                 [Chart: {b.kind}]
               </div>
