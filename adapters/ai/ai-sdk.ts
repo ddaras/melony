@@ -5,6 +5,13 @@ interface AISDKEvent {
   type: string;
   id?: string;
   delta?: string;
+  // Tool streaming specific fields
+  toolCallId?: string;
+  toolName?: string;
+  inputTextDelta?: string;
+  input?: Record<string, any>;
+  output?: any;
+  providerMetadata?: Record<string, any>;
 }
 
 export class AISDKAdapter implements AIAdapter {
@@ -61,6 +68,7 @@ export class AISDKAdapter implements AIAdapter {
     let buffer = "";
     let currentMessage: Partial<Message> | null = null;
     let textContent = "";
+    let toolCalls = new Map<string, any>(); // Track tool calls by ID
 
     try {
       while (true) {
@@ -77,6 +85,10 @@ export class AISDKAdapter implements AIAdapter {
             
             if (data === '[DONE]') {
               if (currentMessage) {
+                // Finalize message with completed tool calls
+                if (toolCalls.size > 0) {
+                  currentMessage.toolCalls = Array.from(toolCalls.values());
+                }
                 this.emit(currentMessage as Message);
               }
               return;
@@ -84,7 +96,7 @@ export class AISDKAdapter implements AIAdapter {
 
             const event = this.parseEvent(data);
             if (event) {
-              const result = this.handleEvent(event, currentMessage, textContent);
+              const result = this.handleEvent(event, currentMessage, textContent, toolCalls);
               if (result.message) {
                 currentMessage = result.message;
                 textContent = result.textContent;
@@ -113,7 +125,8 @@ export class AISDKAdapter implements AIAdapter {
   private handleEvent(
     event: AISDKEvent, 
     currentMessage: Partial<Message> | null, 
-    textContent: string
+    textContent: string,
+    toolCalls: Map<string, any>
   ): { message: Partial<Message> | null; textContent: string; shouldEmit: boolean } {
     if (this.debug) console.log(`[AI-SDK] ${event.type}`, event);
 
@@ -147,7 +160,98 @@ export class AISDKAdapter implements AIAdapter {
         }
         return { message: currentMessage, textContent, shouldEmit: false };
 
+      case 'start-step':
+        if (currentMessage) {
+          currentMessage.streamingState = {
+            isStreaming: true,
+            currentStep: 'thinking',
+          };
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
+      case 'tool-input-start':
+        if (event.toolCallId && event.toolName && currentMessage) {
+          const toolCall = {
+            id: event.toolCallId,
+            name: event.toolName,
+            status: 'streaming' as const,
+            inputStream: '',
+          };
+          toolCalls.set(event.toolCallId, toolCall);
+          
+          currentMessage.streamingState = {
+            isStreaming: true,
+            currentStep: 'tool-input',
+            activeToolCallId: event.toolCallId,
+          };
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
+      case 'tool-input-delta':
+        if (event.toolCallId && event.inputTextDelta && toolCalls.has(event.toolCallId)) {
+          const toolCall = toolCalls.get(event.toolCallId);
+          toolCall.inputStream = (toolCall.inputStream || '') + event.inputTextDelta;
+          toolCalls.set(event.toolCallId, toolCall);
+          
+          if (currentMessage) {
+            currentMessage.toolCalls = Array.from(toolCalls.values());
+          }
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
+      case 'tool-input-available':
+        if (event.toolCallId && event.input && toolCalls.has(event.toolCallId)) {
+          const toolCall = toolCalls.get(event.toolCallId);
+          toolCall.args = event.input;
+          toolCall.status = 'pending';
+          toolCalls.set(event.toolCallId, toolCall);
+          
+          if (currentMessage) {
+            currentMessage.toolCalls = Array.from(toolCalls.values());
+            currentMessage.streamingState = {
+              isStreaming: true,
+              currentStep: 'tool-execution',
+              activeToolCallId: event.toolCallId,
+            };
+          }
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
+      case 'tool-output-available':
+        if (event.toolCallId && toolCalls.has(event.toolCallId)) {
+          const toolCall = toolCalls.get(event.toolCallId);
+          toolCall.status = 'completed';
+          toolCalls.set(event.toolCallId, toolCall);
+          
+          // Add tool result
+          const toolResult = {
+            success: true,
+            output: event.output,
+            toolCallId: event.toolCallId,
+          };
+          
+          if (currentMessage) {
+            currentMessage.toolCalls = Array.from(toolCalls.values());
+            currentMessage.toolResults = [...(currentMessage.toolResults || []), toolResult];
+            currentMessage.streamingState = {
+              isStreaming: true,
+              currentStep: 'tool-output',
+              activeToolCallId: event.toolCallId,
+            };
+          }
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
+      case 'finish-step':
+        if (currentMessage?.streamingState) {
+          currentMessage.streamingState.currentStep = 'response';
+        }
+        return { message: currentMessage, textContent, shouldEmit: true };
+
       case 'finish':
+        if (currentMessage?.streamingState) {
+          currentMessage.streamingState.isStreaming = false;
+        }
         return { message: currentMessage, textContent, shouldEmit: true };
 
       default:

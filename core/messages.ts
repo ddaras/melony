@@ -8,16 +8,22 @@ export type MessagePart =
   | { type: "table"; columns: string[]; rows: any[][] }
   | { type: "form"; fields: FormField[] }
   | { type: "detail"; data: Record<string, any> }
-  | { type: "chart"; kind: "bar" | "line" | "pie"; data: any };
+  | { type: "chart"; kind: "bar" | "line" | "pie"; data: any }
+  | { type: "tool-stream"; toolCallId: string; status: string; inputStream?: string };
 
 export type Message = {
   id: string;
   role: Role;
   parts: MessagePart[];
-  toolCall?: ToolCall;
-  toolResult?: ToolResult;
+  toolCalls?: ToolCall[]; // Support multiple tool calls
+  toolResults?: ToolResult[]; // Support multiple tool results
   createdAt: number;
   metadata?: Record<string, any>;
+  streamingState?: {
+    isStreaming: boolean;
+    currentStep?: 'thinking' | 'tool-input' | 'tool-execution' | 'tool-output' | 'response';
+    activeToolCallId?: string;
+  };
 };
 
 export type FormField = {

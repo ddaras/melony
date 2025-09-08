@@ -20,7 +20,7 @@ export const FlowWhen: React.FC<FlowWhenProps> = ({
   if (!latest) return null;
 
   // Check tool match
-  if (tool && latest.toolCall?.name === tool) return <>{children}</>;
+  if (tool && latest.toolCalls?.some(tc => tc.name === tool)) return <>{children}</>;
 
   // Check block match
   if (block && Array.isArray(latest.parts)) {
