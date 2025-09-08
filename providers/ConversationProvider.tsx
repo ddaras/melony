@@ -25,7 +25,7 @@ export function ConversationProvider({
       ...msg,
     };
     setMessages((m) => [...m, full]);
-    client.send(full); // SSE/WS/HTTP call
+    client.send(full); // AI SDK backend (HTTP)
   };
 
   return (
