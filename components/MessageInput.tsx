@@ -44,7 +44,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const defaultInputStyle: React.CSSProperties = {
     flex: 1, // flex-1
-    padding: "0.75rem 0.5rem",
+    padding: "0.75rem 1rem",
     fontSize: "0.875rem", // text-sm
     outline: "none", // focus:outline-none
   };
