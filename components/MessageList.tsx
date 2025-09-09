@@ -27,8 +27,9 @@ export function MessageList({
     flex: 1,
     gap: "1rem",
     width: "100%",
-    maxWidth: "940px",
+    maxWidth: "740px",
     margin: "0 auto",
+    padding: "1rem 0",
   };
 
   return (

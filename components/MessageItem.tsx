@@ -1,6 +1,7 @@
 import { ToolResponse } from "./ToolResponse";
 import { Thinking } from "./Thinking";
 import type { Message } from "../core/messages";
+import { Avatar } from "./Avatar";
 
 type MessageItemProps = {
   message: Message;
@@ -27,14 +28,19 @@ export function MessageItem({
     borderRadius: "0.5rem", // rounded-lg
   };
 
+  const messageContainerStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "0.75rem", // gap-3
+    marginBottom: "1rem", // mb-4
+  };
+
   const getUserBubbleStyle = (): React.CSSProperties => ({
     ...baseBubbleStyle,
-    alignSelf: "flex-end", // self-end
   });
 
   const getAssistantBubbleStyle = (): React.CSSProperties => ({
     ...baseBubbleStyle,
-    alignSelf: "flex-start", // self-start
   });
 
   const getSystemBubbleStyle = (): React.CSSProperties => ({
@@ -44,6 +50,7 @@ export function MessageItem({
 
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
+  const isSystem = message.role === "system";
 
   let bubbleStyle: React.CSSProperties;
   let bubbleClassName: string | undefined;
@@ -59,41 +66,117 @@ export function MessageItem({
     bubbleClassName = systemBubbleClassName;
   }
 
+  const userName = "You";
+  const assistantName = "Assistant";
+
+  // For system messages, use the original layout without avatars
+  if (isSystem) {
+    return (
+      <div
+        key={message.id}
+        data-role={message.role}
+        data-type={(message as any).type}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <div
+          className={bubbleClassName}
+          style={bubbleClassName ? undefined : bubbleStyle}
+        >
+          {message.parts.map((part, index) => {
+            if (part.type === "text") {
+              return <p key={index}>{part.text}</p>;
+            }
+
+            if (part.type === "thinking") {
+              return (
+                <Thinking
+                  key={index}
+                  text={part.text}
+                  isStreaming={
+                    message.streamingState?.isStreaming &&
+                    message.streamingState?.currentStep === "thinking"
+                  }
+                />
+              );
+            }
+
+            if (part.type === "tool") {
+              return <ToolResponse key={index} parts={[part]} />;
+            }
+          })}
+        </div>
+
+        {message.streamingState?.isStreaming && <>Using tool...</>}
+      </div>
+    );
+  }
+
+  // For user and assistant messages, use the new layout with avatars
+  const containerStyle: React.CSSProperties = {
+    ...messageContainerStyle,
+    flexDirection: isUser ? "row-reverse" : "row",
+  };
+
+  const contentContainerStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: isUser ? "flex-end" : "flex-start",
+    maxWidth: "80%",
+  };
+
+  const nameStyle: React.CSSProperties = {
+    fontSize: "0.75rem", // text-xs
+    fontWeight: "500", // font-medium
+    color: "#6b7280", // text-gray-500
+    marginBottom: "0.25rem", // mb-1
+  };
+
   return (
     <div
       key={message.id}
       data-role={message.role}
       data-type={(message as any).type}
+      style={containerStyle}
     >
-      <div
-        className={bubbleClassName}
-        style={bubbleClassName ? undefined : bubbleStyle}
-      >
-        {message.parts.map((part, index) => {
-          if (part.type === "text") {
-            return <p key={index}>{part.text}</p>;
-          }
+      <Avatar name={isUser ? userName : assistantName} isUser={isUser} />
 
-          if (part.type === "thinking") {
-            return (
-              <Thinking
-                key={index}
-                text={part.text}
-                isStreaming={
-                  message.streamingState?.isStreaming &&
-                  message.streamingState?.currentStep === "thinking"
-                }
-              />
-            );
-          }
+      <div style={contentContainerStyle}>
+        <div style={nameStyle}>{isUser ? userName : assistantName}</div>
 
-          if (part.type === "tool") {
-            return <ToolResponse key={index} parts={[part]} />;
-          }
-        })}
+        <div
+          className={bubbleClassName}
+          style={bubbleClassName ? undefined : bubbleStyle}
+        >
+          {message.parts.map((part, index) => {
+            if (part.type === "text") {
+              return <p key={index}>{part.text}</p>;
+            }
+
+            if (part.type === "thinking") {
+              return (
+                <Thinking
+                  key={index}
+                  text={part.text}
+                  isStreaming={
+                    message.streamingState?.isStreaming &&
+                    message.streamingState?.currentStep === "thinking"
+                  }
+                />
+              );
+            }
+
+            if (part.type === "tool") {
+              return <ToolResponse key={index} parts={[part]} />;
+            }
+          })}
+        </div>
+
+        {message.streamingState?.isStreaming && <>Using tool...</>}
       </div>
-
-      {message.streamingState?.isStreaming && <>Using tool...</>}
     </div>
   );
 }
