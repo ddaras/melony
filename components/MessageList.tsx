@@ -26,6 +26,9 @@ export function MessageList({
     flexDirection: "column",
     flex: 1,
     gap: "0.75rem", // gap-3
+    width: "100%",
+    maxWidth: "1200px",
+    margin: " 0 auto",
   };
 
   return (
