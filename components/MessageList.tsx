@@ -25,10 +25,11 @@ export function MessageList({
     display: "flex",
     flexDirection: "column",
     flex: 1,
-    gap: "0.75rem", // gap-3
+    gap: "1rem",
     width: "100%",
     maxWidth: "940px",
-    margin: " 0 auto",
+    margin: "0 auto",
+    padding: "0 1rem",
   };
 
   return (
