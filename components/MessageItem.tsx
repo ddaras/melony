@@ -23,6 +23,8 @@ export function MessageItem({
     paddingBottom: "0.5rem",
     fontSize: "0.875rem", // text-sm
     whiteSpace: "pre-wrap", // whitespace-pre-wrap
+    border: "1px solid #e5e7eb", // border-gray-200
+    borderRadius: "0.5rem", // rounded-lg
   };
 
   const getUserBubbleStyle = (): React.CSSProperties => ({

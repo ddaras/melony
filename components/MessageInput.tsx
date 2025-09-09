@@ -35,6 +35,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     alignItems: "center",
     gap: "0.5rem", // gap-2
     padding: "0.5rem", // p-2
+    border: "1px solid #e5e7eb", // border-gray-200
+    borderRadius: "0.5rem", // rounded-lg
   };
 
   const defaultInputStyle: React.CSSProperties = {
@@ -51,7 +53,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const inputId = React.useId();
 
   const defaultButtonStyle: React.CSSProperties = {
-    borderRadius: "0.375rem", // rounded-md
+    borderRadius: "0.5rem", // rounded-lg
     paddingLeft: "0.75rem", // px-3
     paddingRight: "0.75rem",
     paddingTop: "0.5rem", // py-2
