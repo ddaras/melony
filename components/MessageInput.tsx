@@ -38,7 +38,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     border: "1px solid #e5e7eb", // border-gray-200
     borderRadius: "0.5rem", // rounded-lg
     width: "100%",
-    maxWidth: "1200px",
+    maxWidth: "940px",
     margin: " 0 auto",
   };
 
