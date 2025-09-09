@@ -34,7 +34,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     display: "flex",
     alignItems: "center",
     gap: "0.5rem", // gap-2
-    padding: "0.5rem", // p-2
     border: "1px solid #e5e7eb", // border-gray-200
     borderRadius: "0.5rem", // rounded-lg
     width: "100%",
@@ -45,10 +44,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const defaultInputStyle: React.CSSProperties = {
     flex: 1, // flex-1
-    paddingLeft: "0.75rem", // px-3
-    paddingRight: "0.75rem",
-    paddingTop: "0.5rem", // py-2
-    paddingBottom: "0.5rem",
+    padding: "0.75rem 0.5rem",
     fontSize: "0.875rem", // text-sm
     outline: "none", // focus:outline-none
   };

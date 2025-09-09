@@ -17,7 +17,7 @@ export function MessageItem({
   systemBubbleClassName,
 }: MessageItemProps) {
   const baseBubbleStyle: React.CSSProperties = {
-    maxWidth: "80%", // max-w-[80%]
+    maxWidth: "90%", // max-w-[80%]
     flex: 1,
     whiteSpace: "pre-wrap", // whitespace-pre-wrap
   };
@@ -119,7 +119,7 @@ export function MessageItem({
     display: "flex",
     flexDirection: "column",
     alignItems: isUser ? "flex-end" : "flex-start",
-    maxWidth: "80%",
+    maxWidth: "90%",
     flex: 1,
   };
 
