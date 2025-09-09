@@ -6,7 +6,7 @@ import { Message } from "../core/messages";
  * Returns the full message stream and helper methods
  */
 export const useMessages = () => {
-  const { messages, send } = useConversation();
+  const { messages, send, isStreaming } = useConversation();
 
   // Optionally, you can add helper methods here
   const lastMessage: Message | null = messages[messages.length - 1] ?? null;
@@ -18,5 +18,6 @@ export const useMessages = () => {
     lastMessage,
     filterByRole,
     send,
+    isStreaming,
   };
 };

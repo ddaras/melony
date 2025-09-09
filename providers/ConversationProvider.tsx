@@ -5,6 +5,7 @@ import { AIAdapter } from "../core/client";
 type ConversationContextType = {
   messages: Message[];
   send: (msg: Omit<Message, "id" | "createdAt">) => void;
+  isStreaming: boolean;
 };
 
 export const ConversationContext =
@@ -18,6 +19,7 @@ export function ConversationProvider({
   adapter: AIAdapter;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
 
   // Listen to backend stream
   useEffect(() => {
@@ -29,15 +31,24 @@ export function ConversationProvider({
           (m) => m.role === "assistant" && m.id === msg.id
         );
 
+        let updatedMessages;
         if (existingIndex >= 0) {
           // Update existing message
           const updated = [...prev];
           updated[existingIndex] = msg;
-          return updated;
+          updatedMessages = updated;
         } else {
           // Add new message
-          return [...prev, msg];
+          updatedMessages = [...prev, msg];
         }
+
+        // Check if any message is currently streaming
+        const hasStreamingMessage = updatedMessages.some(
+          (message) => message.streamingState?.isStreaming === true
+        );
+        setIsStreaming(hasStreamingMessage);
+
+        return updatedMessages;
       });
     });
     return () => subscription.unsubscribe();
@@ -50,11 +61,12 @@ export function ConversationProvider({
       ...msg,
     };
     setMessages((m) => [...m, full]);
+    setIsStreaming(true); // Set streaming to true when sending a message
     adapter.send(full); // AI SDK backend (HTTP)
   };
 
   return (
-    <ConversationContext.Provider value={{ messages, send }}>
+    <ConversationContext.Provider value={{ messages, send, isStreaming }}>
       {children}
     </ConversationContext.Provider>
   );

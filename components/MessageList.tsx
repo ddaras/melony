@@ -14,15 +14,15 @@ export function MessageList({
   assistantBubbleClassName,
   systemBubbleClassName,
 }: MessageListProps) {
-  const { messages } = useConversation();
+  const { messages, isStreaming } = useConversation();
 
   const defaultContainerStyle: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
+    flex: 1,
     gap: "0.75rem", // gap-3
     padding: "1rem", // p-4
   };
-
 
   return (
     <div
@@ -39,6 +39,8 @@ export function MessageList({
           systemBubbleClassName={systemBubbleClassName}
         />
       ))}
+
+      {isStreaming && <div>...</div>}
     </div>
   );
 }
