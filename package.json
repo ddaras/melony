@@ -14,10 +14,29 @@
     "pub": "npm run version:patch && npm publish --access public",
     "version:patch": "npm version patch"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "ai",
+    "chat",
+    "conversation",
+    "agent",
+    "ui",
+    "components",
+    "typescript",
+    "hooks",
+    "providers"
+  ],
   "author": "",
   "license": "MIT",
-  "description": "",
+  "description": "A React library for building AI-powered conversational interfaces with agents, flows, and tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddaras/melony.git"
+  },
+  "homepage": "https://github.com/ddaras/melony#readme",
+  "bugs": {
+    "url": "https://github.com/ddaras/melony/issues"
+  },
   "type": "module",
   "private": false,
   "sideEffects": false,
