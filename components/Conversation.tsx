@@ -12,7 +12,6 @@ export function Conversation(props: ConversationProps) {
       style={{
         height: "100%",
         width: "100%",
-        padding: "1rem",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
