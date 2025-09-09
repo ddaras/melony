@@ -120,6 +120,7 @@ export function MessageItem({
     flexDirection: "column",
     alignItems: isUser ? "flex-end" : "flex-start",
     maxWidth: "80%",
+    width: "100%",
   };
 
   const nameStyle: React.CSSProperties = {
