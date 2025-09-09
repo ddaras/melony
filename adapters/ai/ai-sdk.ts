@@ -1,5 +1,10 @@
 import { Message } from "../../core/messages";
-import { AIAdapter, AIAdapterOptions, SubscribeCallback, Subscription } from "../../core/client";
+import {
+  AIAdapter,
+  AIAdapterOptions,
+  SubscribeCallback,
+  Subscription,
+} from "../../core/client";
 
 interface AISDKEvent {
   type: string;
@@ -76,14 +81,14 @@ export class AISDKAdapter implements AIAdapter {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        const lines = buffer.split("\n");
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith("data: ")) {
             const data = line.slice(6);
-            
-            if (data === '[DONE]') {
+
+            if (data === "[DONE]") {
               if (currentMessage) {
                 // Finalize message with completed tool calls
                 if (toolCalls.size > 0) {
@@ -96,7 +101,12 @@ export class AISDKAdapter implements AIAdapter {
 
             const event = this.parseEvent(data);
             if (event) {
-              const result = this.handleEvent(event, currentMessage, textContent, toolCalls);
+              const result = this.handleEvent(
+                event,
+                currentMessage,
+                textContent,
+                toolCalls
+              );
               if (result.message) {
                 currentMessage = result.message;
                 textContent = result.textContent;
@@ -117,25 +127,29 @@ export class AISDKAdapter implements AIAdapter {
     try {
       return JSON.parse(data);
     } catch (error) {
-      if (this.debug) console.warn('Failed to parse event:', data);
+      if (this.debug) console.warn("Failed to parse event:", data);
       return null;
     }
   }
 
   private handleEvent(
-    event: AISDKEvent, 
-    currentMessage: Partial<Message> | null, 
+    event: AISDKEvent,
+    currentMessage: Partial<Message> | null,
     textContent: string,
     toolCalls: Map<string, any>
-  ): { message: Partial<Message> | null; textContent: string; shouldEmit: boolean } {
+  ): {
+    message: Partial<Message> | null;
+    textContent: string;
+    shouldEmit: boolean;
+  } {
     if (this.debug) console.log(`[AI-SDK] ${event.type}`, event);
 
     switch (event.type) {
-      case 'start':
+      case "start":
         return {
           message: {
             id: crypto.randomUUID(),
-            role: 'assistant',
+            role: "assistant",
             parts: [],
             createdAt: Date.now(),
           },
@@ -143,158 +157,190 @@ export class AISDKAdapter implements AIAdapter {
           shouldEmit: false,
         };
 
-      case 'text-start':
-        if (currentMessage && !currentMessage.parts?.find(p => p.type === 'text')) {
-          currentMessage.parts = [...(currentMessage.parts || []), { type: 'text', text: '' }];
+      case "text-start":
+        if (
+          currentMessage &&
+          !currentMessage.parts?.find((p) => p.type === "text")
+        ) {
+          currentMessage.parts = [
+            ...(currentMessage.parts || []),
+            { type: "text", text: "" },
+          ];
         }
         return { message: currentMessage, textContent, shouldEmit: false };
 
-      case 'text-delta':
+      case "text-delta":
         if (event.delta && currentMessage) {
           const newTextContent = textContent + event.delta;
-          const textPart = currentMessage.parts?.find(p => p.type === 'text') as { type: 'text', text: string } | undefined;
+          const textPart = currentMessage.parts?.find(
+            (p) => p.type === "text"
+          ) as { type: "text"; text: string } | undefined;
           if (textPart) {
             textPart.text = newTextContent;
           }
-          return { message: currentMessage, textContent: newTextContent, shouldEmit: true };
+          return {
+            message: currentMessage,
+            textContent: newTextContent,
+            shouldEmit: true,
+          };
         }
         return { message: currentMessage, textContent, shouldEmit: false };
 
-      case 'start-step':
-        if (currentMessage) {
-          currentMessage.streamingState = {
-            isStreaming: true,
-            currentStep: 'thinking',
-          };
-          // Add thinking part when starting thinking step
-          if (!currentMessage.parts?.find(p => p.type === 'thinking')) {
-            currentMessage.parts = [...(currentMessage.parts || []), { type: 'thinking', text: '' }];
-          }
-        }
+      case "start-step":
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'tool-input-start':
+      case "tool-input-start":
         if (event.toolCallId && event.toolName && currentMessage) {
           const toolCall = {
             id: event.toolCallId,
             name: event.toolName,
-            status: 'streaming' as const,
-            inputStream: '',
+            status: "streaming" as const,
+            inputStream: "",
           };
           toolCalls.set(event.toolCallId, toolCall);
-          
+
           // Create tool message part
           const toolPart = {
-            type: 'tool' as const,
+            type: "tool" as const,
             toolCallId: event.toolCallId,
-            status: 'streaming',
-            inputStream: '',
+            status: "streaming",
+            inputStream: "",
           };
           currentMessage.parts = [...(currentMessage.parts || []), toolPart];
-          
+
           currentMessage.streamingState = {
             isStreaming: true,
-            currentStep: 'tool-input',
+            currentStep: "tool-input",
             activeToolCallId: event.toolCallId,
           };
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'tool-input-delta':
-        if (event.toolCallId && event.inputTextDelta && toolCalls.has(event.toolCallId)) {
+      case "tool-input-delta":
+        if (
+          event.toolCallId &&
+          event.inputTextDelta &&
+          toolCalls.has(event.toolCallId)
+        ) {
           const toolCall = toolCalls.get(event.toolCallId);
-          toolCall.inputStream = (toolCall.inputStream || '') + event.inputTextDelta;
+          toolCall.inputStream =
+            (toolCall.inputStream || "") + event.inputTextDelta;
           toolCalls.set(event.toolCallId, toolCall);
-          
+
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
-            
+
             // Update tool message part with input stream
             const toolPart = currentMessage.parts?.find(
-              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
-            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
-            
+              (p) =>
+                p.type === "tool" && (p as any).toolCallId === event.toolCallId
+            ) as
+              | {
+                  type: "tool";
+                  toolCallId: string;
+                  status: string;
+                  inputStream?: string;
+                }
+              | undefined;
+
             if (toolPart) {
-              toolPart.inputStream = (toolPart.inputStream || '') + event.inputTextDelta;
+              toolPart.inputStream =
+                (toolPart.inputStream || "") + event.inputTextDelta;
             }
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'tool-input-available':
-        if (event.toolCallId && event.input && toolCalls.has(event.toolCallId)) {
+      case "tool-input-available":
+        if (
+          event.toolCallId &&
+          event.input &&
+          toolCalls.has(event.toolCallId)
+        ) {
           const toolCall = toolCalls.get(event.toolCallId);
           toolCall.args = event.input;
-          toolCall.status = 'pending';
+          toolCall.status = "pending";
           toolCalls.set(event.toolCallId, toolCall);
-          
+
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
-            
+
             // Update tool message part status
             const toolPart = currentMessage.parts?.find(
-              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
-            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
-            
+              (p) =>
+                p.type === "tool" && (p as any).toolCallId === event.toolCallId
+            ) as
+              | {
+                  type: "tool";
+                  toolCallId: string;
+                  status: string;
+                  inputStream?: string;
+                }
+              | undefined;
+
             if (toolPart) {
-              toolPart.status = 'pending';
+              toolPart.status = "pending";
             }
-            
+
             currentMessage.streamingState = {
               isStreaming: true,
-              currentStep: 'tool-execution',
+              currentStep: "tool-execution",
               activeToolCallId: event.toolCallId,
             };
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'tool-output-available':
+      case "tool-output-available":
         if (event.toolCallId && toolCalls.has(event.toolCallId)) {
           const toolCall = toolCalls.get(event.toolCallId);
-          toolCall.status = 'completed';
+          toolCall.status = "completed";
           toolCalls.set(event.toolCallId, toolCall);
-          
+
           // Add tool result
           const toolResult = {
             success: true,
             output: event.output,
             toolCallId: event.toolCallId,
           };
-          
+
           if (currentMessage) {
             currentMessage.toolCalls = Array.from(toolCalls.values());
-            currentMessage.toolResults = [...(currentMessage.toolResults || []), toolResult];
-            
+            currentMessage.toolResults = [
+              ...(currentMessage.toolResults || []),
+              toolResult,
+            ];
+
             // Update tool message part status
             const toolPart = currentMessage.parts?.find(
-              p => p.type === 'tool' && (p as any).toolCallId === event.toolCallId
-            ) as { type: 'tool'; toolCallId: string; status: string; inputStream?: string } | undefined;
-            
+              (p) =>
+                p.type === "tool" && (p as any).toolCallId === event.toolCallId
+            ) as
+              | {
+                  type: "tool";
+                  toolCallId: string;
+                  status: string;
+                  inputStream?: string;
+                }
+              | undefined;
+
             if (toolPart) {
-              toolPart.status = 'completed';
+              toolPart.status = "completed";
             }
-            
+
             currentMessage.streamingState = {
               isStreaming: true,
-              currentStep: 'tool-output',
+              currentStep: "tool-output",
               activeToolCallId: event.toolCallId,
             };
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'finish-step':
-        if (currentMessage?.streamingState) {
-          currentMessage.streamingState.currentStep = 'response';
-          // Remove thinking part when finishing thinking step
-          if (currentMessage.parts) {
-            currentMessage.parts = currentMessage.parts.filter(p => p.type !== 'thinking');
-          }
-        }
+      case "finish-step":
         return { message: currentMessage, textContent, shouldEmit: true };
 
-      case 'finish':
+      case "finish":
         if (currentMessage?.streamingState) {
           currentMessage.streamingState.isStreaming = false;
         }
@@ -306,15 +352,16 @@ export class AISDKAdapter implements AIAdapter {
   }
 
   private emit(message: Message): void {
-    this.subscribers.forEach(callback => callback(message));
+    this.subscribers.forEach((callback) => callback(message));
   }
 
   private emitError(error: unknown): void {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     this.emit({
       id: crypto.randomUUID(),
-      role: 'assistant',
-      parts: [{ type: 'text', text: `Error: ${errorMessage}` }],
+      role: "assistant",
+      parts: [{ type: "text", text: `Error: ${errorMessage}` }],
       createdAt: Date.now(),
     });
   }
