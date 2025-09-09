@@ -18,6 +18,7 @@ export function MessageItem({
 }: MessageItemProps) {
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "80%", // max-w-[80%]
+    width: "100%",
     whiteSpace: "pre-wrap", // whitespace-pre-wrap
   };
 
