@@ -57,7 +57,6 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({
           border: "1px solid #e5e7eb", // border-gray-200
           borderRadius: "0.5rem", // rounded-lg
           padding: "0.75rem", // p-3
-          backgroundColor: "#f9fafb", // bg-gray-50
         }}
       >
         <div
@@ -299,7 +298,12 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({
               </div>
             );
           case "tool":
-            const toolPart = b as { type: "tool"; toolCallId: string; status: string; inputStream?: string };
+            const toolPart = b as {
+              type: "tool";
+              toolCallId: string;
+              status: string;
+              inputStream?: string;
+            };
             const getStatusColor = (status: string) => {
               switch (status) {
                 case "streaming":

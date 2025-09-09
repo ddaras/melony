@@ -15,6 +15,7 @@ export function Conversation(props: ConversationProps) {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        padding: "0 1rem",
       }}
     >
       {props.children}

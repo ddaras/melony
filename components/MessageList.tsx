@@ -29,7 +29,6 @@ export function MessageList({
     width: "100%",
     maxWidth: "940px",
     margin: "0 auto",
-    padding: "0 1rem",
   };
 
   return (
