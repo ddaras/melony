@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface AgentSidebarProps {
   children?: React.ReactNode;
@@ -7,11 +7,9 @@ export interface AgentSidebarProps {
 
 export function AgentSidebar({ children, className }: AgentSidebarProps) {
   const defaultStyle: React.CSSProperties = {
-    width: '16rem', // w-64
+    width: "16rem", // w-64
     flexShrink: 0, // shrink-0
-    borderRight: '1px solid #e5e7eb', // border-r border-gray-200
-    backgroundColor: '#ffffff', // bg-white
-    padding: '1rem', // p-4
+    padding: "1rem", // p-4
   };
 
   return (

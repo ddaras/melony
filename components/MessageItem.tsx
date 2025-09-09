@@ -17,7 +17,6 @@ export function MessageItem({
 }: MessageItemProps) {
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "80%", // max-w-[80%]
-    borderRadius: "0.5rem", // rounded-lg
     paddingLeft: "0.75rem", // px-3
     paddingRight: "0.75rem",
     paddingTop: "0.5rem", // py-2
@@ -29,23 +28,16 @@ export function MessageItem({
   const getUserBubbleStyle = (): React.CSSProperties => ({
     ...baseBubbleStyle,
     alignSelf: "flex-end", // self-end
-    backgroundColor: "#2563eb", // bg-blue-600
-    color: "#ffffff", // text-white
   });
 
   const getAssistantBubbleStyle = (): React.CSSProperties => ({
     ...baseBubbleStyle,
     alignSelf: "flex-start", // self-start
-    backgroundColor: "#f3f4f6", // bg-gray-100
-    color: "#111827", // text-gray-900
   });
 
   const getSystemBubbleStyle = (): React.CSSProperties => ({
     ...baseBubbleStyle,
     alignSelf: "center", // self-center
-    backgroundColor: "#fffbeb", // bg-yellow-50
-    color: "#78350f", // text-yellow-900
-    border: "1px solid #fed7aa", // border border-yellow-200
   });
 
   const isUser = message.role === "user";
