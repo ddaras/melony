@@ -18,14 +18,7 @@ export function MessageItem({
 }: MessageItemProps) {
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "80%", // max-w-[80%]
-    paddingLeft: "0.75rem", // px-3
-    paddingRight: "0.75rem",
-    paddingTop: "0.5rem", // py-2
-    paddingBottom: "0.5rem",
-    fontSize: "0.875rem", // text-sm
     whiteSpace: "pre-wrap", // whitespace-pre-wrap
-    border: "1px solid #e5e7eb", // border-gray-200
-    borderRadius: "0.5rem", // rounded-lg
   };
 
   const messageContainerStyle: React.CSSProperties = {
