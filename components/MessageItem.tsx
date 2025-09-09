@@ -93,7 +93,7 @@ export function MessageItem({
         })}
       </div>
 
-      {message.streamingState?.isStreaming && <>...</>}
+      {message.streamingState?.isStreaming && <>Using tool...</>}
     </div>
   );
 }

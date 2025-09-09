@@ -8,9 +8,8 @@ export interface ConversationProps {
 export function Conversation(props: ConversationProps) {
   return (
     <div
-      data-ai-conversation=""
       className={props.className}
-      style={{ display: "contents" }}
+      style={{ height: "100%", padding: "1rem", overflow: "hidden" }}
     >
       {props.children}
     </div>

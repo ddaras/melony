@@ -17,30 +17,35 @@ export function MessageList({
   const { messages, isStreaming } = useConversation();
 
   const defaultContainerStyle: React.CSSProperties = {
+    height: "100%",
+    overflow: "auto",
+  };
+
+  const defaultInnerStyle: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
     flex: 1,
     gap: "0.75rem", // gap-3
-    padding: "1rem", // p-4
   };
 
   return (
     <div
-      data-ai-message-list=""
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >
-      {messages.map((message) => (
-        <MessageItem
-          key={message.id}
-          message={message}
-          userBubbleClassName={userBubbleClassName}
-          assistantBubbleClassName={assistantBubbleClassName}
-          systemBubbleClassName={systemBubbleClassName}
-        />
-      ))}
+      <div style={defaultInnerStyle}>
+        {messages.map((message) => (
+          <MessageItem
+            key={message.id}
+            message={message}
+            userBubbleClassName={userBubbleClassName}
+            assistantBubbleClassName={assistantBubbleClassName}
+            systemBubbleClassName={systemBubbleClassName}
+          />
+        ))}
 
-      {isStreaming && <div>...</div>}
+        {isStreaming && <div>...</div>}
+      </div>
     </div>
   );
 }
