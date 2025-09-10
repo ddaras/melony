@@ -1,4 +1,4 @@
-import { Message } from "./messages";
+import { Message } from "./types";
 
 export type SubscribeCallback = (message: Message) => void;
 export type Subscription = { unsubscribe: () => void };
