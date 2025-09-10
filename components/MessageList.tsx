@@ -21,7 +21,12 @@ export function MessageList({
     <StickToBottom.Content
       id="message-list"
       className={className}
-      style={{ flex: 1 }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        maxWidth: "600px",
+        margin: "0 auto",
+      }}
     >
       {messages.map((message) => (
         <MessageItem
