@@ -13,17 +13,13 @@ type OpenAIChatMessage =
   | { role: "tool"; content: string; tool_call_id?: string };
 
 export class OpenAIAdapter implements AIAdapter {
-  private apiKey: string | undefined;
-  private baseURL: string;
-  private model: string;
+  private endpoint: string;
   private headers: Record<string, string>;
   private debug: boolean;
   private subscribers = new Set<SubscribeCallback>();
 
-  constructor(options: Partial<AIAdapterOptions & { apiKey?: string; baseURL?: string; model?: string }> = {}) {
-    this.apiKey = options.apiKey;
-    this.baseURL = options.baseURL || "https://api.openai.com/v1";
-    this.model = (options as any)?.model || "gpt-4o-mini";
+  constructor(options: Partial<AIAdapterOptions> = {}) {
+    this.endpoint = options.endpoint || "";
     this.headers = options.headers || {};
     this.debug = (options as any)?.debug || false;
   }
@@ -39,21 +35,14 @@ export class OpenAIAdapter implements AIAdapter {
 
   async send(messages: Message[]): Promise<void> {
     try {
-      if (!this.apiKey) {
-        throw new Error("Missing OPENAI_API_KEY for OpenAIAdapter");
-      }
-
       const payload = {
-        model: this.model,
         messages: this.toOpenAIChatMessages(messages),
-        stream: true,
       } as const;
 
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
+      const response = await fetch(`${this.endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
           ...this.headers,
         },
         body: JSON.stringify(payload),
@@ -119,13 +108,18 @@ export class OpenAIAdapter implements AIAdapter {
           }
 
           if (delta?.content) {
-            const textPart = currentMessage.parts.find((p) => p.type === "text") as { type: "text"; text: string };
+            const textPart = currentMessage.parts.find(
+              (p) => p.type === "text"
+            ) as { type: "text"; text: string };
             textPart.text += delta.content as string;
             this.emit(currentMessage);
           }
 
           if (finishReason) {
-            currentMessage.streamingState = { isStreaming: false, currentStep: "response" };
+            currentMessage.streamingState = {
+              isStreaming: false,
+              currentStep: "response",
+            };
             this.emit(currentMessage);
           }
         }
@@ -138,7 +132,10 @@ export class OpenAIAdapter implements AIAdapter {
   private toOpenAIChatMessages(messages: Message[]): OpenAIChatMessage[] {
     const result: OpenAIChatMessage[] = [];
     for (const m of messages) {
-      const role: OpenAIChatRole = m.role === "system" || m.role === "assistant" || m.role === "user" ? m.role : "user";
+      const role: OpenAIChatRole =
+        m.role === "system" || m.role === "assistant" || m.role === "user"
+          ? m.role
+          : "user";
 
       const text = (m.parts || [])
         .filter((p) => p.type === "text" || p.type === "thinking")
@@ -168,5 +165,3 @@ export class OpenAIAdapter implements AIAdapter {
 }
 
 export default OpenAIAdapter;
-
-
