@@ -12,5 +12,6 @@ export interface AIAdapter {
 export interface AIAdapterOptions {
   endpoint: string;
   headers?: Record<string, string>;
+  body?: Record<string, any>;
   debug?: boolean;
 }

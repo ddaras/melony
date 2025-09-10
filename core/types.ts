@@ -7,7 +7,6 @@ export type ToolCall = {
 };
 
 export type ToolResult = {
-  success: boolean;
   output?: any;
   toolCallId?: string;
 };

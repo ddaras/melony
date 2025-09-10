@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { Message } from "../core/types";
-import { AIAdapter } from "../core/client";
+import { AIAdapter } from "../core/adapter";
 
 type ConversationContextType = {
   messages: Message[];

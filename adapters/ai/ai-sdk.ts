@@ -4,7 +4,7 @@ import {
   AIAdapterOptions,
   SubscribeCallback,
   Subscription,
-} from "../../core/client";
+} from "../../core/adapter";
 
 interface AISDKEvent {
   type: string;
@@ -49,11 +49,13 @@ export class AISDKAdapter implements AIAdapter {
   private headers: Record<string, string>;
   private debug: boolean;
   private subscribers = new Set<SubscribeCallback>();
+  private body: Record<string, any>;
 
   constructor(options: AIAdapterOptions) {
     this.endpoint = options.endpoint;
     this.headers = options.headers || {};
     this.debug = options.debug || false;
+    this.body = options.body || {};
   }
 
   async send(messages: Message[]): Promise<void> {
@@ -64,7 +66,10 @@ export class AISDKAdapter implements AIAdapter {
           "Content-Type": "application/json",
           ...this.headers,
         },
-        body: JSON.stringify({ messages: this.toUISDKMessages(messages) }),
+        body: JSON.stringify({
+          messages: this.toUISDKMessages(messages),
+          ...this.body,
+        }),
       });
 
       if (!response.ok) {
@@ -150,87 +155,96 @@ export class AISDKAdapter implements AIAdapter {
 
   // Convert local Message[] to ai-sdk UIMessage[] (minimal subset)
   private toUISDKMessages(messages: Message[]): AISDKUIMessage[] {
-    return messages
-      // Exclude internal tool-role messages; UIMessage does not support 'tool' role
-      .filter((m) => m.role !== "tool")
-      .map((m) => {
-        const parts: AISDKUIPart[] = [];
+    return (
+      messages
+        // Exclude internal tool-role messages; UIMessage does not support 'tool' role
+        .filter((m) => m.role !== "tool")
+        .map((m) => {
+          const parts: AISDKUIPart[] = [];
 
-        for (const part of m.parts || []) {
-          switch (part.type) {
-            case "text":
-              parts.push({ type: "text", text: part.text });
-              break;
-            case "thinking":
-              parts.push({ type: "reasoning", text: part.text });
-              break;
-            // Omit unsupported parts in request payload
-            case "image":
-            case "table":
-            case "form":
-            case "detail":
-            case "chart":
-            case "tool":
-            default:
-              break;
-          }
-        }
-
-        // Map tool calls/results to ToolUIParts
-        if (Array.isArray(m.toolCalls) && m.toolCalls.length > 0) {
-          for (const call of m.toolCalls) {
-            // Find the UI "tool" message part (to get input stream text if any)
-            const uiToolMsgPart = (m.parts || []).find(
-              (p) => p.type === "tool" && (p as any).toolCallId === call.id
-            ) as { type: "tool"; toolCallId: string; status: string; inputStream?: string } | undefined;
-
-            // Attempt to find a matching tool result
-            const matchingResult = (m.toolResults || []).find(
-              (r) => r.toolCallId === call.id
-            );
-
-            let state: AISDKUIToolPart["state"]; // derive UI state from our internal status
-            if (call.status === "streaming") {
-              state = "input-streaming";
-            } else if (call.status === "pending") {
-              state = "input-final";
-            } else if (call.status === "completed") {
-              state = matchingResult ? "result-final" : "result-streaming";
-            } else if (call.status === "error") {
-              // Represent errors as final result without output (could be extended with error fields)
-              state = "result-final";
-            } else {
-              state = "input-final";
+          for (const part of m.parts || []) {
+            switch (part.type) {
+              case "text":
+                parts.push({ type: "text", text: part.text });
+                break;
+              case "thinking":
+                parts.push({ type: "reasoning", text: part.text });
+                break;
+              // Omit unsupported parts in request payload
+              case "image":
+              case "table":
+              case "form":
+              case "detail":
+              case "chart":
+              case "tool":
+              default:
+                break;
             }
-
-            parts.push({
-              type: "tool",
-              toolName: call.name,
-              toolCallId: call.id,
-              state,
-              input: call.args,
-              inputText: uiToolMsgPart?.inputStream,
-              output: matchingResult?.output,
-            });
           }
-        }
 
-        if (parts.length === 0) {
-          parts.push({ type: "text", text: "" });
-        }
+          // Map tool calls/results to ToolUIParts
+          if (Array.isArray(m.toolCalls) && m.toolCalls.length > 0) {
+            for (const call of m.toolCalls) {
+              // Find the UI "tool" message part (to get input stream text if any)
+              const uiToolMsgPart = (m.parts || []).find(
+                (p) => p.type === "tool" && (p as any).toolCallId === call.id
+              ) as
+                | {
+                    type: "tool";
+                    toolCallId: string;
+                    status: string;
+                    inputStream?: string;
+                  }
+                | undefined;
 
-        const role: AISDKUIMessageRole =
-          m.role === "system" || m.role === "assistant" || m.role === "user"
-            ? m.role
-            : "user";
+              // Attempt to find a matching tool result
+              const matchingResult = (m.toolResults || []).find(
+                (r) => r.toolCallId === call.id
+              );
 
-        return {
-          id: m.id,
-          role,
-          metadata: m.metadata,
-          parts,
-        };
-      });
+              let state: AISDKUIToolPart["state"]; // derive UI state from our internal status
+              if (call.status === "streaming") {
+                state = "input-streaming";
+              } else if (call.status === "pending") {
+                state = "input-final";
+              } else if (call.status === "completed") {
+                state = matchingResult ? "result-final" : "result-streaming";
+              } else if (call.status === "error") {
+                // Represent errors as final result without output (could be extended with error fields)
+                state = "result-final";
+              } else {
+                state = "input-final";
+              }
+
+              parts.push({
+                type: "tool",
+                toolName: call.name,
+                toolCallId: call.id,
+                state,
+                input: call.args,
+                inputText: uiToolMsgPart?.inputStream,
+                output: matchingResult?.output,
+              });
+            }
+          }
+
+          if (parts.length === 0) {
+            parts.push({ type: "text", text: "" });
+          }
+
+          const role: AISDKUIMessageRole =
+            m.role === "system" || m.role === "assistant" || m.role === "user"
+              ? m.role
+              : "user";
+
+          return {
+            id: m.id,
+            role,
+            metadata: m.metadata,
+            parts,
+          };
+        })
+    );
   }
 
   private parseEvent(data: string): AISDKEvent | null {
@@ -409,7 +423,6 @@ export class AISDKAdapter implements AIAdapter {
 
           // Add tool result
           const toolResult = {
-            success: true,
             output: event.output,
             toolCallId: event.toolCallId,
           };

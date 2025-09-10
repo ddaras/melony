@@ -1,7 +1,7 @@
 "use client";
 
 // Core
-export * from "./core/client";
+export * from "./core/adapter";
 export * from "./core/types";
 export * from "./core/storage";
 
@@ -23,3 +23,4 @@ export * from "./providers/ConversationProvider";
 
 // AI Adapters
 export * from "./adapters/ai/ai-sdk";
+export * from "./adapters/ai/openai";
