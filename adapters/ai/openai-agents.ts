@@ -45,7 +45,10 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           "Content-Type": "application/json",
           ...this.headers,
         },
-        body: JSON.stringify({ messages, ...this.body }),
+        body: JSON.stringify({
+          messages: this.toOpenAIChatMessages(messages),
+          ...this.body,
+        }),
       });
 
       if (!response.ok) {
@@ -67,6 +70,7 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     const decoder = new TextDecoder();
     let buffer = "";
     let currentMessage: Message | null = null;
+    const processedSequences = new Set<string>();
 
     try {
       while (true) {
@@ -96,10 +100,10 @@ export class OpenAIAgentsAdapter implements AIAdapter {
             continue;
           }
 
-          // The exact structure of `chunk` depends on @openai/agents runtime.
-          // We support a minimal mapping:
-          // - text deltas -> append to assistant text part
-          // - finish indication -> mark streamingState false
+          // Normalize the container and inner event
+          const containerType: string | undefined = chunk?.type;
+          const inner = chunk?.data ?? chunk; // sometimes payloads nest under data
+          const innerType: string | undefined = inner?.type;
 
           if (!currentMessage) {
             currentMessage = {
@@ -111,42 +115,90 @@ export class OpenAIAgentsAdapter implements AIAdapter {
             };
           }
 
-          // Heuristics for common fields in agent chunks
-          const deltaText = chunk?.delta ?? chunk?.textDelta ?? chunk?.text;
-          const finalText = chunk?.message ?? chunk?.content;
-          const finishReason = chunk?.finishReason ?? chunk?.finish_reason;
-
-          if (typeof deltaText === "string" && deltaText.length > 0) {
-            const textPart = currentMessage.parts.find(
+          const maybeAppendText = (text: string | undefined, seqKey?: string) => {
+            if (typeof text !== "string" || text.length === 0) return;
+            if (seqKey && processedSequences.has(seqKey)) return;
+            const textPart = currentMessage!.parts.find(
               (p) => p.type === "text"
             ) as { type: "text"; text: string } | undefined;
             if (textPart) {
-              textPart.text += deltaText;
+              textPart.text += text;
             }
-            this.emit(currentMessage);
-          }
+            if (seqKey) processedSequences.add(seqKey);
+            this.emit(currentMessage!);
+          };
 
-          if (typeof finalText === "string" && finalText.length > 0) {
-            const textPart = currentMessage.parts.find(
-              (p) => p.type === "text"
-            ) as { type: "text"; text: string } | undefined;
-            if (textPart) {
-              textPart.text += finalText;
-            }
-            this.emit(currentMessage);
-          }
-
-          if (finishReason || chunk?.type === "finish") {
+          const finish = () => {
             if (currentMessage?.streamingState) {
               currentMessage.streamingState.isStreaming = false;
             }
-            this.emit(currentMessage);
+            this.emit(currentMessage!);
+          };
+
+          // Case 1: direct output_text_delta
+          if (innerType === "output_text_delta") {
+            const seq = inner?.providerData?.sequence_number;
+            maybeAppendText(inner?.delta, `output_text.delta:${seq}`);
+            continue;
+          }
+
+          // Case 2: model event
+          if (innerType === "model" && inner?.event) {
+            const ev = inner.event;
+            if (typeof ev?.type === "string") {
+              if (ev.type.endsWith("output_text.delta")) {
+                maybeAppendText(ev?.delta, `output_text.delta:${ev?.sequence_number}`);
+              } else if (ev.type.endsWith("output_text.done")) {
+                // Some streams send the final full text here
+                maybeAppendText(ev?.text);
+              } else if (ev.type === "response.completed") {
+                finish();
+              }
+            }
+            continue;
+          }
+
+          // Case 3: response_done (aggregated final payload)
+          if (innerType === "response_done") {
+            const text = inner?.response?.output?.[0]?.content?.[0]?.text;
+            if (text) maybeAppendText(text);
+            finish();
+            continue;
+          }
+
+          // Case 4: run item event with message_output_created
+          if (containerType === "run_item_stream_event" && chunk?.name === "message_output_created") {
+            const text = chunk?.item?.rawItem?.content?.[0]?.text;
+            if (text) maybeAppendText(text);
+            finish();
+            continue;
+          }
+
+          // Generic heuristics as fallback
+          const deltaText = inner?.delta ?? inner?.textDelta ?? inner?.text ?? chunk?.delta ?? chunk?.text;
+          if (typeof deltaText === "string") {
+            maybeAppendText(deltaText);
           }
         }
       }
     } finally {
       reader.releaseLock();
     }
+  }
+
+  private toOpenAIChatMessages(messages: Message[]): Array<{ role: "system" | "user" | "assistant"; content: string }> {
+    const result: Array<{ role: "system" | "user" | "assistant"; content: string }> = [];
+    for (const m of messages) {
+      const role = (m.role === "system" || m.role === "assistant" || m.role === "user") ? m.role : "user";
+      const text = (m.parts || [])
+        .filter((p) => p.type === "text" || p.type === "thinking")
+        .map((p) => (p as any).text)
+        .join("\n\n");
+      if (text.length > 0) {
+        result.push({ role, content: text });
+      }
+    }
+    return result;
   }
 
   private emit(message: Message): void {
