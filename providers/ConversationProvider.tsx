@@ -63,7 +63,7 @@ export function ConversationProvider({
     };
     setMessages((m) => [...m, full]);
     setIsStreaming(true); // Set streaming to true when sending a message
-    adapter.send(full); // AI SDK backend (HTTP)
+    adapter.send([full]); // AI SDK backend (HTTP)
   };
 
   return (

@@ -19,6 +19,31 @@ interface AISDKEvent {
   providerMetadata?: Record<string, any>;
 }
 
+// Minimal ai-sdk UIMessage compatible types (subset)
+type AISDKUIMessageRole = "user" | "assistant" | "system";
+type AISDKUITextPart = { type: "text"; text: string };
+type AISDKUIReasoningPart = { type: "reasoning"; text: string };
+type AISDKUIToolPart = {
+  type: "tool";
+  toolName: string;
+  toolCallId: string;
+  state:
+    | "input-streaming"
+    | "input-final"
+    | "result-streaming"
+    | "result-final";
+  input?: Record<string, any>;
+  inputText?: string;
+  output?: any;
+};
+type AISDKUIPart = AISDKUITextPart | AISDKUIReasoningPart | AISDKUIToolPart;
+type AISDKUIMessage = {
+  id: string;
+  role: AISDKUIMessageRole;
+  metadata?: Record<string, any>;
+  parts: AISDKUIPart[];
+};
+
 export class AISDKAdapter implements AIAdapter {
   private endpoint: string;
   private headers: Record<string, string>;
@@ -31,7 +56,7 @@ export class AISDKAdapter implements AIAdapter {
     this.debug = options.debug || false;
   }
 
-  async send(message: Message): Promise<void> {
+  async send(messages: Message[]): Promise<void> {
     try {
       const response = await fetch(this.endpoint, {
         method: "POST",
@@ -39,7 +64,7 @@ export class AISDKAdapter implements AIAdapter {
           "Content-Type": "application/json",
           ...this.headers,
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ messages: this.toUISDKMessages(messages) }),
       });
 
       if (!response.ok) {
@@ -121,6 +146,91 @@ export class AISDKAdapter implements AIAdapter {
     } finally {
       reader.releaseLock();
     }
+  }
+
+  // Convert local Message[] to ai-sdk UIMessage[] (minimal subset)
+  private toUISDKMessages(messages: Message[]): AISDKUIMessage[] {
+    return messages
+      // Exclude internal tool-role messages; UIMessage does not support 'tool' role
+      .filter((m) => m.role !== "tool")
+      .map((m) => {
+        const parts: AISDKUIPart[] = [];
+
+        for (const part of m.parts || []) {
+          switch (part.type) {
+            case "text":
+              parts.push({ type: "text", text: part.text });
+              break;
+            case "thinking":
+              parts.push({ type: "reasoning", text: part.text });
+              break;
+            // Omit unsupported parts in request payload
+            case "image":
+            case "table":
+            case "form":
+            case "detail":
+            case "chart":
+            case "tool":
+            default:
+              break;
+          }
+        }
+
+        // Map tool calls/results to ToolUIParts
+        if (Array.isArray(m.toolCalls) && m.toolCalls.length > 0) {
+          for (const call of m.toolCalls) {
+            // Find the UI "tool" message part (to get input stream text if any)
+            const uiToolMsgPart = (m.parts || []).find(
+              (p) => p.type === "tool" && (p as any).toolCallId === call.id
+            ) as { type: "tool"; toolCallId: string; status: string; inputStream?: string } | undefined;
+
+            // Attempt to find a matching tool result
+            const matchingResult = (m.toolResults || []).find(
+              (r) => r.toolCallId === call.id
+            );
+
+            let state: AISDKUIToolPart["state"]; // derive UI state from our internal status
+            if (call.status === "streaming") {
+              state = "input-streaming";
+            } else if (call.status === "pending") {
+              state = "input-final";
+            } else if (call.status === "completed") {
+              state = matchingResult ? "result-final" : "result-streaming";
+            } else if (call.status === "error") {
+              // Represent errors as final result without output (could be extended with error fields)
+              state = "result-final";
+            } else {
+              state = "input-final";
+            }
+
+            parts.push({
+              type: "tool",
+              toolName: call.name,
+              toolCallId: call.id,
+              state,
+              input: call.args,
+              inputText: uiToolMsgPart?.inputStream,
+              output: matchingResult?.output,
+            });
+          }
+        }
+
+        if (parts.length === 0) {
+          parts.push({ type: "text", text: "" });
+        }
+
+        const role: AISDKUIMessageRole =
+          m.role === "system" || m.role === "assistant" || m.role === "user"
+            ? m.role
+            : "user";
+
+        return {
+          id: m.id,
+          role,
+          metadata: m.metadata,
+          parts,
+        };
+      });
   }
 
   private parseEvent(data: string): AISDKEvent | null {

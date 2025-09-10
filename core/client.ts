@@ -4,7 +4,7 @@ export type SubscribeCallback = (message: Message) => void;
 export type Subscription = { unsubscribe: () => void };
 
 export interface AIAdapter {
-  send(message: Message): Promise<void>;
+  send(messages: Message[]): Promise<void>;
   subscribe(callback: SubscribeCallback): Subscription;
   dispose?(): void;
 }
