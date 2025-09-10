@@ -13,9 +13,6 @@ export function Conversation(props: ConversationProps) {
       className={props.className}
       style={{
         position: "relative",
-        height: "100%",
-        width: "100%",
-        padding: "1rem",
       }}
     >
       {props.children}
