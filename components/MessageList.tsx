@@ -24,8 +24,9 @@ export function MessageList({
       style={{
         display: "flex",
         flexDirection: "column",
-        maxWidth: "600px",
+        maxWidth: "740px",
         margin: "0 auto",
+        padding: "1rem",
       }}
     >
       {messages.map((message) => (

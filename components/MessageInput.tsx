@@ -31,11 +31,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const defaultContainerStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem", // gap-2
-    border: "1px solid #e5e7eb", // border-gray-200
-    borderRadius: "0.5rem", // rounded-lg
     width: "100%",
     maxWidth: "740px",
     margin: " 0 auto",
@@ -71,30 +66,40 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >
-      <input
-        id={inputId}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className={inputClassName}
-        style={inputClassName ? undefined : defaultInputStyle}
-      />
-      <button
-        onClick={handleSend}
-        disabled={!text}
-        className={buttonClassName}
-        style={
-          buttonClassName
-            ? undefined
-            : {
-                ...defaultButtonStyle,
-                opacity: !text ? 0.5 : 1, // disabled:opacity-50
-              }
-        }
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          border: "1px solid #e5e7eb",
+          borderRadius: "0.5rem",
+        }}
       >
-        Send
-      </button>
+        <input
+          id={inputId}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={inputClassName}
+          style={inputClassName ? undefined : defaultInputStyle}
+        />
+        <button
+          onClick={handleSend}
+          disabled={!text}
+          className={buttonClassName}
+          style={
+            buttonClassName
+              ? undefined
+              : {
+                  ...defaultButtonStyle,
+                  opacity: !text ? 0.5 : 1, // disabled:opacity-50
+                }
+          }
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };
