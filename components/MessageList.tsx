@@ -1,3 +1,4 @@
+import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { useConversation } from "../hooks/useConversation";
 import { MessageItem } from "./MessageItem";
 
@@ -33,7 +34,7 @@ export function MessageList({
   };
 
   return (
-    <div
+    <StickToBottom.Content
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >
@@ -49,7 +50,22 @@ export function MessageList({
         ))}
 
         {isStreaming && <div>...</div>}
+
+        <ScrollToBottom />
       </div>
-    </div>
+    </StickToBottom.Content>
+  );
+}
+
+function ScrollToBottom() {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
+
+  return (
+    !isAtBottom && (
+      <button
+        className="absolute i-ph-arrow-circle-down-fill text-4xl rounded-lg left-[50%] translate-x-[-50%] bottom-0"
+        onClick={() => scrollToBottom()}
+      />
+    )
   );
 }

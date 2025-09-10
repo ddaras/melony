@@ -1,4 +1,5 @@
 import React from "react";
+import { StickToBottom } from "use-stick-to-bottom";
 
 export interface ConversationProps {
   children?: React.ReactNode;
@@ -7,7 +8,7 @@ export interface ConversationProps {
 
 export function Conversation(props: ConversationProps) {
   return (
-    <div
+    <StickToBottom
       className={props.className}
       style={{
         height: "100%",
@@ -19,6 +20,6 @@ export function Conversation(props: ConversationProps) {
       }}
     >
       {props.children}
-    </div>
+    </StickToBottom>
   );
 }
