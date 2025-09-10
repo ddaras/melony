@@ -9,14 +9,16 @@ export interface ConversationProps {
 export function Conversation(props: ConversationProps) {
   return (
     <StickToBottom
+      id="conversation"
       className={props.className}
       style={{
+        position: "relative",
         height: "100%",
         width: "100%",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        padding: "0 1rem",
+        padding: "0",
       }}
     >
       {props.children}

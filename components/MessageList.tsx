@@ -30,11 +30,12 @@ export function MessageList({
     width: "100%",
     maxWidth: "740px",
     margin: "0 auto",
-    padding: "1rem 0",
+    padding: "1rem",
   };
 
   return (
     <StickToBottom.Content
+      id="message-list"
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >

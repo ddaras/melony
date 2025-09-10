@@ -40,6 +40,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     maxWidth: "740px",
     margin: " 0 auto",
     marginBottom: "1rem",
+    padding: "0 1rem",
   };
 
   const defaultInputStyle: React.CSSProperties = {

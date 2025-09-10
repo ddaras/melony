@@ -132,6 +132,7 @@ export function MessageItem({
 
   return (
     <div
+      id="message-item"
       key={message.id}
       data-role={message.role}
       data-type={(message as any).type}
