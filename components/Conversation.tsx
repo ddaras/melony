@@ -1,16 +1,12 @@
 import React from "react";
-import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
-import { useConversation } from "../hooks/useConversation";
+import { StickToBottom } from "use-stick-to-bottom";
 
 export interface ConversationProps {
   children?: React.ReactNode;
   className?: string;
-  messageListContainerClassName?: string;
 }
 
 export function Conversation(props: ConversationProps) {
-  const { isStreaming } = useConversation();
-
   return (
     <StickToBottom
       id="conversation"
@@ -23,36 +19,7 @@ export function Conversation(props: ConversationProps) {
         flexDirection: "column",
       }}
     >
-      <StickToBottom.Content
-        id="message-list"
-        className={props.messageListContainerClassName}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "740px",
-          margin: "0 auto",
-          padding: "1rem",
-        }}
-      >
-        {props.children}
-
-        {isStreaming && <div>...</div>}
-
-        <ScrollToBottom />
-      </StickToBottom.Content>
+      {props.children}
     </StickToBottom>
-  );
-}
-
-function ScrollToBottom() {
-  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
-
-  return (
-    !isAtBottom && (
-      <button
-        className="absolute i-ph-arrow-circle-down-fill text-4xl rounded-lg left-[50%] translate-x-[-50%] bottom-0"
-        onClick={() => scrollToBottom()}
-      />
-    )
   );
 }
