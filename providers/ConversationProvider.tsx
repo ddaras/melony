@@ -61,9 +61,12 @@ export function ConversationProvider({
       createdAt: Date.now(),
       ...msg,
     };
-    setMessages((m) => [...m, full]);
+
+    const newMessages = [...messages, full];
+
+    setMessages(newMessages);
     setIsStreaming(true); // Set streaming to true when sending a message
-    adapter.send([full]); // AI SDK backend (HTTP)
+    adapter.send(newMessages); // AI SDK backend (HTTP)
   };
 
   return (
