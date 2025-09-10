@@ -71,6 +71,9 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     let buffer = "";
     let currentMessage: Message | null = null;
     const processedSequences = new Set<string>();
+    let seenAnyDelta = false;
+    let finalCommitted = false;
+    let finished = false;
 
     try {
       while (true) {
@@ -129,6 +132,8 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           };
 
           const finish = () => {
+            if (finished) return;
+            finished = true;
             if (currentMessage?.streamingState) {
               currentMessage.streamingState.isStreaming = false;
             }
@@ -139,6 +144,9 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           if (innerType === "output_text_delta") {
             const seq = inner?.providerData?.sequence_number;
             maybeAppendText(inner?.delta, `output_text.delta:${seq}`);
+            if (typeof inner?.delta === "string" && inner?.delta.length > 0) {
+              seenAnyDelta = true;
+            }
             continue;
           }
 
@@ -148,9 +156,15 @@ export class OpenAIAgentsAdapter implements AIAdapter {
             if (typeof ev?.type === "string") {
               if (ev.type.endsWith("output_text.delta")) {
                 maybeAppendText(ev?.delta, `output_text.delta:${ev?.sequence_number}`);
+                if (typeof ev?.delta === "string" && ev?.delta.length > 0) {
+                  seenAnyDelta = true;
+                }
               } else if (ev.type.endsWith("output_text.done")) {
-                // Some streams send the final full text here
-                maybeAppendText(ev?.text);
+                // Only append if we never saw deltas
+                if (!seenAnyDelta && !finalCommitted && typeof ev?.text === "string" && ev.text.length > 0) {
+                  maybeAppendText(ev.text);
+                  finalCommitted = true;
+                }
               } else if (ev.type === "response.completed") {
                 finish();
               }
@@ -161,7 +175,10 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           // Case 3: response_done (aggregated final payload)
           if (innerType === "response_done") {
             const text = inner?.response?.output?.[0]?.content?.[0]?.text;
-            if (text) maybeAppendText(text);
+            if (!seenAnyDelta && !finalCommitted && typeof text === "string" && text.length > 0) {
+              maybeAppendText(text);
+              finalCommitted = true;
+            }
             finish();
             continue;
           }
@@ -169,15 +186,19 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           // Case 4: run item event with message_output_created
           if (containerType === "run_item_stream_event" && chunk?.name === "message_output_created") {
             const text = chunk?.item?.rawItem?.content?.[0]?.text;
-            if (text) maybeAppendText(text);
+            if (!seenAnyDelta && !finalCommitted && typeof text === "string" && text.length > 0) {
+              maybeAppendText(text);
+              finalCommitted = true;
+            }
             finish();
             continue;
           }
 
           // Generic heuristics as fallback
           const deltaText = inner?.delta ?? inner?.textDelta ?? inner?.text ?? chunk?.delta ?? chunk?.text;
-          if (typeof deltaText === "string") {
+          if (!finalCommitted && typeof deltaText === "string" && deltaText.length > 0) {
             maybeAppendText(deltaText);
+            seenAnyDelta = true;
           }
         }
       }
