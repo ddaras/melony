@@ -15,10 +15,7 @@ export function Conversation(props: ConversationProps) {
         position: "relative",
         height: "100%",
         width: "100%",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        padding: "0",
+        padding: "1rem",
       }}
     >
       {props.children}
