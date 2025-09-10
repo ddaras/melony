@@ -18,7 +18,11 @@ export function MessageList({
   const { messages, isStreaming } = useConversation();
 
   return (
-    <StickToBottom.Content id="message-list" className={className}>
+    <StickToBottom.Content
+      id="message-list"
+      className={className}
+      style={{ flex: 1 }}
+    >
       {messages.map((message) => (
         <MessageItem
           key={message.id}

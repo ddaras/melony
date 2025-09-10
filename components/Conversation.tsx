@@ -13,6 +13,9 @@ export function Conversation(props: ConversationProps) {
       className={props.className}
       style={{
         position: "relative",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {props.children}
