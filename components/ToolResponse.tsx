@@ -1,6 +1,5 @@
 import React from "react";
-import { Message, MessagePart } from "../core/messages";
-import { ToolCall } from "../core/tools";
+import { Message, MessagePart, ToolCall } from "../core/types";
 
 type ToolResponseProps = {
   parts: MessagePart[];

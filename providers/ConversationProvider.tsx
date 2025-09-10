@@ -1,11 +1,12 @@
 import React, { createContext, useEffect, useState } from "react";
-import { Message } from "../core/messages";
+import { Message } from "../core/types";
 import { AIAdapter } from "../core/client";
 
 type ConversationContextType = {
   messages: Message[];
   send: (msg: Omit<Message, "id" | "createdAt">) => void;
   isStreaming: boolean;
+  lastMessage: Message | null;
 };
 
 export const ConversationContext =
@@ -66,7 +67,15 @@ export function ConversationProvider({
   };
 
   return (
-    <ConversationContext.Provider value={{ messages, send, isStreaming }}>
+    <ConversationContext.Provider
+      value={{
+        messages,
+        send,
+        isStreaming,
+        lastMessage:
+          messages?.length > 0 ? messages[messages.length - 1] : null,
+      }}
+    >
       {children}
     </ConversationContext.Provider>
   );

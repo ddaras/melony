@@ -1,4 +1,4 @@
-import { Message } from "../../core/messages";
+import { Message } from "../../core/types";
 import {
   AIAdapter,
   AIAdapterOptions,

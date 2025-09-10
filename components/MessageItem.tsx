@@ -1,6 +1,6 @@
 import { ToolResponse } from "./ToolResponse";
 import { Thinking } from "./Thinking";
-import type { Message } from "../core/messages";
+import type { Message } from "../core/types";
 import { Avatar } from "./Avatar";
 
 type MessageItemProps = {
