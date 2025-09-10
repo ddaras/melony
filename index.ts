@@ -24,3 +24,4 @@ export * from "./providers/ConversationProvider";
 // AI Adapters
 export * from "./adapters/ai/ai-sdk";
 export * from "./adapters/ai/openai";
+export * from "./adapters/ai/openai-agents";
