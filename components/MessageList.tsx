@@ -22,38 +22,25 @@ export function MessageList({
     overflow: "auto",
   };
 
-  const defaultInnerStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
-    gap: "1rem",
-    width: "100%",
-    maxWidth: "740px",
-    margin: "0 auto",
-    padding: "1rem",
-  };
-
   return (
     <StickToBottom.Content
       id="message-list"
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >
-      <div style={defaultInnerStyle}>
-        {messages.map((message) => (
-          <MessageItem
-            key={message.id}
-            message={message}
-            userBubbleClassName={userBubbleClassName}
-            assistantBubbleClassName={assistantBubbleClassName}
-            systemBubbleClassName={systemBubbleClassName}
-          />
-        ))}
+      {messages.map((message) => (
+        <MessageItem
+          key={message.id}
+          message={message}
+          userBubbleClassName={userBubbleClassName}
+          assistantBubbleClassName={assistantBubbleClassName}
+          systemBubbleClassName={systemBubbleClassName}
+        />
+      ))}
 
-        {isStreaming && <div>...</div>}
+      {isStreaming && <div>...</div>}
 
-        <ScrollToBottom />
-      </div>
+      <ScrollToBottom />
     </StickToBottom.Content>
   );
 }
