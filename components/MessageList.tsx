@@ -17,17 +17,8 @@ export function MessageList({
 }: MessageListProps) {
   const { messages, isStreaming } = useConversation();
 
-  const defaultContainerStyle: React.CSSProperties = {
-    height: "100%",
-    overflow: "auto",
-  };
-
   return (
-    <StickToBottom.Content
-      id="message-list"
-      className={className}
-      style={className ? undefined : defaultContainerStyle}
-    >
+    <StickToBottom.Content id="message-list" className={className}>
       {messages.map((message) => (
         <MessageItem
           key={message.id}
