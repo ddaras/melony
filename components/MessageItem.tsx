@@ -85,7 +85,7 @@ export function MessageItem({
               return <p key={index}>{part.text}</p>;
             }
 
-            if (part.type === "thinking") {
+            if (part.type === "reasoning") {
               return (
                 <Thinking
                   key={index}
@@ -152,7 +152,7 @@ export function MessageItem({
               return <p key={index}>{part.text}</p>;
             }
 
-            if (part.type === "thinking") {
+            if (part.type === "reasoning") {
               return (
                 <Thinking
                   key={index}

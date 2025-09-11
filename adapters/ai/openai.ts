@@ -138,7 +138,7 @@ export class OpenAIAdapter implements AIAdapter {
           : "user";
 
       const text = (m.parts || [])
-        .filter((p) => p.type === "text" || p.type === "thinking")
+        .filter((p) => p.type === "text" || p.type === "reasoning")
         .map((p) => (p as any).text)
         .join("\n\n");
 

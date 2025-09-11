@@ -167,7 +167,7 @@ export class AISDKAdapter implements AIAdapter {
               case "text":
                 parts.push({ type: "text", text: part.text });
                 break;
-              case "thinking":
+              case "reasoning":
                 parts.push({ type: "reasoning", text: part.text });
                 break;
               // Omit unsupported parts in request payload

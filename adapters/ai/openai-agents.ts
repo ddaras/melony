@@ -212,7 +212,7 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     for (const m of messages) {
       const role = (m.role === "system" || m.role === "assistant" || m.role === "user") ? m.role : "user";
       const text = (m.parts || [])
-        .filter((p) => p.type === "text" || p.type === "thinking")
+        .filter((p) => p.type === "text" || p.type === "reasoning")
         .map((p) => (p as any).text)
         .join("\n\n");
       if (text.length > 0) {

@@ -7,6 +7,7 @@ export * from "./core/storage";
 
 // Components
 export * from "./components/Conversation";
+export * from "./components/ConversationContent";
 export * from "./components/MessageList";
 export * from "./components/MessageItem";
 export * from "./components/MessageInput";

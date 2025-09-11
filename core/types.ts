@@ -15,7 +15,7 @@ export type Role = "user" | "assistant" | "system" | "tool";
 
 export type MessagePart =
   | { type: "text"; text: string }
-  | { type: "thinking"; text: string }
+  | { type: "reasoning"; text: string }
   | { type: "image"; url: string; alt?: string }
   | { type: "table"; columns: string[]; rows: any[][] }
   | { type: "form"; fields: FormField[] }
