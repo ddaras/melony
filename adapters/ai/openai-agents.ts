@@ -37,7 +37,7 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     this.subscribers.clear();
   }
 
-  async send(messages: string): Promise<void> {
+  async send(message: string): Promise<void> {
     try {
       const response = await fetch(this.endpoint, {
         method: "POST",
@@ -46,14 +46,7 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           ...this.headers,
         },
         body: JSON.stringify({
-          messages: this.toOpenAIChatMessages([
-            {
-              id: crypto.randomUUID(),
-              role: "user",
-              parts: [{ type: "text", text: messages }],
-              createdAt: Date.now(),
-            },
-          ]),
+          message,
           ...this.body,
         }),
       });
@@ -245,29 +238,6 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     } finally {
       reader.releaseLock();
     }
-  }
-
-  private toOpenAIChatMessages(
-    messages: Message[]
-  ): Array<{ role: "system" | "user" | "assistant"; content: string }> {
-    const result: Array<{
-      role: "system" | "user" | "assistant";
-      content: string;
-    }> = [];
-    for (const m of messages) {
-      const role =
-        m.role === "system" || m.role === "assistant" || m.role === "user"
-          ? m.role
-          : "user";
-      const text = (m.parts || [])
-        .filter((p) => p.type === "text" || p.type === "reasoning")
-        .map((p) => (p as any).text)
-        .join("\n\n");
-      if (text.length > 0) {
-        result.push({ role, content: text });
-      }
-    }
-    return result;
   }
 
   private emit(message: Message): void {
