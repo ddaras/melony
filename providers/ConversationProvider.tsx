@@ -4,7 +4,7 @@ import { AIAdapter } from "../core/adapter";
 
 type ConversationContextType = {
   messages: Message[];
-  send: (msg: Omit<Message, "id" | "createdAt">) => void;
+  send: (message: string) => void;
   isStreaming: boolean;
   lastMessage: Message | null;
 };
@@ -55,18 +55,19 @@ export function ConversationProvider({
     return () => subscription.unsubscribe();
   }, [adapter]);
 
-  const send = (msg: Omit<Message, "id" | "createdAt">) => {
+  const send = (message: string) => {
     const full: Message = {
       id: crypto.randomUUID(),
       createdAt: Date.now(),
-      ...msg,
+      parts: [{ type: "text", text: message }],
+      role: "user",
     };
 
     const newMessages = [...messages, full];
 
     setMessages(newMessages);
-    setIsStreaming(true); // Set streaming to true when sending a message
-    adapter.send(newMessages); // AI SDK backend (HTTP)
+    setIsStreaming(true);
+    adapter.send(message);
   };
 
   return (

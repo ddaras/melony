@@ -37,7 +37,7 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     this.subscribers.clear();
   }
 
-  async send(messages: Message[]): Promise<void> {
+  async send(messages: string): Promise<void> {
     try {
       const response = await fetch(this.endpoint, {
         method: "POST",
@@ -46,7 +46,14 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           ...this.headers,
         },
         body: JSON.stringify({
-          messages: this.toOpenAIChatMessages(messages),
+          messages: this.toOpenAIChatMessages([
+            {
+              id: crypto.randomUUID(),
+              role: "user",
+              parts: [{ type: "text", text: messages }],
+              createdAt: Date.now(),
+            },
+          ]),
           ...this.body,
         }),
       });
@@ -118,7 +125,10 @@ export class OpenAIAgentsAdapter implements AIAdapter {
             };
           }
 
-          const maybeAppendText = (text: string | undefined, seqKey?: string) => {
+          const maybeAppendText = (
+            text: string | undefined,
+            seqKey?: string
+          ) => {
             if (typeof text !== "string" || text.length === 0) return;
             if (seqKey && processedSequences.has(seqKey)) return;
             const textPart = currentMessage!.parts.find(
@@ -155,13 +165,21 @@ export class OpenAIAgentsAdapter implements AIAdapter {
             const ev = inner.event;
             if (typeof ev?.type === "string") {
               if (ev.type.endsWith("output_text.delta")) {
-                maybeAppendText(ev?.delta, `output_text.delta:${ev?.sequence_number}`);
+                maybeAppendText(
+                  ev?.delta,
+                  `output_text.delta:${ev?.sequence_number}`
+                );
                 if (typeof ev?.delta === "string" && ev?.delta.length > 0) {
                   seenAnyDelta = true;
                 }
               } else if (ev.type.endsWith("output_text.done")) {
                 // Only append if we never saw deltas
-                if (!seenAnyDelta && !finalCommitted && typeof ev?.text === "string" && ev.text.length > 0) {
+                if (
+                  !seenAnyDelta &&
+                  !finalCommitted &&
+                  typeof ev?.text === "string" &&
+                  ev.text.length > 0
+                ) {
                   maybeAppendText(ev.text);
                   finalCommitted = true;
                 }
@@ -175,7 +193,12 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           // Case 3: response_done (aggregated final payload)
           if (innerType === "response_done") {
             const text = inner?.response?.output?.[0]?.content?.[0]?.text;
-            if (!seenAnyDelta && !finalCommitted && typeof text === "string" && text.length > 0) {
+            if (
+              !seenAnyDelta &&
+              !finalCommitted &&
+              typeof text === "string" &&
+              text.length > 0
+            ) {
               maybeAppendText(text);
               finalCommitted = true;
             }
@@ -184,9 +207,17 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           }
 
           // Case 4: run item event with message_output_created
-          if (containerType === "run_item_stream_event" && chunk?.name === "message_output_created") {
+          if (
+            containerType === "run_item_stream_event" &&
+            chunk?.name === "message_output_created"
+          ) {
             const text = chunk?.item?.rawItem?.content?.[0]?.text;
-            if (!seenAnyDelta && !finalCommitted && typeof text === "string" && text.length > 0) {
+            if (
+              !seenAnyDelta &&
+              !finalCommitted &&
+              typeof text === "string" &&
+              text.length > 0
+            ) {
               maybeAppendText(text);
               finalCommitted = true;
             }
@@ -195,8 +226,17 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           }
 
           // Generic heuristics as fallback
-          const deltaText = inner?.delta ?? inner?.textDelta ?? inner?.text ?? chunk?.delta ?? chunk?.text;
-          if (!finalCommitted && typeof deltaText === "string" && deltaText.length > 0) {
+          const deltaText =
+            inner?.delta ??
+            inner?.textDelta ??
+            inner?.text ??
+            chunk?.delta ??
+            chunk?.text;
+          if (
+            !finalCommitted &&
+            typeof deltaText === "string" &&
+            deltaText.length > 0
+          ) {
             maybeAppendText(deltaText);
             seenAnyDelta = true;
           }
@@ -207,10 +247,18 @@ export class OpenAIAgentsAdapter implements AIAdapter {
     }
   }
 
-  private toOpenAIChatMessages(messages: Message[]): Array<{ role: "system" | "user" | "assistant"; content: string }> {
-    const result: Array<{ role: "system" | "user" | "assistant"; content: string }> = [];
+  private toOpenAIChatMessages(
+    messages: Message[]
+  ): Array<{ role: "system" | "user" | "assistant"; content: string }> {
+    const result: Array<{
+      role: "system" | "user" | "assistant";
+      content: string;
+    }> = [];
     for (const m of messages) {
-      const role = (m.role === "system" || m.role === "assistant" || m.role === "user") ? m.role : "user";
+      const role =
+        m.role === "system" || m.role === "assistant" || m.role === "user"
+          ? m.role
+          : "user";
       const text = (m.parts || [])
         .filter((p) => p.type === "text" || p.type === "reasoning")
         .map((p) => (p as any).text)
@@ -238,5 +286,3 @@ export class OpenAIAgentsAdapter implements AIAdapter {
 }
 
 export default OpenAIAgentsAdapter;
-
-

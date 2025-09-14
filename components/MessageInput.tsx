@@ -19,7 +19,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSend = () => {
     if (!text) return;
-    send({ role: "user", parts: [{ type: "text", text }] });
+    send(text);
     setText("");
   };
 

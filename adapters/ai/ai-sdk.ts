@@ -58,7 +58,7 @@ export class AISDKAdapter implements AIAdapter {
     this.body = options.body || {};
   }
 
-  async send(messages: Message[]): Promise<void> {
+  async send(messages: string): Promise<void> {
     try {
       const response = await fetch(this.endpoint, {
         method: "POST",
@@ -67,7 +67,14 @@ export class AISDKAdapter implements AIAdapter {
           ...this.headers,
         },
         body: JSON.stringify({
-          messages: this.toUISDKMessages(messages),
+          messages: this.toUISDKMessages([
+            {
+              id: crypto.randomUUID(),
+              role: "user",
+              parts: [{ type: "text", text: messages }],
+              createdAt: Date.now(),
+            },
+          ]),
           ...this.body,
         }),
       });

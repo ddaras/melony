@@ -33,10 +33,17 @@ export class OpenAIAdapter implements AIAdapter {
     this.subscribers.clear();
   }
 
-  async send(messages: Message[]): Promise<void> {
+  async send(messages: string): Promise<void> {
     try {
       const payload = {
-        messages: this.toOpenAIChatMessages(messages),
+        messages: this.toOpenAIChatMessages([
+          {
+            id: crypto.randomUUID(),
+            role: "user",
+            parts: [{ type: "text", text: messages }],
+            createdAt: Date.now(),
+          },
+        ]),
       } as const;
 
       const response = await fetch(`${this.endpoint}`, {
