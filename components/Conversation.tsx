@@ -3,7 +3,7 @@ import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { useConversation } from "../hooks/useConversation";
 
 export interface ConversationProps {
-  children?: React.ReactNode;
+  children?: React.ReactNode[];
   className?: string;
 }
 
@@ -32,11 +32,13 @@ export function Conversation(props: ConversationProps) {
           padding: "1rem",
         }}
       >
-        {props.children}
+        {props.children?.[0]}
 
         {isStreaming && <div>...</div>}
       </StickToBottom.Content>
       <ScrollToBottom />
+
+      {props.children?.[1]}
     </StickToBottom>
   );
 }
