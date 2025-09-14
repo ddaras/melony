@@ -32,13 +32,13 @@ export function Conversation(props: ConversationProps) {
           padding: "1rem",
         }}
       >
-        {props.children?.[0]}
+        {props.children?.slice(0, -1)}
 
         {isStreaming && <div>...</div>}
       </StickToBottom.Content>
       <ScrollToBottom />
 
-      {props.children?.[1]}
+      {props.children?.[props.children.length - 1]}
     </StickToBottom>
   );
 }
