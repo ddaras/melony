@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
 ### What’s included
 
-- **Components**: `Conversation`, `MessageList`, `MessageItem`, `MessageInput`, `ToolResponse`, `Thinking`, `AgentSidebar`, `Flow`
+- **Components**: `Conversation`, `MessageList`, `MessageItem`, `MessageInput`, `ToolResponse`, `Thinking`, `Flow`
 - **Hooks**: `useConversation`, `useMessages`, `useFlow`, `useAgent`
 - **Providers**: `ConversationProvider`, `FlowProvider`
 - **Adapters**: `AISDKAdapter` (SSE streaming). WebSocket support coming next.

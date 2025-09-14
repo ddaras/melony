@@ -1,6 +1,5 @@
 import { useConversation } from "../hooks/useConversation";
 import { MessageItem } from "./MessageItem";
-import { ConversationContent } from "./ConversationContent";
 
 type MessageListProps = {
   userBubbleClassName?: string;
@@ -16,7 +15,7 @@ export function MessageList({
   const { messages } = useConversation();
 
   return (
-    <ConversationContent>
+    <>
       {messages.map((message) => (
         <MessageItem
           key={message.id}
@@ -26,6 +25,6 @@ export function MessageList({
           systemBubbleClassName={systemBubbleClassName}
         />
       ))}
-    </ConversationContent>
+    </>
   );
 }
