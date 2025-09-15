@@ -55,7 +55,7 @@ export function ConversationContent({
 }
 
 export interface ConversationFooterProps {
-  children?: React.ReactNode[];
+  children?: React.ReactNode;
   className?: string;
 }
 
@@ -69,6 +69,7 @@ export function ConversationFooter({
       style={{
         display: "flex",
         flexDirection: "column",
+        width: "100%",
         maxWidth: "740px",
         margin: "0 auto",
         padding: "1rem",
