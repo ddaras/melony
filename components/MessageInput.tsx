@@ -3,16 +3,16 @@ import { useConversation } from "../hooks/useConversation";
 
 type MessageInputProps = {
   placeholder?: string;
-  className?: string;
   inputClassName?: string;
   buttonClassName?: string;
+  className?: string;
 };
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   placeholder,
-  className,
   inputClassName,
   buttonClassName,
+  className,
 }) => {
   const [text, setText] = useState("");
   const { send } = useConversation();
@@ -28,14 +28,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const defaultContainerStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: "740px",
-    margin: " 0 auto",
-    marginBottom: "1rem",
-    padding: "0 1rem",
   };
 
   const defaultInputStyle: React.CSSProperties = {
@@ -62,44 +54,39 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div
-      data-ai-message-input-container=""
       className={className}
-      style={className ? undefined : defaultContainerStyle}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        border: "1px solid #e5e7eb",
+        borderRadius: "0.5rem",
+      }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          border: "1px solid #e5e7eb",
-          borderRadius: "0.5rem",
-        }}
+      <input
+        id={inputId}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className={inputClassName}
+        style={inputClassName ? undefined : defaultInputStyle}
+      />
+      <button
+        onClick={handleSend}
+        disabled={!text}
+        className={buttonClassName}
+        style={
+          buttonClassName
+            ? undefined
+            : {
+                ...defaultButtonStyle,
+                opacity: !text ? 0.5 : 1, // disabled:opacity-50
+              }
+        }
       >
-        <input
-          id={inputId}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className={inputClassName}
-          style={inputClassName ? undefined : defaultInputStyle}
-        />
-        <button
-          onClick={handleSend}
-          disabled={!text}
-          className={buttonClassName}
-          style={
-            buttonClassName
-              ? undefined
-              : {
-                  ...defaultButtonStyle,
-                  opacity: !text ? 0.5 : 1, // disabled:opacity-50
-                }
-          }
-        >
-          Send
-        </button>
-      </div>
+        Send
+      </button>
     </div>
   );
 };

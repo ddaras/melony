@@ -54,6 +54,31 @@ export function ConversationContent({
   );
 }
 
+export interface ConversationFooterProps {
+  children?: React.ReactNode[];
+  className?: string;
+}
+
+export function ConversationFooter({
+  children,
+  className,
+}: ConversationFooterProps) {
+  return (
+    <div
+      className={className}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        maxWidth: "740px",
+        margin: "0 auto",
+        padding: "1rem",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function ScrollToBottom() {
   const { isAtBottom, scrollToBottom } = useStickToBottomContext();
 
