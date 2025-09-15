@@ -1,15 +1,12 @@
 import React from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
-export interface ConversationProps {
+interface ConversationProps {
   children?: React.ReactNode[];
   className?: string;
 }
 
-export function ConversationContainer({
-  children,
-  className,
-}: ConversationProps) {
+function ConversationContainer({ children, className }: ConversationProps) {
   return (
     <StickToBottom
       id="conversation"
@@ -28,12 +25,12 @@ export function ConversationContainer({
   );
 }
 
-export interface ConversationContentProps {
+interface ConversationContentProps {
   children?: React.ReactNode[];
   className?: string;
 }
 
-export function ConversationContent({
+function ConversationContent({
   children,
   className,
 }: ConversationContentProps) {
@@ -54,15 +51,12 @@ export function ConversationContent({
   );
 }
 
-export interface ConversationFooterProps {
+interface ConversationFooterProps {
   children?: React.ReactNode;
   className?: string;
 }
 
-export function ConversationFooter({
-  children,
-  className,
-}: ConversationFooterProps) {
+function ConversationFooter({ children, className }: ConversationFooterProps) {
   return (
     <div
       className={className}
@@ -92,3 +86,10 @@ function ScrollToBottom() {
     )
   );
 }
+
+// Compound component export
+export const Conversation = {
+  Container: ConversationContainer,
+  Content: ConversationContent,
+  Footer: ConversationFooter,
+} as const;
