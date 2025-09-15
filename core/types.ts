@@ -11,16 +11,11 @@ export type ToolResult = {
   toolCallId?: string;
 };
 
-export type Role = "user" | "assistant" | "system" | "tool";
+export type Role = "user" | "assistant" | "system";
 
 export type MessagePart =
   | { type: "text"; text: string }
   | { type: "reasoning"; text: string }
-  | { type: "image"; url: string; alt?: string }
-  | { type: "table"; columns: string[]; rows: any[][] }
-  | { type: "form"; fields: FormField[] }
-  | { type: "detail"; data: Record<string, any> }
-  | { type: "chart"; kind: "bar" | "line" | "pie"; data: any }
   | { type: "tool"; toolCallId: string; status: string; inputStream?: string };
 
 export type Message = {

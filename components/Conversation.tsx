@@ -1,19 +1,19 @@
 import React from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
-import { useConversation } from "../hooks/useConversation";
 
 export interface ConversationProps {
   children?: React.ReactNode[];
   className?: string;
 }
 
-export function Conversation(props: ConversationProps) {
-  const { isStreaming } = useConversation();
-
+export function ConversationContainer({
+  children,
+  className,
+}: ConversationProps) {
   return (
     <StickToBottom
       id="conversation"
-      className={props.className}
+      className={className}
       style={{
         position: "relative",
         height: "100%",
@@ -22,24 +22,35 @@ export function Conversation(props: ConversationProps) {
         flexDirection: "column",
       }}
     >
-      <StickToBottom.Content
-        id="conversation-content"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "740px",
-          margin: "0 auto",
-          padding: "1rem",
-        }}
-      >
-        {props.children?.slice(0, -1)}
-
-        {isStreaming && <div>...</div>}
-      </StickToBottom.Content>
+      {children}
       <ScrollToBottom />
-
-      {props.children?.[props.children.length - 1]}
     </StickToBottom>
+  );
+}
+
+export interface ConversationContentProps {
+  children?: React.ReactNode[];
+  className?: string;
+}
+
+export function ConversationContent({
+  children,
+  className,
+}: ConversationContentProps) {
+  return (
+    <StickToBottom.Content
+      id="conversation-content"
+      className={className}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        maxWidth: "740px",
+        margin: "0 auto",
+        padding: "1rem",
+      }}
+    >
+      {children}
+    </StickToBottom.Content>
   );
 }
 
