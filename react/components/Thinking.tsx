@@ -13,7 +13,6 @@ export function Thinking({ text, className }: ThinkingProps) {
     fontStyle: "italic",
     fontSize: "0.875rem", // text-sm
     position: "relative",
-    whiteSpace: "pre-wrap",
   };
 
   const thinkingIndicatorStyle: React.CSSProperties = {

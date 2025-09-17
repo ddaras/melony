@@ -20,7 +20,6 @@ export function MessageItem({
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "90%", // max-w-[80%]
     flex: 1,
-    whiteSpace: "pre-wrap", // whitespace-pre-wrap
   };
 
   const getUserBubbleStyle = (): React.CSSProperties => ({
