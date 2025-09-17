@@ -69,6 +69,8 @@ export class DefaultAdapter implements AIAdapter {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
+          console.log("line", line);
+
           if (!line.startsWith("message\t")) continue;
           const data = line.slice(8).trim(); // Remove "message\t" prefix
           if (!data) continue;
@@ -88,7 +90,8 @@ export class DefaultAdapter implements AIAdapter {
           try {
             event = JSON.parse(data);
           } catch {
-            if (this.debug) console.warn("Failed to parse streaming event:", data);
+            if (this.debug)
+              console.warn("Failed to parse streaming event:", data);
             continue;
           }
 
@@ -100,7 +103,10 @@ export class DefaultAdapter implements AIAdapter {
     }
   }
 
-  private handleStreamingEvent(event: StreamingEvent, messageMap: Map<string, Message>): void {
+  private handleStreamingEvent(
+    event: StreamingEvent,
+    messageMap: Map<string, Message>
+  ): void {
     switch (event.type) {
       case "start":
         // Global start - could emit a system message or update global state
@@ -117,10 +123,10 @@ export class DefaultAdapter implements AIAdapter {
           role: "assistant",
           parts: [{ type: "text", text: "" }],
           createdAt: Date.now(),
-          streamingState: { 
-            isStreaming: true, 
+          streamingState: {
+            isStreaming: true,
             currentStep: "text-start",
-            textId: event.id 
+            textId: event.id,
           },
           metadata: event.providerMetadata,
         };
@@ -132,9 +138,10 @@ export class DefaultAdapter implements AIAdapter {
         // Append text to existing message
         const message = messageMap.get(event.id);
         if (message) {
-          const textPart = message.parts.find(
-            (p) => p.type === "text"
-          ) as { type: "text"; text: string };
+          const textPart = message.parts.find((p) => p.type === "text") as {
+            type: "text";
+            text: string;
+          };
           if (textPart) {
             textPart.text += event.delta;
             message.streamingState = {
