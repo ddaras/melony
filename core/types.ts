@@ -33,8 +33,16 @@ export type Message = {
       | "tool-input"
       | "tool-execution"
       | "tool-output"
-      | "response";
+      | "response"
+      | "start"
+      | "start-step"
+      | "text-start"
+      | "text-streaming"
+      | "text-end"
+      | "finish-step"
+      | "finish";
     activeToolCallId?: string;
+    textId?: string; // ID for the current text being streamed
   };
 };
 
@@ -44,3 +52,13 @@ export type FormField = {
   type: "text" | "number" | "select" | "checkbox";
   options?: string[];
 };
+
+// Streaming event types to match the new message flow
+export type StreamingEvent = 
+  | { type: "start" }
+  | { type: "start-step" }
+  | { type: "text-start"; id: string; providerMetadata?: Record<string, any> }
+  | { type: "text-delta"; id: string; delta: string }
+  | { type: "text-end"; id: string }
+  | { type: "finish-step" }
+  | { type: "finish" };

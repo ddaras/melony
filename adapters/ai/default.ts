@@ -1,4 +1,4 @@
-import { Message } from "../../core/types";
+import { Message, StreamingEvent } from "../../core/types";
 import {
   AIAdapter,
   AIAdapterOptions,
@@ -57,6 +57,7 @@ export class DefaultAdapter implements AIAdapter {
     const decoder = new TextDecoder();
     let buffer = "";
     let currentMessage: Message | null = null;
+    const messageMap = new Map<string, Message>(); // Track messages by their text ID
 
     try {
       while (true) {
@@ -68,54 +69,115 @@ export class DefaultAdapter implements AIAdapter {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (!line.startsWith("data:")) continue;
-          const data = line.slice(5).trim();
+          if (!line.startsWith("message\t")) continue;
+          const data = line.slice(8).trim(); // Remove "message\t" prefix
           if (!data) continue;
           if (data === "[DONE]") {
-            if (currentMessage) this.emit(currentMessage);
+            // Finalize any remaining messages
+            messageMap.forEach((msg) => {
+              msg.streamingState = {
+                isStreaming: false,
+                currentStep: "finish",
+              };
+              this.emit(msg);
+            });
             return;
           }
-          let parsed: any;
+
+          let event: StreamingEvent;
           try {
-            parsed = JSON.parse(data);
+            event = JSON.parse(data);
           } catch {
-            if (this.debug) console.warn("Failed to parse SSE data:", data);
+            if (this.debug) console.warn("Failed to parse streaming event:", data);
             continue;
           }
 
-          // OpenAI chat.completions stream delta
-          const delta = parsed?.choices?.[0]?.delta;
-          const finishReason = parsed?.choices?.[0]?.finish_reason;
-
-          if (!currentMessage) {
-            currentMessage = {
-              id: crypto.randomUUID(),
-              role: "assistant",
-              parts: [{ type: "text", text: "" }],
-              createdAt: Date.now(),
-              streamingState: { isStreaming: true, currentStep: "response" },
-            };
-          }
-
-          if (delta?.content) {
-            const textPart = currentMessage.parts.find(
-              (p) => p.type === "text"
-            ) as { type: "text"; text: string };
-            textPart.text += delta.content as string;
-            this.emit(currentMessage);
-          }
-
-          if (finishReason) {
-            currentMessage.streamingState = {
-              isStreaming: false,
-              currentStep: "response",
-            };
-            this.emit(currentMessage);
-          }
+          this.handleStreamingEvent(event, messageMap);
         }
       }
     } finally {
       reader.releaseLock();
+    }
+  }
+
+  private handleStreamingEvent(event: StreamingEvent, messageMap: Map<string, Message>): void {
+    switch (event.type) {
+      case "start":
+        // Global start - could emit a system message or update global state
+        break;
+
+      case "start-step":
+        // Step start - could indicate thinking or tool use is about to begin
+        break;
+
+      case "text-start":
+        // Create a new message for this text stream
+        const newMessage: Message = {
+          id: event.id,
+          role: "assistant",
+          parts: [{ type: "text", text: "" }],
+          createdAt: Date.now(),
+          streamingState: { 
+            isStreaming: true, 
+            currentStep: "text-start",
+            textId: event.id 
+          },
+          metadata: event.providerMetadata,
+        };
+        messageMap.set(event.id, newMessage);
+        this.emit(newMessage);
+        break;
+
+      case "text-delta":
+        // Append text to existing message
+        const message = messageMap.get(event.id);
+        if (message) {
+          const textPart = message.parts.find(
+            (p) => p.type === "text"
+          ) as { type: "text"; text: string };
+          if (textPart) {
+            textPart.text += event.delta;
+            message.streamingState = {
+              isStreaming: true,
+              currentStep: "text-streaming",
+              textId: message.streamingState?.textId,
+            };
+            this.emit(message);
+          }
+        }
+        break;
+
+      case "text-end":
+        // Mark text streaming as complete
+        const endMessage = messageMap.get(event.id);
+        if (endMessage) {
+          endMessage.streamingState = {
+            isStreaming: true,
+            currentStep: "text-end",
+            textId: endMessage.streamingState?.textId,
+          };
+          this.emit(endMessage);
+        }
+        break;
+
+      case "finish-step":
+        // Step completion
+        // Could update any active messages or emit step completion
+        break;
+
+      case "finish":
+        // Final completion - mark all messages as no longer streaming
+        messageMap.forEach((msg) => {
+          msg.streamingState = {
+            isStreaming: false,
+            currentStep: "finish",
+          };
+          this.emit(msg);
+        });
+        break;
+
+      default:
+        if (this.debug) console.warn("Unknown streaming event type:", event);
     }
   }
 
