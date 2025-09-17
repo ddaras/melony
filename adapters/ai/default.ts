@@ -56,7 +56,6 @@ export class DefaultAdapter implements AIAdapter {
     const reader = body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    let currentMessage: Message | null = null;
     const messageMap = new Map<string, Message>(); // Track messages by their text ID
 
     try {

@@ -28,6 +28,8 @@ export function ConversationProvider({
   // Listen to backend stream
   useEffect(() => {
     const subscription = defaultAdapter.subscribe((msg: Message) => {
+      if (adapterOptions?.debug) console.log("msg", msg);
+
       setMessages((prev) => {
         // Check if this is an update to an existing assistant message
         const existingIndex = prev.findIndex(
