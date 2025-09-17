@@ -66,7 +66,6 @@ function ConversationFooter({ children, className }: ConversationFooterProps) {
         width: "100%",
         maxWidth: "740px",
         margin: "0 auto",
-        padding: "1rem",
       }}
     >
       {children}

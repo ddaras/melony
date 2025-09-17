@@ -61,6 +61,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         gap: "0.5rem",
         border: "1px solid #e5e7eb",
         borderRadius: "0.5rem",
+        marginBottom: "1rem",
       }}
     >
       <input
