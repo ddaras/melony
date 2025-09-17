@@ -121,7 +121,10 @@ export class DefaultAdapter implements AIAdapter {
         const newMessage: Message = {
           id: event.id,
           role: "assistant",
-          parts: [{ type: "text", text: "" }],
+          parts: [
+            ...(messageMap.get(event.id)?.parts || []),
+            { type: "text", text: "" },
+          ],
           createdAt: Date.now(),
           metadata: {},
         };
