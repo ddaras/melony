@@ -1,6 +1,8 @@
-import { Thinking } from "./Thinking";
 import type { Message } from "../../core/types";
 import { Avatar } from "./Avatar";
+import { TextPart } from "./TextPart";
+import { ReasoningPart } from "./ReasoningPart";
+import { ToolPart } from "./ToolPart";
 
 type MessageItemProps = {
   message: Message;
@@ -19,13 +21,6 @@ export function MessageItem({
     maxWidth: "90%", // max-w-[80%]
     flex: 1,
     whiteSpace: "pre-wrap", // whitespace-pre-wrap
-  };
-
-  const messageContainerStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "0.75rem", // gap-3
-    marginBottom: "1rem", // mb-4
   };
 
   const getUserBubbleStyle = (): React.CSSProperties => ({
@@ -64,7 +59,10 @@ export function MessageItem({
 
   // For user and assistant messages, use the new layout with avatars
   const containerStyle: React.CSSProperties = {
-    ...messageContainerStyle,
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "0.75rem", // gap-3
+    marginBottom: "1rem", // mb-4
     flexDirection: isUser ? "row-reverse" : "row",
   };
 
@@ -102,41 +100,15 @@ export function MessageItem({
         >
           {message.parts.map((part, index) => {
             if (part.type === "text") {
-              return <p key={index}>{part.text}</p>;
+              return <TextPart key={index} part={part} index={index} />;
             }
 
             if (part.type === "reasoning") {
-              return (
-                <Thinking key={index} text={part.text} isStreaming={false} />
-              );
+              return <ReasoningPart key={index} part={part} index={index} />;
             }
-            if (part.type === "tool") {
-              switch (part.status) {
-                case "streaming":
-                  return <div key={index}>Using {part.toolName}...</div>;
-                case "pending":
-                  if (part.input) {
-                    return (
-                      <div key={index}>
-                        Using {part.toolName}... with input:{" "}
-                        {JSON.stringify(part.input, null, 2)}
-                      </div>
-                    );
-                  }
-                  return <div key={index}>Using {part.toolName}...</div>;
-                case "completed":
-                  return (
-                    <div key={index}>
-                      Using {part.toolName}... completed. results:
-                      {JSON.stringify(part?.output, null, 2)}
-                    </div>
-                  );
-                case "error":
-                  return <div key={index}>Error using {part.toolName}</div>;
 
-                default:
-                  return <>unknown state of the tool message</>;
-              }
+            if (part.type === "tool") {
+              return <ToolPart key={index} part={part} index={index} />;
             }
           })}
         </div>

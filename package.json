@@ -82,6 +82,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "use-stick-to-bottom": "^1.1.1"
   }
 }
