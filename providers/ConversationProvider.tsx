@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { Message } from "../core/types";
-import { AIAdapter } from "../core/adapter";
+import DefaultAdapter from "../adapters/ai/default";
+import { AIAdapterOptions } from "../core/adapter";
 
 type ConversationContextType = {
   messages: Message[];
@@ -14,18 +15,19 @@ export const ConversationContext =
 
 export function ConversationProvider({
   children,
-  adapter,
+  adapterOptions,
 }: {
   children: React.ReactNode;
-  adapter: AIAdapter;
+  adapterOptions?: AIAdapterOptions;
 }) {
+  const defaultAdapter = new DefaultAdapter(adapterOptions);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
 
   // Listen to backend stream
   useEffect(() => {
-    if (!adapter) return;
-    const subscription = adapter.subscribe((msg: Message) => {
+    const subscription = defaultAdapter.subscribe((msg: Message) => {
       setMessages((prev) => {
         // Check if this is an update to an existing assistant message
         const existingIndex = prev.findIndex(
@@ -53,7 +55,7 @@ export function ConversationProvider({
       });
     });
     return () => subscription.unsubscribe();
-  }, [adapter]);
+  }, [defaultAdapter]);
 
   const send = (message: string) => {
     const full: Message = {
@@ -67,7 +69,7 @@ export function ConversationProvider({
 
     setMessages(newMessages);
     setIsStreaming(true);
-    adapter.send(message);
+    defaultAdapter.send(message);
   };
 
   return (
