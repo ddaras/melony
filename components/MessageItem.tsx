@@ -63,68 +63,6 @@ export function MessageItem({
   const userName = "You";
   const assistantName = "Assistant";
 
-  // For system messages, use the original layout without avatars
-  if (isSystem) {
-    return (
-      <div
-        key={message.id}
-        data-role={message.role}
-        data-type={(message as any).type}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        <div
-          className={bubbleClassName}
-          style={bubbleClassName ? undefined : bubbleStyle}
-        >
-          {message.parts.map((part, index) => {
-            if (part.type === "text") {
-              return <p key={index}>{part.text}</p>;
-            }
-
-            if (part.type === "reasoning") {
-              return (
-                <Thinking key={index} text={part.text} isStreaming={false} />
-              );
-            }
-
-            if (part.type === "tool") {
-              switch (part.status) {
-                case "streaming":
-                  return <>Using {part.toolName}...</>;
-                case "pending":
-                  if (part.input) {
-                    return (
-                      <>
-                        Using {part.toolName}... with input:{" "}
-                        {JSON.stringify(part.input)}
-                      </>
-                    );
-                  }
-                  return <>Using {part.toolName}...</>;
-                case "completed":
-                  return (
-                    <>
-                      Using {part.toolName}... completed. results:{" "}
-                      {part.output?.toString()}
-                    </>
-                  );
-                case "error":
-                  return <>Error using {part.toolName}</>;
-
-                default:
-                  return <>unknown state of the tool message</>;
-              }
-            }
-          })}
-        </div>
-      </div>
-    );
-  }
-
   // For user and assistant messages, use the new layout with avatars
   const containerStyle: React.CSSProperties = {
     ...messageContainerStyle,
@@ -173,9 +111,33 @@ export function MessageItem({
                 <Thinking key={index} text={part.text} isStreaming={false} />
               );
             }
-
             if (part.type === "tool") {
-              return <ToolResponse key={index} parts={[part]} />;
+              switch (part.status) {
+                case "streaming":
+                  return <>Using {part.toolName}...</>;
+                case "pending":
+                  if (part.input) {
+                    return (
+                      <>
+                        Using {part.toolName}... with input:{" "}
+                        {JSON.stringify(part.input)}
+                      </>
+                    );
+                  }
+                  return <>Using {part.toolName}...</>;
+                case "completed":
+                  return (
+                    <>
+                      Using {part.toolName}... completed. results:{" "}
+                      {part.output?.toString()}
+                    </>
+                  );
+                case "error":
+                  return <>Error using {part.toolName}</>;
+
+                default:
+                  return <>unknown state of the tool message</>;
+              }
             }
           })}
         </div>
