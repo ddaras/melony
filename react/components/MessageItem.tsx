@@ -20,6 +20,9 @@ export function MessageItem({
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "90%", // max-w-[80%]
     flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
   };
 
   const getUserBubbleStyle = (): React.CSSProperties => ({

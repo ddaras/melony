@@ -107,6 +107,13 @@ export class GenericStreamingAdapter implements StreamingHandler {
     switch (event.type) {
       case "start":
         // Global start - could emit a system message or update global state
+        this.emit({
+          id: event.id,
+          role: "assistant",
+          parts: [{ type: "text", text: "Thinking..." }],
+          createdAt: Date.now(),
+          metadata: {},
+        });
         break;
 
       case "start-step":
