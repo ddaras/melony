@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.5.95",
+  "version": "1.5.96",
   "main": "dist/index.js",
   "directories": {
     "example": "examples"
