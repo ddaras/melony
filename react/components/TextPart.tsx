@@ -17,7 +17,7 @@ export function TextPart({ part, index }: TextPartProps) {
           p: ({ children }) => (
             <p
               style={{
-                margin: "0.5em 0",
+                margin: "0 0 0.5em 0",
                 fontSize: "inherit",
                 lineHeight: "inherit",
               }}
