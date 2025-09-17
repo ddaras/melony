@@ -114,26 +114,26 @@ export function MessageItem({
             if (part.type === "tool") {
               switch (part.status) {
                 case "streaming":
-                  return <>Using {part.toolName}...</>;
+                  return <div key={index}>Using {part.toolName}...</div>;
                 case "pending":
                   if (part.input) {
                     return (
-                      <>
+                      <div key={index}>
                         Using {part.toolName}... with input:{" "}
-                        {JSON.stringify(part.input)}
-                      </>
+                        {JSON.stringify(part.input, null, 2)}
+                      </div>
                     );
                   }
-                  return <>Using {part.toolName}...</>;
+                  return <div key={index}>Using {part.toolName}...</div>;
                 case "completed":
                   return (
-                    <>
-                      Using {part.toolName}... completed. results:{" "}
-                      {part.output?.toString()}
-                    </>
+                    <div key={index}>
+                      Using {part.toolName}... completed. results:
+                      {JSON.stringify(part?.output, null, 2)}
+                    </div>
                   );
                 case "error":
-                  return <>Error using {part.toolName}</>;
+                  return <div key={index}>Error using {part.toolName}</div>;
 
                 default:
                   return <>unknown state of the tool message</>;
