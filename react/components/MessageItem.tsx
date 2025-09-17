@@ -74,10 +74,10 @@ export function MessageItem({
   };
 
   const nameStyle: React.CSSProperties = {
-    fontSize: "1rem", // text-xs
+    fontSize: ".875rem", // text-xs
     fontWeight: "500", // font-medium
     color: "#6b7280", // text-gray-500
-    margin: "0.5rem", // mb-1
+    margin: "0.25rem 0", // mb-1
   };
 
   return (
