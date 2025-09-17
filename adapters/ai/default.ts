@@ -76,10 +76,6 @@ export class DefaultAdapter implements AIAdapter {
           if (data === "[DONE]") {
             // Finalize any remaining messages
             messageMap.forEach((msg) => {
-              msg.streamingState = {
-                isStreaming: false,
-                currentStep: "finish",
-              };
               this.emit(msg);
             });
             return;
@@ -122,11 +118,6 @@ export class DefaultAdapter implements AIAdapter {
           role: "assistant",
           parts: [{ type: "text", text: "" }],
           createdAt: Date.now(),
-          streamingState: {
-            isStreaming: true,
-            currentStep: "text-start",
-            textId: event.id,
-          },
           metadata: event.providerMetadata,
         };
         messageMap.set(event.id, newMessage);
@@ -143,11 +134,6 @@ export class DefaultAdapter implements AIAdapter {
           };
           if (textPart) {
             textPart.text += event.delta;
-            message.streamingState = {
-              isStreaming: true,
-              currentStep: "text-streaming",
-              textId: message.streamingState?.textId,
-            };
             this.emit(message);
           }
         }
@@ -157,11 +143,6 @@ export class DefaultAdapter implements AIAdapter {
         // Mark text streaming as complete
         const endMessage = messageMap.get(event.id);
         if (endMessage) {
-          endMessage.streamingState = {
-            isStreaming: true,
-            currentStep: "text-end",
-            textId: endMessage.streamingState?.textId,
-          };
           this.emit(endMessage);
         }
         break;
@@ -174,10 +155,6 @@ export class DefaultAdapter implements AIAdapter {
       case "finish":
         // Final completion - mark all messages as no longer streaming
         messageMap.forEach((msg) => {
-          msg.streamingState = {
-            isStreaming: false,
-            currentStep: "finish",
-          };
           this.emit(msg);
         });
         break;

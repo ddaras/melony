@@ -99,7 +99,6 @@ export class OpenAIAdapter implements AIAdapter {
               role: "assistant",
               parts: [{ type: "text", text: "" }],
               createdAt: Date.now(),
-              streamingState: { isStreaming: true, currentStep: "response" },
             };
           }
 
@@ -112,10 +111,6 @@ export class OpenAIAdapter implements AIAdapter {
           }
 
           if (finishReason) {
-            currentMessage.streamingState = {
-              isStreaming: false,
-              currentStep: "response",
-            };
             this.emit(currentMessage);
           }
         }

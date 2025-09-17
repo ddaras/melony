@@ -87,14 +87,7 @@ export function MessageItem({
 
             if (part.type === "reasoning") {
               return (
-                <Thinking
-                  key={index}
-                  text={part.text}
-                  isStreaming={
-                    message.streamingState?.isStreaming &&
-                    message.streamingState?.currentStep === "thinking"
-                  }
-                />
+                <Thinking key={index} text={part.text} isStreaming={false} />
               );
             }
 
@@ -103,23 +96,6 @@ export function MessageItem({
             }
           })}
         </div>
-
-        {message.streamingState?.isStreaming && (
-          <div style={{ 
-            fontSize: "0.75rem", 
-            color: "#6b7280", 
-            marginTop: "0.5rem",
-            fontStyle: "italic" 
-          }}>
-            {message.streamingState.currentStep === "text-start" && "Starting response..."}
-            {message.streamingState.currentStep === "text-streaming" && "●"}
-            {message.streamingState.currentStep === "text-end" && "Finishing..."}
-            {message.streamingState.currentStep === "thinking" && "Thinking..."}
-            {(message.streamingState.currentStep === "tool-input" || 
-              message.streamingState.currentStep === "tool-execution" || 
-              message.streamingState.currentStep === "tool-output") && "Using tool..."}
-          </div>
-        )}
       </div>
     );
   }
@@ -169,14 +145,7 @@ export function MessageItem({
 
             if (part.type === "reasoning") {
               return (
-                <Thinking
-                  key={index}
-                  text={part.text}
-                  isStreaming={
-                    message.streamingState?.isStreaming &&
-                    message.streamingState?.currentStep === "thinking"
-                  }
-                />
+                <Thinking key={index} text={part.text} isStreaming={false} />
               );
             }
 
@@ -185,23 +154,6 @@ export function MessageItem({
             }
           })}
         </div>
-
-        {message.streamingState?.isStreaming && (
-          <div style={{ 
-            fontSize: "0.75rem", 
-            color: "#6b7280", 
-            marginTop: "0.5rem",
-            fontStyle: "italic" 
-          }}>
-            {message.streamingState.currentStep === "text-start" && "Starting response..."}
-            {message.streamingState.currentStep === "text-streaming" && "●"}
-            {message.streamingState.currentStep === "text-end" && "Finishing..."}
-            {message.streamingState.currentStep === "thinking" && "Thinking..."}
-            {(message.streamingState.currentStep === "tool-input" || 
-              message.streamingState.currentStep === "tool-execution" || 
-              message.streamingState.currentStep === "tool-output") && "Using tool..."}
-          </div>
-        )}
       </div>
     </div>
   );

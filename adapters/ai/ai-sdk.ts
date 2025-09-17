@@ -120,10 +120,6 @@ export class AISDKAdapter implements AIAdapter {
 
             if (data === "[DONE]") {
               if (currentMessage) {
-                // Finalize message with completed tool calls
-                if (toolCalls.size > 0) {
-                  currentMessage.toolCalls = Array.from(toolCalls.values());
-                }
                 this.emit(currentMessage as Message);
               }
               return;
@@ -237,12 +233,6 @@ export class AISDKAdapter implements AIAdapter {
             inputStream: "",
           };
           currentMessage.parts = [...(currentMessage.parts || []), toolPart];
-
-          currentMessage.streamingState = {
-            isStreaming: true,
-            currentStep: "tool-input",
-            activeToolCallId: event.toolCallId,
-          };
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
@@ -258,8 +248,6 @@ export class AISDKAdapter implements AIAdapter {
           toolCalls.set(event.toolCallId, toolCall);
 
           if (currentMessage) {
-            currentMessage.toolCalls = Array.from(toolCalls.values());
-
             // Update tool message part with input stream
             const toolPart = currentMessage.parts?.find(
               (p) =>
@@ -293,8 +281,6 @@ export class AISDKAdapter implements AIAdapter {
           toolCalls.set(event.toolCallId, toolCall);
 
           if (currentMessage) {
-            currentMessage.toolCalls = Array.from(toolCalls.values());
-
             // Update tool message part status
             const toolPart = currentMessage.parts?.find(
               (p) =>
@@ -311,12 +297,6 @@ export class AISDKAdapter implements AIAdapter {
             if (toolPart) {
               toolPart.status = "pending";
             }
-
-            currentMessage.streamingState = {
-              isStreaming: true,
-              currentStep: "tool-execution",
-              activeToolCallId: event.toolCallId,
-            };
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
@@ -334,12 +314,6 @@ export class AISDKAdapter implements AIAdapter {
           };
 
           if (currentMessage) {
-            currentMessage.toolCalls = Array.from(toolCalls.values());
-            currentMessage.toolResults = [
-              ...(currentMessage.toolResults || []),
-              toolResult,
-            ];
-
             // Update tool message part status
             const toolPart = currentMessage.parts?.find(
               (p) =>
@@ -356,12 +330,6 @@ export class AISDKAdapter implements AIAdapter {
             if (toolPart) {
               toolPart.status = "completed";
             }
-
-            currentMessage.streamingState = {
-              isStreaming: true,
-              currentStep: "tool-output",
-              activeToolCallId: event.toolCallId,
-            };
           }
         }
         return { message: currentMessage, textContent, shouldEmit: true };
@@ -370,9 +338,6 @@ export class AISDKAdapter implements AIAdapter {
         return { message: currentMessage, textContent, shouldEmit: true };
 
       case "finish":
-        if (currentMessage?.streamingState) {
-          currentMessage.streamingState.isStreaming = false;
-        }
         return { message: currentMessage, textContent, shouldEmit: true };
 
       default:

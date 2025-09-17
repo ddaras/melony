@@ -16,34 +16,21 @@ export type Role = "user" | "assistant" | "system";
 export type MessagePart =
   | { type: "text"; text: string }
   | { type: "reasoning"; text: string }
-  | { type: "tool"; toolCallId: string; status: string; inputStream?: string };
+  | {
+      type: "tool";
+      toolCallId: string;
+      status: string;
+      inputStream?: string;
+      input?: Record<string, any>;
+      output?: any;
+    };
 
 export type Message = {
   id: string;
   role: Role;
   parts: MessagePart[];
-  toolCalls?: ToolCall[]; // Support multiple tool calls
-  toolResults?: ToolResult[]; // Support multiple tool results
   createdAt: number;
   metadata?: Record<string, any>;
-  streamingState?: {
-    isStreaming: boolean;
-    currentStep?:
-      | "thinking"
-      | "tool-input"
-      | "tool-execution"
-      | "tool-output"
-      | "response"
-      | "start"
-      | "start-step"
-      | "text-start"
-      | "text-streaming"
-      | "text-end"
-      | "finish-step"
-      | "finish";
-    activeToolCallId?: string;
-    textId?: string; // ID for the current text being streamed
-  };
 };
 
 export type FormField = {
@@ -54,7 +41,7 @@ export type FormField = {
 };
 
 // Streaming event types to match the new message flow
-export type StreamingEvent = 
+export type StreamingEvent =
   | { type: "start" }
   | { type: "start-step" }
   | { type: "text-start"; id: string; providerMetadata?: Record<string, any> }

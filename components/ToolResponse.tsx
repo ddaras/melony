@@ -135,42 +135,6 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({
             </pre>
           </div>
         )}
-
-        {/* Show corresponding tool result */}
-        {message?.toolResults?.find(
-          (result) => result.toolCallId === toolCall.id
-        ) && (
-          <div>
-            <div
-              style={{
-                fontSize: "0.75rem",
-                color: "#6b7280",
-                marginBottom: "0.25rem",
-              }}
-            >
-              Result:
-            </div>
-            <pre
-              style={{
-                fontSize: "0.75rem",
-                backgroundColor: "#ffffff",
-                border: "1px solid #d1d5db",
-                borderRadius: "0.25rem",
-                padding: "0.5rem",
-                overflow: "auto",
-                fontFamily: "monospace",
-              }}
-            >
-              {JSON.stringify(
-                message.toolResults.find(
-                  (result) => result.toolCallId === toolCall.id
-                )?.output,
-                null,
-                2
-              )}
-            </pre>
-          </div>
-        )}
       </div>
     );
   };
@@ -180,44 +144,6 @@ export const ToolResponse: React.FC<ToolResponseProps> = ({
       className={className}
       style={className ? undefined : defaultContainerStyle}
     >
-      {/* Render streaming state indicator */}
-      {message?.streamingState?.isStreaming && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.5rem",
-            backgroundColor: "#dbeafe", // bg-blue-50
-            borderRadius: "0.375rem",
-            fontSize: "0.875rem",
-            color: "#1e40af", // text-blue-800
-          }}
-        >
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "50%",
-              backgroundColor: "#3b82f6",
-              animation: "pulse 2s infinite",
-            }}
-          />
-          {message.streamingState.currentStep === "thinking" && "Thinking..."}
-          {message.streamingState.currentStep === "tool-input" &&
-            "Preparing tool input..."}
-          {message.streamingState.currentStep === "tool-execution" &&
-            "Executing tool..."}
-          {message.streamingState.currentStep === "tool-output" &&
-            "Processing result..."}
-          {message.streamingState.currentStep === "response" &&
-            "Generating response..."}
-        </div>
-      )}
-
-      {/* Render tool calls */}
-      {message?.toolCalls?.map((toolCall, i) => renderToolCall(toolCall, i))}
-
       {/* Render regular message parts */}
       {parts.map((b, i) => {
         switch (b.type) {

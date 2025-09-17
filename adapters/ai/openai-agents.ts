@@ -114,7 +114,6 @@ export class OpenAIAgentsAdapter implements AIAdapter {
               role: "assistant",
               parts: [{ type: "text", text: "" }],
               createdAt: Date.now(),
-              streamingState: { isStreaming: true, currentStep: "response" },
             };
           }
 
@@ -137,9 +136,6 @@ export class OpenAIAgentsAdapter implements AIAdapter {
           const finish = () => {
             if (finished) return;
             finished = true;
-            if (currentMessage?.streamingState) {
-              currentMessage.streamingState.isStreaming = false;
-            }
             this.emit(currentMessage!);
           };
 

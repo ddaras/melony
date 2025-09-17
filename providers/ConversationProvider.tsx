@@ -26,7 +26,7 @@ export function ConversationProvider({
   );
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [isStreaming] = useState<boolean>(false);
 
   // Listen to backend stream
   useEffect(() => {
@@ -50,12 +50,6 @@ export function ConversationProvider({
           updatedMessages = [...prev, msg];
         }
 
-        // Check if any message is currently streaming
-        const hasStreamingMessage = updatedMessages.some(
-          (message) => message.streamingState?.isStreaming === true
-        );
-        setIsStreaming(hasStreamingMessage);
-
         return updatedMessages;
       });
     });
@@ -73,7 +67,6 @@ export function ConversationProvider({
     const newMessages = [...messages, full];
 
     setMessages(newMessages);
-    setIsStreaming(true);
     defaultAdapter.send(message);
   };
 

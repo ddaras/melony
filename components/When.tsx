@@ -12,7 +12,12 @@ export const When: React.FC<WhenProps> = ({ tool, children }) => {
   if (!lastMessage) return null;
 
   // Check tool match
-  if (tool && lastMessage.toolCalls?.some((tc) => tc.name === tool))
+  if (
+    tool &&
+    lastMessage.parts.some(
+      (part) => part.type === "tool" && part.toolCallId === tool
+    )
+  )
     return <>{children}</>;
 
   return null;
