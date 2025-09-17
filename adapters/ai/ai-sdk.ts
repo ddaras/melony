@@ -1,4 +1,4 @@
-import { Message } from "../../core/types";
+import { Message, ToolMessagePart } from "../../core/types";
 import {
   AIAdapter,
   AIAdapterOptions,
@@ -232,7 +232,10 @@ export class AISDKAdapter implements AIAdapter {
             status: "streaming",
             inputStream: "",
           };
-          currentMessage.parts = [...(currentMessage.parts || []), toolPart];
+          currentMessage.parts = [
+            ...(currentMessage.parts || []),
+            toolPart as ToolMessagePart,
+          ];
         }
         return { message: currentMessage, textContent, shouldEmit: true };
 
