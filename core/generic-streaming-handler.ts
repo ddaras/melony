@@ -1,23 +1,20 @@
 import {
   Message,
-  MessagePart,
   StreamingEvent,
   ToolMessagePart,
-} from "../../core/types";
-import {
-  AIAdapter,
-  AIAdapterOptions,
   SubscribeCallback,
   Subscription,
-} from "../../core/adapter";
+  StreamingHandler,
+  StreamingHandlerOptions,
+} from "./types";
 
-export class DefaultAdapter implements AIAdapter {
+export class GenericStreamingAdapter implements StreamingHandler {
   private endpoint: string;
   private headers: Record<string, string>;
   private debug: boolean;
   private subscribers = new Set<SubscribeCallback>();
 
-  constructor(options: Partial<AIAdapterOptions> = {}) {
+  constructor(options: Partial<StreamingHandlerOptions> = {}) {
     this.endpoint = options.endpoint || "";
     this.headers = options.headers || {};
     this.debug = (options as any)?.debug || false;
@@ -267,4 +264,4 @@ export class DefaultAdapter implements AIAdapter {
   }
 }
 
-export default DefaultAdapter;
+export default GenericStreamingAdapter;

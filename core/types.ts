@@ -80,3 +80,21 @@ export type StreamingEvent =
     }
   | { type: "finish-step" }
   | { type: "finish" };
+
+export type SubscribeCallback = (message: Message) => void;
+export type Subscription = { unsubscribe: () => void };
+
+
+// streaming handler
+export interface StreamingHandler {
+  send(messages: string): Promise<void>;
+  subscribe(callback: SubscribeCallback): Subscription;
+  dispose?(): void;
+}
+
+export interface StreamingHandlerOptions {
+  endpoint: string;
+  headers?: Record<string, string>;
+  body?: Record<string, any>;
+  debug?: boolean;
+}

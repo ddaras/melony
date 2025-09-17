@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { Message } from "../core/types";
-import DefaultAdapter from "../adapters/ai/default";
-import { AIAdapterOptions } from "../core/adapter";
+import { Message } from "../../core/types";
+import GenericStreamingAdapter from "../../core/generic-streaming-handler";
+import { StreamingHandlerOptions } from "../../core/types";
 
 type ConversationContextType = {
   messages: Message[];
@@ -15,14 +15,14 @@ export const ConversationContext =
 
 export function ConversationProvider({
   children,
-  adapterOptions,
+  streamingHandlerOptions,
 }: {
   children: React.ReactNode;
-  adapterOptions?: AIAdapterOptions;
+  streamingHandlerOptions?: StreamingHandlerOptions;
 }) {
   const defaultAdapter = useMemo(
-    () => new DefaultAdapter(adapterOptions),
-    [adapterOptions]
+    () => new GenericStreamingAdapter(streamingHandlerOptions),
+    [streamingHandlerOptions]
   );
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -31,7 +31,7 @@ export function ConversationProvider({
   // Listen to backend stream
   useEffect(() => {
     const subscription = defaultAdapter.subscribe((msg: Message) => {
-      if (adapterOptions?.debug) console.log("msg", msg);
+      if (streamingHandlerOptions?.debug) console.log("msg", msg);
 
       setMessages((prev) => {
         // Check if this is an update to an existing assistant message
