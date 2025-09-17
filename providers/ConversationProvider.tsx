@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { Message } from "../core/types";
 import DefaultAdapter from "../adapters/ai/default";
 import { AIAdapterOptions } from "../core/adapter";
@@ -20,7 +20,10 @@ export function ConversationProvider({
   children: React.ReactNode;
   adapterOptions?: AIAdapterOptions;
 }) {
-  const defaultAdapter = new DefaultAdapter(adapterOptions);
+  const defaultAdapter = useMemo(
+    () => new DefaultAdapter(adapterOptions),
+    [adapterOptions]
+  );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
