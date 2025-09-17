@@ -69,10 +69,10 @@ export class DefaultAdapter implements AIAdapter {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          console.log("line", line);
+          if (this.debug) console.log("line", line);
 
-          if (!line.startsWith("message\t")) continue;
-          const data = line.slice(8).trim(); // Remove "message\t" prefix
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim(); // Remove "data: " prefix
           if (!data) continue;
           if (data === "[DONE]") {
             // Finalize any remaining messages
