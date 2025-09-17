@@ -13,17 +13,30 @@ export type ToolResult = {
 
 export type Role = "user" | "assistant" | "system";
 
+export type ToolMessagePart = {
+  type: "tool";
+  toolCallId: string;
+  toolName: string;
+  status: "pending" | "streaming" | "completed" | "error";
+  inputStream?: string;
+  input?: Record<string, any>;
+  output?: any;
+};
+
+export type TextMessagePart = {
+  type: "text";
+  text: string;
+};
+
+export type ReasoningMessagePart = {
+  type: "reasoning";
+  text: string;
+};
+
 export type MessagePart =
-  | { type: "text"; text: string }
-  | { type: "reasoning"; text: string }
-  | {
-      type: "tool";
-      toolCallId: string;
-      status: string;
-      inputStream?: string;
-      input?: Record<string, any>;
-      output?: any;
-    };
+  | TextMessagePart
+  | ReasoningMessagePart
+  | ToolMessagePart;
 
 export type Message = {
   id: string;
@@ -40,12 +53,30 @@ export type FormField = {
   options?: string[];
 };
 
-// Streaming event types to match the new message flow
+// Streaming event type
 export type StreamingEvent =
   | { type: "start" }
   | { type: "start-step" }
-  | { type: "text-start"; id: string; providerMetadata?: Record<string, any> }
+  | { type: "text-start"; id: string }
   | { type: "text-delta"; id: string; delta: string }
   | { type: "text-end"; id: string }
+  | { type: "tool-start"; id: string; toolCallId: string; toolName: string }
+  | { type: "tool-delta"; id: string; toolCallId: string; delta: string }
+  | { type: "tool-end"; id: string; toolCallId: string }
+  | {
+      type: "tool-call";
+      id: string;
+      toolCallId: string;
+      toolName: string;
+      input: Record<string, any>;
+    }
+  | {
+      type: "tool-result";
+      id: string;
+      toolCallId: string;
+      toolName: string;
+      input: Record<string, any>;
+      output: any;
+    }
   | { type: "finish-step" }
   | { type: "finish" };

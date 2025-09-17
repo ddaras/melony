@@ -92,7 +92,32 @@ export function MessageItem({
             }
 
             if (part.type === "tool") {
-              return <ToolResponse key={index} parts={[part]} />;
+              switch (part.status) {
+                case "streaming":
+                  return <>Using {part.toolName}...</>;
+                case "pending":
+                  if (part.input) {
+                    return (
+                      <>
+                        Using {part.toolName}... with input:{" "}
+                        {JSON.stringify(part.input)}
+                      </>
+                    );
+                  }
+                  return <>Using {part.toolName}...</>;
+                case "completed":
+                  return (
+                    <>
+                      Using {part.toolName}... completed. results:{" "}
+                      {part.output?.toString()}
+                    </>
+                  );
+                case "error":
+                  return <>Error using {part.toolName}</>;
+
+                default:
+                  return <>unknown state of the tool message</>;
+              }
             }
           })}
         </div>

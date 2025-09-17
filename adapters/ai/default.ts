@@ -1,4 +1,9 @@
-import { Message, StreamingEvent } from "../../core/types";
+import {
+  Message,
+  MessagePart,
+  StreamingEvent,
+  ToolMessagePart,
+} from "../../core/types";
 import {
   AIAdapter,
   AIAdapterOptions,
@@ -118,7 +123,7 @@ export class DefaultAdapter implements AIAdapter {
           role: "assistant",
           parts: [{ type: "text", text: "" }],
           createdAt: Date.now(),
-          metadata: event.providerMetadata,
+          metadata: {},
         };
         messageMap.set(event.id, newMessage);
         this.emit(newMessage);
@@ -128,10 +133,7 @@ export class DefaultAdapter implements AIAdapter {
         // Append text to existing message
         const message = messageMap.get(event.id);
         if (message) {
-          const textPart = message.parts.find((p) => p.type === "text") as {
-            type: "text";
-            text: string;
-          };
+          const textPart = message.parts.find((p) => p.type === "text");
           if (textPart) {
             textPart.text += event.delta;
             this.emit(message);
@@ -145,6 +147,89 @@ export class DefaultAdapter implements AIAdapter {
         if (endMessage) {
           this.emit(endMessage);
         }
+        break;
+
+      // tools
+      case "tool-start":
+        // Create a new message for this tool stream
+        const newToolMessage: Message = {
+          id: event.id,
+          role: "assistant",
+          parts: [
+            {
+              type: "tool",
+              toolCallId: event.toolCallId,
+              toolName: event.toolName,
+              status: "streaming",
+              inputStream: "",
+            },
+          ],
+          createdAt: Date.now(),
+        };
+        messageMap.set(event.id, newToolMessage);
+        this.emit(newToolMessage);
+        break;
+
+      case "tool-delta":
+        // Append text to existing tool message
+        const toolMessage = messageMap.get(event.id);
+        if (toolMessage) {
+          const toolPart = toolMessage.parts.find(
+            (p) => p.type === "tool" && p.toolCallId === event.toolCallId
+          ) as ToolMessagePart;
+          if (toolPart) {
+            toolPart.inputStream += event.delta;
+            this.emit(toolMessage);
+          }
+        }
+        break;
+
+      case "tool-end":
+        // nothing yet
+        break;
+
+      // input available
+      case "tool-call":
+        // Create a new message for this tool call
+        const newToolCallMessage: Message = {
+          id: event.id,
+          role: "assistant",
+          parts: [
+            {
+              type: "tool",
+              toolCallId: event.toolCallId,
+              toolName: event.toolName,
+              status: "pending",
+              input: event.input,
+            },
+          ],
+          createdAt: Date.now(),
+        };
+        messageMap.set(event.id, newToolCallMessage);
+        this.emit(newToolCallMessage);
+        break;
+
+      // output available
+      case "tool-result":
+        // Create a new message for this tool result
+        const newToolResultMessage: Message = {
+          id: event.id,
+          role: "assistant",
+          parts: [
+            {
+              type: "tool",
+              toolCallId: event.toolCallId,
+              toolName: event.toolName,
+              status: "completed",
+              output: event.output,
+              input: event.input,
+            },
+          ],
+          createdAt: Date.now(),
+          metadata: {},
+        };
+        messageMap.set(event.id, newToolResultMessage);
+        this.emit(newToolResultMessage);
         break;
 
       case "finish-step":
