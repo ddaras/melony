@@ -127,7 +127,7 @@ export function MyChat() {
 - **ConversationProvider**
 
   - `options`: `{ api: string; headers?: Record<string, string>; debug?: boolean }`
-    - `endpoint` is your POST route that returns `text/event-stream`.
+    - `api` is your POST route that returns `text/event-stream`.
 
 - **useConversation() →** `{ messages, send, status }`
   - `messages`: array of chat `Message` objects
