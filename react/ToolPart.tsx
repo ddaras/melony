@@ -1,4 +1,4 @@
-import type { ToolMessagePart } from "../../core/types";
+import type { ToolMessagePart } from "../core/types";
 
 type ToolPartProps = {
   part: ToolMessagePart;

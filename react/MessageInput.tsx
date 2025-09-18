@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useConversation } from "../hooks/useConversation";
+import { useConversation } from "./useConversation";
 
 type MessageInputProps = {
   placeholder?: string;

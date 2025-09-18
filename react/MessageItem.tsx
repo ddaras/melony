@@ -1,4 +1,4 @@
-import type { Message } from "../../core/types";
+import type { Message } from "../core/types";
 import { Avatar } from "./Avatar";
 import { TextPart } from "./TextPart";
 import { ReasoningPart } from "./ReasoningPart";

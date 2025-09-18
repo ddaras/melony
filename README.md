@@ -81,17 +81,18 @@ export async function POST(req: Request) {
 import { useConversation } from "melony";
 
 export function MyChat() {
-  const { messages, send, lastMessage, isStreaming } = useConversation();
+  const { messages, send } = useConversation();
 
   return (
     <div>
       <ul>
         {messages.map((m) => (
-          <li key={m.id}>{m.parts.map((p) => (p.type === "text" ? p.text : ""))}</li>
+          <li key={m.id}>
+            {m.parts.map((p) => (p.type === "text" ? p.text : ""))}
+          </li>
         ))}
       </ul>
-      <button onClick={() => send("Hello")} disabled={isStreaming}>Send</button>
-      <div>Last: {lastMessage ? "yes" : "no"}</div>
+      <button onClick={() => send("Hello")}>Send</button>
     </div>
   );
 }
@@ -100,14 +101,13 @@ export function MyChat() {
 ### API
 
 - **ConversationProvider**
+
   - `streamingHandlerOptions`: `{ endpoint: string; headers?: Record<string, string>; debug?: boolean }`
     - `endpoint` is your POST route that returns `text/event-stream`.
 
-- **useConversation() →** `{ messages, send, isStreaming, lastMessage }`
+- **useConversation() →** `{ messages, send }`
   - `messages`: array of chat `Message` objects
   - `send(message: string)`: send a user message
-  - `isStreaming`: whether the assistant is currently streaming (informational)
-  - `lastMessage`: convenience reference to the most recent message
 
 ### Components (optional)
 

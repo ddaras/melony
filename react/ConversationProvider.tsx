@@ -1,13 +1,11 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { Message } from "../../core/types";
-import GenericStreamingAdapter from "../../core/generic-streaming-handler";
-import { StreamingHandlerOptions } from "../../core/types";
+import { Message } from "../core/types";
+import { StreamingHandlerOptions } from "../core/types";
+import { GenericStreamingAdapter } from "../core/generic-streaming-handler";
 
 type ConversationContextType = {
   messages: Message[];
   send: (message: string) => void;
-  isStreaming: boolean;
-  lastMessage: Message | null;
 };
 
 export const ConversationContext =
@@ -15,23 +13,22 @@ export const ConversationContext =
 
 export function ConversationProvider({
   children,
-  streamingHandlerOptions,
+  options,
 }: {
   children: React.ReactNode;
-  streamingHandlerOptions?: StreamingHandlerOptions;
+  options?: StreamingHandlerOptions;
 }) {
   const defaultAdapter = useMemo(
-    () => new GenericStreamingAdapter(streamingHandlerOptions),
-    [streamingHandlerOptions]
+    () => new GenericStreamingAdapter(options),
+    [options]
   );
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming] = useState<boolean>(false);
 
   // Listen to backend stream
   useEffect(() => {
     const subscription = defaultAdapter.subscribe((msg: Message) => {
-      if (streamingHandlerOptions?.debug) console.log("msg", msg);
+      if (options?.debug) console.log("msg", msg);
 
       setMessages((prev) => {
         // Check if this is an update to an existing assistant message
@@ -75,9 +72,6 @@ export function ConversationProvider({
       value={{
         messages,
         send,
-        isStreaming,
-        lastMessage:
-          messages?.length > 0 ? messages[messages.length - 1] : null,
       }}
     >
       {children}

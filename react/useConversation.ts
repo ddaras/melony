@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ConversationContext } from "../components/ConversationProvider";
+import { ConversationContext } from "./ConversationProvider";
 
 export const useConversation = () => {
   const ctx = useContext(ConversationContext);

@@ -1,4 +1,4 @@
-import { useConversation } from "../hooks/useConversation";
+import { useConversation } from "./useConversation";
 import { MessageItem } from "./MessageItem";
 
 type MessageListProps = {

@@ -3,7 +3,6 @@ import React from "react";
 type ThinkingProps = {
   text?: string;
   className?: string;
-  isStreaming?: boolean;
 };
 
 export function Thinking({ text, className }: ThinkingProps) {

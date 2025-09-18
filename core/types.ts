@@ -55,8 +55,8 @@ export type FormField = {
 
 // Streaming event type
 export type StreamingEvent =
-  | { type: "start", id: string }
-  | { type: "start-step", id: string }
+  | { type: "start"; id: string }
+  | { type: "start-step"; id: string }
   | { type: "text-start"; id: string }
   | { type: "text-delta"; id: string; delta: string }
   | { type: "text-end"; id: string }
@@ -78,12 +78,11 @@ export type StreamingEvent =
       input: Record<string, any>;
       output: any;
     }
-  | { type: "finish-step", id: string }
-  | { type: "finish", id: string };
+  | { type: "finish-step"; id: string }
+  | { type: "finish"; id: string };
 
 export type SubscribeCallback = (message: Message) => void;
 export type Subscription = { unsubscribe: () => void };
-
 
 // streaming handler
 export interface StreamingHandler {
@@ -93,7 +92,7 @@ export interface StreamingHandler {
 }
 
 export interface StreamingHandlerOptions {
-  endpoint: string;
+  api: string;
   headers?: Record<string, string>;
   body?: Record<string, any>;
   debug?: boolean;

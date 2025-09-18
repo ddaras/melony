@@ -1,17 +1,13 @@
 "use client";
 
-// Components
-export * from "./react/components/Conversation";
-export * from "./react/components/MessageList";
-export * from "./react/components/MessageItem";
-export * from "./react/components/MessageInput";
-export * from "./react/components/Thinking";
-export * from "./react/components/TextPart";
-export * from "./react/components/ReasoningPart";
-export * from "./react/components/ToolPart";
+export * from "./react/ConversationProvider";
+export * from "./react/Conversation";
+export * from "./react/MessageList";
+export * from "./react/MessageItem";
+export * from "./react/MessageInput";
+export * from "./react/Thinking";
+export * from "./react/TextPart";
+export * from "./react/ReasoningPart";
+export * from "./react/ToolPart";
 
-// Hooks
-export * from "./react/hooks/useConversation";
-
-// Providers
-export * from "./react/components/ConversationProvider";
+export * from "./react/useConversation";

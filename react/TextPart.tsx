@@ -1,4 +1,4 @@
-import type { TextMessagePart } from "../../core/types";
+import type { TextMessagePart } from "../core/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
