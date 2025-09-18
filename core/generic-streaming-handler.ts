@@ -13,6 +13,7 @@ export class GenericStreamingAdapter implements StreamingHandler {
   private headers: Record<string, string>;
   private debug: boolean;
   private subscribers = new Set<SubscribeCallback>();
+  private completionCallbacks = new Set<() => void>();
 
   constructor(options: Partial<StreamingHandlerOptions> = {}) {
     this.endpoint = options.api || "";
@@ -25,8 +26,14 @@ export class GenericStreamingAdapter implements StreamingHandler {
     return { unsubscribe: () => this.subscribers.delete(callback) };
   }
 
+  onCompletion(callback: () => void): Subscription {
+    this.completionCallbacks.add(callback);
+    return { unsubscribe: () => this.completionCallbacks.delete(callback) };
+  }
+
   dispose(): void {
     this.subscribers.clear();
+    this.completionCallbacks.clear();
   }
 
   async send(message: string): Promise<void> {
@@ -51,6 +58,8 @@ export class GenericStreamingAdapter implements StreamingHandler {
       await this.processStream(response.body);
     } catch (error) {
       this.emitError(error);
+      // Also signal completion in case of error so status doesn't get stuck
+      this.emitCompletion();
     }
   }
 
@@ -80,6 +89,7 @@ export class GenericStreamingAdapter implements StreamingHandler {
             messageAssembler.getAllMessages().forEach((msg) => {
               this.emit(msg);
             });
+            this.emitCompletion();
             return;
           }
 
@@ -96,8 +106,15 @@ export class GenericStreamingAdapter implements StreamingHandler {
           if (updatedMessage) {
             this.emit(updatedMessage);
           }
+
+          // Check for finish events to signal completion
+          if (event.type === "finish") {
+            this.emitCompletion();
+          }
         }
       }
+      // If we exit the loop without seeing [DONE] or finish event, still signal completion
+      this.emitCompletion();
     } finally {
       reader.releaseLock();
     }
@@ -106,6 +123,10 @@ export class GenericStreamingAdapter implements StreamingHandler {
 
   private emit(message: Message): void {
     this.subscribers.forEach((cb) => cb(message));
+  }
+
+  private emitCompletion(): void {
+    this.completionCallbacks.forEach((cb) => cb());
   }
 
   private emitError(error: unknown): void {

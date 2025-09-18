@@ -15,16 +15,7 @@ export class MessageAssembler {
   processEvent(event: StreamingEvent): Message | undefined {
     switch (event.type) {
       case "start":
-        // Global start - create initial thinking message
-        const startMessage: Message = {
-          id: event.id,
-          role: "assistant",
-          parts: [{ type: "text", text: "Thinking..." }],
-          createdAt: Date.now(),
-          metadata: {},
-        };
-        this.messageMap.set(event.id, startMessage);
-        return startMessage;
+        return undefined;
 
       case "start-step":
         // Step start - could indicate thinking or tool use is about to begin
@@ -180,11 +171,11 @@ export class MessageAssembler {
    */
   static assembleFromEvents(events: StreamingEvent[]): Message[] {
     const assembler = new MessageAssembler();
-    
+
     for (const event of events) {
       assembler.processEvent(event);
     }
-    
+
     return assembler.getAllMessages();
   }
 
@@ -197,12 +188,12 @@ export class MessageAssembler {
     if (!message) return undefined;
 
     // Clean up any streaming states for final message
-    const finalParts = message.parts.map(part => {
+    const finalParts = message.parts.map((part) => {
       if (part.type === "tool" && part.status === "streaming") {
         return {
           ...part,
           status: "completed" as const,
-          input: part.inputStream ? JSON.parse(part.inputStream) : part.input
+          input: part.inputStream ? JSON.parse(part.inputStream) : part.input,
         };
       }
       return part;
@@ -210,7 +201,7 @@ export class MessageAssembler {
 
     return {
       ...message,
-      parts: finalParts
+      parts: finalParts,
     };
   }
 }
