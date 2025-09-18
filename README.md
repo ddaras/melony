@@ -75,13 +75,57 @@ export async function POST(req: Request) {
 }
 ```
 
+### AI SDK Integration
+
+For advanced use cases, melony provides a direct adapter for the Vercel AI SDK that gives you more control over the streaming process:
+
+```ts
+// app/api/ai/route.ts
+import { streamText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { createMelonyStreamFromAISDK } from "melony";
+
+export const runtime = "edge";
+
+export async function POST(req: Request) {
+  const { message } = await req.json();
+
+  const result = await streamText({
+    model: openai("gpt-4o-mini"),
+    messages: [{ role: "user", content: message }],
+  });
+
+  // Use the melony adapter for more control
+  const stream = createMelonyStreamFromAISDK(result.fullStream, {
+    onFinish: ({ message }) => {
+      console.log("Streaming finished:", message);
+      // Save to database, log, etc.
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
+  });
+}
+```
+
+The `createMelonyStreamFromAISDK` function:
+- Converts AI SDK stream chunks to melony-compatible events
+- Supports text streaming, tool calls, and reasoning steps
+- Provides `onFinish` callback for post-processing
+- Handles error states and cleanup automatically
+
 ### Make your own UI with the hook
 
 ```tsx
 import { useConversation } from "melony";
 
 export function MyChat() {
-  const { messages, send } = useConversation();
+  const { messages, send, status } = useConversation();
 
   return (
     <div>
@@ -92,7 +136,13 @@ export function MyChat() {
           </li>
         ))}
       </ul>
-      <button onClick={() => send("Hello")}>Send</button>
+      <button 
+        onClick={() => send("Hello")} 
+        disabled={status === "streaming"}
+      >
+        {status === "streaming" ? "Sending..." : "Send"}
+      </button>
+      {status === "error" && <p>Error occurred. Please try again.</p>}
     </div>
   );
 }
@@ -105,9 +155,10 @@ export function MyChat() {
   - `streamingHandlerOptions`: `{ endpoint: string; headers?: Record<string, string>; debug?: boolean }`
     - `endpoint` is your POST route that returns `text/event-stream`.
 
-- **useConversation() →** `{ messages, send }`
+- **useConversation() →** `{ messages, send, status }`
   - `messages`: array of chat `Message` objects
   - `send(message: string)`: send a user message
+  - `status`: current conversation state (`"idle"` | `"requested"` | `"streaming"` | `"error"`)
 
 ### Components (optional)
 
