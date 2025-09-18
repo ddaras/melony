@@ -11,8 +11,8 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",
-    "pub": "npm run version:minor && npm publish --access public",
-    "version:patch": "npm version patch"
+    "pub": "npm run version:patch && npm publish --access public",
+    "version:patch": "npm version minor"
   },
   "keywords": [
     "react",
