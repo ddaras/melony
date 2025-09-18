@@ -33,7 +33,7 @@ import {
   Conversation,
   MessageList,
   MessageInput,
-} from "melony";
+} from "melony/react";
 
 export default function Chat() {
   return (
@@ -99,7 +99,7 @@ The `createMelonyStreamFromAISDK` function:
 ### Make your own UI with the hook
 
 ```tsx
-import { useConversation } from "melony";
+import { useConversation } from "melony/react";
 
 export function MyChat() {
   const { messages, send, status } = useConversation();
