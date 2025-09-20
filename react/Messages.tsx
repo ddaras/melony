@@ -1,23 +1,23 @@
-import { useConversation } from "./useConversation";
-import { MessageItem } from "./MessageItem";
+import { useAgent } from "./Agent";
+import { Message } from "./Message";
 
-type MessageListProps = {
+type MessagesProps = {
   userBubbleClassName?: string;
   assistantBubbleClassName?: string;
   systemBubbleClassName?: string;
 };
 
-export function MessageList({
+export function Messages({
   userBubbleClassName,
   assistantBubbleClassName,
   systemBubbleClassName,
-}: MessageListProps) {
-  const { messages } = useConversation();
+}: MessagesProps) {
+  const { messages } = useAgent();
 
   return (
     <>
       {messages.map((message) => (
-        <MessageItem
+        <Message
           key={message.id}
           message={message}
           userBubbleClassName={userBubbleClassName}

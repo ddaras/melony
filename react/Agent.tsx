@@ -1,18 +1,23 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
-import { Message } from "../core/types";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { BaseMessage } from "../core/types";
 import { StreamingHandlerOptions } from "../core/types";
 import { GenericStreamingAdapter } from "../core/generic-streaming-handler";
 
-type ConversationContextType = {
-  messages: Message[];
-  send: (message: string) => Promise<void>;
+type AgentContextType = {
+  messages: BaseMessage[];
+  prompt: (message: string) => Promise<void>;
   status: "idle" | "requested" | "streaming" | "error";
 };
 
-export const ConversationContext =
-  createContext<ConversationContextType | null>(null);
+export const AgentContext = createContext<AgentContextType | null>(null);
 
-export function ConversationProvider({
+export function Agent({
   children,
   options,
 }: {
@@ -24,12 +29,14 @@ export function ConversationProvider({
     [options]
   );
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [status, setStatus] = useState<"idle" | "requested" | "streaming" | "error">("idle");
+  const [messages, setMessages] = useState<BaseMessage[]>([]);
+  const [status, setStatus] = useState<
+    "idle" | "requested" | "streaming" | "error"
+  >("idle");
 
   // Listen to backend stream
   useEffect(() => {
-    const subscription = defaultAdapter.subscribe((msg: Message) => {
+    const subscription = defaultAdapter.subscribe((msg: BaseMessage) => {
       if (options?.debug) console.log("msg", msg);
 
       // Set status to streaming when we receive the first message
@@ -68,8 +75,8 @@ export function ConversationProvider({
     };
   }, [defaultAdapter]);
 
-  const send = async (message: string) => {
-    const full: Message = {
+  const prompt = async (message: string) => {
+    const full: BaseMessage = {
       id: crypto.randomUUID(),
       createdAt: Date.now(),
       parts: [{ type: "text", text: message }],
@@ -93,14 +100,22 @@ export function ConversationProvider({
   };
 
   return (
-    <ConversationContext.Provider
+    <AgentContext.Provider
       value={{
         messages,
-        send,
+        prompt,
         status,
       }}
     >
       {children}
-    </ConversationContext.Provider>
+    </AgentContext.Provider>
   );
 }
+
+export const useAgent = () => {
+  const context = useContext(AgentContext);
+  if (!context) {
+    throw new Error("useAgent must be used within an AgentProvider");
+  }
+  return context;
+};

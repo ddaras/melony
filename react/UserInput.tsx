@@ -1,25 +1,25 @@
 import React, { useState } from "react";
-import { useConversation } from "./useConversation";
+import { useAgent } from "./Agent";
 
-type MessageInputProps = {
+type UserInputProps = {
   placeholder?: string;
   inputClassName?: string;
   buttonClassName?: string;
   className?: string;
 };
 
-export const MessageInput: React.FC<MessageInputProps> = ({
+export const UserInput: React.FC<UserInputProps> = ({
   placeholder,
   inputClassName,
   buttonClassName,
   className,
 }) => {
   const [text, setText] = useState("");
-  const { send } = useConversation();
+  const { prompt } = useAgent();
 
   const handleSend = () => {
     if (!text) return;
-    send(text);
+    prompt(text);
     setText("");
   };
 

@@ -1,5 +1,5 @@
 import {
-  Message,
+  BaseMessage,
   StreamingEvent,
   SubscribeCallback,
   Subscription,
@@ -121,7 +121,7 @@ export class GenericStreamingAdapter implements StreamingHandler {
   }
 
 
-  private emit(message: Message): void {
+  private emit(message: BaseMessage): void {
     this.subscribers.forEach((cb) => cb(message));
   }
 

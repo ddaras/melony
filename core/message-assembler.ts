@@ -1,18 +1,18 @@
-import { Message, StreamingEvent, ToolMessagePart } from "./types";
+import { BaseMessage, StreamingEvent, ToolMessagePart } from "./types";
 
 /**
  * Utility class for assembling messages from streaming events
  * Can be used both in streaming handlers and in adapters for onFinish callbacks
  */
 export class MessageAssembler {
-  private messageMap = new Map<string, Message>();
+  private messageMap = new Map<string, BaseMessage>();
 
   /**
    * Process a streaming event and update the internal message map
    * @param event - The streaming event to process
    * @returns The updated message if one was modified, undefined otherwise
    */
-  processEvent(event: StreamingEvent): Message | undefined {
+  processEvent(event: StreamingEvent): BaseMessage | undefined {
     switch (event.type) {
       case "start":
         return undefined;
@@ -24,7 +24,7 @@ export class MessageAssembler {
       case "text-start":
         // Create a new message for this text stream or add text part to existing
         const existingMessage = this.messageMap.get(event.id);
-        const newMessage: Message = {
+        const newMessage: BaseMessage = {
           id: event.id,
           role: "assistant",
           parts: [
@@ -56,7 +56,7 @@ export class MessageAssembler {
 
       case "tool-start":
         // Create a new message for this tool stream
-        const newToolMessage: Message = {
+        const newToolMessage: BaseMessage = {
           id: event.id,
           role: "assistant",
           parts: [
@@ -93,7 +93,7 @@ export class MessageAssembler {
 
       case "tool-call":
         // Create a new message for this tool call
-        const newToolCallMessage: Message = {
+        const newToolCallMessage: BaseMessage = {
           id: event.id,
           role: "assistant",
           parts: [
@@ -112,7 +112,7 @@ export class MessageAssembler {
 
       case "tool-result":
         // Create a new message for this tool result
-        const newToolResultMessage: Message = {
+        const newToolResultMessage: BaseMessage = {
           id: event.id,
           role: "assistant",
           parts: [
@@ -147,14 +147,14 @@ export class MessageAssembler {
   /**
    * Get a message by ID
    */
-  getMessage(id: string): Message | undefined {
+  getMessage(id: string): BaseMessage | undefined {
     return this.messageMap.get(id);
   }
 
   /**
    * Get all messages
    */
-  getAllMessages(): Message[] {
+  getAllMessages(): BaseMessage[] {
     return Array.from(this.messageMap.values());
   }
 
@@ -169,7 +169,7 @@ export class MessageAssembler {
    * Process multiple events and return the final assembled messages
    * Useful for onFinish callbacks where you have all events at once
    */
-  static assembleFromEvents(events: StreamingEvent[]): Message[] {
+  static assembleFromEvents(events: StreamingEvent[]): BaseMessage[] {
     const assembler = new MessageAssembler();
 
     for (const event of events) {
@@ -183,7 +183,7 @@ export class MessageAssembler {
    * Create a final message from accumulated events
    * This is useful for onFinish callbacks where you want a single final message
    */
-  getFinalMessage(id: string): Message | undefined {
+  getFinalMessage(id: string): BaseMessage | undefined {
     const message = this.messageMap.get(id);
     if (!message) return undefined;
 

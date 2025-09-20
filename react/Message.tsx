@@ -1,22 +1,22 @@
-import type { Message } from "../core/types";
+import type { BaseMessage } from "../core/types";
 import { Avatar } from "./Avatar";
 import { TextPart } from "./TextPart";
 import { ReasoningPart } from "./ReasoningPart";
 import { ToolPart } from "./ToolPart";
 
-type MessageItemProps = {
-  message: Message;
+type MessageProps = {
+  message: BaseMessage;
   userBubbleClassName?: string;
   assistantBubbleClassName?: string;
   systemBubbleClassName?: string;
 };
 
-export function MessageItem({
+export function Message({
   message,
   userBubbleClassName,
   assistantBubbleClassName,
   systemBubbleClassName,
-}: MessageItemProps) {
+}: MessageProps) {
   const baseBubbleStyle: React.CSSProperties = {
     maxWidth: "90%", // max-w-[80%]
     flex: 1,

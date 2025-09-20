@@ -1,4 +1,4 @@
-import { Message, StreamingEvent } from "../core/types";
+import { BaseMessage, StreamingEvent } from "../core/types";
 import { MessageAssembler } from "../core/message-assembler";
 
 export interface AIStreamChunk {
@@ -20,7 +20,7 @@ export interface AIStreamChunk {
 export function createMelonyStreamFromAISDK(
   fullStream: AsyncIterable<AIStreamChunk>,
   options?: {
-    onFinish?: ({ message }: { message: Message }) => void;
+    onFinish?: ({ message }: { message: BaseMessage }) => void;
   }
 ): ReadableStream {
   const encoder = new TextEncoder();

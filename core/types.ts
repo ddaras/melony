@@ -38,7 +38,7 @@ export type MessagePart =
   | ReasoningMessagePart
   | ToolMessagePart;
 
-export type Message = {
+export type BaseMessage = {
   id: string;
   role: Role;
   parts: MessagePart[];
@@ -81,7 +81,7 @@ export type StreamingEvent =
   | { type: "finish-step"; id: string }
   | { type: "finish"; id: string };
 
-export type SubscribeCallback = (message: Message) => void;
+export type SubscribeCallback = (message: BaseMessage) => void;
 export type Subscription = { unsubscribe: () => void };
 
 // streaming handler

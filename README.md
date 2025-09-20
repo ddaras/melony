@@ -8,18 +8,14 @@ TypeScript‑first, headless React toolkit for building AI chat UIs.
 
 ### The core idea
 
-- **ConversationProvider** gives you streaming chat state.
-- **useConversation** lets you read messages and send new ones.
+- **Agent** gives you streaming chat state.
+- **useAgent** lets you read messages and send new ones.
 - Optional **components** help you ship a beautiful chat fast.
 
 ### Install
 
 ```bash
-npm i melony
-# or
-pnpm add melony
-# or
-yarn add melony
+pnpm add melony 
 ```
 
 ### 30‑second quickstart
@@ -29,24 +25,24 @@ Client component (e.g. Next.js) with built‑in streaming handler:
 ```tsx
 "use client";
 import {
-  ConversationProvider,
+  Agent,
   Conversation,
-  MessageList,
-  MessageInput,
+  Messages,
+  UserInput,
 } from "melony/react";
 
 export default function Chat() {
   return (
-    <ConversationProvider options={{ api: "/api/chat", debug: false }}>
+    <Agent options={{ api: "/api/chat", debug: false }}>
       <Conversation.Container>
         <Conversation.Content>
-          <MessageList />
+          <Messages />
         </Conversation.Content>
         <Conversation.Footer>
-          <MessageInput placeholder="Ask me anything…" />
+          <UserInput placeholder="Ask me anything…" />
         </Conversation.Footer>
       </Conversation.Container>
-    </ConversationProvider>
+    </Agent>
   );
 }
 ```
@@ -99,10 +95,10 @@ The `createMelonyStreamFromAISDK` function:
 ### Make your own UI with the hook
 
 ```tsx
-import { useConversation } from "melony/react";
+import { useAgent } from "melony/react";
 
 export function MyChat() {
-  const { messages, send, status } = useConversation();
+  const { messages, prompt, status } = useAgent();
 
   return (
     <div>
@@ -113,7 +109,7 @@ export function MyChat() {
           </li>
         ))}
       </ul>
-      <button onClick={() => send("Hello")} disabled={status === "streaming"}>
+      <button onClick={() => prompt("Hello")} disabled={status === "streaming"}>
         {status === "streaming" ? "Sending..." : "Send"}
       </button>
       {status === "error" && <p>Error occurred. Please try again.</p>}
@@ -124,28 +120,28 @@ export function MyChat() {
 
 ### API
 
-- **ConversationProvider**
+- **Agent**
 
   - `options`: `{ api: string; headers?: Record<string, string>; debug?: boolean }`
     - `api` is your POST route that returns `text/event-stream`.
 
-- **useConversation() →** `{ messages, send, status }`
+- **useAgent() →** `{ messages, prompt, status }`
   - `messages`: array of chat `Message` objects
-  - `send(message: string)`: send a user message
+  - `prompt(message: string)`: send a user message
   - `status`: current conversation state (`"idle"` | `"requested"` | `"streaming"` | `"error"`)
 
 ### Components (optional)
 
 - `Conversation.Container`, `Conversation.Content`, `Conversation.Footer`: layout helpers with sticky‑scroll UX.
-- `MessageList`: renders all messages using `MessageItem`.
-- `MessageItem`: renders each message, including text/reasoning/tool parts.
-- `MessageInput`: controlled input + send button wired to `send`.
+- `Messages`: renders all messages using `Message`.
+- `Message`: renders each message, including text/reasoning/tool parts.
+- `UserInput`: controlled input + send button wired to `prompt`.
 - `TextPart`: renders markdown text parts.
 - `ReasoningPart`: shows “thinking” content.
 - `ToolPart`: shows tool call input/progress/result.
 - `Thinking`: a lightweight “thinking…” indicator you can place anywhere.
 
-Styling is headless by default. Most components accept `className` props, and `MessageList`/`MessageItem` expose `userBubbleClassName`, `assistantBubbleClassName`, and `systemBubbleClassName` for easy theming.
+Styling is headless by default. Most components accept `className` props, and `Messages`/`Message` expose `userBubbleClassName`, `assistantBubbleClassName`, and `systemBubbleClassName` for easy theming.
 
 ### Requirements
 
