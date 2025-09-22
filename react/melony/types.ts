@@ -14,3 +14,10 @@ export type MelonyMessage = {
   createdAt: number;
   metadata?: Record<string, any>;
 };
+
+export type MelonyMessagesOptions = {
+  filter?: (part: MelonyPart) => boolean;
+  groupBy?: (part: MelonyPart) => string;
+  sortBy?: (a: MelonyPart, b: MelonyPart) => number;
+  limit?: number;
+};

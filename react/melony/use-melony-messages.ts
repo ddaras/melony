@@ -1,24 +1,49 @@
 import { useMelony } from "./melony-provider";
-import { MelonyPart, MelonyMessage } from "./types";
+import { MelonyPart, MelonyMessage, MelonyMessagesOptions } from "./types";
 
 export const useMelonyMessages = (
-  groupBy?: (part: MelonyPart) => string
+  options?: MelonyMessagesOptions | ((part: MelonyPart) => string)
 ): MelonyMessage[] => {
   const { parts } = useMelony();
 
-  if (!groupBy)
-    return parts.map((part) => ({
+  // Handle backward compatibility - if options is a function, treat it as groupBy
+  const config: MelonyMessagesOptions = typeof options === 'function' 
+    ? { groupBy: options }
+    : options || {};
+
+  const { filter, groupBy, sortBy, limit } = config;
+
+  // Apply filtering first
+  let filteredParts = parts;
+  if (filter) {
+    filteredParts = parts.filter(filter);
+  }
+
+  // Apply sorting if provided
+  if (sortBy) {
+    filteredParts = [...filteredParts].sort(sortBy);
+  }
+
+  // Apply limit if provided
+  if (limit && limit > 0) {
+    filteredParts = filteredParts.slice(0, limit);
+  }
+
+  // If no grouping, return each part as a separate message
+  if (!groupBy) {
+    return filteredParts.map((part) => ({
       id: crypto.randomUUID(),
       role: part.role,
       parts: [part],
       createdAt: Date.now(),
       metadata: {},
     }));
+  }
 
-  // Flatten all parts and regroup
+  // Group parts by the provided function
   const grouped: Record<string, MelonyPart[]> = {};
 
-  parts.forEach((part) => {
+  filteredParts.forEach((part) => {
     const key = groupBy(part);
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(part);

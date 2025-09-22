@@ -46,7 +46,7 @@ export function MelonyProvider({
 
   const send = async (message: string) => {
     const full: MelonyPart = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID(), // user message never streams, so id is generated just on the fly
       type: "text",
       text: message,
       role: "user",
@@ -89,6 +89,9 @@ export function MelonyProvider({
         const lines = buffer.split("\n");
         buffer = lines.pop() || "";
 
+        // default messageId in case we cannot extract it from the line
+        const messageId = crypto.randomUUID();
+
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           const data = line.slice(6).trim(); // Remove "data: " prefix
@@ -100,10 +103,15 @@ export function MelonyProvider({
           }
 
           try {
+            // here this is a first time part is defined, so we add it to the parts array and notify all part listeners
             const part = JSON.parse(data);
             setParts((prevParts) => [
               ...prevParts,
-              { ...part, role: "assistant" },
+              {
+                ...part,
+                id: part?.id || part?.messageId || messageId, // if id is not provided, we generate a new one. notice that messageId is same for a single streaming shot
+                role: "assistant", // streaming response is always considered as assistant
+              },
             ]);
             // Notify all part listeners
             partListeners.current.forEach((listener) => listener(part));
