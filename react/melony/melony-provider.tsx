@@ -100,7 +100,7 @@ export function MelonyProvider({
 
           try {
             const part = JSON.parse(data);
-            setParts([...parts, { ...part, role: "assistant" }]);
+            setParts((prevParts) => [...prevParts, { ...part, role: "assistant" }]);
             // Notify all part listeners
             partListeners.current.forEach((listener) => listener(part));
           } catch (error) {
