@@ -20,4 +20,12 @@ export type MelonyMessagesOptions = {
   groupBy?: (part: MelonyPart) => string;
   sortBy?: (a: MelonyPart, b: MelonyPart) => number;
   limit?: number;
+  joinParts?: {
+    // Function to determine if parts should be joined together
+    shouldJoin: (part1: MelonyPart, part2: MelonyPart) => boolean;
+    // Function to merge two parts into one
+    merge: (part1: MelonyPart, part2: MelonyPart) => MelonyPart;
+    // Optional: function to sort parts before joining (useful for out-of-order streams)
+    sortBeforeJoin?: (a: MelonyPart, b: MelonyPart) => number;
+  };
 };
