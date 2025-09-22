@@ -79,6 +79,9 @@ export function MelonyProvider({
       const decoder = new TextDecoder();
       let buffer = "";
 
+      // melonyId is used to group parts in MelonyMessage container
+      const melonyId = crypto.randomUUID();
+
       while (true) {
         setStatus("streaming");
 
@@ -88,9 +91,6 @@ export function MelonyProvider({
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
         buffer = lines.pop() || "";
-
-        // default messageId in case we cannot extract it from the line
-        const melonyId = crypto.randomUUID();
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
