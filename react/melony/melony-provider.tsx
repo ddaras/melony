@@ -46,7 +46,7 @@ export function MelonyProvider({
 
   const send = async (message: string) => {
     const full: MelonyPart = {
-      id: crypto.randomUUID(), // user message never streams, so id is generated just on the fly
+      melonyId: crypto.randomUUID(), // user message never streams, so id is generated just on the fly
       type: "text",
       text: message,
       role: "user",
@@ -90,7 +90,7 @@ export function MelonyProvider({
         buffer = lines.pop() || "";
 
         // default messageId in case we cannot extract it from the line
-        const messageId = crypto.randomUUID();
+        const melonyId = crypto.randomUUID();
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
@@ -109,7 +109,7 @@ export function MelonyProvider({
               ...prevParts,
               {
                 ...part,
-                id: part?.id || part?.messageId || messageId, // if id is not provided, we generate a new one. notice that messageId is same for a single streaming shot
+                melonyId: melonyId, // if id is not provided, we generate a new one. notice that messageId is same for a single streaming shot
                 role: "assistant", // streaming response is always considered as assistant
               },
             ]);

@@ -1,10 +1,10 @@
 export type Role = "user" | "assistant" | "system";
 
 export type MelonyPart = {
-  id: string;
+  melonyId: string;
   type: string;
   role: Role;
-  text?: string;
+  text?: string; // this is used for user message
 };
 
 export type MelonyMessage = {
