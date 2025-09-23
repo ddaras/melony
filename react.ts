@@ -13,7 +13,6 @@ export * from "./react/ToolPart";
 export * from "./react/melony/melony-provider";
 export * from "./react/melony/use-melony-messages";
 export * from "./react/melony/use-melony-part";
-export * from "./react/melony/use-melony-events";
 export * from "./react/melony/use-melony-send";
 export * from "./react/melony/use-melony-status";
 export * from "./react/melony/types";
