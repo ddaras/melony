@@ -4,11 +4,7 @@ import { MelonyPart } from "./types";
 type MelonyContextType = {
   parts: MelonyPart[];
   send: (message: string) => Promise<void>;
-  subscribePart: (
-    partType?: string,
-    filter?: (part: MelonyPart) => boolean,
-    callback?: (part: MelonyPart) => void
-  ) => () => void;
+  subscribeEvents: (callback: (part: MelonyPart) => void) => () => void;
   status: "idle" | "requested" | "streaming" | "error";
 };
 
@@ -30,18 +26,9 @@ export function MelonyProvider({
 
   const partListeners = useRef<Set<(part: MelonyPart) => void>>(new Set());
 
-  const subscribePart = (
-    partType?: string,
-    filter?: (part: MelonyPart) => boolean,
-    callback?: (part: MelonyPart) => void
-  ) => {
-    const listener = (part: MelonyPart) => {
-      if ((!partType || part.type === partType) && (!filter || filter(part))) {
-        callback?.(part);
-      }
-    };
-    partListeners.current.add(listener);
-    return () => partListeners.current.delete(listener);
+  const subscribeEvents = (callback: (part: MelonyPart) => void) => {
+    partListeners.current.add(callback);
+    return () => partListeners.current.delete(callback);
   };
 
   const send = async (message: string) => {
@@ -136,7 +123,7 @@ export function MelonyProvider({
       value={{
         parts,
         send,
-        subscribePart,
+        subscribeEvents,
         status,
       }}
     >

@@ -1,16 +1,19 @@
 import { useMelony } from "./melony-provider";
-import { MelonyPart, MelonyMessage, MelonyMessagesOptions } from "./types";
+import { MelonyPart, MelonyMessage } from "./types";
+
+export type MelonyMessagesOptions = {
+  filter?: (part: MelonyPart) => boolean;
+  groupBy?: (part: MelonyPart) => string;
+  sortBy?: (a: MelonyPart, b: MelonyPart) => number;
+  limit?: number;
+};
 
 export const useMelonyMessages = (
-  options?: MelonyMessagesOptions | ((part: MelonyPart) => string)
+  options?: MelonyMessagesOptions
 ): MelonyMessage[] => {
   const { parts } = useMelony();
 
-  // Handle backward compatibility - if options is a function, treat it as groupBy
-  const config: MelonyMessagesOptions =
-    typeof options === "function" ? { groupBy: options } : options || {};
-
-  const { filter, groupBy, sortBy, limit } = config;
+  const { filter, groupBy, sortBy, limit } = options || {};
 
   // Apply filtering first
   let filteredParts = parts;
