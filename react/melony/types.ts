@@ -1,16 +1,18 @@
 export type Role = "user" | "assistant" | "system";
 
-export type MelonyPart = {
+export type MelonyPart<
+  TType extends string = string,
+  TExtra extends object | undefined = { text?: string }
+> = {
   melonyId: string;
-  type: string;
+  type: TType;
   role: Role;
-  text?: string; // this is used for user message
-};
+} & (TExtra extends undefined ? {} : TExtra);
 
-export type MelonyMessage = {
+export type MelonyMessage<TPart extends MelonyPart = MelonyPart> = {
   id: string;
   role: Role;
-  parts: MelonyPart[];
+  parts: TPart[];
   createdAt: number;
   metadata?: Record<string, any>;
 };

@@ -1,17 +1,17 @@
 import { useMelony } from "./melony-provider";
 import { MelonyPart, MelonyMessage } from "./types";
 
-export type MelonyMessagesOptions = {
-  filter?: (part: MelonyPart) => boolean;
-  groupBy?: (part: MelonyPart) => string;
-  sortBy?: (a: MelonyPart, b: MelonyPart) => number;
+export type MelonyMessagesOptions<TPart extends MelonyPart = MelonyPart> = {
+  filter?: (part: TPart) => boolean;
+  groupBy?: (part: TPart) => string;
+  sortBy?: (a: TPart, b: TPart) => number;
   limit?: number;
 };
 
-export const useMelonyMessages = (
-  options?: MelonyMessagesOptions
-): MelonyMessage[] => {
-  const { parts } = useMelony();
+export const useMelonyMessages = <TPart extends MelonyPart = MelonyPart>(
+  options?: MelonyMessagesOptions<TPart>
+): MelonyMessage<TPart>[] => {
+  const { parts } = useMelony<TPart>();
 
   const { filter, groupBy, sortBy, limit } = options || {};
 
@@ -32,7 +32,7 @@ export const useMelonyMessages = (
   }
 
   // Group parts by the provided function
-  const grouped: Record<string, MelonyPart[]> = {};
+  const grouped: Record<string, TPart[]> = {};
 
   filteredParts.forEach((part) => {
     const key = groupBy?.(part) || part.melonyId;
@@ -42,7 +42,7 @@ export const useMelonyMessages = (
 
   return Object.entries(grouped).map(([key, parts]) => ({
     id: key,
-    role: parts[0]?.role || "unknown",
+    role: (parts[0]?.role ?? "assistant"),
     createdAt: Date.now(),
     metadata: {},
     parts,

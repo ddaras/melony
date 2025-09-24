@@ -1,45 +1,57 @@
 import React, { createContext, useContext, useRef, useState } from "react";
 import { MelonyPart } from "./types";
 
-type MelonyContextType = {
-  parts: MelonyPart[];
+type MelonyContextType<TPart extends MelonyPart = MelonyPart> = {
+  parts: TPart[];
   send: (message: string) => Promise<void>;
-  subscribeEvents: (callback: (part: MelonyPart) => void) => () => void;
+  subscribeEvents: (callback: (part: TPart) => void) => () => void;
   status: "idle" | "requested" | "streaming" | "error";
 };
 
 export const MelonyContext = createContext<MelonyContextType | null>(null);
 
-export function MelonyProvider({
+export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
   children,
   endpoint,
   headers,
+  mapUserMessage,
+  mapIncomingPart,
 }: {
   children: React.ReactNode;
   endpoint?: string;
   headers?: Record<string, string>;
+  /**
+   * Optional mapper to turn a user input string into a framework-specific part.
+   */
+  mapUserMessage?: (message: string) => TPart;
+  /**
+   * Optional mapper to convert raw streamed JSON into your framework-specific part.
+   */
+  mapIncomingPart?: (raw: unknown) => TPart;
 }) {
-  const [parts, setParts] = useState<MelonyPart[]>([]);
+  const [parts, setParts] = useState<TPart[]>([]);
   const [status, setStatus] = useState<
     "idle" | "requested" | "streaming" | "error"
   >("idle");
 
-  const partListeners = useRef<Set<(part: MelonyPart) => void>>(new Set());
+  const partListeners = useRef<Set<(part: TPart) => void>>(new Set());
 
-  const subscribeEvents = (callback: (part: MelonyPart) => void) => {
+  const subscribeEvents = (callback: (part: TPart) => void) => {
     partListeners.current.add(callback);
     return () => partListeners.current.delete(callback);
   };
 
   const send = async (message: string) => {
-    const full: MelonyPart = {
-      melonyId: crypto.randomUUID(), // user message never streams, so id is generated just on the fly
-      type: "text",
-      text: message,
-      role: "user",
-    };
+    const userPart: TPart = mapUserMessage
+      ? mapUserMessage(message)
+      : ({
+          melonyId: crypto.randomUUID(),
+          type: "text",
+          role: "user",
+          text: message,
+        } as unknown as TPart);
 
-    const newParts = [...parts, full];
+    const newParts = [...parts, userPart];
 
     setParts(newParts);
     setStatus("requested");
@@ -90,17 +102,17 @@ export function MelonyProvider({
           }
 
           try {
-            // here this is a first time part is defined, so we add it to the parts array and notify all part listeners
-            const part = JSON.parse(data);
+            const raw = JSON.parse(data);
+            const part = mapIncomingPart ? mapIncomingPart(raw) : (raw as TPart);
             setParts((prevParts) => [
               ...prevParts,
               {
-                ...part,
-                melonyId: melonyId, // if id is not provided, we generate a new one. notice that messageId is same for a single streaming shot
-                role: "assistant", // streaming response is always considered as assistant
-              },
+                ...(part as unknown as Record<string, any>),
+                melonyId: melonyId,
+                role: "assistant",
+              } as unknown as TPart,
             ]);
-            // Notify all part listeners
+            // Notify all part listeners with the mapped part
             partListeners.current.forEach((listener) => listener(part));
           } catch (error) {
             setStatus("error");
@@ -132,10 +144,10 @@ export function MelonyProvider({
   );
 }
 
-export const useMelony = () => {
-  const context = useContext(MelonyContext);
+export const useMelony = <TPart extends MelonyPart = MelonyPart>() => {
+  const context = useContext(MelonyContext) as MelonyContextType<TPart> | null;
   if (!context) {
     throw new Error("useMelony must be used within an MelonyProvider");
   }
-  return context;
+  return context as MelonyContextType<TPart>;
 };
