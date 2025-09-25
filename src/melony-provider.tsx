@@ -14,20 +14,10 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
   children,
   endpoint,
   headers,
-  mapUserMessage,
-  mapIncomingPart,
 }: {
   children: React.ReactNode;
   endpoint?: string;
   headers?: Record<string, string>;
-  /**
-   * Optional mapper to turn a user input string into a framework-specific part.
-   */
-  mapUserMessage?: (message: string) => TPart;
-  /**
-   * Optional mapper to convert raw streamed JSON into your framework-specific part.
-   */
-  mapIncomingPart?: (raw: unknown) => TPart;
 }) {
   const [parts, setParts] = useState<TPart[]>([]);
   const [status, setStatus] = useState<
@@ -42,14 +32,12 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
   };
 
   const send = async (message: string) => {
-    const userPart: TPart = mapUserMessage
-      ? mapUserMessage(message)
-      : ({
-          melonyId: crypto.randomUUID(),
-          type: "text",
-          role: "user",
-          text: message,
-        } as unknown as TPart);
+    const userPart: TPart = {
+      melonyId: crypto.randomUUID(),
+      type: "text",
+      role: "user",
+      text: message,
+    } as unknown as TPart;
 
     const newParts = [...parts, userPart];
 
@@ -103,9 +91,7 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
 
           try {
             const raw = JSON.parse(data);
-            const part = mapIncomingPart
-              ? mapIncomingPart(raw)
-              : (raw as TPart);
+            const part = raw as TPart;
             setParts((prevParts) => [
               ...prevParts,
               {

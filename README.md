@@ -16,7 +16,7 @@ TypeScript‑first, headless React toolkit for building AI chat UIs with streami
 ### Install
 
 ```bash
-pnpm add melony 
+pnpm add melony
 ```
 
 ### 30‑second quickstart
@@ -43,16 +43,11 @@ function ChatMessages() {
         <div key={message.id}>
           <strong>{message.role}:</strong>
           {message.parts.map((part, i) => (
-            <div key={i}>
-              {part.type === "text" && part.text}
-            </div>
+            <div key={i}>{part.type === "text" && part.text}</div>
           ))}
         </div>
       ))}
-      <button 
-        onClick={() => send("Hello!")} 
-        disabled={status === "streaming"}
-      >
+      <button onClick={() => send("Hello!")} disabled={status === "streaming"}>
         {status === "streaming" ? "Sending..." : "Send"}
       </button>
     </div>
@@ -88,11 +83,11 @@ Configure delta handling with `useMelonyMessages`:
 const messages = useMelonyMessages({
   joinTextDeltas: {
     deltaType: "text-delta",
-    idField: "id", 
+    idField: "id",
     deltaField: "delta",
     outputType: "text",
-    outputField: "text"
-  }
+    outputField: "text",
+  },
 });
 ```
 
@@ -115,19 +110,7 @@ type CustomPart = {
 // Use with custom mappers
 function ChatWithCustomTypes() {
   return (
-    <MelonyProvider<CustomPart>
-      endpoint="/api/chat"
-      mapUserMessage={(message) => ({
-        melonyId: crypto.randomUUID(),
-        type: "text",
-        role: "user",
-        text: message,
-      })}
-      mapIncomingPart={(raw) => {
-        // Transform server response to your custom part
-        return raw as CustomPart;
-      }}
-    >
+    <MelonyProvider<CustomPart> endpoint="/api/chat">
       <ChatMessages />
     </MelonyProvider>
   );
@@ -166,17 +149,15 @@ export function AdvancedChat() {
         {messages.map((message) => (
           <div key={message.id} className={`message ${message.role}`}>
             {message.parts.map((part, i) => (
-              <div key={i}>
-                {part.type === "text" && part.text}
-              </div>
+              <div key={i}>{part.type === "text" && part.text}</div>
             ))}
           </div>
         ))}
       </div>
-      
+
       <div className="input">
-        <button 
-          onClick={() => send("Hello!")} 
+        <button
+          onClick={() => send("Hello!")}
           disabled={status === "streaming"}
         >
           {status === "streaming" ? "Sending..." : "Send"}
@@ -198,29 +179,29 @@ The main provider component that manages chat state and handles server communica
 <MelonyProvider<TPart>
   endpoint?: string
   headers?: Record<string, string>
-  mapUserMessage?: (message: string) => TPart
-  mapIncomingPart?: (raw: unknown) => TPart
 >
   {children}
 </MelonyProvider>
 ```
 
 **Props:**
+
 - `endpoint`: API endpoint for chat requests (default: `/api/chat`)
 - `headers`: Additional headers to send with requests
-- `mapUserMessage`: Transform user input strings into your part type
-- `mapIncomingPart`: Transform server responses into your part type
 
 #### Hooks
 
 - **`useMelonyMessages(options?)`** → `MelonyMessage<TPart>[]`
+
   - Returns grouped and processed messages
   - Options: `filter`, `groupBy`, `sortBy`, `limit`, `joinTextDeltas`
 
 - **`useMelonySend()`** → `(message: string) => Promise<void>`
+
   - Send a new message to the chat
 
 - **`useMelonyStatus()`** → `"idle" | "requested" | "streaming" | "error"`
+
   - Current conversation state
 
 - **`useMelonyPart(callback)`** → `void`
@@ -249,7 +230,7 @@ export async function POST(req: Request) {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "Connection": "keep-alive",
+      Connection: "keep-alive",
     },
   });
 }
