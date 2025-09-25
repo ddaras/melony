@@ -103,7 +103,9 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
 
           try {
             const raw = JSON.parse(data);
-            const part = mapIncomingPart ? mapIncomingPart(raw) : (raw as TPart);
+            const part = mapIncomingPart
+              ? mapIncomingPart(raw)
+              : (raw as TPart);
             setParts((prevParts) => [
               ...prevParts,
               {
