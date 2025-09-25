@@ -239,42 +239,6 @@ export async function POST(req: Request) {
 }
 ```
 
-For a complete Next.js API route with proper error handling:
-
-```ts
-// app/api/chat/route.ts
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
-
-export const maxDuration = 300;
-
-export async function POST(req: Request) {
-  try {
-    const { message } = await req.json();
-
-    if (!message) {
-      return new Response("Message is required", { status: 400 });
-    }
-
-    const result = await streamText({
-      model: openai("gpt-4o"),
-      messages: [
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-      temperature: 0.7,
-    });
-
-    return result.toUIMessageStream();
-  } catch (error) {
-    console.error("Chat API error:", error);
-    return new Response("Internal Server Error", { status: 500 });
-  }
-}
-```
-
 The `toUIMessageStream()` method automatically formats the streaming response in the format that melony expects by default:
 
 ```
