@@ -1,6 +1,6 @@
 ## melony
 
-TypeScript‑first, headless React toolkit for building AI chat UIs.
+TypeScript‑first, headless React toolkit for building AI chat UIs with streaming support.
 
 [![npm version](https://img.shields.io/npm/v/melony.svg?color=2ea043)](https://www.npmjs.com/package/melony)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -8,9 +8,10 @@ TypeScript‑first, headless React toolkit for building AI chat UIs.
 
 ### The core idea
 
-- **Agent** gives you streaming chat state.
-- **useAgent** lets you read messages and send new ones.
-- Optional **components** help you ship a beautiful chat fast.
+- **MelonyProvider** manages streaming chat state and handles server communication.
+- **Hooks** give you fine-grained access to messages, parts, status, and sending.
+- **Flexible parts system** supports any message structure with custom mappers.
+- **TypeScript-first** with full type safety and extensibility.
 
 ### Install
 
@@ -20,99 +21,168 @@ pnpm add melony
 
 ### 30‑second quickstart
 
-Client component (e.g. Next.js) with built‑in streaming handler:
+Basic chat component with streaming support:
 
 ```tsx
 "use client";
 import {
-  Agent,
-  Conversation,
-  Messages,
-  UserInput,
-} from "melony/react";
+  MelonyProvider,
+  useMelonyMessages,
+  useMelonySend,
+  useMelonyStatus,
+} from "melony";
+
+function ChatMessages() {
+  const messages = useMelonyMessages();
+  const send = useMelonySend();
+  const status = useMelonyStatus();
+
+  return (
+    <div>
+      {messages.map((message) => (
+        <div key={message.id}>
+          <strong>{message.role}:</strong>
+          {message.parts.map((part, i) => (
+            <div key={i}>
+              {part.type === "text" && part.text}
+            </div>
+          ))}
+        </div>
+      ))}
+      <button 
+        onClick={() => send("Hello!")} 
+        disabled={status === "streaming"}
+      >
+        {status === "streaming" ? "Sending..." : "Send"}
+      </button>
+    </div>
+  );
+}
 
 export default function Chat() {
   return (
-    <Agent options={{ api: "/api/chat", debug: false }}>
-      <Conversation.Container>
-        <Conversation.Content>
-          <Messages />
-        </Conversation.Content>
-        <Conversation.Footer>
-          <UserInput placeholder="Ask me anything…" />
-        </Conversation.Footer>
-      </Conversation.Container>
-    </Agent>
+    <MelonyProvider endpoint="/api/chat">
+      <ChatMessages />
+    </MelonyProvider>
   );
 }
 ```
 
-### AI SDK Integration
+### Text Delta Handling
 
-For advanced use cases, melony provides a direct adapter for the Vercel AI SDK that gives you more control over the streaming process:
+melony automatically handles text deltas for smooth streaming:
 
-```ts
-// app/api/chat/route.ts
-import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { createMelonyStreamFromAISDK } from "melony";
+```tsx
+// Server streams deltas
+data: {"type": "text-delta", "id": "block1", "delta": "Hello"}
+data: {"type": "text-delta", "id": "block1", "delta": " world"}
+data: {"type": "text-delta", "id": "block1", "delta": "!"}
 
-export const runtime = "edge";
+// Client receives joined text
+{type: "text", text: "Hello world!"}
+```
 
-export async function POST(req: Request) {
-  const { message } = await req.json();
+Configure delta handling with `useMelonyMessages`:
 
-  const result = await streamText({
-    model: openai("gpt-4o-mini"),
-    messages: [{ role: "user", content: message }],
-  });
+```tsx
+const messages = useMelonyMessages({
+  joinTextDeltas: {
+    deltaType: "text-delta",
+    idField: "id", 
+    deltaField: "delta",
+    outputType: "text",
+    outputField: "text"
+  }
+});
+```
 
-  // Use the melony adapter for more control
-  const stream = createMelonyStreamFromAISDK(result.fullStream, {
-    onFinish: ({ message }) => {
-      console.log("Streaming finished:", message);
-      // Save to database, log, etc.
-    },
-  });
+### Custom Message Types
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+melony supports custom message structures through TypeScript generics and mappers:
+
+```tsx
+// Define your custom part type
+type CustomPart = {
+  melonyId: string;
+  type: "text" | "image" | "tool_call";
+  role: "user" | "assistant" | "system";
+  text?: string;
+  imageUrl?: string;
+  toolName?: string;
+  toolArgs?: Record<string, any>;
+};
+
+// Use with custom mappers
+function ChatWithCustomTypes() {
+  return (
+    <MelonyProvider<CustomPart>
+      endpoint="/api/chat"
+      mapUserMessage={(message) => ({
+        melonyId: crypto.randomUUID(),
+        type: "text",
+        role: "user",
+        text: message,
+      })}
+      mapIncomingPart={(raw) => {
+        // Transform server response to your custom part
+        return raw as CustomPart;
+      }}
+    >
+      <ChatMessages />
+    </MelonyProvider>
+  );
 }
 ```
 
-The `createMelonyStreamFromAISDK` function:
+### Advanced Usage with Hooks
 
-- Converts AI SDK stream chunks to melony-compatible events
-- Supports text streaming, tool calls, and reasoning steps
-- Provides `onFinish` callback for post-processing
-- Handles error states and cleanup automatically
-
-### Make your own UI with the hook
+For more control, use individual hooks to build custom UIs:
 
 ```tsx
-import { useAgent } from "melony/react";
+import {
+  useMelonyMessages,
+  useMelonySend,
+  useMelonyStatus,
+  useMelonyPart,
+} from "melony";
 
-export function MyChat() {
-  const { messages, prompt, status } = useAgent();
+export function AdvancedChat() {
+  const messages = useMelonyMessages({
+    filter: (part) => part.type === "text",
+    joinTextDeltas: true,
+    limit: 50,
+  });
+  const send = useMelonySend();
+  const status = useMelonyStatus();
+
+  // Listen to individual parts as they stream
+  useMelonyPart((part) => {
+    console.log("New part received:", part);
+  });
 
   return (
     <div>
-      <ul>
-        {messages.map((m) => (
-          <li key={m.id}>
-            {m.parts.map((p) => (p.type === "text" ? p.text : ""))}
-          </li>
+      <div className="messages">
+        {messages.map((message) => (
+          <div key={message.id} className={`message ${message.role}`}>
+            {message.parts.map((part, i) => (
+              <div key={i}>
+                {part.type === "text" && part.text}
+              </div>
+            ))}
+          </div>
         ))}
-      </ul>
-      <button onClick={() => prompt("Hello")} disabled={status === "streaming"}>
-        {status === "streaming" ? "Sending..." : "Send"}
-      </button>
-      {status === "error" && <p>Error occurred. Please try again.</p>}
+      </div>
+      
+      <div className="input">
+        <button 
+          onClick={() => send("Hello!")} 
+          disabled={status === "streaming"}
+        >
+          {status === "streaming" ? "Sending..." : "Send"}
+        </button>
+        {status === "error" && <p>Error occurred. Please try again.</p>}
+      </div>
     </div>
   );
 }
@@ -120,33 +190,83 @@ export function MyChat() {
 
 ### API
 
-- **Agent**
+#### MelonyProvider
 
-  - `options`: `{ api: string; headers?: Record<string, string>; debug?: boolean }`
-    - `api` is your POST route that returns `text/event-stream`.
+The main provider component that manages chat state and handles server communication.
 
-- **useAgent() →** `{ messages, prompt, status }`
-  - `messages`: array of chat `Message` objects
-  - `prompt(message: string)`: send a user message
-  - `status`: current conversation state (`"idle"` | `"requested"` | `"streaming"` | `"error"`)
+```tsx
+<MelonyProvider<TPart>
+  endpoint?: string
+  headers?: Record<string, string>
+  mapUserMessage?: (message: string) => TPart
+  mapIncomingPart?: (raw: unknown) => TPart
+>
+  {children}
+</MelonyProvider>
+```
 
-### Components (optional)
+**Props:**
+- `endpoint`: API endpoint for chat requests (default: `/api/chat`)
+- `headers`: Additional headers to send with requests
+- `mapUserMessage`: Transform user input strings into your part type
+- `mapIncomingPart`: Transform server responses into your part type
 
-- `Conversation.Container`, `Conversation.Content`, `Conversation.Footer`: layout helpers with sticky‑scroll UX.
-- `Messages`: renders all messages using `Message`.
-- `Message`: renders each message, including text/reasoning/tool parts.
-- `UserInput`: controlled input + send button wired to `prompt`.
-- `TextPart`: renders markdown text parts.
-- `ReasoningPart`: shows “thinking” content.
-- `ToolPart`: shows tool call input/progress/result.
-- `Thinking`: a lightweight “thinking…” indicator you can place anywhere.
+#### Hooks
 
-Styling is headless by default. Most components accept `className` props, and `Messages`/`Message` expose `userBubbleClassName`, `assistantBubbleClassName`, and `systemBubbleClassName` for easy theming.
+- **`useMelonyMessages(options?)`** → `MelonyMessage<TPart>[]`
+  - Returns grouped and processed messages
+  - Options: `filter`, `groupBy`, `sortBy`, `limit`, `joinTextDeltas`
+
+- **`useMelonySend()`** → `(message: string) => Promise<void>`
+  - Send a new message to the chat
+
+- **`useMelonyStatus()`** → `"idle" | "requested" | "streaming" | "error"`
+  - Current conversation state
+
+- **`useMelonyPart(callback)`** → `void`
+  - Subscribe to individual parts as they stream in
+
+#### Types
+
+- **`MelonyPart<TType, TExtra>`**: Base part structure with `melonyId`, `type`, `role`
+- **`MelonyMessage<TPart>`**: Message container with `id`, `role`, `parts[]`, `createdAt`, `metadata`
+- **`Role`**: `"user" | "assistant" | "system"`
+
+### Server Integration
+
+Your server should accept POST requests and return Server-Sent Events:
+
+```ts
+// app/api/chat/route.ts
+export async function POST(req: Request) {
+  const { message } = await req.json();
+
+  // Your AI/LLM logic here
+  const response = await callYourAI(message);
+
+  // Return streaming response
+  return new Response(response, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
+  });
+}
+```
+
+The server should stream JSON objects that match your part structure:
+
+```
+data: {"type": "text", "text": "Hello"}
+data: {"type": "text", "text": " world"}
+data: [DONE]
+```
 
 ### Requirements
 
 - React `>= 18`
-- A server route that returns `text/event-stream` (AI SDK recommended)
+- A server route that returns `text/event-stream`
 
 ### License
 
