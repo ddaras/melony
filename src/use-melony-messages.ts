@@ -24,7 +24,7 @@ export type MelonyMessagesOptions<TPart extends MelonyPart = MelonyPart> = {
 
 // Helper function to build text by block ID from delta parts
 const buildTextByBlockId = (
-  parts: any[], 
+  parts: any[],
   config: Required<TextDeltaConfig>
 ): Map<string, string> => {
   const map = new Map<string, string>();
@@ -55,7 +55,7 @@ const joinDeltaParts = <TPart extends MelonyPart = MelonyPart>(
         continue;
       }
       renderedTextIds.add(textBlockId);
-      
+
       // Convert delta to output part with joined content
       const joinedText = textById.get(textBlockId) ?? "";
       const outputPart = {
@@ -63,7 +63,7 @@ const joinDeltaParts = <TPart extends MelonyPart = MelonyPart>(
         type: config.outputType,
         [config.outputField]: joinedText,
       } as TPart;
-      
+
       result.push(outputPart);
     } else {
       // Keep non-delta parts as-is
@@ -79,7 +79,13 @@ export const useMelonyMessages = <TPart extends MelonyPart = MelonyPart>(
 ): MelonyMessage<TPart>[] => {
   const { parts } = useMelony<TPart>();
 
-  const { filter, groupBy, sortBy, limit, joinTextDeltas } = options || {};
+  const {
+    filter,
+    groupBy,
+    sortBy,
+    limit,
+    joinTextDeltas = true,
+  } = options || {};
 
   // Apply filtering first
   let filteredParts = parts;
@@ -121,7 +127,7 @@ export const useMelonyMessages = <TPart extends MelonyPart = MelonyPart>(
 
   return Object.entries(grouped).map(([key, parts]) => ({
     id: key,
-    role: (parts[0]?.role ?? "assistant"),
+    role: parts[0]?.role ?? "assistant",
     createdAt: Date.now(),
     metadata: {},
     parts,
