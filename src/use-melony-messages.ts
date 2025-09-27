@@ -1,17 +1,11 @@
 import { useMelony } from "./melony-provider";
 import { MelonyPart, MelonyMessage } from "./types";
 
-export type TextDeltaConfig = {
-  /** The type field value that identifies text delta parts (default: "text-delta") */
-  deltaType?: string;
-  /** The field name that contains the block ID for grouping deltas (default: "id") */
-  idField?: string;
-  /** The field name that contains the delta text content (default: "delta") */
-  deltaField?: string;
-  /** The type to convert joined deltas to (default: "text") */
-  outputType?: string;
-  /** The field name to store the joined text in the output (default: "text") */
-  outputField?: string;
+export type MergeConfig<TPart extends MelonyPart = MelonyPart> = {
+  /** Function to determine which parts should be merged together. Returns a key to group parts by, or null to skip merging. */
+  groupBy?: (part: TPart) => string | null;
+  /** Function to merge an array of parts into a single part */
+  merge: (parts: TPart[]) => TPart;
 };
 
 export type MelonyMessagesOptions<TPart extends MelonyPart = MelonyPart> = {
@@ -19,55 +13,37 @@ export type MelonyMessagesOptions<TPart extends MelonyPart = MelonyPart> = {
   groupBy?: (part: TPart) => string;
   sortBy?: (a: TPart, b: TPart) => number;
   limit?: number;
-  joinTextDeltas?: boolean | TextDeltaConfig;
+  merge?: boolean | MergeConfig<TPart> | MergeConfig<TPart>[];
 };
 
-// Helper function to build text by block ID from delta parts
-const buildTextByBlockId = (
-  parts: any[],
-  config: Required<TextDeltaConfig>
-): Map<string, string> => {
-  const map = new Map<string, string>();
+// Helper function to merge parts based on custom configuration
+const mergeParts = <TPart extends MelonyPart = MelonyPart>(
+  parts: TPart[],
+  config: Required<MergeConfig<TPart>>
+): TPart[] => {
+  const groups = new Map<string, TPart[]>();
+  const nonMergeableParts: TPart[] = [];
+
+  // Group parts that should be merged
   for (const part of parts) {
-    if (part.type === config.deltaType) {
-      const id = (part as any)[config.idField] as string;
-      const delta = ((part as any)[config.deltaField] as string) || "";
-      map.set(id, (map.get(id) ?? "") + delta);
+    const groupKey = config.groupBy(part);
+    if (groupKey) {
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, []);
+      }
+      groups.get(groupKey)!.push(part);
+    } else {
+      nonMergeableParts.push(part);
     }
   }
-  return map;
-};
 
-// Helper function to join delta parts into text parts
-const joinDeltaParts = <TPart extends MelonyPart = MelonyPart>(
-  parts: TPart[],
-  config: Required<TextDeltaConfig>
-): TPart[] => {
-  const textById = buildTextByBlockId(parts, config);
-  const renderedTextIds = new Set<string>();
-  const result: TPart[] = [];
+  // Merge grouped parts and combine with non-mergeable parts
+  const result: TPart[] = [...nonMergeableParts];
 
-  for (const part of parts) {
-    if (part.type === config.deltaType) {
-      const textBlockId = (part as any)[config.idField] as string;
-      if (renderedTextIds.has(textBlockId)) {
-        // Skip this delta as we've already processed this text block
-        continue;
-      }
-      renderedTextIds.add(textBlockId);
-
-      // Convert delta to output part with joined content
-      const joinedText = textById.get(textBlockId) ?? "";
-      const outputPart = {
-        ...part,
-        type: config.outputType,
-        [config.outputField]: joinedText,
-      } as TPart;
-
-      result.push(outputPart);
-    } else {
-      // Keep non-delta parts as-is
-      result.push(part);
+  for (const [groupKey, groupParts] of groups) {
+    if (groupParts.length > 0) {
+      const mergedPart = config.merge(groupParts);
+      result.push(mergedPart);
     }
   }
 
@@ -79,13 +55,7 @@ export const useMelonyMessages = <TPart extends MelonyPart = MelonyPart>(
 ): MelonyMessage<TPart>[] => {
   const { parts } = useMelony<TPart>();
 
-  const {
-    filter,
-    groupBy,
-    sortBy,
-    limit,
-    joinTextDeltas = true,
-  } = options || {};
+  const { filter, groupBy, sortBy, limit, merge = false } = options || {};
 
   // Apply filtering first
   let filteredParts = parts;
@@ -93,17 +63,27 @@ export const useMelonyMessages = <TPart extends MelonyPart = MelonyPart>(
     filteredParts = parts.filter(filter);
   }
 
-  // Apply text delta joining if requested
-  if (joinTextDeltas) {
-    const config: Required<TextDeltaConfig> = {
-      deltaType: "text-delta",
-      idField: "id",
-      deltaField: "delta",
-      outputType: "text",
-      outputField: "text",
-      ...(typeof joinTextDeltas === "object" ? joinTextDeltas : {}),
-    };
-    filteredParts = joinDeltaParts(filteredParts, config);
+  // Apply custom merging if requested
+  if (merge) {
+    const mergeConfigs: MergeConfig<TPart>[] = Array.isArray(merge)
+      ? merge
+      : [
+          typeof merge === "object"
+            ? merge
+            : {
+                groupBy: (part) => part.melonyId, // Default grouping by melonyId
+                merge: (parts) => parts[0], // Default: take first part
+              },
+        ];
+
+    // Apply each merge configuration sequentially
+    for (const mergeConfig of mergeConfigs) {
+      const config: Required<MergeConfig<TPart>> = {
+        groupBy: mergeConfig.groupBy || ((part) => part.melonyId), // Default grouping by melonyId
+        merge: mergeConfig.merge || ((parts) => parts[0]), // Default: take first part
+      };
+      filteredParts = mergeParts(filteredParts, config);
+    }
   }
 
   // Apply sorting if provided
