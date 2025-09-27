@@ -3,7 +3,7 @@ import { MelonyPart } from "./types";
 
 type MelonyContextType<TPart extends MelonyPart = MelonyPart> = {
   parts: TPart[];
-  send: (message: string) => Promise<void>;
+  send: (message: string, data?: Record<string, unknown>) => Promise<void>;
   subscribeEvents: (callback: (part: TPart) => void) => () => void;
   status: "idle" | "requested" | "streaming" | "error";
 };
@@ -31,7 +31,7 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
     return () => partListeners.current.delete(callback);
   };
 
-  const send = async (message: string) => {
+  const send = async (message: string, data?: Record<string, unknown>) => {
     const userPart: TPart = {
       melonyId: crypto.randomUUID(),
       type: "text",
@@ -51,7 +51,7 @@ export function MelonyProvider<TPart extends MelonyPart = MelonyPart>({
           "Content-Type": "application/json",
           ...headers,
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, data }),
       });
 
       if (!response.ok) {
