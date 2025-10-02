@@ -70,10 +70,10 @@ type ComponentData =
 
 // Parse the answer string to detect JSON
 const parseAnswer = (answer: string): ParsedContent => {
-  // Check if the string contains JSON-like content
-  const jsonMatch = answer.match(/\{[\s\S]*\}/);
+  // Check if the string contains JSON-like content (starts with {)
+  const openBraceIndex = answer.indexOf("{");
 
-  if (!jsonMatch) {
+  if (openBraceIndex === -1) {
     return {
       type: "text",
       data: null,
@@ -82,8 +82,8 @@ const parseAnswer = (answer: string): ParsedContent => {
   }
 
   try {
-    // Try to parse the JSON (potentially partial)
-    const jsonString = jsonMatch[0];
+    // Try to parse the JSON from the opening brace onwards (potentially partial)
+    const jsonString = answer.substring(openBraceIndex);
     const parsed = parsePartialJson(jsonString);
 
     if (parsed && typeof parsed === "object" && "type" in parsed) {
@@ -424,17 +424,20 @@ const renderJsonComponent = (
   }
 };
 
-export const MelonyCard: React.FC<MelonyCardProps> = ({ 
-  text, 
+export const MelonyCard: React.FC<MelonyCardProps> = ({
+  text,
   className,
-  customComponents 
+  customComponents,
 }) => {
   const parsedContent = useMemo(() => parseAnswer(text), [text]);
 
   if (parsedContent.type === "json" && parsedContent.data) {
     return (
       <div className={className}>
-        {renderJsonComponent(parsedContent.data as ComponentData, customComponents)}
+        {renderJsonComponent(
+          parsedContent.data as ComponentData,
+          customComponents
+        )}
       </div>
     );
   }
