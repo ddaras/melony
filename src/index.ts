@@ -5,4 +5,3 @@ export * from "./use-melony-send";
 export * from "./use-melony-status";
 export * from "./types";
 export * from "./answer-card";
-export * from "./answer-card-prompts";
