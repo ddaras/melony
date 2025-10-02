@@ -70,10 +70,10 @@ type ComponentData =
 
 // Parse the answer string to detect JSON
 const parseAnswer = (answer: string): ParsedContent => {
-  // Check if the string contains JSON-like content (starts with {)
-  const openBraceIndex = answer.indexOf("{");
+  // Check if the string contains JSON-like content
+  const jsonMatch = answer.match(/\{[\s\S]*\}/);
 
-  if (openBraceIndex === -1) {
+  if (!jsonMatch) {
     return {
       type: "text",
       data: null,
@@ -82,8 +82,8 @@ const parseAnswer = (answer: string): ParsedContent => {
   }
 
   try {
-    // Try to parse the JSON from the opening brace onwards (potentially partial)
-    const jsonString = answer.substring(openBraceIndex);
+    // Try to parse the JSON (potentially partial)
+    const jsonString = jsonMatch[0];
     const parsed = parsePartialJson(jsonString);
 
     if (parsed && typeof parsed === "object" && "type" in parsed) {
