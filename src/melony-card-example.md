@@ -1,4 +1,4 @@
-# AnswerCard Component Prompts - Usage Examples
+# MelonyCard Component Prompts - Usage Examples
 
 ## Basic Usage
 
@@ -96,7 +96,7 @@ Choose the appropriate component based on what the user is asking for.`
   ]
 });
 
-// The AI will respond with chart JSON that AnswerCard can render
+// The AI will respond with chart JSON that MelonyCard can render
 ```
 
 ## Component Response Examples
@@ -149,17 +149,17 @@ Please fill out this registration form:
 }
 ```
 
-## Rendering with AnswerCard
+## Rendering with MelonyCard
 
 ```tsx
-import { AnswerCard } from 'melony';
+import { MelonyCard } from 'melony';
 
 function ChatMessage({ message }) {
-  return <AnswerCard answer={message.content} />;
+  return <MelonyCard text={message.content} />;
 }
 ```
 
-The AnswerCard component will automatically:
+The MelonyCard component will automatically:
 - Detect JSON structures in the response
 - Parse partial/streaming JSON
 - Render the appropriate component

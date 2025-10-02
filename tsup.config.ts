@@ -21,7 +21,7 @@ export default defineConfig([
   },
   // Prompts-only build (no React dependencies, safe for server-side)
   {
-    entry: ["src/answer-card-prompts.ts"],
+    entry: ["src/melony-card-prompts.ts"],
     format: ["esm", "cjs"],
     dts: true,
     sourcemap: true,

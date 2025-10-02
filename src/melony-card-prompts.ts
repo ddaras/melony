@@ -106,6 +106,31 @@ Use the card component for:
 - Call-to-action messages
 - Standalone content blocks`;
 
+export const CUSTOM_COMPONENT_PROMPT = `To use custom components, define them in the customComponents prop and reference them by type:
+{
+  "type": "your-custom-type",
+  "customProp1": "value1",
+  "customProp2": "value2",
+  ...
+}
+
+Custom components allow you to:
+- Extend the default component library
+- Create domain-specific visualizations
+- Implement custom business logic
+- Override built-in component rendering
+
+Pass your custom component renderers to the MelonyCard customComponents prop:
+<MelonyCard 
+  text={text} 
+  customComponents={{
+    "your-custom-type": YourCustomComponent,
+    "another-type": AnotherComponent
+  }}
+/>
+
+Each custom component will receive all properties from the JSON object as React props.`;
+
 /**
  * Combined prompt with all component types
  */
@@ -129,6 +154,9 @@ ${LIST_PROMPT}
 6. CARD - For highlighted content blocks:
 ${CARD_PROMPT}
 
+7. CUSTOM COMPONENTS - For custom component types:
+${CUSTOM_COMPONENT_PROMPT}
+
 You can embed these JSON structures within your text responses. The JSON will be automatically detected and rendered as the appropriate component.`;
 
 /**
@@ -145,7 +173,7 @@ export const COMPACT_COMPONENTS_PROMPT = `Format responses with JSON components:
 /**
  * Helper to get a specific component prompt
  */
-export const getComponentPrompt = (componentType: 'overview' | 'details' | 'chart' | 'form' | 'list' | 'card'): string => {
+export const getComponentPrompt = (componentType: 'overview' | 'details' | 'chart' | 'form' | 'list' | 'card' | 'custom'): string => {
   const prompts = {
     overview: OVERVIEW_PROMPT,
     details: DETAILS_PROMPT,
@@ -153,6 +181,7 @@ export const getComponentPrompt = (componentType: 'overview' | 'details' | 'char
     form: FORM_PROMPT,
     list: LIST_PROMPT,
     card: CARD_PROMPT,
+    custom: CUSTOM_COMPONENT_PROMPT,
   };
   return prompts[componentType];
 };
@@ -160,7 +189,7 @@ export const getComponentPrompt = (componentType: 'overview' | 'details' | 'char
 /**
  * Helper to get multiple component prompts
  */
-export const getComponentPrompts = (componentTypes: Array<'overview' | 'details' | 'chart' | 'form' | 'list' | 'card'>): string => {
+export const getComponentPrompts = (componentTypes: Array<'overview' | 'details' | 'chart' | 'form' | 'list' | 'card' | 'custom'>): string => {
   return componentTypes.map((type, index) => 
     `${index + 1}. ${type.toUpperCase()} Component:\n${getComponentPrompt(type)}`
   ).join('\n\n');
@@ -177,6 +206,7 @@ export interface ComponentPromptConfig {
   form?: boolean;
   list?: boolean;
   card?: boolean;
+  custom?: boolean;
 }
 
 /**
@@ -185,7 +215,7 @@ export interface ComponentPromptConfig {
 export const generateCustomPrompt = (config: ComponentPromptConfig): string => {
   const enabledComponents = Object.entries(config)
     .filter(([_, enabled]) => enabled)
-    .map(([type]) => type as 'overview' | 'details' | 'chart' | 'form' | 'list' | 'card');
+    .map(([type]) => type as 'overview' | 'details' | 'chart' | 'form' | 'list' | 'card' | 'custom');
 
   if (enabledComponents.length === 0) {
     return '';
