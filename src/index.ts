@@ -6,3 +6,4 @@ export * from "./use-melony-status";
 export * from "./types";
 export * from "./melony-card";
 export * from "./melony-card-prompts";
+export * from "./zod-schema-utils";

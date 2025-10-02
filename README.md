@@ -117,6 +117,81 @@ function ChatWithCustomTypes() {
 }
 ```
 
+### Zod Schema Support
+
+Define custom component schemas with Zod and automatically generate AI prompts with JSON schema:
+
+```tsx
+import { z } from "zod";
+import { zodSchemaToPrompt, MelonyCard } from "melony";
+
+// Define your schema once
+const productSchema = z.object({
+  type: z.literal("product-card"),
+  name: z.string(),
+  price: z.number(),
+  description: z.string(),
+  inStock: z.boolean(),
+});
+
+// Generate AI prompt automatically
+const aiPrompt = zodSchemaToPrompt({
+  type: "product-card",
+  schema: productSchema,
+  description: "Use for product displays and e-commerce",
+  examples: [{
+    type: "product-card",
+    name: "Wireless Headphones",
+    price: 99.99,
+    description: "Premium noise-cancelling headphones",
+    inStock: true,
+  }],
+});
+
+// Use for type safety and validation
+type ProductCardProps = z.infer<typeof productSchema>;
+
+const ProductCard: React.FC<ProductCardProps> = (props) => {
+  return <div className="product-card">{/* ... */}</div>;
+};
+
+// Use with MelonyCard
+<MelonyCard
+  text={aiResponse}
+  customComponents={{ "product-card": ProductCard }}
+/>
+
+// Include in your AI system prompt
+const systemPrompt = `You are a shopping assistant. ${aiPrompt}`;
+```
+
+**Benefits:**
+- Single source of truth for schemas
+- Auto-generated JSON schema prompts for AI
+- Runtime validation with Zod
+- Full TypeScript type safety
+- Keep schemas and prompts in sync
+
+For multiple schemas:
+
+```tsx
+import { zodSchemasToPrompt, combinePrompts } from "melony";
+
+const customPrompt = zodSchemasToPrompt([
+  { type: "product-card", schema: productSchema, ... },
+  { type: "user-profile", schema: userSchema, ... },
+]);
+```
+
+**Server-side optimized import** (no React dependencies):
+
+```ts
+// Next.js API route, Express backend, etc.
+import { zodSchemaToPrompt } from "melony/zod";
+```
+
+See [zod-schema-example.md](src/zod-schema-example.md) and [zod-schema-imports.md](src/zod-schema-imports.md) for detailed examples.
+
 ### Advanced Usage with Hooks
 
 For more control, use individual hooks to build custom UIs:
