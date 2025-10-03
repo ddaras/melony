@@ -31,10 +31,11 @@ function formatJsonSchemaPrompt(
   let prompt = `To display a ${type}, use this JSON format:\n`;
 
   // Add a simplified example based on the schema
-  const exampleJson = examples && examples.length > 0 
-    ? examples[0] 
-    : generateExampleFromSchema(jsonSchema, type);
-  
+  const exampleJson =
+    examples && examples.length > 0
+      ? examples[0]
+      : generateExampleFromSchema(jsonSchema, type);
+
   prompt += `${JSON.stringify(exampleJson, null, 2)}\n\n`;
 
   // Add JSON schema for AI understanding
@@ -54,7 +55,11 @@ function formatJsonSchemaPrompt(
   if (examples && examples.length > 1) {
     prompt += `\nAdditional examples:\n`;
     examples.slice(1).forEach((example, index) => {
-      prompt += `Example ${index + 2}:\n${JSON.stringify(example, null, 2)}\n\n`;
+      prompt += `Example ${index + 2}:\n${JSON.stringify(
+        example,
+        null,
+        2
+      )}\n\n`;
     });
   }
 
@@ -70,7 +75,7 @@ function generateExampleFromSchema(schema: any, typeName: string): any {
   if (schema.type === "object" && schema.properties) {
     Object.entries(schema.properties).forEach(([key, prop]: [string, any]) => {
       if (key === "type") return; // Skip the type field
-      
+
       switch (prop.type) {
         case "string":
           example[key] = prop.description || `Example ${key}`;
@@ -122,7 +127,7 @@ export function zodSchemaToPrompt(config: ZodSchemaPromptConfig): string {
       },
       ...jsonSchema.properties,
     };
-    
+
     // Add type to required fields
     if (Array.isArray(jsonSchema.required)) {
       if (!jsonSchema.required.includes("type")) {
@@ -133,7 +138,13 @@ export function zodSchemaToPrompt(config: ZodSchemaPromptConfig): string {
     }
   }
 
-  return formatJsonSchemaPrompt(type, jsonSchema, description, examples, customInstructions);
+  return formatJsonSchemaPrompt(
+    type,
+    jsonSchema,
+    description,
+    examples,
+    customInstructions
+  );
 }
 
 /**
@@ -144,7 +155,8 @@ export function zodSchemasToPrompt(configs: ZodSchemaPromptConfig[]): string {
     return "";
   }
 
-  let prompt = "You can use the following custom JSON components in your responses:\n\n";
+  let prompt =
+    "You can use the following custom JSON components in your responses:\n\n";
 
   configs.forEach((config, index) => {
     prompt += `${index + 1}. ${config.type.toUpperCase()} Component:\n`;
@@ -160,25 +172,13 @@ export function zodSchemasToPrompt(configs: ZodSchemaPromptConfig[]): string {
  * This ensures the Zod schema matches the component's expected props
  */
 export function defineComponentSchema<T extends z.ZodType<any>>(
-  config: Omit<ZodSchemaPromptConfig, 'schema'> & { schema: T }
-): ZodSchemaPromptConfig & { schema: T; validate: (data: unknown) => z.infer<T> } {
+  config: Omit<ZodSchemaPromptConfig, "schema"> & { schema: T }
+): ZodSchemaPromptConfig & {
+  schema: T;
+  validate: (data: unknown) => z.infer<T>;
+} {
   return {
     ...config,
     validate: (data: unknown) => config.schema.parse(data),
   };
 }
-
-/**
- * Utility to combine built-in prompts with custom Zod schema prompts
- */
-export function combinePrompts(
-  builtInPrompt: string,
-  zodConfigs: ZodSchemaPromptConfig[]
-): string {
-  if (zodConfigs.length === 0) {
-    return builtInPrompt;
-  }
-
-  return `${builtInPrompt}\n\nAdditional Custom Components:\n${zodSchemasToPrompt(zodConfigs)}`;
-}
-
