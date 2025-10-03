@@ -1,332 +1,345 @@
-## melony
+# Melony 🍈
 
-TypeScript‑first, headless React toolkit for building AI chat UIs with streaming support.
+A React library for building AI-powered conversational interfaces with intelligent component rendering and type-safe schema definitions.
 
-[![npm version](https://img.shields.io/npm/v/melony.svg?color=2ea043)](https://www.npmjs.com/package/melony)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![TypeScript](https://img.shields.io/badge/typed-TypeScript-3178c6.svg)
+[![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### The core idea
+## Features
 
-- **MelonyProvider** manages streaming chat state and handles server communication.
-- **Hooks** give you fine-grained access to messages, parts, status, and sending.
-- **Flexible parts system** supports any message structure with custom mappers.
-- **TypeScript-first** with full type safety and extensibility.
+- 🎯 **Smart Component Rendering** - Automatically parses and renders JSON structures embedded in AI responses
+- 📝 **Markdown Support** - Built-in markdown rendering with GitHub Flavored Markdown support
+- 🔧 **Custom Components** - Easily extend with your own component types
+- 🛡️ **Type Safety** - Zod schema integration for type-safe component definitions
+- 🤖 **AI-Ready Prompts** - Pre-built prompt templates to guide AI responses
+- ⚡ **Partial JSON Parsing** - Handles streaming responses with incomplete JSON
+- 🎨 **Flexible Styling** - BYO CSS with className support
 
-### Install
+## Installation
+
+```bash
+npm install melony
+```
+
+```bash
+yarn add melony
+```
 
 ```bash
 pnpm add melony
 ```
 
-### 30‑second quickstart
+## Quick Start
 
-Basic chat component with streaming support:
+### Basic Usage
 
 ```tsx
-"use client";
-import {
-  MelonyProvider,
-  useMelonyMessages,
-  useMelonySend,
-  useMelonyStatus,
-} from "melony";
+import { MelonyCard } from 'melony';
 
-function ChatMessages() {
-  const messages = useMelonyMessages();
-  const send = useMelonySend();
-  const status = useMelonyStatus();
+function ChatMessage({ text }) {
+  return <MelonyCard text={text} className="my-message" />;
+}
+```
 
+The `MelonyCard` component will automatically:
+- Render plain text as markdown
+- Detect and parse JSON structures
+- Render custom components when JSON is detected
+
+### With Custom Components
+
+```tsx
+import { MelonyCard } from 'melony';
+
+// Define your custom component
+function ProductCard({ type, name, price, inStock }) {
   return (
-    <div>
-      {messages.map((message) => (
-        <div key={message.id}>
-          <strong>{message.role}:</strong>
-          {message.parts.map((part, i) => (
-            <div key={i}>{part.type === "text" && part.text}</div>
-          ))}
-        </div>
-      ))}
-      <button onClick={() => send("Hello!")} disabled={status === "streaming"}>
-        {status === "streaming" ? "Sending..." : "Send"}
-      </button>
+    <div className="product-card">
+      <h3>{name}</h3>
+      <p>${price}</p>
+      <span>{inStock ? '✅ In Stock' : '❌ Out of Stock'}</span>
     </div>
   );
 }
 
-export default function Chat() {
+// Use it with MelonyCard
+function App() {
+  const aiResponse = `
+    Here's the product you requested:
+    {"type": "product-card", "name": "Laptop", "price": 999, "inStock": true}
+  `;
+  
   return (
-    <MelonyProvider endpoint="/api/chat">
-      <ChatMessages />
-    </MelonyProvider>
+    <MelonyCard 
+      text={aiResponse}
+      components={{
+        "product-card": ProductCard
+      }}
+    />
   );
 }
 ```
 
-### Text Delta Handling
+## Using AI Prompts
 
-melony automatically handles text deltas for smooth streaming:
-
-```tsx
-// Server streams deltas
-data: {"type": "text-delta", "id": "block1", "delta": "Hello"}
-data: {"type": "text-delta", "id": "block1", "delta": " world"}
-data: {"type": "text-delta", "id": "block1", "delta": "!"}
-
-// Client receives joined text
-{type: "text", text: "Hello world!"}
-```
-
-Configure delta handling with `useMelonyMessages`:
+Melony provides pre-built prompts to guide AI models in generating structured responses.
 
 ```tsx
-const messages = useMelonyMessages({
-  joinTextDeltas: {
-    deltaType: "text-delta",
-    idField: "id",
-    deltaField: "delta",
-    outputType: "text",
-    outputField: "text",
-  },
-});
-```
+import { ALL_COMPONENTS_PROMPT } from 'melony/prompts';
+import { useChat } from 'ai/react';
 
-### Custom Message Types
+function ChatInterface() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: '/api/chat',
+    systemMessage: ALL_COMPONENTS_PROMPT, // Inject the prompt
+  });
 
-melony supports custom message structures through TypeScript generics and mappers:
-
-```tsx
-// Define your custom part type
-type CustomPart = {
-  melonyId: string;
-  type: "text" | "image" | "tool_call";
-  role: "user" | "assistant" | "system";
-  text?: string;
-  imageUrl?: string;
-  toolName?: string;
-  toolArgs?: Record<string, any>;
-};
-
-// Use with custom mappers
-function ChatWithCustomTypes() {
   return (
-    <MelonyProvider<CustomPart> endpoint="/api/chat">
-      <ChatMessages />
-    </MelonyProvider>
+    <div>
+      {messages.map(m => (
+        <MelonyCard key={m.id} text={m.content} />
+      ))}
+      <form onSubmit={handleSubmit}>
+        <input value={input} onChange={handleInputChange} />
+      </form>
+    </div>
   );
 }
 ```
 
-### Zod Schema Support
-
-Define custom component schemas with Zod and automatically generate AI prompts with JSON schema:
+### Available Prompt Templates
 
 ```tsx
-import { z } from "zod";
-import { zodSchemaToPrompt, MelonyCard } from "melony";
+import {
+  OVERVIEW_PROMPT,
+  DETAILS_PROMPT,
+  CHART_PROMPT,
+  FORM_PROMPT,
+  LIST_PROMPT,
+  CARD_PROMPT,
+  ALL_COMPONENTS_PROMPT,
+  COMPACT_COMPONENTS_PROMPT,
+  getComponentPrompt,
+  getComponentPrompts,
+  generateCustomPrompt,
+} from 'melony/prompts';
 
-// Define your schema once
-const productSchema = z.object({
-  type: z.literal("product-card"),
-  name: z.string(),
-  price: z.number(),
-  description: z.string(),
-  inStock: z.boolean(),
+// Use individual prompts
+const systemPrompt = getComponentPrompt('overview');
+
+// Combine multiple prompts
+const systemPrompt = getComponentPrompts(['overview', 'chart', 'list']);
+
+// Generate custom prompt based on config
+const systemPrompt = generateCustomPrompt({
+  overview: true,
+  chart: true,
+  form: false,
+});
+```
+
+## Type-Safe Components with Zod
+
+Create type-safe custom components using Zod schemas:
+
+```tsx
+import { z } from 'zod';
+import { zodSchemaToPrompt, defineComponentSchema } from 'melony/zod';
+import { MelonyCard } from 'melony';
+
+// Define your schema
+const ProductSchema = z.object({
+  name: z.string().describe('Product name'),
+  price: z.number().describe('Product price in USD'),
+  inStock: z.boolean().describe('Whether the product is in stock'),
+  tags: z.array(z.string()).optional().describe('Product tags'),
 });
 
-// Generate AI prompt automatically
-const aiPrompt = zodSchemaToPrompt({
-  type: "product-card",
-  schema: productSchema,
-  description: "Use for product displays and e-commerce",
+// Generate AI prompt from schema
+const productPrompt = zodSchemaToPrompt({
+  type: 'product-card',
+  schema: ProductSchema,
+  description: 'Product information display',
   examples: [{
-    type: "product-card",
-    name: "Wireless Headphones",
-    price: 99.99,
-    description: "Premium noise-cancelling headphones",
+    type: 'product-card',
+    name: 'Laptop',
+    price: 999,
     inStock: true,
+    tags: ['electronics', 'computers']
   }],
 });
 
-// Use for type safety and validation
-type ProductCardProps = z.infer<typeof productSchema>;
+// Type-safe component definition
+const ProductComponent = defineComponentSchema({
+  type: 'product-card',
+  schema: ProductSchema,
+  description: 'Display product information',
+});
 
-const ProductCard: React.FC<ProductCardProps> = (props) => {
-  return <div className="product-card">{/* ... */}</div>;
-};
-
-// Use with MelonyCard
-<MelonyCard
-  text={aiResponse}
-  customComponents={{ "product-card": ProductCard }}
-/>
-
-// Include in your AI system prompt
-const systemPrompt = `You are a shopping assistant. ${aiPrompt}`;
-```
-
-**Benefits:**
-- Single source of truth for schemas
-- Auto-generated JSON schema prompts for AI
-- Runtime validation with Zod
-- Full TypeScript type safety
-- Keep schemas and prompts in sync
-
-For multiple schemas:
-
-```tsx
-import { zodSchemasToPrompt, combinePrompts } from "melony";
-
-const customPrompt = zodSchemasToPrompt([
-  { type: "product-card", schema: productSchema, ... },
-  { type: "user-profile", schema: userSchema, ... },
-]);
-```
-
-**Server-side optimized import** (no React dependencies):
-
-```ts
-// Next.js API route, Express backend, etc.
-import { zodSchemaToPrompt } from "melony/zod";
-```
-
-See [zod-schema-example.md](src/zod-schema-example.md) and [zod-schema-imports.md](src/zod-schema-imports.md) for detailed examples.
-
-### Advanced Usage with Hooks
-
-For more control, use individual hooks to build custom UIs:
-
-```tsx
-import {
-  useMelonyMessages,
-  useMelonySend,
-  useMelonyStatus,
-  useMelonyPart,
-} from "melony";
-
-export function AdvancedChat() {
-  const messages = useMelonyMessages({
-    filter: (part) => part.type === "text",
-    joinTextDeltas: true,
-    limit: 50,
-  });
-  const send = useMelonySend();
-  const status = useMelonyStatus();
-
-  // Listen to individual parts as they stream
-  useMelonyPart((part) => {
-    console.log("New part received:", part);
-  });
-
+// Your React component (fully typed)
+function ProductCard(props: z.infer<typeof ProductSchema> & { type: string }) {
+  // Validate props at runtime
+  const validated = ProductComponent.validate(props);
+  
   return (
     <div>
-      <div className="messages">
-        {messages.map((message) => (
-          <div key={message.id} className={`message ${message.role}`}>
-            {message.parts.map((part, i) => (
-              <div key={i}>{part.type === "text" && part.text}</div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      <div className="input">
-        <button
-          onClick={() => send("Hello!")}
-          disabled={status === "streaming"}
-        >
-          {status === "streaming" ? "Sending..." : "Send"}
-        </button>
-        {status === "error" && <p>Error occurred. Please try again.</p>}
-      </div>
+      <h3>{validated.name}</h3>
+      <p>${validated.price}</p>
+      {validated.tags?.map(tag => <span key={tag}>{tag}</span>)}
     </div>
+  );
+}
+
+// Use in your app
+function App() {
+  return (
+    <MelonyCard
+      text={aiResponse}
+      components={{ 'product-card': ProductCard }}
+    />
   );
 }
 ```
 
-### API
-
-#### MelonyProvider
-
-The main provider component that manages chat state and handles server communication.
+### Multiple Schemas
 
 ```tsx
-<MelonyProvider<TPart>
-  endpoint?: string
-  headers?: Record<string, string>
->
-  {children}
-</MelonyProvider>
+import { zodSchemasToPrompt, combinePrompts } from 'melony/zod';
+import { ALL_COMPONENTS_PROMPT } from 'melony/prompts';
+
+const customPrompt = zodSchemasToPrompt([
+  {
+    type: 'product-card',
+    schema: ProductSchema,
+    description: 'Product information',
+  },
+  {
+    type: 'user-profile',
+    schema: UserSchema,
+    description: 'User profile display',
+  },
+]);
+
+// Combine with built-in prompts
+const finalPrompt = combinePrompts(ALL_COMPONENTS_PROMPT, [
+  { type: 'product-card', schema: ProductSchema },
+  { type: 'user-profile', schema: UserSchema },
+]);
 ```
 
-**Props:**
+## API Reference
 
-- `endpoint`: API endpoint for chat requests (default: `/api/chat`)
-- `headers`: Additional headers to send with requests
+### `MelonyCard`
 
-#### Hooks
+Main component for rendering AI responses.
 
-- **`useMelonyMessages(options?)`** → `MelonyMessage<TPart>[]`
+#### Props
 
-  - Returns grouped and processed messages
-  - Options: `filter`, `groupBy`, `sortBy`, `limit`, `joinTextDeltas`
+| Prop | Type | Description |
+|------|------|-------------|
+| `text` | `string` | The text content to render (can contain JSON) |
+| `className` | `string?` | Optional CSS class name |
+| `components` | `Record<string, React.FC<any>>?` | Map of component types to React components |
 
-- **`useMelonySend()`** → `(message: string) => Promise<void>`
+### Exports
 
-  - Send a new message to the chat
+```tsx
+// Main component
+import { MelonyCard } from 'melony';
 
-- **`useMelonyStatus()`** → `"idle" | "requested" | "streaming" | "error"`
+// Prompt utilities
+import {
+  ALL_COMPONENTS_PROMPT,
+  COMPACT_COMPONENTS_PROMPT,
+  OVERVIEW_PROMPT,
+  DETAILS_PROMPT,
+  CHART_PROMPT,
+  FORM_PROMPT,
+  LIST_PROMPT,
+  CARD_PROMPT,
+  CUSTOM_COMPONENT_PROMPT,
+  getComponentPrompt,
+  getComponentPrompts,
+  generateCustomPrompt,
+} from 'melony/prompts';
 
-  - Current conversation state
-
-- **`useMelonyPart(callback)`** → `void`
-  - Subscribe to individual parts as they stream in
-
-#### Types
-
-- **`MelonyPart<TType, TExtra>`**: Base part structure with `melonyId`, `type`, `role`
-- **`MelonyMessage<TPart>`**: Message container with `id`, `role`, `parts[]`, `createdAt`, `metadata`
-- **`Role`**: `"user" | "assistant" | "system"`
-
-### Server Integration
-
-Using the AI SDK for streaming chat responses:
-
-```ts
-// app/api/chat/route.ts
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
-
-export async function POST(req: Request) {
-  const { message } = await req.json();
-
-  const result = await streamText({
-    model: openai("gpt-4o"),
-    messages: [
-      {
-        role: "user",
-        content: message,
-      },
-    ],
-  });
-
-  return result.toUIMessageStream();
-}
+// Zod utilities
+import {
+  zodSchemaToPrompt,
+  zodSchemasToPrompt,
+  defineComponentSchema,
+  combinePrompts,
+} from 'melony/zod';
 ```
 
-The `toUIMessageStream()` method automatically formats the streaming response in the format that melony expects by default:
+## How It Works
+
+1. **Text Input**: `MelonyCard` receives a text string from an AI response
+2. **JSON Detection**: Automatically detects JSON structures using regex pattern matching
+3. **Partial Parsing**: Uses `partial-json` to handle streaming/incomplete JSON
+4. **Component Matching**: Matches `type` field in JSON to custom components
+5. **Rendering**: Renders custom component if found, otherwise renders as markdown
+
+### Example Flow
 
 ```
-data: {"type": "text-delta", "id": "response", "delta": "Hello"}
-data: {"type": "text-delta", "id": "response", "delta": " world"}
-data: {"type": "text-delta", "id": "response", "delta": "!"}
+Input: "Here's the data: {\"type\": \"chart\", \"data\": [...]}"
+  ↓
+Parse: Detect JSON structure
+  ↓
+Match: Find "chart" in components map
+  ↓
+Render: <ChartComponent data={...} />
 ```
 
-### Requirements
+If no JSON is found or no component matches:
+```
+Input: "This is a normal message"
+  ↓
+Render: <ReactMarkdown>This is a normal message</ReactMarkdown>
+```
 
-- React `>= 18`
-- A server route that returns `text/event-stream`
+## Built-in Component Types
 
-### License
+When using the prompt utilities, you can guide AI to generate these component types:
 
-MIT © melony contributors
+- **overview** - Key-value summaries and status reports
+- **details** - Multi-section detailed content
+- **chart** - Data visualization (bar, line, pie)
+- **form** - User input collection forms
+- **list** - Bullet point lists
+- **card** - Highlighted content blocks
+
+Note: These are prompt templates only. You need to implement the actual React components.
+
+## Requirements
+
+- React >= 18.0.0
+- React DOM >= 18.0.0
+
+## Dependencies
+
+- `@ai-sdk/openai` - AI SDK OpenAI provider
+- `ai` - Vercel AI SDK
+- `zod` - TypeScript-first schema validation
+- `react-markdown` - Markdown rendering
+- `remark-gfm` - GitHub Flavored Markdown support
+- `partial-json` - Partial JSON parsing
+- `use-stick-to-bottom` - Scroll management utility
+
+## License
+
+MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Repository
+
+[https://github.com/ddaras/melony](https://github.com/ddaras/melony)
+
+## Issues
+
+[https://github.com/ddaras/melony/issues](https://github.com/ddaras/melony/issues)
+
