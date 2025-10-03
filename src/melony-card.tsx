@@ -20,7 +20,23 @@ type ComponentData = { type: string; [key: string]: any };
 // Parse the answer string to detect JSON
 const parseText = (text: string): ParsedContent => {
   try {
-    const parsed = parsePartialJson(text);
+    // Extract JSON portion starting from { and ending at the last } if it exists
+    const startIndex = text.indexOf('{');
+    if (startIndex === -1) {
+      // No JSON object found, treat as text
+      return {
+        type: "text",
+        data: null,
+        originalText: text,
+      };
+    }
+    
+    const lastBraceIndex = text.lastIndexOf('}');
+    const jsonText = lastBraceIndex !== -1 && lastBraceIndex > startIndex
+      ? text.substring(startIndex, lastBraceIndex + 1)
+      : text.substring(startIndex);
+    
+    const parsed = parsePartialJson(jsonText);
 
     if (parsed && typeof parsed === "object" && "type" in parsed) {
       return {
