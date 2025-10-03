@@ -8,8 +8,6 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 
 ## Why Melony?
 
-Traditional AI tool calling requires the model to finish generating, send a tool call, wait for execution, and then continue. Melony eliminates this latency by **streaming JSON directly** into your React components as the AI generates its response.
-
 - ⚡ **Zero Latency** - Components render progressively during streaming
 - 🎯 **Smart Parsing** - Handles incomplete JSON with partial-json
 - 🛡️ **Type Safe** - Full Zod schema integration
