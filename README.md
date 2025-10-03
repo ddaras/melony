@@ -1,4 +1,4 @@
-# Melony 🍈
+# Melony
 
 Generate React UIs from AI responses in real-time.  
 No tool calling latency. No completion waiting. Just smooth, progressive rendering as the AI thinks.
@@ -19,7 +19,7 @@ Traditional AI tool calling requires the model to finish generating, send a tool
 ## Installation
 
 ```bash
-npm install melony zod
+pnpm add melony zod
 ```
 
 ## Quick Start
