@@ -52,7 +52,7 @@ const parseText = (text: string): ParsedSegment[] => {
     try {
       const parsed = parsePartialJson(remainingText);
       if (parsed && typeof parsed === "object" && "type" in parsed) {
-        // Find the end of the JSON object by finding the matching closing brace
+        // Check if we have a complete JSON object by finding the matching closing brace
         let braceCount = 0;
         let jsonEndIndex = -1;
         
@@ -69,6 +69,7 @@ const parseText = (text: string): ParsedSegment[] => {
         }
         
         if (jsonEndIndex !== -1) {
+          // Complete JSON object found
           segments.push({
             type: "json",
             data: parsed,
@@ -76,6 +77,15 @@ const parseText = (text: string): ParsedSegment[] => {
           });
           foundValidJson = true;
           currentIndex = startBrace + jsonEndIndex + 1;
+        } else {
+          // Partial JSON object - render it anyway
+          segments.push({
+            type: "json",
+            data: parsed,
+            originalText: remainingText,
+          });
+          foundValidJson = true;
+          currentIndex = text.length; // Move to end of text since we're processing partial JSON
         }
       }
     } catch (error) {
