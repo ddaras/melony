@@ -55,12 +55,6 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./prompts": {
-      "types": "./dist/melony-card-prompts.d.ts",
-      "import": "./dist/melony-card-prompts.js",
-      "require": "./dist/melony-card-prompts.cjs",
-      "default": "./dist/melony-card-prompts.js"
-    },
     "./zod": {
       "types": "./dist/zod-schema-utils.d.ts",
       "import": "./dist/zod-schema-utils.js",

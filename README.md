@@ -25,14 +25,14 @@ npm install melony zod
 ## Quick Start
 
 ```tsx
-import { MelonyCard } from 'melony';
+import { MelonyCard } from "melony";
 
-<MelonyCard 
+<MelonyCard
   text={streamingAIResponse}
   components={{
-    "weather-card": WeatherCard
+    "weather-card": WeatherCard,
   }}
-/>
+/>;
 ```
 
 As the AI streams `{"type": "weather-card", "temperature": 72...}`, your component renders immediately—even before the JSON is complete.
@@ -56,12 +56,14 @@ const prompt = zodSchemaToPrompt({
   type: "weather-card",
   schema: weatherSchema,
   description: "Display current weather information",
-  examples: [{
-    type: "weather-card",
-    location: "New York, NY",
-    temperature: 72,
-    condition: "Partly Cloudy",
-  }],
+  examples: [
+    {
+      type: "weather-card",
+      location: "New York, NY",
+      temperature: 72,
+      condition: "Partly Cloudy",
+    },
+  ],
 });
 ```
 
@@ -77,25 +79,46 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 }) => (
   <Card>
     <h3>{location}</h3>
-    <p>{temperature}°F - {condition}</p>
+    <p>
+      {temperature}°F - {condition}
+    </p>
   </Card>
 );
 ```
 
-### 3. Use in Chat
+### 3. Server-Side Prompt Injection
 
 ```tsx
-import { useChat } from 'ai/react';
+// app/api/chat/route.ts
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: openai("gpt-4"),
+    system: prompt, // Inject generated prompt here
+    messages,
+  });
+
+  return result.toDataStreamResponse();
+}
+```
+
+### 4. Client-Side Rendering
+
+```tsx
+import { useChat } from "ai/react";
 
 function Chat() {
   const { messages } = useChat({
-    api: '/api/chat',
-    systemMessage: prompt,
+    api: "/api/chat",
   });
 
-  return messages.map(m => (
-    <MelonyCard 
-      key={m.id} 
+  return messages.map((m) => (
+    <MelonyCard
+      key={m.id}
       text={m.content}
       components={{ "weather-card": WeatherCard }}
     />
@@ -107,22 +130,22 @@ function Chat() {
 
 ### `MelonyCard`
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `text` | `string` | AI response (can contain streaming JSON) |
-| `components` | `Record<string, React.FC>` | Map of type identifiers to components |
+| Prop         | Type                       | Description                              |
+| ------------ | -------------------------- | ---------------------------------------- |
+| `text`       | `string`                   | AI response (can contain streaming JSON) |
+| `components` | `Record<string, React.FC>` | Map of type identifiers to components    |
 
 ### `zodSchemaToPrompt(config)`
 
 Generate AI prompts from Zod schemas.
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `type` | `string` | ✅ | Component type identifier |
-| `schema` | `z.ZodType` | ✅ | Zod schema for validation |
-| `description` | `string` | ❌ | When to use this component |
-| `examples` | `any[]` | ❌ | Example JSON objects |
-| `customInstructions` | `string` | ❌ | Additional instructions |
+| Option               | Type        | Required | Description                |
+| -------------------- | ----------- | -------- | -------------------------- |
+| `type`               | `string`    | ✅       | Component type identifier  |
+| `schema`             | `z.ZodType` | ✅       | Zod schema for validation  |
+| `description`        | `string`    | ❌       | When to use this component |
+| `examples`           | `any[]`     | ❌       | Example JSON objects       |
+| `customInstructions` | `string`    | ❌       | Additional instructions    |
 
 ### `zodSchemasToPrompt(configs)`
 
@@ -130,8 +153,8 @@ Generate prompts for multiple component types.
 
 ```tsx
 const prompt = zodSchemasToPrompt([
-  { type: 'weather-card', schema: weatherSchema },
-  { type: 'chart', schema: chartSchema },
+  { type: "weather-card", schema: weatherSchema },
+  { type: "chart", schema: chartSchema },
 ]);
 ```
 
@@ -141,7 +164,7 @@ Create type-safe component definitions with validation.
 
 ```tsx
 const WeatherComponent = defineComponentSchema({
-  type: 'weather-card',
+  type: "weather-card",
   schema: weatherSchema,
 });
 
@@ -151,22 +174,14 @@ const validData = WeatherComponent.validate(data);
 ## Multiple Components
 
 ```tsx
-<MelonyCard 
+<MelonyCard
   text={message}
   components={{
     "weather-card": WeatherCard,
     "user-profile": UserProfile,
-    "chart": Chart,
+    chart: Chart,
   }}
 />
-```
-
-## Package Exports
-
-```tsx
-import { MelonyCard } from 'melony';
-import { zodSchemaToPrompt, zodSchemasToPrompt, defineComponentSchema } from 'melony/zod';
-import { getComponentPrompt, getComponentPrompts } from 'melony/prompts';
 ```
 
 ## How It Works
