@@ -18,28 +18,15 @@ interface ParsedContent {
 type ComponentData = { type: string; [key: string]: any };
 
 // Parse the answer string to detect JSON
-const parseAnswer = (answer: string): ParsedContent => {
-  // Check if the string contains JSON-like content
-  const jsonMatch = answer.match(/\{[\s\S]*\}/);
-
-  if (!jsonMatch) {
-    return {
-      type: "text",
-      data: null,
-      originalText: answer,
-    };
-  }
-
+const parseText = (text: string): ParsedContent => {
   try {
-    // Try to parse the JSON (potentially partial)
-    const jsonString = jsonMatch[0];
-    const parsed = parsePartialJson(jsonString);
+    const parsed = parsePartialJson(text);
 
     if (parsed && typeof parsed === "object" && "type" in parsed) {
       return {
         type: "json",
         data: parsed,
-        originalText: answer,
+        originalText: text,
       };
     }
   } catch (error) {
@@ -50,7 +37,7 @@ const parseAnswer = (answer: string): ParsedContent => {
   return {
     type: "text",
     data: null,
-    originalText: answer,
+    originalText: text,
   };
 };
 
@@ -62,6 +49,7 @@ const renderJsonComponent = (
   // Check for custom components first
   if (components && data.type in components) {
     const CustomComponent = components[data.type];
+
     return <CustomComponent {...data} />;
   }
 
@@ -74,7 +62,7 @@ export const MelonyCard: React.FC<MelonyCardProps> = ({
   className,
   components,
 }) => {
-  const parsedContent = useMemo(() => parseAnswer(text), [text]);
+  const parsedContent = useMemo(() => parseText(text), [text]);
 
   if (parsedContent.type === "json" && parsedContent.data) {
     return (
