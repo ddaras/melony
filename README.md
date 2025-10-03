@@ -52,7 +52,7 @@ const weatherSchema = z.object({
   condition: z.string(),
 });
 
-const prompt = zodSchemaToPrompt({
+const weatherUIPrompt = zodSchemaToPrompt({
   type: "weather-card",
   schema: weatherSchema,
   description: "Display current weather information",
@@ -92,13 +92,14 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 // app/api/chat/route.ts
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { weatherUIPrompt } from "@components/weather"
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
     model: openai("gpt-4"),
-    system: prompt, // Inject generated prompt here
+    system: `You are a helpful assistant. ${weatherUIPrompt}`, // Inject generated prompt here
     messages,
   });
 
