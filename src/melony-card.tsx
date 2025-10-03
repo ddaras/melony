@@ -52,53 +52,17 @@ const parseText = (text: string): ParsedSegment[] => {
     try {
       const parsed = parsePartialJson(remainingText);
       if (parsed && typeof parsed === "object" && "type" in parsed) {
-        // Find the actual end of the JSON in the original text by counting braces
-        let braceCount = 0;
-        let endIndex = startBrace;
-        let inString = false;
-        let escaped = false;
-        
-        for (let i = startBrace; i < text.length; i++) {
-          const char = text[i];
-          
-          if (escaped) {
-            escaped = false;
-            continue;
-          }
-          
-          if (char === '\\') {
-            escaped = true;
-            continue;
-          }
-          
-          if (char === '"' && !escaped) {
-            inString = !inString;
-            continue;
-          }
-          
-          if (!inString) {
-            if (char === '{') {
-              braceCount++;
-            } else if (char === '}') {
-              braceCount--;
-              if (braceCount === 0) {
-                endIndex = i + 1;
-                break;
-              }
-            }
-          }
-        }
-        
         segments.push({
           type: "json",
           data: parsed,
-          originalText: text.substring(startBrace, endIndex),
+          originalText: text.substring(startBrace),
         });
-        
-        currentIndex = endIndex;
-        foundValidJson = true;
       }
     } catch (error) {
+      const endIndex = startBrace + remainingText.length;
+
+      currentIndex = endIndex;
+      foundValidJson = true;
       // JSON parsing failed, treat as regular text
     }
 
