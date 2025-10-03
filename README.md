@@ -1,18 +1,20 @@
 # Melony 🍈
 
-A lightweight React library for building AI-powered conversational interfaces with intelligent JSON component rendering and type-safe schema definitions.
+Generate React UIs from AI responses in real-time.  
+No tool calling latency. No completion waiting. Just smooth, progressive rendering as the AI thinks.
 
 [![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+## Why Melony?
 
-- 🎯 **Smart Component Rendering** - Automatically parses and renders JSON structures embedded in AI responses
-- 🛡️ **Type Safety** - Full Zod schema integration for type-safe component definitions
-- 🤖 **AI Prompt Generation** - Auto-generate AI prompts from Zod schemas
-- ⚡ **Partial JSON Parsing** - Handles streaming AI responses with incomplete JSON
-- 📝 **Markdown Support** - Built-in markdown rendering with GitHub Flavored Markdown (GFM)
-- 🪶 **Lightweight** - Minimal dependencies, maximum flexibility
+Traditional AI tool calling requires the model to finish generating, send a tool call, wait for execution, and then continue. Melony eliminates this latency by **streaming JSON directly** into your React components as the AI generates its response.
+
+- ⚡ **Zero Latency** - Components render progressively during streaming
+- 🎯 **Smart Parsing** - Handles incomplete JSON with partial-json
+- 🛡️ **Type Safe** - Full Zod schema integration
+- 📝 **Markdown Support** - Built-in GFM rendering
+- 🪶 **Lightweight** - Minimal dependencies
 
 ## Installation
 
@@ -25,177 +27,94 @@ npm install melony zod
 ```tsx
 import { MelonyCard } from 'melony';
 
-function ChatMessage({ text }) {
-  return (
-    <MelonyCard 
-      text={text}
-      components={{
-        "weather-card": WeatherCard
-      }}
-    />
-  );
-}
+<MelonyCard 
+  text={streamingAIResponse}
+  components={{
+    "weather-card": WeatherCard
+  }}
+/>
 ```
 
-The `MelonyCard` component automatically:
-- Detects JSON objects with a `type` field in AI responses
-- Renders matching custom React components
-- Renders remaining text as markdown
+As the AI streams `{"type": "weather-card", "temperature": 72...}`, your component renders immediately—even before the JSON is complete.
 
-## Complete Example: Weather Card
+## Complete Example
 
-### 1. Define Your Schema
+### 1. Define Schema & Generate Prompt
 
 ```tsx
 import { z } from "zod";
+import { zodSchemaToPrompt } from "melony/zod";
 
 const weatherSchema = z.object({
   type: z.literal("weather-card"),
   location: z.string(),
   temperature: z.number(),
   condition: z.string(),
-  humidity: z.number().min(0).max(100).optional(),
-  windSpeed: z.number().optional(),
-  description: z.string().optional(),
-  icon: z.enum(["sunny", "cloudy", "rainy", "snowy"]).optional(),
 });
 
-type WeatherCardProps = z.infer<typeof weatherSchema>;
-```
-
-### 2. Generate AI Prompt
-
-```tsx
-import { zodSchemaToPrompt } from "melony/zod";
-
-export const weatherPrompt = zodSchemaToPrompt({
+const prompt = zodSchemaToPrompt({
   type: "weather-card",
   schema: weatherSchema,
-  description: "Display current weather information with temperature, conditions, and additional details",
-  examples: [
-    {
-      type: "weather-card",
-      location: "New York, NY",
-      temperature: 72,
-      condition: "Partly Cloudy",
-      humidity: 65,
-      windSpeed: 8,
-      icon: "cloudy",
-    },
-  ],
+  description: "Display current weather information",
+  examples: [{
+    type: "weather-card",
+    location: "New York, NY",
+    temperature: 72,
+    condition: "Partly Cloudy",
+  }],
 });
 ```
 
-### 3. Create Your Component
+### 2. Create Component
 
 ```tsx
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Cloud, Sun, CloudRain, Snowflake } from "lucide-react";
+type WeatherCardProps = z.infer<typeof weatherSchema>;
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
   location,
   temperature,
   condition,
-  humidity,
-  windSpeed,
-  description,
-  icon,
-}) => {
-  return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-100">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-lg">{location}</h3>
-            <p className="text-sm text-gray-600">{condition}</p>
-          </div>
-          <div className="text-3xl">{temperature}°F</div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {description && <p className="text-sm mb-2">{description}</p>}
-        {humidity && <p className="text-xs">Humidity: {humidity}%</p>}
-        {windSpeed && <p className="text-xs">Wind: {windSpeed} mph</p>}
-      </CardContent>
-    </Card>
-  );
-};
+}) => (
+  <Card>
+    <h3>{location}</h3>
+    <p>{temperature}°F - {condition}</p>
+  </Card>
+);
 ```
 
-### 4. Use in Your Chat Interface
+### 3. Use in Chat
 
 ```tsx
 import { useChat } from 'ai/react';
 
-function ChatInterface() {
+function Chat() {
   const { messages } = useChat({
     api: '/api/chat',
-    systemMessage: weatherPrompt, // Inject generated prompt
+    systemMessage: prompt,
   });
 
-  return (
-    <div>
-      {messages.map(m => (
-        <MelonyCard 
-          key={m.id} 
-          text={m.content}
-          components={{
-            "weather-card": WeatherCard
-          }}
-        />
-      ))}
-    </div>
-  );
+  return messages.map(m => (
+    <MelonyCard 
+      key={m.id} 
+      text={m.content}
+      components={{ "weather-card": WeatherCard }}
+    />
+  ));
 }
 ```
 
-## How It Works
-
-1. **Schema → Prompt**: `zodSchemaToPrompt()` converts your Zod schema into a detailed AI prompt with JSON schema and examples
-2. **AI Response**: The AI responds with text containing JSON: `"The weather looks nice! {"type": "weather-card", "location": "Seattle", ...}"`
-3. **Smart Parsing**: `MelonyCard` parses the response, extracting JSON objects
-4. **Component Rendering**: JSON objects with matching `type` fields render as custom components
-5. **Markdown Fallback**: Remaining text renders as markdown
-
-## API Reference
+## API
 
 ### `MelonyCard`
 
-Main rendering component for AI responses with embedded JSON.
-
-```tsx
-<MelonyCard 
-  text={aiResponse}
-  components={{
-    "component-type": YourComponent,
-  }}
-/>
-```
-
-**Props:**
-
 | Prop | Type | Description |
 |------|------|-------------|
-| `text` | `string` | Text content to render (can contain JSON objects) |
-| `components` | `Record<string, React.FC<any>>` | Map of component type identifiers to React components |
+| `text` | `string` | AI response (can contain streaming JSON) |
+| `components` | `Record<string, React.FC>` | Map of type identifiers to components |
 
 ### `zodSchemaToPrompt(config)`
 
-Generate an AI prompt from a Zod schema.
-
-```tsx
-import { zodSchemaToPrompt } from 'melony/zod';
-
-const prompt = zodSchemaToPrompt({
-  type: 'weather-card',
-  schema: weatherSchema,
-  description: 'When to use this component',
-  examples: [{ type: 'weather-card', /* ... */ }],
-  customInstructions: 'Additional AI instructions',
-});
-```
-
-**Config Options:**
+Generate AI prompts from Zod schemas.
 
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
@@ -203,81 +122,35 @@ const prompt = zodSchemaToPrompt({
 | `schema` | `z.ZodType` | ✅ | Zod schema for validation |
 | `description` | `string` | ❌ | When to use this component |
 | `examples` | `any[]` | ❌ | Example JSON objects |
-| `customInstructions` | `string` | ❌ | Additional AI instructions |
-| `includeFieldDescriptions` | `boolean` | ❌ | Include field details (default: true) |
+| `customInstructions` | `string` | ❌ | Additional instructions |
 
 ### `zodSchemasToPrompt(configs)`
 
-Generate prompts for multiple schemas at once.
+Generate prompts for multiple component types.
 
 ```tsx
-import { zodSchemasToPrompt } from 'melony/zod';
-
 const prompt = zodSchemasToPrompt([
-  { type: 'weather-card', schema: weatherSchema, description: '...' },
-  { type: 'user-profile', schema: userSchema, description: '...' },
-  { type: 'product-card', schema: productSchema, description: '...' },
+  { type: 'weather-card', schema: weatherSchema },
+  { type: 'chart', schema: chartSchema },
 ]);
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `configs` | `ZodSchemaPromptConfig[]` | Array of schema configurations |
-
-**Returns:** Combined prompt string for all schemas.
 
 ### `defineComponentSchema(config)`
 
-Create a type-safe component definition with built-in validation.
+Create type-safe component definitions with validation.
 
 ```tsx
-import { defineComponentSchema } from 'melony/zod';
-
 const WeatherComponent = defineComponentSchema({
   type: 'weather-card',
   schema: weatherSchema,
-  description: 'Display weather information',
 });
 
-// Type-safe validation
-try {
-  const validData = WeatherComponent.validate(unknownData);
-  // validData is fully typed
-} catch (error) {
-  // Handle validation error
-}
+const validData = WeatherComponent.validate(data);
 ```
 
-**Returns:** Schema configuration with added `validate()` method.
-
-## Advanced Usage
-
-### Multiple Component Types
+## Multiple Components
 
 ```tsx
-import { zodSchemasToPrompt } from 'melony/zod';
-
-const systemPrompt = zodSchemasToPrompt([
-  { 
-    type: 'weather-card', 
-    schema: weatherSchema,
-    description: 'Display weather data'
-  },
-  { 
-    type: 'user-profile', 
-    schema: userSchema,
-    description: 'Show user information'
-  },
-  { 
-    type: 'chart', 
-    schema: chartSchema,
-    description: 'Visualize data trends'
-  },
-]);
-
-// Use in chat
 <MelonyCard 
   text={message}
   components={{
@@ -288,97 +161,29 @@ const systemPrompt = zodSchemasToPrompt([
 />
 ```
 
-### Streaming Support
-
-`MelonyCard` uses `partial-json` to parse incomplete JSON during streaming:
-
-```tsx
-// AI is streaming: "Here's the weather: {"type": "weather-card", "loc"
-// MelonyCard will attempt to parse and render as more data arrives
-```
-
-### Custom Prompts
-
-```tsx
-import { getComponentPrompt } from 'melony/prompts';
-
-const customPrompt = getComponentPrompt('custom');
-// Returns generic instructions for custom components
-```
-
-### Type-Safe Component Props
-
-```tsx
-import { z } from 'zod';
-
-const productSchema = z.object({
-  type: z.literal('product-card'),
-  name: z.string(),
-  price: z.number(),
-  image: z.string().url(),
-  inStock: z.boolean(),
-});
-
-// Automatically infer prop types
-type ProductCardProps = z.infer<typeof productSchema>;
-
-export const ProductCard: React.FC<ProductCardProps> = (props) => {
-  // props are fully typed
-  return <div>{props.name} - ${props.price}</div>;
-};
-```
-
 ## Package Exports
 
 ```tsx
-// Main component
 import { MelonyCard } from 'melony';
-
-// Zod utilities
-import { 
-  zodSchemaToPrompt, 
-  zodSchemasToPrompt, 
-  defineComponentSchema 
-} from 'melony/zod';
-
-// Prompt utilities
-import { 
-  getComponentPrompt,
-  getComponentPrompts,
-  generateCustomPrompt,
-  CUSTOM_COMPONENT_PROMPT,
-} from 'melony/prompts';
+import { zodSchemaToPrompt, zodSchemasToPrompt, defineComponentSchema } from 'melony/zod';
+import { getComponentPrompt, getComponentPrompts } from 'melony/prompts';
 ```
 
-## Requirements
+## How It Works
 
-- React >= 18.0.0
-- Zod >= 4.0.0
+1. AI streams response containing JSON
+2. `MelonyCard` parses partial JSON in real-time
+3. Components render progressively as JSON becomes valid
+4. Remaining text renders as markdown
 
-## How JSON Detection Works
+No waiting. No tool calls. Just instant UI generation.
 
-`MelonyCard` parses text and detects JSON objects with the following criteria:
+## Links
 
-1. Valid JSON object (or partial JSON during streaming)
-2. Contains a `type` field
-3. Has a matching component in the `components` prop
-
-Everything else is rendered as markdown with GFM support (tables, strikethrough, task lists, etc.).
-
-## Use Cases
-
-- **AI Chat Interfaces** - Render rich components in AI responses
-- **Dynamic Dashboards** - Let AI create visualizations on the fly
-- **Form Generation** - AI generates form components based on context
-- **Data Visualization** - Embed charts and graphs in AI responses
-- **Multi-Modal Responses** - Mix text explanations with interactive components
+- [GitHub](https://github.com/ddaras/melony)
+- [NPM](https://www.npmjs.com/package/melony)
+- [Report Issues](https://github.com/ddaras/melony/issues)
 
 ## License
 
 MIT
-
-## Links
-
-- [GitHub Repository](https://github.com/ddaras/melony)
-- [Report Issues](https://github.com/ddaras/melony/issues)
-- [NPM Package](https://www.npmjs.com/package/melony)
