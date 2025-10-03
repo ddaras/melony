@@ -106,7 +106,7 @@ Use the card component for:
 - Call-to-action messages
 - Standalone content blocks`;
 
-export const CUSTOM_COMPONENT_PROMPT = `To use custom components, define them in the customComponents prop and reference them by type:
+export const CUSTOM_COMPONENT_PROMPT = `To use custom components, define them in the components prop and reference them by type:
 {
   "type": "your-custom-type",
   "customProp1": "value1",
@@ -120,10 +120,10 @@ Custom components allow you to:
 - Implement custom business logic
 - Override built-in component rendering
 
-Pass your custom component renderers to the MelonyCard customComponents prop:
+Pass your custom component renderers to the MelonyCard components prop:
 <MelonyCard 
   text={text} 
-  customComponents={{
+  components={{
     "your-custom-type": YourCustomComponent,
     "another-type": AnotherComponent
   }}
