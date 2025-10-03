@@ -45,36 +45,28 @@ const parseText = (text: string): ParsedSegment[] => {
       });
     }
 
-    // Try to find the matching closing brace
-    let braceCount = 0;
-    let endBrace = startBrace;
+    // Try to parse partial JSON directly from the remaining text
+    const remainingText = text.substring(startBrace);
     let foundValidJson = false;
 
-    // Try to parse JSON from this point
-    for (let i = startBrace; i < text.length; i++) {
-      if (text[i] === "{") braceCount++;
-      if (text[i] === "}") braceCount--;
-
-      if (braceCount === 0) {
-        endBrace = i;
-        const jsonText = text.substring(startBrace, endBrace + 1);
-
-        try {
-          const parsed = parsePartialJson(jsonText);
-          if (parsed && typeof parsed === "object" && "type" in parsed) {
-            segments.push({
-              type: "json",
-              data: parsed,
-              originalText: jsonText,
-            });
-            foundValidJson = true;
-            currentIndex = endBrace + 1;
-            break;
-          }
-        } catch (error) {
-          // Continue searching for a valid JSON
-        }
+    try {
+      const parsed = parsePartialJson(remainingText);
+      if (parsed && typeof parsed === "object" && "type" in parsed) {
+        // Find where the JSON ends by parsing it and converting back to string
+        const jsonString = JSON.stringify(parsed);
+        const endIndex = startBrace + jsonString.length;
+        
+        segments.push({
+          type: "json",
+          data: parsed,
+          originalText: text.substring(startBrace, endIndex),
+        });
+        
+        currentIndex = endIndex;
+        foundValidJson = true;
       }
+    } catch (error) {
+      // JSON parsing failed, treat as regular text
     }
 
     // If no valid JSON found, treat the brace as regular text
