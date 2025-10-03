@@ -57,12 +57,10 @@ const parseText = (text: string): ParsedSegment[] => {
           data: parsed,
           originalText: text.substring(startBrace),
         });
+        foundValidJson = true;
+        currentIndex = startBrace + remainingText.length;
       }
     } catch (error) {
-      const endIndex = startBrace + remainingText.length;
-
-      currentIndex = endIndex;
-      foundValidJson = true;
       // JSON parsing failed, treat as regular text
     }
 
