@@ -9,7 +9,7 @@ export interface MelonyCardProps {
   components?: Record<string, React.FC<any>>;
 }
 
-interface ParsedContent {
+interface ParsedSegment {
   type: "text" | "json";
   data: any;
   originalText: string;
@@ -17,44 +17,79 @@ interface ParsedContent {
 
 type ComponentData = { type: string; [key: string]: any };
 
-// Parse the answer string to detect JSON
-const parseText = (text: string): ParsedContent => {
-  try {
-    // Extract JSON portion starting from { and ending at the last } if it exists
-    const startIndex = text.indexOf('{');
-    if (startIndex === -1) {
-      // No JSON object found, treat as text
-      return {
+// Parse the text to extract mixed content (text and JSON)
+const parseText = (text: string): ParsedSegment[] => {
+  const segments: ParsedSegment[] = [];
+  let currentIndex = 0;
+
+  while (currentIndex < text.length) {
+    const startBrace = text.indexOf('{', currentIndex);
+    
+    // If no more JSON objects, add remaining text
+    if (startBrace === -1) {
+      if (currentIndex < text.length) {
+        segments.push({
+          type: "text",
+          data: null,
+          originalText: text.substring(currentIndex),
+        });
+      }
+      break;
+    }
+    
+    // Add text before the JSON object
+    if (startBrace > currentIndex) {
+      segments.push({
         type: "text",
         data: null,
-        originalText: text,
-      };
+        originalText: text.substring(currentIndex, startBrace),
+      });
     }
     
-    const lastBraceIndex = text.lastIndexOf('}');
-    const jsonText = lastBraceIndex !== -1 && lastBraceIndex > startIndex
-      ? text.substring(startIndex, lastBraceIndex + 1)
-      : text.substring(startIndex);
+    // Try to find the matching closing brace
+    let braceCount = 0;
+    let endBrace = startBrace;
+    let foundValidJson = false;
     
-    const parsed = parsePartialJson(jsonText);
-
-    if (parsed && typeof parsed === "object" && "type" in parsed) {
-      return {
-        type: "json",
-        data: parsed,
-        originalText: text,
-      };
+    // Try to parse JSON from this point
+    for (let i = startBrace; i < text.length; i++) {
+      if (text[i] === '{') braceCount++;
+      if (text[i] === '}') braceCount--;
+      
+      if (braceCount === 0) {
+        endBrace = i;
+        const jsonText = text.substring(startBrace, endBrace + 1);
+        
+        try {
+          const parsed = parsePartialJson(jsonText);
+          if (parsed && typeof parsed === "object" && "type" in parsed) {
+            segments.push({
+              type: "json",
+              data: parsed,
+              originalText: jsonText,
+            });
+            foundValidJson = true;
+            currentIndex = endBrace + 1;
+            break;
+          }
+        } catch (error) {
+          // Continue searching for a valid JSON
+        }
+      }
     }
-  } catch (error) {
-    // If parsing fails, treat as text
-    console.warn("Failed to parse JSON:", error);
+    
+    // If no valid JSON found, treat the brace as regular text
+    if (!foundValidJson) {
+      segments.push({
+        type: "text",
+        data: null,
+        originalText: text.substring(startBrace, startBrace + 1),
+      });
+      currentIndex = startBrace + 1;
+    }
   }
 
-  return {
-    type: "text",
-    data: null,
-    originalText: text,
-  };
+  return segments;
 };
 
 // Main component renderer
@@ -78,22 +113,28 @@ export const MelonyCard: React.FC<MelonyCardProps> = ({
   className,
   components,
 }) => {
-  const parsedContent = useMemo(() => parseText(text), [text]);
+  const segments = useMemo(() => parseText(text), [text]);
 
-  if (parsedContent.type === "json" && parsedContent.data) {
-    return (
-      <div className={className}>
-        {renderJsonComponent(parsedContent.data as ComponentData, components)}
-      </div>
-    );
-  }
-
-  // Render as markdown text
   return (
-    <div className={`markdown-component ${className}`}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {parsedContent.originalText}
-      </ReactMarkdown>
+    <div className={className}>
+      {segments.map((segment, index) => {
+        if (segment.type === "json" && segment.data) {
+          return (
+            <React.Fragment key={index}>
+              {renderJsonComponent(segment.data as ComponentData, components)}
+            </React.Fragment>
+          );
+        }
+        
+        // Render text as markdown
+        return (
+          <div key={index} className="markdown-component">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {segment.originalText}
+            </ReactMarkdown>
+          </div>
+        );
+      })}
     </div>
   );
 };
