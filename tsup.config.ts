@@ -19,22 +19,6 @@ export default defineConfig([
       };
     },
   },
-  // Prompts-only build (no React dependencies, safe for server-side)
-  {
-    entry: ["src/melony-card-prompts.ts"],
-    format: ["esm", "cjs"],
-    dts: true,
-    sourcemap: true,
-    target: "es2020",
-    splitting: false,
-    treeshake: true,
-    skipNodeModulesBundle: true,
-    outExtension({ format }) {
-      return {
-        js: format === "esm" ? ".js" : ".cjs",
-      };
-    },
-  },
   // Zod schema utilities build (includes Zod dependency, safe for server-side)
   {
     entry: ["src/zod-schema-utils.ts"],
