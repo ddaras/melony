@@ -117,13 +117,17 @@ function Chat() {
     api: "/api/chat",
   });
 
-  return messages.map((m) => (
-    <MelonyCard
-      key={m.id}
-      text={m.content}
-      components={{ "weather-card": WeatherCard }}
-    />
-  ));
+  return messages.map((message) =>
+    message.parts.map((part) =>
+      part.type === "text" ? (
+        <MelonyCard
+          key={part.id}
+          text={part.content}
+          components={{ "weather-card": WeatherCard }}
+        />
+      ) : null
+    )
+  );
 }
 ```
 
