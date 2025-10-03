@@ -8,12 +8,10 @@ A React library for building AI-powered conversational interfaces with intellige
 ## Features
 
 - 🎯 **Smart Component Rendering** - Automatically parses and renders JSON structures embedded in AI responses
-- 📝 **Markdown Support** - Built-in markdown rendering with GitHub Flavored Markdown support
-- 🔧 **Custom Components** - Easily extend with your own component types
 - 🛡️ **Type Safety** - Zod schema integration for type-safe component definitions
-- 🤖 **AI-Ready Prompts** - Pre-built prompt templates to guide AI responses
+- 🤖 **AI-Ready Prompts** - Generate prompts from Zod schemas automatically
 - ⚡ **Partial JSON Parsing** - Handles streaming responses with incomplete JSON
-- 🎨 **Flexible Styling** - BYO CSS with className support
+- 📝 **Markdown Support** - Built-in markdown rendering with GFM support
 
 ## Installation
 
@@ -21,247 +19,277 @@ A React library for building AI-powered conversational interfaces with intellige
 npm install melony
 ```
 
-```bash
-yarn add melony
-```
-
-```bash
-pnpm add melony
-```
-
 ## Quick Start
-
-### Basic Usage
 
 ```tsx
 import { MelonyCard } from 'melony';
 
 function ChatMessage({ text }) {
-  return <MelonyCard text={text} className="my-message" />;
+  return <MelonyCard text={text} />;
 }
 ```
 
-The `MelonyCard` component will automatically:
-- Render plain text as markdown
-- Detect and parse JSON structures
-- Render custom components when JSON is detected
+The component automatically detects JSON in AI responses and renders matching custom components.
 
-### With Custom Components
+## Complete Example: Weather Card
 
 ```tsx
-import { MelonyCard } from 'melony';
+import { zodSchemaToPrompt } from "melony/zod";
+import { MelonyCard } from "melony";
+import { z } from "zod";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Cloud,
+  Sun,
+  CloudRain,
+  Wind,
+  Droplets,
+  Thermometer,
+  Snowflake,
+} from "lucide-react";
 
-// Define your custom component
-function ProductCard({ type, name, price, inStock }) {
+// 1. Define schema once
+const weatherSchema = z.object({
+  type: z.literal("weather-card"),
+  location: z.string(),
+  temperature: z.number(),
+  condition: z.string(),
+  humidity: z.number().min(0).max(100).optional(),
+  windSpeed: z.number().optional(),
+  description: z.string().optional(),
+  icon: z.enum(["sunny", "cloudy", "rainy", "snowy"]).optional(),
+});
+
+// 2. Generate AI prompt automatically
+export const weatherCardUIComponentPrompt = zodSchemaToPrompt({
+  type: "weather-card",
+  schema: weatherSchema,
+  description:
+    "Use for displaying current weather information with temperature, conditions, and additional details",
+  examples: [
+    {
+      type: "weather-card",
+      location: "New York, NY",
+      temperature: 72,
+      condition: "Partly Cloudy",
+      humidity: 65,
+      windSpeed: 8,
+      description: "Light winds with occasional clouds",
+      icon: "cloudy",
+    },
+    {
+      type: "weather-card",
+      location: "Los Angeles, CA",
+      temperature: 85,
+      condition: "Sunny",
+      humidity: 40,
+      windSpeed: 5,
+      description: "Clear skies and warm temperatures",
+      icon: "sunny",
+    },
+  ],
+});
+
+// 3. Use for type-safe components
+type WeatherCardProps = z.infer<typeof weatherSchema>;
+
+const getWeatherIcon = (icon?: string, condition?: string) => {
+  if (icon === "sunny" || condition?.toLowerCase().includes("sun")) {
+    return <Sun className="w-12 h-12 text-yellow-500" />;
+  }
+  if (icon === "rainy" || condition?.toLowerCase().includes("rain")) {
+    return <CloudRain className="w-12 h-12 text-blue-500" />;
+  }
+  if (icon === "snowy" || condition?.toLowerCase().includes("snow")) {
+    return <Snowflake className="w-12 h-12 text-blue-200" />;
+  }
+  return <Cloud className="w-12 h-12 text-gray-500" />;
+};
+
+export const WeatherCard: React.FC<WeatherCardProps> = (props) => {
+  const {
+    location,
+    temperature,
+    condition,
+    humidity,
+    windSpeed,
+    description,
+    icon,
+  } = props;
+
   return (
-    <div className="product-card">
-      <h3>{name}</h3>
-      <p>${price}</p>
-      <span>{inStock ? '✅ In Stock' : '❌ Out of Stock'}</span>
-    </div>
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-lg text-gray-900">{location}</h3>
+            <p className="text-sm text-gray-600">{condition}</p>
+          </div>
+          <div className="flex items-center justify-center w-16 h-16 bg-white/50 rounded-full">
+            {getWeatherIcon(icon, condition)}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        {/* Temperature */}
+        <div className="flex items-center gap-2 mb-4">
+          <Thermometer className="w-5 h-5 text-red-500" />
+          <span className="text-3xl font-bold text-gray-900">
+            {temperature}°F
+          </span>
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p className="text-sm text-gray-600 mb-4">{description}</p>
+        )}
+
+        {/* Additional Details */}
+        <div className="flex flex-wrap gap-2">
+          {humidity !== undefined && (
+            <Badge variant="secondary" className="bg-white/70 text-gray-700">
+              <Droplets className="w-3 h-3 mr-1" />
+              {humidity}% humidity
+            </Badge>
+          )}
+          {windSpeed !== undefined && (
+            <Badge variant="secondary" className="bg-white/70 text-gray-700">
+              <Wind className="w-3 h-3 mr-1" />
+              {windSpeed} mph
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
-}
+};
 
-// Use it with MelonyCard
-function App() {
-  const aiResponse = `
-    Here's the product you requested:
-    {"type": "product-card", "name": "Laptop", "price": 999, "inStock": true}
-  `;
-  
-  return (
-    <MelonyCard 
-      text={aiResponse}
-      components={{
-        "product-card": ProductCard
-      }}
-    />
-  );
-}
-```
-
-## Using AI Prompts
-
-Melony provides pre-built prompts to guide AI models in generating structured responses.
-
-```tsx
-import { ALL_COMPONENTS_PROMPT } from 'melony/prompts';
-import { useChat } from 'ai/react';
-
+// 4. Use in your chat interface
 function ChatInterface() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+  const { messages } = useChat({
     api: '/api/chat',
-    systemMessage: ALL_COMPONENTS_PROMPT, // Inject the prompt
+    systemMessage: weatherCardUIComponentPrompt, // Inject the generated prompt
   });
 
   return (
     <div>
       {messages.map(m => (
-        <MelonyCard key={m.id} text={m.content} />
+        <MelonyCard 
+          key={m.id} 
+          text={m.content}
+          components={{
+            "weather-card": WeatherCard
+          }}
+        />
       ))}
-      <form onSubmit={handleSubmit}>
-        <input value={input} onChange={handleInputChange} />
-      </form>
     </div>
   );
 }
 ```
 
-### Available Prompt Templates
+## How It Works
+
+1. **Define Schema** - Create a Zod schema for your component's data structure
+2. **Generate Prompt** - Use `zodSchemaToPrompt()` to automatically generate an AI prompt
+3. **Type-Safe Component** - Use `z.infer` to create type-safe React components
+4. **Render** - Pass your components to `MelonyCard` to automatically render them
+
+The AI will respond with JSON like:
+```json
+{"type": "weather-card", "location": "Seattle", "temperature": 68, ...}
+```
+
+And `MelonyCard` automatically renders your `WeatherCard` component!
+
+## API Reference
+
+### `MelonyCard`
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `text` | `string` | Text content to render (can contain JSON) |
+| `className` | `string?` | Optional CSS class name |
+| `components` | `Record<string, React.FC<any>>?` | Map of component types to React components |
+
+### `zodSchemaToPrompt(config)`
+
+Generate an AI prompt from a Zod schema.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `type` | `string` | Component type identifier |
+| `schema` | `z.ZodType` | Zod schema for validation |
+| `description` | `string?` | When to use this component |
+| `examples` | `any[]?` | Example instances |
+| `customInstructions` | `string?` | Additional AI instructions |
+
+### Additional Utilities
+
+```tsx
+// Generate prompts for multiple schemas
+import { zodSchemasToPrompt } from 'melony/zod';
+
+const prompt = zodSchemasToPrompt([
+  { type: 'weather-card', schema: weatherSchema },
+  { type: 'user-profile', schema: userSchema },
+]);
+
+// Combine with built-in prompts
+import { combinePrompts } from 'melony/zod';
+import { ALL_COMPONENTS_PROMPT } from 'melony/prompts';
+
+const finalPrompt = combinePrompts(ALL_COMPONENTS_PROMPT, [
+  { type: 'weather-card', schema: weatherSchema },
+]);
+
+// Type-safe component definition
+import { defineComponentSchema } from 'melony/zod';
+
+const WeatherComponent = defineComponentSchema({
+  type: 'weather-card',
+  schema: weatherSchema,
+  description: 'Display weather information',
+});
+
+// Includes validate function
+const validated = WeatherComponent.validate(data);
+```
+
+## Built-in Prompts
+
+Pre-built prompt templates for common UI patterns:
 
 ```tsx
 import {
+  ALL_COMPONENTS_PROMPT,
   OVERVIEW_PROMPT,
   DETAILS_PROMPT,
   CHART_PROMPT,
   FORM_PROMPT,
   LIST_PROMPT,
   CARD_PROMPT,
-  ALL_COMPONENTS_PROMPT,
-  COMPACT_COMPONENTS_PROMPT,
-  getComponentPrompt,
   getComponentPrompts,
   generateCustomPrompt,
 } from 'melony/prompts';
 
-// Use individual prompts
-const systemPrompt = getComponentPrompt('overview');
+// Use specific prompts
+const prompt = getComponentPrompts(['overview', 'chart', 'list']);
 
-// Combine multiple prompts
-const systemPrompt = getComponentPrompts(['overview', 'chart', 'list']);
-
-// Generate custom prompt based on config
-const systemPrompt = generateCustomPrompt({
+// Generate based on config
+const prompt = generateCustomPrompt({
   overview: true,
   chart: true,
   form: false,
 });
 ```
 
-## Type-Safe Components with Zod
-
-Create type-safe custom components using Zod schemas:
-
-```tsx
-import { z } from 'zod';
-import { zodSchemaToPrompt, defineComponentSchema } from 'melony/zod';
-import { MelonyCard } from 'melony';
-
-// Define your schema
-const ProductSchema = z.object({
-  name: z.string().describe('Product name'),
-  price: z.number().describe('Product price in USD'),
-  inStock: z.boolean().describe('Whether the product is in stock'),
-  tags: z.array(z.string()).optional().describe('Product tags'),
-});
-
-// Generate AI prompt from schema
-const productPrompt = zodSchemaToPrompt({
-  type: 'product-card',
-  schema: ProductSchema,
-  description: 'Product information display',
-  examples: [{
-    type: 'product-card',
-    name: 'Laptop',
-    price: 999,
-    inStock: true,
-    tags: ['electronics', 'computers']
-  }],
-});
-
-// Type-safe component definition
-const ProductComponent = defineComponentSchema({
-  type: 'product-card',
-  schema: ProductSchema,
-  description: 'Display product information',
-});
-
-// Your React component (fully typed)
-function ProductCard(props: z.infer<typeof ProductSchema> & { type: string }) {
-  // Validate props at runtime
-  const validated = ProductComponent.validate(props);
-  
-  return (
-    <div>
-      <h3>{validated.name}</h3>
-      <p>${validated.price}</p>
-      {validated.tags?.map(tag => <span key={tag}>{tag}</span>)}
-    </div>
-  );
-}
-
-// Use in your app
-function App() {
-  return (
-    <MelonyCard
-      text={aiResponse}
-      components={{ 'product-card': ProductCard }}
-    />
-  );
-}
-```
-
-### Multiple Schemas
-
-```tsx
-import { zodSchemasToPrompt, combinePrompts } from 'melony/zod';
-import { ALL_COMPONENTS_PROMPT } from 'melony/prompts';
-
-const customPrompt = zodSchemasToPrompt([
-  {
-    type: 'product-card',
-    schema: ProductSchema,
-    description: 'Product information',
-  },
-  {
-    type: 'user-profile',
-    schema: UserSchema,
-    description: 'User profile display',
-  },
-]);
-
-// Combine with built-in prompts
-const finalPrompt = combinePrompts(ALL_COMPONENTS_PROMPT, [
-  { type: 'product-card', schema: ProductSchema },
-  { type: 'user-profile', schema: UserSchema },
-]);
-```
-
-## API Reference
-
-### `MelonyCard`
-
-Main component for rendering AI responses.
-
-#### Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `text` | `string` | The text content to render (can contain JSON) |
-| `className` | `string?` | Optional CSS class name |
-| `components` | `Record<string, React.FC<any>>?` | Map of component types to React components |
-
-### Exports
+## Exports
 
 ```tsx
 // Main component
 import { MelonyCard } from 'melony';
-
-// Prompt utilities
-import {
-  ALL_COMPONENTS_PROMPT,
-  COMPACT_COMPONENTS_PROMPT,
-  OVERVIEW_PROMPT,
-  DETAILS_PROMPT,
-  CHART_PROMPT,
-  FORM_PROMPT,
-  LIST_PROMPT,
-  CARD_PROMPT,
-  CUSTOM_COMPONENT_PROMPT,
-  getComponentPrompt,
-  getComponentPrompts,
-  generateCustomPrompt,
-} from 'melony/prompts';
 
 // Zod utilities
 import {
@@ -270,76 +298,28 @@ import {
   defineComponentSchema,
   combinePrompts,
 } from 'melony/zod';
+
+// Prompt utilities
+import {
+  ALL_COMPONENTS_PROMPT,
+  COMPACT_COMPONENTS_PROMPT,
+  // ... more prompts
+  getComponentPrompt,
+  getComponentPrompts,
+  generateCustomPrompt,
+} from 'melony/prompts';
 ```
-
-## How It Works
-
-1. **Text Input**: `MelonyCard` receives a text string from an AI response
-2. **JSON Detection**: Automatically detects JSON structures using regex pattern matching
-3. **Partial Parsing**: Uses `partial-json` to handle streaming/incomplete JSON
-4. **Component Matching**: Matches `type` field in JSON to custom components
-5. **Rendering**: Renders custom component if found, otherwise renders as markdown
-
-### Example Flow
-
-```
-Input: "Here's the data: {\"type\": \"chart\", \"data\": [...]}"
-  ↓
-Parse: Detect JSON structure
-  ↓
-Match: Find "chart" in components map
-  ↓
-Render: <ChartComponent data={...} />
-```
-
-If no JSON is found or no component matches:
-```
-Input: "This is a normal message"
-  ↓
-Render: <ReactMarkdown>This is a normal message</ReactMarkdown>
-```
-
-## Built-in Component Types
-
-When using the prompt utilities, you can guide AI to generate these component types:
-
-- **overview** - Key-value summaries and status reports
-- **details** - Multi-section detailed content
-- **chart** - Data visualization (bar, line, pie)
-- **form** - User input collection forms
-- **list** - Bullet point lists
-- **card** - Highlighted content blocks
-
-Note: These are prompt templates only. You need to implement the actual React components.
 
 ## Requirements
 
 - React >= 18.0.0
 - React DOM >= 18.0.0
 
-## Dependencies
-
-- `@ai-sdk/openai` - AI SDK OpenAI provider
-- `ai` - Vercel AI SDK
-- `zod` - TypeScript-first schema validation
-- `react-markdown` - Markdown rendering
-- `remark-gfm` - GitHub Flavored Markdown support
-- `partial-json` - Partial JSON parsing
-- `use-stick-to-bottom` - Scroll management utility
-
 ## License
 
 MIT
 
-## Contributing
+## Links
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Repository
-
-[https://github.com/ddaras/melony](https://github.com/ddaras/melony)
-
-## Issues
-
-[https://github.com/ddaras/melony/issues](https://github.com/ddaras/melony/issues)
-
+- [GitHub Repository](https://github.com/ddaras/melony)
+- [Report Issues](https://github.com/ddaras/melony/issues)
