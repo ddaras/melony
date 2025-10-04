@@ -6,10 +6,7 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 [![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<video width="100%" controls>
-  <source src="https://github.com/ddaras/melony/assets/screen-chart.mov" type="video/quicktime">
-  Your browser does not support the video tag.
-</video>
+![Melony Demo](screen-chart.gif)
 
 ## Why Melony?
 
