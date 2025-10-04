@@ -6,7 +6,10 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 [![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-https://github.com/ddaras/melony/assets/screen-chart.mov
+<video width="100%" controls>
+  <source src="https://github.com/ddaras/melony/assets/screen-chart.mov" type="video/quicktime">
+  Your browser does not support the video tag.
+</video>
 
 ## Why Melony?
 
@@ -92,7 +95,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
 // app/api/chat/route.ts
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { weatherUIPrompt } from "@components/weather"
+import { weatherUIPrompt } from "@components/weather";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
