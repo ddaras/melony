@@ -6,7 +6,7 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 [![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Melony Demo](screen-chart.gif)
+https://github.com/ddaras/melony/assets/screen-chart.mov
 
 ## Why Melony?
 
