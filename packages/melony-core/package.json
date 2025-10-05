@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.6.61",
+  "version": "1.6.63",
   "main": "dist/index.js",
   "type": "module",
   "private": false,
@@ -11,7 +11,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",
-    "version:patch": "npm version patch",
+    "version:patch": "echo 'Version manually updated in package.json'",
     "pub": "npm run version:patch && npm publish --access public"
   },
   "keywords": [
