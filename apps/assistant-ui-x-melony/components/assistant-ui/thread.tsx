@@ -37,7 +37,7 @@ import {
 import { MelonyCard } from "melony";
 
 import { cn } from "@/lib/utils";
-import { WeatherCard } from "../cards/weather-card";
+import { WeatherCard } from "../cards/weather-card.ui";
 
 export const Thread: FC = () => {
   return (
@@ -241,10 +241,11 @@ const MessageError: FC = () => {
   );
 };
 
-const MelonyTextMessage = ({ text, status }: TextMessagePartProps) => {
+const MelonyTextMessage: FC<TextMessagePartProps> = ({ text, status }) => {
   return (
     <div className="flex flex-col items-start gap-2">
-      <MelonyCard text={text} components={{ "weather-card": WeatherCard }} />{" "}
+      <MelonyCard text={text} components={{ "weather-card": WeatherCard }} />
+
       {status.type === "running" && (
         <Loader2Icon className="size-4 animate-spin" />
       )}

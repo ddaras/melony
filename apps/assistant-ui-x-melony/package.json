@@ -31,7 +31,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
-    "melony": "1.6.56",
+    "melony": "^1.6.55",
     "motion": "^12.23.22",
     "next": "15.5.4",
     "react": "^19.1.1",

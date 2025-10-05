@@ -27,6 +27,8 @@ const getWeatherIcon = (icon?: string, condition?: string) => {
   return <Cloud className="h-12 w-12 text-gray-500" />;
 };
 
+
+// define weather card component
 export const WeatherCard: React.FC<WeatherCardProps> = (props) => {
   const {
     location,

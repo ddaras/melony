@@ -6,6 +6,10 @@ import remarkGfm from "remark-gfm";
 export interface MelonyCardProps {
   text: string;
   components?: Record<string, React.FC<any>>;
+  markdown?: {
+    component: React.ComponentType<any>;
+    props?: any;
+  };
 }
 
 interface ParsedSegment {
@@ -119,11 +123,22 @@ const renderJsonComponent = (
   }
 
   // Fall back to JSON
-  return <pre style={{ fontSize: "11px" }}>{JSON.stringify(data, null, 2)}</pre>;
+  return (
+    <pre style={{ fontSize: "11px" }}>{JSON.stringify(data, null, 2)}</pre>
+  );
 };
 
-export const MelonyCard: React.FC<MelonyCardProps> = ({ text, components }) => {
+export const MelonyCard: React.FC<MelonyCardProps> = ({
+  text,
+  components,
+  markdown,
+}) => {
   const segments = useMemo(() => parseText(text), [text]);
+
+  const { component = ReactMarkdown, props = { remarkPlugins: [remarkGfm] } } =
+    markdown || {};
+
+  const MarkdownComponent = component;
 
   return (
     <>
@@ -138,9 +153,9 @@ export const MelonyCard: React.FC<MelonyCardProps> = ({ text, components }) => {
 
         // Render text as markdown
         return (
-          <ReactMarkdown key={index} remarkPlugins={[remarkGfm]}>
+          <MarkdownComponent key={index} {...props}>
             {segment.originalText}
-          </ReactMarkdown>
+          </MarkdownComponent>
         );
       })}
     </>

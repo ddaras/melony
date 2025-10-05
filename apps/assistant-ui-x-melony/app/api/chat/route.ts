@@ -11,9 +11,5 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
   });
 
-  console.log(
-    `You are a helpful assistant. You can use the following components to display information: ${weatherCardUIComponentPrompt}`,
-  );
-
   return result.toUIMessageStreamResponse();
 }
