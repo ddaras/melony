@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CopyIcon,
+  Loader2Icon,
   PencilIcon,
   RefreshCwIcon,
   Square,
@@ -16,6 +17,7 @@ import {
   ComposerPrimitive,
   ErrorPrimitive,
   MessagePrimitive,
+  TextMessagePartProps,
   ThreadPrimitive,
 } from "@assistant-ui/react";
 
@@ -35,6 +37,7 @@ import {
 import { MelonyCard } from "melony";
 
 import { cn } from "@/lib/utils";
+import { WeatherCard } from "../cards/weather-card";
 
 export const Thread: FC = () => {
   return (
@@ -238,10 +241,15 @@ const MessageError: FC = () => {
   );
 };
 
-const MelonyTextMessage = ({ text, ...rest }: { text: string }) => {
-  console.log(rest);
-
-  return <MarkdownText />;
+const MelonyTextMessage = ({ text, status }: TextMessagePartProps) => {
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <MelonyCard text={text} components={{ "weather-card": WeatherCard }} />{" "}
+      {status.type === "running" && (
+        <Loader2Icon className="size-4 animate-spin" />
+      )}
+    </div>
+  );
 };
 
 const AssistantMessage: FC = () => {

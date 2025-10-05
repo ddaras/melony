@@ -55,11 +55,11 @@ const parseText = (text: string): ParsedSegment[] => {
         // Check if we have a complete JSON object by finding the matching closing brace
         let braceCount = 0;
         let jsonEndIndex = -1;
-        
+
         for (let i = 0; i < remainingText.length; i++) {
-          if (remainingText[i] === '{') {
+          if (remainingText[i] === "{") {
             braceCount++;
-          } else if (remainingText[i] === '}') {
+          } else if (remainingText[i] === "}") {
             braceCount--;
             if (braceCount === 0) {
               jsonEndIndex = i;
@@ -67,7 +67,7 @@ const parseText = (text: string): ParsedSegment[] => {
             }
           }
         }
-        
+
         if (jsonEndIndex !== -1) {
           // Complete JSON object found
           segments.push({
@@ -118,8 +118,8 @@ const renderJsonComponent = (
     return <CustomComponent {...data} />;
   }
 
-  // Fall back to built-in components
-  return null;
+  // Fall back to JSON
+  return <pre style={{ fontSize: "11px" }}>{JSON.stringify(data, null, 2)}</pre>;
 };
 
 export const MelonyCard: React.FC<MelonyCardProps> = ({ text, components }) => {
