@@ -1,93 +1,27 @@
 {
-  "name": "melony",
+  "name": "melony-monorepo",
   "version": "1.6.45",
-  "main": "dist/index.js",
-  "directories": {
-    "example": "examples"
-  },
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "build": "tsup",
-    "clean": "rimraf dist",
-    "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "prepack": "npm run build",
-    "pub": "npm run version:patch && npm publish --access public",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "clean": "turbo run clean",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "pub": "turbo run pub",
     "version:patch": "npm version patch"
   },
-  "keywords": [
-    "react",
-    "ai",
-    "chat",
-    "conversation",
-    "agent",
-    "ui",
-    "components",
-    "typescript",
-    "hooks",
-    "providers"
-  ],
-  "author": "",
-  "license": "MIT",
-  "description": "A React library for building AI-powered conversational interfaces with agents, flows, and tools",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ddaras/melony.git"
-  },
-  "homepage": "https://github.com/ddaras/melony#readme",
-  "bugs": {
-    "url": "https://github.com/ddaras/melony/issues"
-  },
-  "type": "module",
-  "private": false,
-  "sideEffects": false,
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": false
-    },
-    "react-dom": {
-      "optional": false
-    }
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
-    },
-    "./zod": {
-      "types": "./dist/zod-schema-utils.d.ts",
-      "import": "./dist/zod-schema-utils.js",
-      "require": "./dist/zod-schema-utils.cjs",
-      "default": "./dist/zod-schema-utils.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  },
   "devDependencies": {
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "rimraf": "^5.0.10",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "turbo": "^2.0.0"
   },
-  "dependencies": {
-    "@ai-sdk/openai": "^2.0.38",
-    "ai": "^5.0.56",
-    "partial-json": "^0.1.7",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "use-stick-to-bottom": "^1.1.1",
-    "zod": "^4.1.11"
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   }
 }
