@@ -1,4 +1,4 @@
-# @melony/core
+# Melony
 
 Generate React UIs from AI responses in real-time.  
 No tool calling latency. No completion waiting. Just smooth, progressive rendering as the AI thinks.
@@ -19,13 +19,13 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 ## Installation
 
 ```bash
-pnpm add @melony/core zod
+pnpm add melony zod
 ```
 
 ## Quick Start
 
 ```tsx
-import { MelonyCard } from "@melony/core";
+import { MelonyCard } from "melony";
 
 <MelonyCard
   text={streamingAIResponse}
@@ -43,7 +43,7 @@ As the AI streams `{"type": "weather-card", "temperature": 72...}`, your compone
 
 ```tsx
 import { z } from "zod";
-import { zodSchemaToPrompt } from "@melony/core/zod";
+import { zodSchemaToPrompt } from "melony/zod";
 
 const weatherSchema = z.object({
   type: z.literal("weather-card"),
