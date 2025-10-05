@@ -57,8 +57,8 @@ importers:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.0)
       melony:
-        specifier: ^1.6.55
-        version: 1.6.55(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        specifier: ^1.6.63
+        version: 1.6.63(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       motion:
         specifier: ^12.23.22
         version: 12.23.22(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -71,6 +71,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.2.0(react@19.2.0)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.2.0)(react@19.2.0)
       react-shiki:
         specifier: ^0.8.0
         version: 0.8.0(@types/react-dom@19.2.0(@types/react@19.2.0))(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -2469,8 +2472,8 @@ packages:
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
-  melony@1.6.55:
-    resolution: {integrity: sha512-GfFGXlL7wHvTAoxAiNxKqqF5yzbmqB+Uxt+vfUWeZDRFKeGEE6rqw1tF1ZCof1LFuydwxqWEbvFnV7mUsdr7xg==}
+  melony@1.6.63:
+    resolution: {integrity: sha512-Lx01cbdQeDsFHuICqfIwag5/KqKjhqKB8qhILzVqqbjBrhisB6lneyoPbGLreCWKIZia7mx9xltwqiFI4WLAog==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -5901,7 +5904,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
-  melony@1.6.55(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+  melony@1.6.63(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       '@ai-sdk/openai': 2.0.42(zod@4.1.11)
       ai: 5.0.60(zod@4.1.11)

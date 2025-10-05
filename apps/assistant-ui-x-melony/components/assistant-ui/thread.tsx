@@ -26,7 +26,10 @@ import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 
 import { Button } from "@/components/ui/button";
-import { MarkdownText } from "@/components/assistant-ui/markdown-text";
+import {
+  defaultComponents,
+  MarkdownText,
+} from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import {
@@ -38,6 +41,8 @@ import { MelonyCard } from "melony";
 
 import { cn } from "@/lib/utils";
 import { WeatherCard } from "../cards/weather-card.ui";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const Thread: FC = () => {
   return (
@@ -244,7 +249,14 @@ const MessageError: FC = () => {
 const MelonyTextMessage: FC<TextMessagePartProps> = ({ text, status }) => {
   return (
     <div className="flex flex-col items-start gap-2">
-      <MelonyCard text={text} components={{ "weather-card": WeatherCard }} />
+      <MelonyCard
+        text={text}
+        components={{ "weather-card": WeatherCard }}
+        markdown={{
+          component: ReactMarkdown,
+          props: { remarkPlugins: [remarkGfm], components: defaultComponents },
+        }}
+      />
 
       {status.type === "running" && (
         <Loader2Icon className="size-4 animate-spin" />

@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { parse as parsePartialJson } from "partial-json";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { MelonyMarkdown } from "./melony-markdown";
 
 export interface MelonyCardProps {
   text: string;
@@ -135,8 +134,7 @@ export const MelonyCard: React.FC<MelonyCardProps> = ({
 }) => {
   const segments = useMemo(() => parseText(text), [text]);
 
-  const { component = ReactMarkdown, props = { remarkPlugins: [remarkGfm] } } =
-    markdown || {};
+  const { component = MelonyMarkdown, props = {} } = markdown || {};
 
   const MarkdownComponent = component;
 
