@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback, memo } from "react";
 import { parse as parsePartialJson } from "partial-json";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -106,11 +106,11 @@ const parseText = (text: string): ParsedSegment[] => {
   return segments;
 };
 
-// Main component renderer
-const renderJsonComponent = (
-  data: ComponentData,
-  components?: Record<string, React.FC<any>>
-) => {
+// Main component renderer - memoized to prevent unnecessary re-renders
+const renderJsonComponent = memo<{
+  data: ComponentData;
+  components?: Record<string, React.FC<any>>;
+}>(({ data, components }) => {
   // Check for custom components first
   if (components && data.type in components) {
     const CustomComponent = components[data.type];
@@ -120,29 +120,56 @@ const renderJsonComponent = (
 
   // Fall back to built-in components
   return null;
-};
+});
+
+// Memoized segment component for JSON segments
+const JsonSegment = memo<{
+  data: ComponentData;
+  components?: Record<string, React.FC<any>>;
+}>(({ data, components }) => {
+  return renderJsonComponent({ data, components });
+});
+
+// Memoized segment component for text segments
+const TextSegment = memo<{ text: string }>(({ text }) => {
+  const remarkPlugins = useMemo(() => [remarkGfm], []);
+  
+  return (
+    <ReactMarkdown remarkPlugins={remarkPlugins}>
+      {text}
+    </ReactMarkdown>
+  );
+});
 
 export const MelonyCard: React.FC<MelonyCardProps> = ({ text, components }) => {
   const segments = useMemo(() => parseText(text), [text]);
+  
+  // Memoize components to prevent unnecessary re-renders
+  const memoizedComponents = useMemo(() => components, [components]);
+
+  const renderSegment = useCallback((segment: ParsedSegment, index: number) => {
+    if (segment.type === "json" && segment.data) {
+      return (
+        <JsonSegment 
+          key={index}
+          data={segment.data as ComponentData} 
+          components={memoizedComponents} 
+        />
+      );
+    }
+
+    // Render text as markdown
+    return (
+      <TextSegment 
+        key={index} 
+        text={segment.originalText} 
+      />
+    );
+  }, [memoizedComponents]);
 
   return (
     <>
-      {segments.map((segment, index) => {
-        if (segment.type === "json" && segment.data) {
-          return (
-            <React.Fragment key={index}>
-              {renderJsonComponent(segment.data as ComponentData, components)}
-            </React.Fragment>
-          );
-        }
-
-        // Render text as markdown
-        return (
-          <ReactMarkdown key={index} remarkPlugins={[remarkGfm]}>
-            {segment.originalText}
-          </ReactMarkdown>
-        );
-      })}
+      {segments.map(renderSegment)}
     </>
   );
 };
