@@ -43,6 +43,8 @@ import { cn } from "@/lib/utils";
 import { WeatherCard } from "../cards/weather-card.ui";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown";
+import { ChartCard } from "../cards/chart-card.ui";
 
 export const Thread: FC = () => {
   return (
@@ -132,9 +134,9 @@ const ThreadSuggestions: FC = () => {
           action: "What's the weather in San Francisco?",
         },
         {
-          title: "Explain React hooks",
-          label: "like useState and useEffect",
-          action: "Explain React hooks like useState and useEffect",
+          title: "What's the sales trend",
+          label: "in the last 30 days?",
+          action: "What's the sales trend in the last 30 days?",
         },
         {
           title: "Write a SQL query",
@@ -247,14 +249,19 @@ const MessageError: FC = () => {
 };
 
 const MelonyTextMessage: FC<TextMessagePartProps> = ({ text, status }) => {
+  console.log("status", status);
+
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className="flex flex-col items-start gap-4">
       <MelonyCard
         text={text}
-        components={{ "weather-card": WeatherCard }}
+        components={{ "weather-card": WeatherCard, "chart-card": ChartCard }}
         markdown={{
           component: ReactMarkdown,
-          props: { remarkPlugins: [remarkGfm], components: defaultComponents },
+          props: {
+            remarkPlugins: [remarkGfm],
+            components: defaultComponents,
+          },
         }}
       />
 
