@@ -41,7 +41,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = (props) => {
   } = props;
 
   return (
-    <Card className="overflow-hidden border-gray-200 transition-all duration-300">
+    <Card className="overflow-hidden border-gray-200 transition-all duration-300 w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -54,7 +54,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = (props) => {
         </div>
       </CardHeader>
 
-      <CardContent className="w-[400px] pt-0">
+      <CardContent className="w-full pt-0">
         {/* Temperature */}
         <div className="mb-4 flex items-center gap-2">
           <Thermometer className="h-5 w-5 text-red-500" />
