@@ -1,0 +1,3 @@
+[submodule "apps/assistant-ui-x-melony"]
+	path = apps/assistant-ui-x-melony
+	url = https://github.com/ddaras/assistant-ui-x-melony.git
