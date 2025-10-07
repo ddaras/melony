@@ -1,6 +1,6 @@
 {
   "name": "melony-monorepo",
-  "version": "1.6.45",
+  "version": "0.0.1",
   "private": true,
   "packageManager": "pnpm@8.15.0",
   "workspaces": [
