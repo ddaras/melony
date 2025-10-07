@@ -57,8 +57,8 @@ importers:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.0)
       melony:
-        specifier: workspace:*
-        version: link:../../packages/melony-core
+        specifier: ^1.6.65
+        version: 1.6.65(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       motion:
         specifier: ^12.23.22
         version: 12.23.22(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -2565,6 +2565,12 @@ packages:
 
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
+
+  melony@1.6.65:
+    resolution: {integrity: sha512-PSNTOf2M6LzN9IossCHbccZn/8sg8KTgDcy+WgkN/b9GYyj5b6ElDW2xrHs5KEuxrHtUBmD4TJk3liNEHcVLjg==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
@@ -6099,6 +6105,21 @@ snapshots:
   mdast-util-to-string@4.0.0:
     dependencies:
       '@types/mdast': 4.0.4
+
+  melony@1.6.65(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      '@ai-sdk/openai': 2.0.42(zod@4.1.11)
+      ai: 5.0.60(zod@4.1.11)
+      partial-json: 0.1.7
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      react-markdown: 10.1.0(@types/react@19.2.0)(react@19.2.0)
+      remark-gfm: 4.0.1
+      use-stick-to-bottom: 1.1.1(react@19.2.0)
+      zod: 4.1.11
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
 
   merge2@1.4.1: {}
 
