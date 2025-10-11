@@ -1,3 +1,6 @@
 [submodule "apps/assistant-ui-x-melony"]
 	path = apps/assistant-ui-x-melony
 	url = https://github.com/ddaras/assistant-ui-x-melony.git
+[submodule "apps/generative-ui-template"]
+	path = apps/generative-ui-template
+	url = https://github.com/ddaras/generative-ui-template.git
