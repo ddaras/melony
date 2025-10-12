@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.6.65",
+  "version": "1.7.0",
   "main": "dist/index.js",
   "type": "module",
   "private": false,
@@ -81,7 +81,6 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.38",
     "ai": "^5.0.56",
-    "partial-json": "^0.1.7",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "use-stick-to-bottom": "^1.1.1",

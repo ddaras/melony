@@ -7,10 +7,12 @@ export interface MelonyCardProps {
     component: React.ComponentType<any>;
     props?: any;
   };
+  loadingComponent?: React.ComponentType<any>;
+  disableMarkdown?: boolean;
 }
 
 export interface ParsedSegment {
-  type: "text" | "json";
+  type: "text" | "json" | "loading";
   data: any;
   originalText: string;
 }

@@ -11,7 +11,7 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 ## Why Melony?
 
 - ⚡ **Zero Latency** - Components render progressively during streaming
-- 🎯 **Smart Parsing** - Handles incomplete JSON with partial-json
+- 🎯 **Smart Parsing** - Identifies component JSON with `@melony:` prefix
 - 🛡️ **Type Safe** - Full Zod schema integration
 - 📝 **Markdown Support** - Built-in GFM rendering
 - 🪶 **Lightweight** - Minimal dependencies
@@ -35,7 +35,7 @@ import { MelonyCard } from "melony";
 />;
 ```
 
-As the AI streams `{"type": "weather-card", "temperature": 72...}`, your component renders immediately—even before the JSON is complete.
+As the AI streams `@melony:{"type": "weather-card", "temperature": 72, "location": "NYC", "condition": "Sunny"}`, your component renders immediately with the complete data.
 
 ## Complete Example
 
@@ -99,7 +99,12 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: openai("gpt-4"),
-    system: `You are a helpful assistant. ${weatherUIPrompt}`, // Inject generated prompt here
+    system: `You are a helpful assistant. ${weatherUIPrompt}
+    
+    IMPORTANT: When rendering UI components, prefix the JSON with @melony:
+    Example: @melony:{"type": "weather-card", "location": "NYC", "temperature": 72, "condition": "Sunny"}
+    
+    Regular JSON without the prefix will be displayed as text.`,
     messages,
   });
 
@@ -191,10 +196,23 @@ const validData = WeatherComponent.validate(data);
 
 ## How It Works
 
-1. AI streams response containing JSON
-2. `MelonyCard` parses partial JSON in real-time
-3. Components render progressively as JSON becomes valid
-4. Remaining text renders as markdown
+1. AI streams response containing text and `@melony:` prefixed JSON
+2. `MelonyCard` identifies and parses complete JSON components
+3. Components render when complete JSON is detected
+4. Text without the prefix renders as markdown
+5. Regular JSON without the prefix displays as plain text
+
+### The `@melony:` Prefix
+
+The `@melony:` prefix is used to distinguish JSON that should be rendered as UI components from regular JSON that might appear in text.
+
+```tsx
+// This will render as a component
+"The weather is nice today! @melony:{\"type\": \"weather-card\", \"temperature\": 72}"
+
+// This will display as text
+"Here's some data: {\"foo\": \"bar\"}"
+```
 
 No waiting. No tool calls. Just instant UI generation.
 

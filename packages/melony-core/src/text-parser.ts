@@ -1,102 +1,53 @@
-import { parse as parsePartialJson } from "partial-json";
 import { ParsedSegment } from "./types";
 
 /**
- * Parse the text to extract mixed content (text and JSON)
- * This function identifies JSON objects within text and separates them from regular text content
+ * Prefix to identify JSON that should be rendered as UI components
+ * Example: "@melony:{"type": "weather-card", "data": {...}}"
+ */
+export const MELONY_PREFIX = "@melony:";
+
+/**
+ * Parse text to extract mixed content (text and JSON components).
+ * Identifies JSON objects prefixed with @melony: and separates them from regular text.
  */
 export const parseText = (text: string): ParsedSegment[] => {
   const segments: ParsedSegment[] = [];
-  let currentIndex = 0;
+  let position = 0;
 
-  while (currentIndex < text.length) {
-    // Look for both opening brace and bracket
-    const startBrace = text.indexOf("{", currentIndex);
-    const startBracket = text.indexOf("[", currentIndex);
+  while (position < text.length) {
+    const prefixIndex = text.indexOf(MELONY_PREFIX, position);
 
-    // Determine which comes first (or if neither exists)
-    let startJson = -1;
-    let isArray = false;
-
-    if (startBrace === -1 && startBracket === -1) {
-      // No more JSON, add remaining text
-      if (currentIndex < text.length) {
-        segments.push({
-          type: "text",
-          data: null,
-          originalText: text.substring(currentIndex),
-        });
+    // No more prefixes found - add remaining text and exit
+    if (prefixIndex === -1) {
+      if (position < text.length) {
+        segments.push(createTextSegment(text.substring(position)));
       }
       break;
-    } else if (startBrace === -1) {
-      startJson = startBracket;
-      isArray = true;
-    } else if (startBracket === -1) {
-      startJson = startBrace;
-      isArray = false;
+    }
+
+    // Add text before prefix
+    if (prefixIndex > position) {
+      segments.push(createTextSegment(text.substring(position, prefixIndex)));
+    }
+
+    // Try to extract JSON after prefix
+    const afterPrefix = text.substring(prefixIndex + MELONY_PREFIX.length);
+    const result = extractJson(afterPrefix);
+
+    if (result.type === "complete") {
+      segments.push(createJsonSegment(result.data, result.text));
+      position = prefixIndex + MELONY_PREFIX.length + result.text.length;
+    } else if (result.type === "incomplete") {
+      segments.push(createLoadingSegment(MELONY_PREFIX + result.text));
+      position = text.length; // Incomplete JSON at end - stop parsing
     } else {
-      // Both exist, use whichever comes first
-      startJson = Math.min(startBrace, startBracket);
-      isArray = startJson === startBracket;
-    }
-
-    // Add text before the JSON
-    if (startJson > currentIndex) {
-      segments.push({
-        type: "text",
-        data: null,
-        originalText: text.substring(currentIndex, startJson),
-      });
-    }
-
-    // Try to parse partial JSON directly from the remaining text
-    const remainingText = text.substring(startJson);
-    let foundValidJson = false;
-
-    try {
-      const parsed = parsePartialJson(remainingText);
-      if (parsed !== null && parsed !== undefined) {
-        // For objects, check if they have a "type" property
-        // For arrays, check if it's an array (could contain components)
-        const isValidComponent =
-          (typeof parsed === "object" && "type" in parsed) ||
-          Array.isArray(parsed);
-
-        if (isValidComponent) {
-          const jsonSegment = findCompleteJsonSegment(
-            remainingText,
-            parsed,
-            isArray
-          );
-
-          if (jsonSegment) {
-            segments.push(jsonSegment);
-            foundValidJson = true;
-            currentIndex = startJson + jsonSegment.originalText.length;
-          } else {
-            // Partial JSON - render it anyway
-            segments.push({
-              type: "json",
-              data: parsed,
-              originalText: remainingText,
-            });
-            foundValidJson = true;
-            currentIndex = text.length; // Move to end of text since we're processing partial JSON
-          }
-        }
-      }
-    } catch (error) {
-      // JSON parsing failed, treat as regular text
-    }
-
-    // If no valid JSON found, treat the character as regular text
-    if (!foundValidJson) {
-      segments.push({
-        type: "text",
-        data: null,
-        originalText: text.substring(startJson, startJson + 1),
-      });
-      currentIndex = startJson + 1;
+      // Invalid or no JSON - treat prefix + following text as regular text
+      // Find the next prefix or end of text to determine how much to include
+      const nextPrefixIndex = text.indexOf(MELONY_PREFIX, prefixIndex + MELONY_PREFIX.length);
+      const endIndex = nextPrefixIndex === -1 ? text.length : nextPrefixIndex;
+      const textToInclude = text.substring(prefixIndex, endIndex);
+      segments.push(createTextSegment(textToInclude));
+      position = endIndex;
     }
   }
 
@@ -104,70 +55,111 @@ export const parseText = (text: string): ParsedSegment[] => {
 };
 
 /**
- * Find the complete JSON segment by matching braces/brackets
+ * Extract and validate JSON from text.
+ * Returns complete JSON, incomplete JSON, or none.
  */
-const findCompleteJsonSegment = (
-  remainingText: string,
-  parsed: any,
-  isArray: boolean
-): ParsedSegment | null => {
-  let braceCount = 0;
-  let bracketCount = 0;
-  let jsonEndIndex = -1;
+const extractJson = (
+  text: string
+): 
+  | { type: "complete"; data: any; text: string }
+  | { type: "incomplete"; text: string }
+  | { type: "none" } => {
+  const trimmed = text.trimStart();
+  const firstChar = trimmed[0];
+
+  // Must start with { or [
+  if (firstChar !== "{" && firstChar !== "[") {
+    return { type: "none" };
+  }
+
+  const endIndex = findJsonEnd(trimmed, firstChar === "[");
+
+  if (endIndex === -1) {
+    // Has opening bracket/brace but no closing - incomplete
+    return { type: "incomplete", text: text };
+  }
+
+  const jsonText = trimmed.substring(0, endIndex + 1);
+
+  try {
+    const parsed = JSON.parse(jsonText);
+    
+    // Validate component structure: object with "type" property or array
+    const isValid =
+      Array.isArray(parsed) ||
+      (typeof parsed === "object" && parsed !== null && "type" in parsed);
+
+    if (isValid) {
+      // Include whitespace in original text
+      const whitespace = text.substring(0, text.length - trimmed.length);
+      return { type: "complete", data: parsed, text: whitespace + jsonText };
+    }
+  } catch {
+    // Invalid JSON
+  }
+
+  return { type: "none" };
+};
+
+/**
+ * Find the end index of a JSON structure by matching brackets/braces.
+ * Returns -1 if structure is incomplete.
+ */
+const findJsonEnd = (text: string, isArray: boolean): number => {
+  let depth = 0;
   let inString = false;
-  let escapeNext = false;
+  let escaped = false;
 
-  for (let i = 0; i < remainingText.length; i++) {
-    const char = remainingText[i];
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
 
-    // Handle string escaping
-    if (escapeNext) {
-      escapeNext = false;
+    if (escaped) {
+      escaped = false;
       continue;
     }
 
     if (char === "\\") {
-      escapeNext = true;
+      escaped = true;
       continue;
     }
 
-    // Toggle string state
     if (char === '"') {
       inString = !inString;
       continue;
     }
 
-    // Only count brackets/braces outside of strings
     if (!inString) {
-      if (char === "{") {
-        braceCount++;
-      } else if (char === "}") {
-        braceCount--;
-      } else if (char === "[") {
-        bracketCount++;
-      } else if (char === "]") {
-        bracketCount--;
-      }
+      const isOpen = (isArray && char === "[") || (!isArray && char === "{");
+      const isClose = (isArray && char === "]") || (!isArray && char === "}");
 
-      // Check if we've closed the initial structure
-      if (isArray && bracketCount === 0) {
-        jsonEndIndex = i;
-        break;
-      } else if (!isArray && braceCount === 0) {
-        jsonEndIndex = i;
-        break;
+      if (isOpen) depth++;
+      if (isClose) depth--;
+
+      // Found complete structure
+      if (depth === 0) {
+        return i;
       }
     }
   }
 
-  if (jsonEndIndex !== -1) {
-    // Complete JSON structure found
-    return {
-      type: "json",
-      data: parsed,
-      originalText: remainingText.substring(0, jsonEndIndex + 1),
-    };
-  }
-
-  return null;
+  return -1; // Incomplete
 };
+
+// Helper functions to create segments
+const createTextSegment = (text: string): ParsedSegment => ({
+  type: "text",
+  data: null,
+  originalText: text,
+});
+
+const createJsonSegment = (data: any, text: string): ParsedSegment => ({
+  type: "json",
+  data,
+  originalText: text,
+});
+
+const createLoadingSegment = (text: string): ParsedSegment => ({
+  type: "loading",
+  data: null,
+  originalText: text,
+});

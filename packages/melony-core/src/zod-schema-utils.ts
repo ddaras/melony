@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MELONY_PREFIX } from "./text-parser";
 
 /**
  * Configuration for generating a prompt from a Zod schema
@@ -28,7 +29,7 @@ function formatJsonSchemaPrompt(
   examples?: any[],
   customInstructions?: string
 ): string {
-  let prompt = `To display a ${type}, use this JSON format:\n`;
+  let prompt = `To display a ${type}, use this JSON format with the ${MELONY_PREFIX} prefix:\n`;
 
   // Add a simplified example based on the schema
   const exampleJson =
@@ -36,7 +37,7 @@ function formatJsonSchemaPrompt(
       ? examples[0]
       : generateExampleFromSchema(jsonSchema, type);
 
-  prompt += `${JSON.stringify(exampleJson, null, 2)}\n\n`;
+  prompt += `${MELONY_PREFIX}${JSON.stringify(exampleJson, null, 2)}\n\n`;
 
   // Add JSON schema for AI understanding
   prompt += `JSON Schema:\n${JSON.stringify(jsonSchema, null, 2)}\n`;
@@ -55,7 +56,7 @@ function formatJsonSchemaPrompt(
   if (examples && examples.length > 1) {
     prompt += `\nAdditional examples:\n`;
     examples.slice(1).forEach((example, index) => {
-      prompt += `Example ${index + 2}:\n${JSON.stringify(
+      prompt += `Example ${index + 2}:\n${MELONY_PREFIX}${JSON.stringify(
         example,
         null,
         2
