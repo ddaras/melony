@@ -13,15 +13,18 @@ export default defineConfig([
     treeshake: true,
     skipNodeModulesBundle: true,
     external: ["react", "react-dom"],
+    esbuildOptions(options) {
+      options.jsx = "automatic";
+    },
     outExtension({ format }) {
       return {
         js: format === "esm" ? ".js" : ".cjs",
       };
     },
   },
-  // Zod schema utilities build (includes Zod dependency, safe for server-side)
+  // Server utilities build (system prompt and other server-side utilities)
   {
-    entry: ["src/zod-schema-utils.ts"],
+    entry: ["src/server.ts"],
     format: ["esm", "cjs"],
     dts: true,
     sourcemap: true,
@@ -29,7 +32,6 @@ export default defineConfig([
     splitting: false,
     treeshake: true,
     skipNodeModulesBundle: true,
-    external: ["zod"],
     outExtension({ format }) {
       return {
         js: format === "esm" ? ".js" : ".cjs",

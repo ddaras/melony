@@ -187,8 +187,8 @@ importers:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.0)
       melony:
-        specifier: ^1.7.0
-        version: 1.7.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: workspace:*
+        version: link:../../packages/melony-core
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -268,24 +268,12 @@ importers:
 
   packages/melony-core:
     dependencies:
-      '@ai-sdk/openai':
-        specifier: ^2.0.38
-        version: 2.0.42(zod@4.1.11)
-      ai:
-        specifier: ^5.0.56
-        version: 5.0.60(zod@4.1.11)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.2.0)(react@19.2.0)
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
-      use-stick-to-bottom:
-        specifier: ^1.1.1
-        version: 1.1.1(react@19.2.0)
-      zod:
-        specifier: ^4.1.11
-        version: 4.1.11
     devDependencies:
       '@types/react':
         specifier: ^19.1.12
@@ -3308,12 +3296,6 @@ packages:
 
   melony@1.6.65:
     resolution: {integrity: sha512-PSNTOf2M6LzN9IossCHbccZn/8sg8KTgDcy+WgkN/b9GYyj5b6ElDW2xrHs5KEuxrHtUBmD4TJk3liNEHcVLjg==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-
-  melony@1.7.0:
-    resolution: {integrity: sha512-B0MVTzc5kI5wmcHKX9NiiT/0K48IiQ13IsldLL4EQSR8+djuRhmFJnOKTWhsiM3XrSXyC/IKYfrJ/elEVAWdBQ==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -8069,20 +8051,6 @@ snapshots:
       react-markdown: 10.1.0(@types/react@19.2.0)(react@19.2.0)
       remark-gfm: 4.0.1
       use-stick-to-bottom: 1.1.1(react@19.2.0)
-      zod: 4.1.11
-    transitivePeerDependencies:
-      - '@types/react'
-      - supports-color
-
-  melony@1.7.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
-    dependencies:
-      '@ai-sdk/openai': 2.0.42(zod@4.1.11)
-      ai: 5.0.60(zod@4.1.11)
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      react-markdown: 10.1.0(@types/react@19.2.0)(react@19.1.0)
-      remark-gfm: 4.0.1
-      use-stick-to-bottom: 1.1.1(react@19.1.0)
       zod: 4.1.11
     transitivePeerDependencies:
       - '@types/react'
