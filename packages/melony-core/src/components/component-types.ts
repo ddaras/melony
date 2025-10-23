@@ -29,7 +29,8 @@ type RowOrColContent =
   | LabelProps
   | RowProps
   | ColProps
-  | ListProps;
+  | ListProps
+  | ChartProps;
 
 // Container Component Props
 // This is the only root component. Always start with Card.
@@ -37,7 +38,6 @@ export interface CardProps {
   children?: RowOrColContent[];
   title?: string;
   subtitle?: string;
-  size?: Size | "full";
   background?: Background;
 }
 
@@ -89,12 +89,29 @@ export interface ImageProps {
   src: string;
   alt?: string;
   size?: Size;
+  fallbackText?: string;
+  showFallbackIcon?: boolean;
 }
 
 export interface IconProps {
   name: keyof typeof ICONS;
   size?: Size;
   color?: Color;
+}
+
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+  color?: Color;
+}
+
+export interface ChartProps {
+  data: ChartDataPoint[];
+  chartType?: "bar" | "line" | "area" | "pie";
+  size?: Size;
+  showValues?: boolean;
+  showGrid?: boolean;
+  showTooltips?: boolean;
 }
 
 export interface BadgeProps {

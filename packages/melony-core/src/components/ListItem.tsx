@@ -7,7 +7,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   children,
   orientation = "horizontal",
   gap = "md",
-  align = "center",
+  align,
   justify = "start",
   onClickAction,
 }) => {
@@ -15,6 +15,9 @@ export const ListItem: React.FC<ListItemProps> = ({
   const handleAction = useActionHandler();
   const isInteractive = !!onClickAction;
   const resolvedGap = theme.spacing?.[gap as keyof typeof theme.spacing] || gap;
+  
+  // Default align to "start" for vertical orientation, "center" for horizontal
+  const resolvedAlign = align ?? (orientation === "vertical" ? "start" : "center");
 
   const alignMap = {
     start: "flex-start",
@@ -44,7 +47,7 @@ export const ListItem: React.FC<ListItemProps> = ({
         display: "flex",
         flexDirection: orientation === "horizontal" ? "row" : "column",
         gap: resolvedGap,
-        alignItems: alignMap[align],
+        alignItems: alignMap[resolvedAlign],
         justifyContent: justifyMap[justify],
         padding: theme.spacing?.md || "12px",
         cursor: isInteractive ? "pointer" : "default",

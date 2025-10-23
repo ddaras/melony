@@ -1,5 +1,4 @@
 // Main components
-export * from "./melony-card";
 export * from "./melony-markdown";
 
 // Built-in composable components
@@ -11,9 +10,8 @@ export * from "./theme";
 // Action system
 export * from "./action-context";
 
-// Utilities
-export * from "./text-parser";
-export * from "./component-renderer";
+// Component renderer (for advanced usage)
+export * from "./renderer";
 
 // Types
 export * from "./types";

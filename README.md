@@ -62,8 +62,7 @@ function Chat() {
 
 The AI will automatically generate UIs using the built-in components:
 
-```
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Weather Update",
@@ -75,7 +74,6 @@ The AI will automatically generate UIs using the built-in components:
     ]}
   ]
 }
-:::
 ```
 
 That's it! No schema definitions, no component mapping, no configuration.
@@ -118,7 +116,7 @@ Melony includes 20+ production-ready components:
 ### Basic Example
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "User Profile",
@@ -129,13 +127,12 @@ Melony includes 20+ production-ready components:
     {"type": "Button", "value": "Edit Profile", "variant": "primary"}
   ]
 }
-:::
 ```
 
 ### Horizontal Layout with Row
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Dashboard",
@@ -151,13 +148,12 @@ Melony includes 20+ production-ready components:
     ]}
   ]
 }
-:::
 ```
 
 ### Interactive Form
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Contact Us",
@@ -173,7 +169,6 @@ Melony includes 20+ production-ready components:
     ]}
   ]
 }
-:::
 ```
 
 ### Validation Rules
@@ -217,13 +212,13 @@ import { MelonyCard } from "melony";
 
 ### Component Delimiters
 
-Components must be wrapped in `:::melony:v1` ... `:::` delimiters:
+Components must be wrapped in ````melony` ... ````` delimiters:
 
 ```tsx
 import { BLOCK_START, BLOCK_END } from "melony";
 
-console.log(BLOCK_START); // ":::melony:"
-console.log(BLOCK_END);   // ":::"
+console.log(BLOCK_START); // "```melony:"
+console.log(BLOCK_END);   // "```"
 ```
 
 This distinguishes UI components from regular JSON in text:
@@ -231,9 +226,8 @@ This distinguishes UI components from regular JSON in text:
 ```
 Here's some data: {"foo": "bar"}  ← Renders as text
 
-:::melony:v1
+```melony
 {"type": "Card", "title": "Hello"}  ← Renders as component
-:::
 ```
 
 ### Theme System
@@ -360,7 +354,7 @@ function Chat() {
 Components can trigger actions:
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Actions Demo",
@@ -375,7 +369,6 @@ Components can trigger actions:
     ]}
   ]
 }
-:::
 ```
 
 ### Server-Side Utilities
@@ -546,12 +539,12 @@ export default function ChatPage() {
 
 ```typescript
 // Complete component block → Renders component
-:::melony:v1
+```melony
 {"type": "Card", "title": "Hello"}
-:::
+```
 
 // Incomplete block → Shows loading indicator
-:::melony:v1
+```melony
 {"type": "Card", "tit
 
 // Regular JSON → Renders as plain text
@@ -671,7 +664,7 @@ Built-in Icon component with 30+ icons:
 - Other: `calendar`, `clock`, `location`
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "children": [
@@ -682,7 +675,6 @@ Built-in Icon component with 30+ icons:
     ]}
   ]
 }
-:::
 ```
 
 ## Real-World Examples
@@ -690,7 +682,7 @@ Built-in Icon component with 30+ icons:
 ### Weather Dashboard
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "San Francisco, CA",
@@ -720,13 +712,12 @@ Built-in Icon component with 30+ icons:
     ]}
   ]
 }
-:::
 ```
 
 ### User Profile Form
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Edit Profile",
@@ -756,13 +747,12 @@ Built-in Icon component with 30+ icons:
     ]}
   ]
 }
-:::
 ```
 
 ### Product List
 
 ```tsx
-:::melony:v1
+```melony
 {
   "type": "Card",
   "title": "Featured Products",
@@ -787,7 +777,6 @@ Built-in Icon component with 30+ icons:
     ]}
   ]
 }
-:::
 ```
 
 ## Examples & Templates

@@ -69,7 +69,14 @@
       "optional": false
     }
   },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "rehype-raw": "^7.0.0"
+  },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "react": "^19.1.1",
@@ -77,9 +84,5 @@
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
   }
 }

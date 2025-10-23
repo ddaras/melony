@@ -5,7 +5,7 @@ import { SelectProps } from "./component-types";
 import { Label } from "./Label";
 
 export const Select: React.FC<SelectProps> = ({
-  options,
+  options = [],
   defaultValue,
   value,
   label,
@@ -73,4 +73,3 @@ export const Select: React.FC<SelectProps> = ({
     </div>
   );
 };
-

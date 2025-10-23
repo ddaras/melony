@@ -11,7 +11,7 @@ No tool calling latency. No completion waiting. Just smooth, progressive renderi
 ## Why Melony?
 
 - ⚡ **Zero Latency** - Components render progressively during streaming
-- 🎯 **Smart Parsing** - Identifies component JSON with delimited blocks
+- 🎯 **Smart Parsing** - Identifies component YAML with delimited blocks
 - 🎨 **Built-in Components** - 20+ ready-to-use UI components
 - 🛡️ **Type Safe** - Full TypeScript support
 - 🎭 **Themeable** - Customizable colors, spacing, and typography
@@ -62,20 +62,27 @@ function Chat() {
 
 The AI will automatically generate UIs using the built-in components:
 
-```
-:::melony:v1
-{
-  "type": "Card",
-  "title": "Weather Update",
-  "children": [
-    {"type": "Text", "value": "Current conditions in New York"},
-    {"type": "Row", "gap": "md", "children": [
-      {"type": "Text", "value": "72°F", "size": "xl", "weight": "bold"},
-      {"type": "Badge", "value": "Sunny", "color": "warning"}
-    ]}
-  ]
-}
-:::
+```melony
+component: Card
+props:
+  title: Weather Update
+children:
+  - component: Text
+    props:
+      value: Current conditions in New York
+  - component: Row
+    props:
+      gap: md
+    children:
+      - component: Text
+        props:
+          value: 72°F
+          size: xl
+          weight: bold
+      - component: Badge
+        props:
+          value: Sunny
+          variant: warning
 ```
 
 That's it! No schema definitions, no component mapping, no configuration.
@@ -118,62 +125,95 @@ Melony includes 20+ production-ready components:
 ### Basic Example
 
 ```tsx
-:::melony:v1
-{
-  "type": "Card",
-  "title": "User Profile",
-  "subtitle": "Account Information",
-  "children": [
-    {"type": "Text", "value": "Name: John Doe"},
-    {"type": "Text", "value": "Email: john@example.com"},
-    {"type": "Button", "value": "Edit Profile", "variant": "primary"}
-  ]
-}
-:::
+```melony
+component: Card
+props:
+  title: User Profile
+  subtitle: Account Information
+children:
+  - component: Text
+    props:
+      value: "Name: John Doe"
+  - component: Text
+    props:
+      value: "Email: john@example.com"
+  - component: Button
+    props:
+      value: Edit Profile
+      variant: primary
 ```
 
 ### Horizontal Layout with Row
 
 ```tsx
-:::melony:v1
-{
-  "type": "Card",
-  "title": "Dashboard",
-  "children": [
-    {"type": "Row", "gap": "lg", "align": "center", "justify": "between", "children": [
-      {"type": "Text", "value": "Total Sales", "weight": "semibold"},
-      {"type": "Badge", "value": "$12,345", "color": "success"}
-    ]},
-    {"type": "Divider"},
-    {"type": "Row", "gap": "md", "children": [
-      {"type": "Icon", "name": "user", "color": "primary"},
-      {"type": "Text", "value": "24 active users"}
-    ]}
-  ]
-}
-:::
+```melony
+component: Card
+props:
+  title: Dashboard
+children:
+  - component: Row
+    props:
+      gap: lg
+      align: center
+      justify: between
+    children:
+      - component: Text
+        props:
+          value: Total Sales
+          weight: semibold
+      - component: Badge
+        props:
+          value: $12,345
+          variant: success
+  - component: Divider
+  - component: Row
+    props:
+      gap: md
+    children:
+      - component: Icon
+        props:
+          name: Info
+          color: primary
+      - component: Text
+        props:
+          value: 24 active users
 ```
 
 ### Interactive Form
 
 ```tsx
-:::melony:v1
-{
-  "type": "Card",
-  "title": "Contact Us",
-  "children": [
-    {"type": "Form", "action": {"action": "submit-contact", "payload": {}}, "children": [
-      {"type": "Label", "value": "Name", "htmlFor": "name"},
-      {"type": "Input", "name": "name", "placeholder": "Your name"},
-      {"type": "Label", "value": "Email", "htmlFor": "email"},
-      {"type": "Input", "name": "email", "type": "email", "placeholder": "your@email.com"},
-      {"type": "Label", "value": "Message", "htmlFor": "message"},
-      {"type": "Textarea", "name": "message", "placeholder": "Your message", "rows": 4},
-      {"type": "Button", "value": "Send Message", "type": "submit", "variant": "primary"}
-    ]}
-  ]
-}
-:::
+```melony
+component: Card
+props:
+  title: Contact Us
+children:
+  - component: Form
+    props:
+      onSubmitAction:
+        action: submit-contact
+        payload: {}
+    children:
+      - component: Input
+        props:
+          name: name
+          label: Name
+          placeholder: Your name
+      - component: Input
+        props:
+          name: email
+          inputType: email
+          label: Email
+          placeholder: your@email.com
+      - component: Textarea
+        props:
+          name: message
+          label: Message
+          placeholder: Your message
+          rows: 4
+      - component: Button
+        props:
+          value: Send Message
+          variant: primary
 ```
 
 ### Validation Rules
@@ -187,9 +227,89 @@ Melony includes 20+ production-ready components:
 
 ## API Reference
 
+### `MelonyMarkdown`
+
+Component for rendering markdown with embedded Melony components using YAML syntax.
+
+```tsx
+import { MelonyMarkdown } from "melony";
+
+function Chat() {
+  const markdown = `
+```melony
+{
+  "component": "Card",
+  "props": {
+    "title": "Welcome",
+    "subtitle": "Get started"
+  },
+  "children": [
+    {"component": "Text", "props": {"value": "Hello, World!", "size": "lg", "weight": "semibold"}},
+    {"component": "Button", "props": {"value": "Click me", "variant": "primary"}}
+  ]
+}
+```
+  `;
+
+  return <MelonyMarkdown>{markdown}</MelonyMarkdown>;
+}
+```
+
+**Props:**
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `string` | Markdown content with embedded Melony components |
+| `onAction` | `ActionHandler` | Handler for component actions |
+| `theme` | `Partial<MelonyTheme>` | Custom theme overrides |
+| `components` | `Partial<Components>` | Custom markdown components |
+| `className` | `string` | CSS class name |
+| `style` | `React.CSSProperties` | Inline styles |
+
+**Features:**
+- ✅ **Streaming-safe** - Handles incomplete components during streaming with "Composing..." indicator
+- ✅ **Delimited blocks** - Uses ````melony` ... ````` delimiters for reliable parsing
+- ✅ **JSON syntax** - Define components using simple, valid JSON
+- ✅ **No MDX complexity** - Pure JSON parsing, no JSX or MDX dependencies
+- ✅ **GFM support** - Full GitHub Flavored Markdown rendering
+
+**JSON Component Example:**
+
+```tsx
+const markdown = `
+```melony
+{
+  "component": "Card",
+  "props": {"title": "Actions"},
+  "children": [
+    {
+      "component": "ListItem",
+      "props": {
+        "onClickAction": {"action": "navigate", "payload": {"path": "/profile"}}
+      },
+      "children": [
+        {"component": "Icon", "props": {"name": "Info"}},
+        {"component": "Text", "props": {"value": "Go to Profile"}}
+      ]
+    },
+    {
+      "component": "Button",
+      "props": {
+        "value": "Submit",
+        "onClickAction": {"action": "submit", "payload": {"confirm": true}}
+      }
+    }
+  ]
+}
+```
+`;
+
+<MelonyMarkdown onAction={handleAction}>{markdown}</MelonyMarkdown>
+```
+
 ### `MelonyCard`
 
-The main component for rendering AI responses with embedded UI components.
+The main component for rendering AI responses with embedded UI components (JSON format).
 
 ```tsx
 import { MelonyCard } from "melony";
@@ -217,13 +337,13 @@ import { MelonyCard } from "melony";
 
 ### Component Delimiters
 
-Components must be wrapped in `:::melony:v1` ... `:::` delimiters:
+Components must be wrapped in ````melony` ... ````` delimiters:
 
 ```tsx
 import { BLOCK_START, BLOCK_END } from "melony";
 
-console.log(BLOCK_START); // ":::melony:"
-console.log(BLOCK_END);   // ":::"
+console.log(BLOCK_START); // "```melony:"
+console.log(BLOCK_END);   // "```"
 ```
 
 This distinguishes UI components from regular JSON in text:
@@ -231,9 +351,8 @@ This distinguishes UI components from regular JSON in text:
 ```
 Here's some data: {"foo": "bar"}  ← Renders as text
 
-:::melony:v1
-{"type": "Card", "title": "Hello"}  ← Renders as component
-:::
+```melony
+{"component": "Card", "props": {"title": "Hello"}}  ← Renders as component
 ```
 
 ### Theme System
@@ -360,22 +479,33 @@ function Chat() {
 Components can trigger actions:
 
 ```tsx
-:::melony:v1
+```melony
 {
-  "type": "Card",
-  "title": "Actions Demo",
+  "component": "Card",
+  "props": {"title": "Actions Demo"},
   "children": [
-    {"type": "Button", "value": "Click Me", "action": {
-      "action": "button-click",
-      "payload": {"id": "123", "source": "demo"}
-    }},
-    {"type": "Form", "action": {"action": "submit-form"}, "children": [
-      {"type": "Input", "name": "email", "placeholder": "Email"},
-      {"type": "Button", "value": "Submit", "type": "submit"}
-    ]}
+    {
+      "component": "Button",
+      "props": {
+        "value": "Click Me",
+        "onClickAction": {
+          "action": "button-click",
+          "payload": {"id": "123", "source": "demo"}
+        }
+      }
+    },
+    {
+      "component": "Form",
+      "props": {
+        "onSubmitAction": {"action": "submit-form", "payload": {}}
+      },
+      "children": [
+        {"component": "Input", "props": {"name": "email", "placeholder": "Email"}},
+        {"component": "Button", "props": {"value": "Submit", "variant": "primary"}}
+      ]
+    }
   ]
 }
-:::
 ```
 
 ### Server-Side Utilities
@@ -546,13 +676,13 @@ export default function ChatPage() {
 
 ```typescript
 // Complete component block → Renders component
-:::melony:v1
-{"type": "Card", "title": "Hello"}
-:::
+```melony
+{"component": "Card", "props": {"title": "Hello"}}
+```
 
 // Incomplete block → Shows loading indicator
-:::melony:v1
-{"type": "Card", "tit
+```melony
+{"component": "Card", "props": {"tit
 
 // Regular JSON → Renders as plain text
 Here's some data: {"key": "value"}
@@ -671,18 +801,21 @@ Built-in Icon component with 30+ icons:
 - Other: `calendar`, `clock`, `location`
 
 ```tsx
-:::melony:v1
+```melony
 {
-  "type": "Card",
+  "component": "Card",
   "children": [
-    {"type": "Row", "gap": "md", "children": [
-      {"type": "Icon", "name": "home", "size": "lg", "color": "primary"},
-      {"type": "Icon", "name": "user", "size": "md", "color": "secondary"},
-      {"type": "Icon", "name": "settings", "size": "sm", "color": "muted"}
-    ]}
+    {
+      "component": "Row",
+      "props": {"gap": "md"},
+      "children": [
+        {"component": "Icon", "props": {"name": "Check", "size": "lg", "color": "primary"}},
+        {"component": "Icon", "props": {"name": "Info", "size": "md", "color": "secondary"}},
+        {"component": "Icon", "props": {"name": "X", "size": "sm"}}
+      ]
+    }
   ]
 }
-:::
 ```
 
 ## Real-World Examples
@@ -690,104 +823,165 @@ Built-in Icon component with 30+ icons:
 ### Weather Dashboard
 
 ```tsx
-:::melony:v1
+```melony
 {
-  "type": "Card",
-  "title": "San Francisco, CA",
-  "subtitle": "Current Weather",
+  "component": "Card",
+  "props": {
+    "title": "San Francisco, CA",
+    "subtitle": "Current Weather"
+  },
   "children": [
-    {"type": "Row", "gap": "lg", "align": "center", "children": [
-      {"type": "Icon", "name": "success", "size": "xl", "color": "warning"},
-      {"type": "Col", "gap": "sm", "children": [
-        {"type": "Text", "value": "68°F", "size": "xxl", "weight": "bold"},
-        {"type": "Text", "value": "Partly Cloudy", "color": "mutedForeground"}
-      ]}
-    ]},
-    {"type": "Divider"},
-    {"type": "Row", "gap": "md", "justify": "between", "children": [
-      {"type": "Col", "gap": "xs", "children": [
-        {"type": "Text", "value": "Humidity", "size": "sm", "color": "mutedForeground"},
-        {"type": "Text", "value": "65%", "weight": "semibold"}
-      ]},
-      {"type": "Col", "gap": "xs", "children": [
-        {"type": "Text", "value": "Wind", "size": "sm", "color": "mutedForeground"},
-        {"type": "Text", "value": "12 mph", "weight": "semibold"}
-      ]},
-      {"type": "Col", "gap": "xs", "children": [
-        {"type": "Text", "value": "Pressure", "size": "sm", "color": "mutedForeground"},
-        {"type": "Text", "value": "30.12 in", "weight": "semibold"}
-      ]}
-    ]}
+    {
+      "component": "Row",
+      "props": {"gap": "lg", "align": "center"},
+      "children": [
+        {"component": "Icon", "props": {"name": "Check", "size": "lg", "color": "warning"}},
+        {
+          "component": "Col",
+          "props": {"gap": "sm"},
+          "children": [
+            {"component": "Text", "props": {"value": "68°F", "size": "xxl", "weight": "bold"}},
+            {"component": "Text", "props": {"value": "Partly Cloudy", "color": "secondary"}}
+          ]
+        }
+      ]
+    },
+    {"component": "Divider"},
+    {
+      "component": "Row",
+      "props": {"gap": "md", "justify": "between"},
+      "children": [
+        {
+          "component": "Col",
+          "props": {"gap": "xs"},
+          "children": [
+            {"component": "Text", "props": {"value": "Humidity", "size": "sm", "color": "secondary"}},
+            {"component": "Text", "props": {"value": "65%", "weight": "semibold"}}
+          ]
+        },
+        {
+          "component": "Col",
+          "props": {"gap": "xs"},
+          "children": [
+            {"component": "Text", "props": {"value": "Wind", "size": "sm", "color": "secondary"}},
+            {"component": "Text", "props": {"value": "12 mph", "weight": "semibold"}}
+          ]
+        },
+        {
+          "component": "Col",
+          "props": {"gap": "xs"},
+          "children": [
+            {"component": "Text", "props": {"value": "Pressure", "size": "sm", "color": "secondary"}},
+            {"component": "Text", "props": {"value": "30.12 in", "weight": "semibold"}}
+          ]
+        }
+      ]
+    }
   ]
 }
-:::
 ```
 
 ### User Profile Form
 
 ```tsx
-:::melony:v1
+```melony
 {
-  "type": "Card",
-  "title": "Edit Profile",
-  "subtitle": "Update your account information",
+  "component": "Card",
+  "props": {
+    "title": "Edit Profile",
+    "subtitle": "Update your account information"
+  },
   "children": [
-    {"type": "Form", "action": {"action": "update-profile"}, "children": [
-      {"type": "Row", "gap": "md", "children": [
-        {"type": "Col", "flex": 1, "gap": "sm", "children": [
-          {"type": "Label", "value": "First Name"},
-          {"type": "Input", "name": "firstName", "value": "John"}
-        ]},
-        {"type": "Col", "flex": 1, "gap": "sm", "children": [
-          {"type": "Label", "value": "Last Name"},
-          {"type": "Input", "name": "lastName", "value": "Doe"}
-        ]}
-      ]},
-      {"type": "Label", "value": "Email"},
-      {"type": "Input", "name": "email", "type": "email", "value": "john@example.com"},
-      {"type": "Label", "value": "Bio"},
-      {"type": "Textarea", "name": "bio", "rows": 4, "placeholder": "Tell us about yourself..."},
-      {"type": "Label", "value": "Notifications"},
-      {"type": "Checkbox", "name": "notifications", "label": "Receive email notifications", "checked": true},
-      {"type": "Row", "gap": "md", "justify": "end", "children": [
-        {"type": "Button", "value": "Cancel", "variant": "ghost"},
-        {"type": "Button", "value": "Save Changes", "type": "submit", "variant": "primary"}
-      ]}
-    ]}
+    {
+      "component": "Form",
+      "props": {
+        "onSubmitAction": {"action": "update-profile", "payload": {}}
+      },
+      "children": [
+        {
+          "component": "Row",
+          "props": {"gap": "md"},
+          "children": [
+            {
+              "component": "Col",
+              "props": {"flex": 1, "gap": "sm"},
+              "children": [
+                {"component": "Input", "props": {"name": "firstName", "label": "First Name", "defaultValue": "John"}}
+              ]
+            },
+            {
+              "component": "Col",
+              "props": {"flex": 1, "gap": "sm"},
+              "children": [
+                {"component": "Input", "props": {"name": "lastName", "label": "Last Name", "defaultValue": "Doe"}}
+              ]
+            }
+          ]
+        },
+        {"component": "Input", "props": {"name": "email", "inputType": "email", "label": "Email", "defaultValue": "john@example.com"}},
+        {"component": "Textarea", "props": {"name": "bio", "label": "Bio", "rows": 4, "placeholder": "Tell us about yourself..."}},
+        {"component": "Checkbox", "props": {"name": "notifications", "label": "Receive email notifications", "defaultChecked": true}},
+        {
+          "component": "Row",
+          "props": {"gap": "md", "justify": "end"},
+          "children": [
+            {"component": "Button", "props": {"value": "Cancel", "variant": "secondary"}},
+            {"component": "Button", "props": {"value": "Save Changes", "variant": "primary"}}
+          ]
+        }
+      ]
+    }
   ]
 }
-:::
 ```
 
 ### Product List
 
 ```tsx
-:::melony:v1
+```melony
 {
-  "type": "Card",
-  "title": "Featured Products",
+  "component": "Card",
+  "props": {"title": "Featured Products"},
   "children": [
-    {"type": "List", "children": [
-      {"type": "ListItem", "orientation": "horizontal", "children": [
-        {"type": "Image", "src": "/product1.jpg", "alt": "Product 1", "size": "sm"},
-        {"type": "Col", "flex": 1, "gap": "xs", "children": [
-          {"type": "Text", "value": "Wireless Headphones", "weight": "semibold"},
-          {"type": "Text", "value": "Premium sound quality", "size": "sm", "color": "mutedForeground"}
-        ]},
-        {"type": "Badge", "value": "$199", "color": "primary"}
-      ]},
-      {"type": "ListItem", "orientation": "horizontal", "children": [
-        {"type": "Image", "src": "/product2.jpg", "alt": "Product 2", "size": "sm"},
-        {"type": "Col", "flex": 1, "gap": "xs", "children": [
-          {"type": "Text", "value": "Smart Watch", "weight": "semibold"},
-          {"type": "Text", "value": "Track your fitness", "size": "sm", "color": "mutedForeground"}
-        ]},
-        {"type": "Badge", "value": "$299", "color": "primary"}
-      ]}
-    ]}
+    {
+      "component": "List",
+      "children": [
+        {
+          "component": "ListItem",
+          "props": {"orientation": "horizontal", "gap": "md"},
+          "children": [
+            {"component": "Image", "props": {"src": "/product1.jpg", "alt": "Product 1", "size": "sm"}},
+            {
+              "component": "Col",
+              "props": {"flex": 1, "gap": "xs"},
+              "children": [
+                {"component": "Text", "props": {"value": "Wireless Headphones", "weight": "semibold"}},
+                {"component": "Text", "props": {"value": "Premium sound quality", "size": "sm", "color": "secondary"}}
+              ]
+            },
+            {"component": "Badge", "props": {"value": "$199", "variant": "primary"}}
+          ]
+        },
+        {
+          "component": "ListItem",
+          "props": {"orientation": "horizontal", "gap": "md"},
+          "children": [
+            {"component": "Image", "props": {"src": "/product2.jpg", "alt": "Product 2", "size": "sm"}},
+            {
+              "component": "Col",
+              "props": {"flex": 1, "gap": "xs"},
+              "children": [
+                {"component": "Text", "props": {"value": "Smart Watch", "weight": "semibold"}},
+                {"component": "Text", "props": {"value": "Track your fitness", "size": "sm", "color": "secondary"}}
+              ]
+            },
+            {"component": "Badge", "props": {"value": "$299", "variant": "primary"}}
+          ]
+        }
+      ]
+    }
   ]
 }
-:::
 ```
 
 ## Examples & Templates

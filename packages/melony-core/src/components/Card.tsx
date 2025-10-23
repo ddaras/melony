@@ -7,46 +7,25 @@ export const Card: React.FC<CardProps> = ({
   title,
   subtitle,
   background,
-  size = "md",
 }) => {
   const theme = useTheme();
-
-  const sizes = {
-    sm: {
-      width: "300px",
-      borderRadius: theme.radius?.sm,
-      padding: theme.spacing?.sm,
-    },
-    md: {
-      width: "400px",
-      borderRadius: theme.radius?.md,
-      padding: theme.spacing?.sm,
-    },
-    lg: {
-      width: "500px",
-      borderRadius: theme.radius?.lg,
-      padding: theme.spacing?.sm,
-    },
-    full: {
-      width: "100%",
-      borderRadius: theme.radius?.lg,
-      padding: theme.spacing?.sm,
-    },
-  };
 
   return (
     <div
       style={{
         border: `1px solid ${theme.colors?.border}`,
         overflow: "hidden",
-        background,
-        ...sizes[size],
+        background: background ?? theme.colors?.cardBackground,
+        minWidth: "380px",
+        width: "100%",
+        borderRadius: theme.radius?.lg,
+        padding: theme.spacing?.sm,
       }}
     >
       {(title || subtitle) && (
         <div
           style={{
-            padding: sizes[size].padding,
+            padding: theme.spacing?.sm,
           }}
         >
           {title && (
@@ -78,9 +57,10 @@ export const Card: React.FC<CardProps> = ({
       )}
       <div
         style={{
-          padding: sizes[size].padding,
+          padding: theme.spacing?.sm,
           display: "flex",
           flexDirection: "column",
+          alignItems: "flex-start",
           gap: theme.spacing?.md,
         }}
       >

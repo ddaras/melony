@@ -1,435 +1,234 @@
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import { ThemeProvider } from "./theme";
+import { ActionProvider } from "./action-context";
+import { MelonyTheme } from "./theme";
+import { ActionHandler } from "./types";
+import remarkGfm from "remark-gfm";
+import yaml from "js-yaml";
+import { renderComponent, ComponentDef } from "./renderer";
+import rehypeRaw from "rehype-raw";
+import { markdownComponents } from "./markdown-components";
 
-export interface MarkdownProps {
-  children: string;
-  className?: string;
-  components?: Partial<Components>;
-  style?: React.CSSProperties;
-}
-
-const defaultComponents: Partial<Components> = {
-  // Headings
-  h1: ({ children, ...props }) => (
-    <h1
-      style={{
-        fontSize: "1.875rem",
-        fontWeight: "bold",
-        marginBottom: "1rem",
-        marginTop: "1.5rem",
-        color: "#111827",
-        lineHeight: "1.2",
-      }}
-      {...props}
-    >
-      {children}
-    </h1>
-  ),
-  h2: ({ children, ...props }) => (
-    <h2
-      style={{
-        fontSize: "1.5rem",
-        fontWeight: "600",
-        marginBottom: "0.75rem",
-        marginTop: "1.25rem",
-        color: "#111827",
-        lineHeight: "1.3",
-      }}
-      {...props}
-    >
-      {children}
-    </h2>
-  ),
-  h3: ({ children, ...props }) => (
-    <h3
-      style={{
-        fontSize: "1.25rem",
-        fontWeight: "500",
-        marginBottom: "0.5rem",
-        marginTop: "1rem",
-        color: "#111827",
-        lineHeight: "1.4",
-      }}
-      {...props}
-    >
-      {children}
-    </h3>
-  ),
-  h4: ({ children, ...props }) => (
-    <h4
-      style={{
-        fontSize: "1.125rem",
-        fontWeight: "500",
-        marginBottom: "0.5rem",
-        marginTop: "0.75rem",
-        color: "#111827",
-        lineHeight: "1.4",
-      }}
-      {...props}
-    >
-      {children}
-    </h4>
-  ),
-  h5: ({ children, ...props }) => (
-    <h5
-      style={{
-        fontSize: "1rem",
-        fontWeight: "500",
-        marginBottom: "0.25rem",
-        marginTop: "0.5rem",
-        color: "#111827",
-        lineHeight: "1.5",
-      }}
-      {...props}
-    >
-      {children}
-    </h5>
-  ),
-  h6: ({ children, ...props }) => (
-    <h6
-      style={{
-        fontSize: "0.875rem",
-        fontWeight: "500",
-        marginBottom: "0.25rem",
-        marginTop: "0.5rem",
-        color: "#111827",
-        lineHeight: "1.5",
-      }}
-      {...props}
-    >
-      {children}
-    </h6>
-  ),
-
-  // Paragraphs
-  p: ({ children, ...props }) => (
-    <p
-      style={{
-        marginBottom: "1rem",
-        color: "#374151",
-        lineHeight: "1.6",
-      }}
-      {...props}
-    >
-      {children}
-    </p>
-  ),
-
-  // Lists
-  ul: ({ children, ...props }) => (
-    <ul
-      style={{
-        marginBottom: "1rem",
-        marginLeft: "1.5rem",
-        listStyleType: "disc",
-        color: "#374151",
-      }}
-      {...props}
-    >
-      {children}
-    </ul>
-  ),
-  ol: ({ children, ...props }) => (
-    <ol
-      style={{
-        marginBottom: "1rem",
-        marginLeft: "1.5rem",
-        listStyleType: "decimal",
-        color: "#374151",
-      }}
-      {...props}
-    >
-      {children}
-    </ol>
-  ),
-  li: ({ children, ...props }) => (
-    <li
-      style={{
-        lineHeight: "1.6",
-        marginBottom: "0.25rem",
-      }}
-      {...props}
-    >
-      {children}
-    </li>
-  ),
-
-  // Links
-  a: ({ href, children, ...props }) => (
-    <a
-      href={href}
-      style={{
-        color: "#2563eb",
-        textDecoration: "underline",
-        transition: "color 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.color = "#1d4ed8";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = "#2563eb";
-      }}
-      target={href?.startsWith("http") ? "_blank" : undefined}
-      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
-      {...props}
-    >
-      {children}
-    </a>
-  ),
-
-  // Code
-  code: ({ children, className, ...props }) => {
-    const isInline = !className;
-    if (isInline) {
-      return (
-        <code
-          style={{
-            backgroundColor: "#f3f4f6",
-            color: "#1f2937",
-            padding: "0.125rem 0.375rem",
-            borderRadius: "0.25rem",
-            fontSize: "0.875rem",
-            fontFamily:
-              'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-          }}
-          {...props}
-        >
-          {children}
-        </code>
-      );
-    }
-    return (
-      <code
-        style={{
-          fontFamily:
-            'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-          fontSize: "0.875rem",
-        }}
-        {...props}
-      >
-        {children}
-      </code>
-    );
-  },
-  pre: ({ children, ...props }) => (
-    <pre
-      style={{
-        backgroundColor: "#f3f4f6",
-        padding: "1rem",
-        borderRadius: "0.5rem",
-        overflowX: "auto",
-        marginBottom: "1rem",
-        fontSize: "0.875rem",
-        fontFamily:
-          'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-        lineHeight: "1.5",
-      }}
-      {...props}
-    >
-      {children}
-    </pre>
-  ),
-
-  // Blockquotes
-  blockquote: ({ children, ...props }) => (
-    <blockquote
-      style={{
-        borderLeft: "4px solid #d1d5db",
-        paddingLeft: "1rem",
-        paddingTop: "0.5rem",
-        paddingBottom: "0.5rem",
-        marginBottom: "1rem",
-        fontStyle: "italic",
-        color: "#6b7280",
-      }}
-      {...props}
-    >
-      {children}
-    </blockquote>
-  ),
-
-  // Tables (GFM feature)
-  table: ({ children, ...props }) => (
-    <div style={{ overflowX: "auto", marginBottom: "1rem" }}>
-      <table
-        style={{
-          minWidth: "100%",
-          borderCollapse: "collapse",
-          border: "1px solid #d1d5db",
-        }}
-        {...props}
-      >
-        {children}
-      </table>
-    </div>
-  ),
-  thead: ({ children, ...props }) => (
-    <thead
-      style={{
-        backgroundColor: "#f9fafb",
-      }}
-      {...props}
-    >
-      {children}
-    </thead>
-  ),
-  tbody: ({ children, ...props }) => (
-    <tbody
-      style={{
-        backgroundColor: "#ffffff",
-      }}
-      {...props}
-    >
-      {children}
-    </tbody>
-  ),
-  tr: ({ children, ...props }) => (
-    <tr
-      style={{
-        borderBottom: "1px solid #e5e7eb",
-      }}
-      {...props}
-    >
-      {children}
-    </tr>
-  ),
-  th: ({ children, ...props }) => (
-    <th
-      style={{
-        border: "1px solid #d1d5db",
-        padding: "0.5rem 1rem",
-        textAlign: "left",
-        fontWeight: "600",
-        color: "#111827",
-      }}
-      {...props}
-    >
-      {children}
-    </th>
-  ),
-  td: ({ children, ...props }) => (
-    <td
-      style={{
-        border: "1px solid #d1d5db",
-        padding: "0.5rem 1rem",
-        color: "#374151",
-      }}
-      {...props}
-    >
-      {children}
-    </td>
-  ),
-
-  // Horizontal rule
-  hr: ({ ...props }) => (
-    <hr
-      style={{
-        margin: "1.5rem 0",
-        border: "none",
-        borderTop: "1px solid #d1d5db",
-      }}
-      {...props}
-    />
-  ),
-
-  // Strong/Bold
-  strong: ({ children, ...props }) => (
-    <strong
-      style={{
-        fontWeight: "600",
-        color: "#111827",
-      }}
-      {...props}
-    >
-      {children}
-    </strong>
-  ),
-
-  // Emphasis/Italic
-  em: ({ children, ...props }) => (
-    <em
-      style={{
-        fontStyle: "italic",
-      }}
-      {...props}
-    >
-      {children}
-    </em>
-  ),
-
-  // Strikethrough (GFM feature)
-  del: ({ children, ...props }) => (
-    <del
-      style={{
-        textDecoration: "line-through",
-        color: "#6b7280",
-      }}
-      {...props}
-    >
-      {children}
-    </del>
-  ),
-
-  // Task lists (GFM feature)
-  input: ({ type, checked, ...props }) => {
-    if (type === "checkbox") {
-      return (
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled
-          style={{
-            marginRight: "0.5rem",
-            accentColor: "#2563eb",
-          }}
-          {...props}
-        />
-      );
-    }
-    return <input type={type} {...props} />;
-  },
-
-  // Images
-  img: ({ src, alt, ...props }) => (
-    <img
-      src={src}
-      alt={alt}
-      style={{
-        maxWidth: "100%",
-        height: "auto",
-        borderRadius: "0.5rem",
-        marginBottom: "1rem",
-      }}
-      {...props}
-    />
-  ),
+const getNodeText = (node: any): string => {
+  if (!node) return "";
+  if (node.type === "text") {
+    return node.value;
+  }
+  if (node.children) {
+    return node.children.map(getNodeText).join("");
+  }
+  return "";
 };
 
-export const MelonyMarkdown: React.FC<MarkdownProps> = ({
-  children,
-  className = "",
-  components = {},
-  style = {},
-}) => {
-  const mergedComponents = { ...defaultComponents, ...components };
+// Helper function to generate a cache key based on YAML content
+const generateCacheKey = (yamlContent: string): string => {
+  // Use a more robust approach for streaming content
+  const lines = yamlContent.split("\n").filter((line) => line.trim());
 
-  const containerStyle: React.CSSProperties = {
-    maxWidth: "none",
-    color: "#374151",
-    fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
-    fontSize: "1rem",
-    lineHeight: "1.75",
-    ...style,
-  };
+  // Extract component name and key properties for better caching
+  const componentLine = lines.find((line) =>
+    line.trim().startsWith("component:")
+  );
+  const componentName = componentLine
+    ? componentLine.split(":")[1]?.trim()
+    : "unknown";
+
+  // Use component name + first few lines for better cache hits during streaming
+  const keyContent = `${componentName}-${lines.slice(0, 2).join("|")}`;
+
+  // Create a simple hash
+  let hash = 0;
+  for (let i = 0; i < keyContent.length; i++) {
+    const char = keyContent.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  return Math.abs(hash).toString(36);
+};
+
+// Helper function to check if YAML content looks complete
+const isYamlContentComplete = (yamlContent: string): boolean => {
+  const trimmed = yamlContent.trim();
+  if (!trimmed) return false;
+
+  // Check if it starts with a component definition
+  if (!trimmed.match(/^\s*component\s*:/)) return false;
+
+  // Check if it has proper YAML structure (basic validation)
+  try {
+    yaml.load(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export interface MarkdownProps {
+  className?: string;
+  children: string | undefined | null;
+  components?: Partial<Components>;
+  style?: React.CSSProperties;
+  theme?: MelonyTheme;
+  onAction?: ActionHandler;
+}
+
+export const MelonyMarkdown = ({
+  children,
+  components = {},
+  theme,
+  onAction,
+}: MarkdownProps) => {
+  // Use ref to store component cache per instance
+  const componentCacheRef = useRef<Map<string, React.ReactNode>>(new Map());
+
+  // Enhanced render function with instance-specific caching
+  const renderMelonyComponentWithCache = useCallback((yamlContent: string) => {
+    const cacheKey = generateCacheKey(yamlContent);
+    const cache = componentCacheRef.current;
+
+    try {
+      // Pre-process to automatically quote strings with special characters
+      const lines = yamlContent.split("\n");
+      const processedYaml = lines
+        .map((line) => {
+          const match = line.match(/^(\s*)(\w+):\s*(.+)$/);
+          if (match) {
+            const [, indent, key, value] = match;
+            const trimmedValue = value.trim();
+
+            if (
+              !trimmedValue.match(/^["'`]/) &&
+              trimmedValue.includes(":") &&
+              !trimmedValue.includes("component:") &&
+              !trimmedValue.includes("props:") &&
+              !trimmedValue.includes("children:") &&
+              !trimmedValue.includes("action:") &&
+              !trimmedValue.includes("payload:") &&
+              !trimmedValue.includes("onClickAction:") &&
+              !trimmedValue.includes("onChangeAction:") &&
+              !trimmedValue.includes("onSubmitAction:")
+            ) {
+              return `${indent}${key}: "${trimmedValue}"`;
+            }
+          }
+          return line;
+        })
+        .join("\n");
+
+      const componentDef = yaml.load(processedYaml) as ComponentDef;
+      const renderedComponent = renderComponent(
+        componentDef,
+        `melony-${Math.random()}`
+      );
+
+      // Cache the successfully rendered component
+      cache.set(cacheKey, renderedComponent);
+
+      return renderedComponent;
+    } catch (error) {
+      // Check if we have a cached version of a similar component
+      const cachedComponent = cache.get(cacheKey);
+      if (cachedComponent) {
+        return cachedComponent;
+      }
+
+      // If no cache and content doesn't look complete, return a placeholder
+      if (!isYamlContentComplete(yamlContent)) {
+        return (
+          <div
+            style={{
+              border: "1px solid #e2e8f0",
+              borderRadius: "6px",
+              padding: "16px",
+              backgroundColor: "#f8fafc",
+              color: "#64748b",
+              fontSize: "14px",
+              fontStyle: "italic",
+            }}
+          >
+            Loading component...
+          </div>
+        );
+      }
+
+      // If content looks complete but parsing failed, show error
+      return (
+        <div
+          style={{
+            border: "1px solid #ff6b6b",
+            borderRadius: "4px",
+            padding: "12px",
+            backgroundColor: "#fff5f5",
+          }}
+        >
+          <div
+            style={{
+              color: "#e53e3e",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Melony Component Error
+          </div>
+          <pre
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              color: "#666",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {yamlContent}
+          </pre>
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#e53e3e",
+              marginTop: "8px",
+            }}
+          >
+            {error instanceof Error ? error.message : "Invalid YAML syntax"}
+          </div>
+        </div>
+      );
+    }
+  }, []);
+
+  // Custom code block renderer for melony language
+  const customComponents: Components = {
+    ...markdownComponents,
+    ...components,
+    section: ({ node, children, ...props }) => {
+      // The `props` object contains the HTML attributes.
+      // Let's check for our custom data attribute here.
+      // @ts-expect-error - data-melony-widget is a custom prop
+      if (props["data-melony-widget"] !== undefined) {
+        const yamlContent = getNodeText(node);
+        return (
+          <section {...props}>
+            {renderMelonyComponentWithCache(yamlContent.trim())}
+          </section>
+        );
+      }
+
+      return <section {...props}>{children}</section>;
+    },
+  } as Components;
 
   return (
-    <div className={className} style={containerStyle}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mergedComponents}>
-        {children}
-      </ReactMarkdown>
-    </div>
+    <ThemeProvider theme={theme}>
+      <ActionProvider onAction={onAction}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          components={customComponents}
+        >
+          {children || ""}
+        </ReactMarkdown>
+      </ActionProvider>
+    </ThemeProvider>
   );
 };
