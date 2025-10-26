@@ -187,8 +187,8 @@ importers:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.0)
       melony:
-        specifier: workspace:*
-        version: link:../../packages/melony-core
+        specifier: 1.8.0
+        version: 1.8.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
@@ -3339,6 +3339,12 @@ packages:
 
   melony@1.6.65:
     resolution: {integrity: sha512-PSNTOf2M6LzN9IossCHbccZn/8sg8KTgDcy+WgkN/b9GYyj5b6ElDW2xrHs5KEuxrHtUBmD4TJk3liNEHcVLjg==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  melony@1.8.0:
+    resolution: {integrity: sha512-VjSk9K0fOBvHawv2MmxA/AyaIJyfBpmYqJVpXuqjMFKEfkfw/sEiCqO2+lsaJhUvv15w8TAwDpcmtehCapCPyQ==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -8137,6 +8143,19 @@ snapshots:
       remark-gfm: 4.0.1
       use-stick-to-bottom: 1.1.1(react@19.2.0)
       zod: 4.1.11
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
+
+  melony@1.8.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@types/mustache': 4.2.6
+      node-html-parser: 7.0.1
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      react-markdown: 10.1.0(@types/react@19.2.0)(react@19.1.0)
+      rehype-raw: 7.0.0
+      remark-gfm: 4.0.1
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
