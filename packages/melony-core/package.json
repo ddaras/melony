@@ -70,13 +70,13 @@
     }
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "@types/mustache": "^4.2.6",
+    "node-html-parser": "^7.0.1",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "rehype-raw": "^7.0.0"
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "react": "^19.1.1",

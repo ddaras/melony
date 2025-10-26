@@ -3,31 +3,31 @@ import * as MelonyComponents from "./components";
 
 /**
  * Component Definition
- * Defines the structure for declarative UI components
+ * Defines the structure for declarative Melony widget components
  */
 export interface ComponentDef {
   component: string;
   props?: Record<string, any>;
-  children?: Array<ComponentDef | string>;
+  children?: ComponentDef[];
 }
 
 /**
- * Renders a component definition into React elements
+ * Melony Widget Renderer
+ * Renders a Melony widget component definition into React elements
+ * 
+ * This is the core renderer for Melony widgets, converting ComponentDef structures
+ * into actual React components. It's used by MelonyWidget and MelonyMarkdown
+ * for widget rendering.
  */
 export const renderComponent = (
-  def: ComponentDef | string,
+  def: ComponentDef,
   key?: string | number
 ): React.ReactNode => {
-  // Handle string children (text nodes)
-  if (typeof def === "string") {
-    return def;
-  }
-
-  // Get the component from the registry
+  // Get the component from the Melony component registry
   const Component = (MelonyComponents as any)[def.component];
 
   if (!Component) {
-    console.warn(`Unknown component: ${def.component}`);
+    console.warn(`Unknown Melony widget component: ${def.component}`);
     return null;
   }
 
@@ -45,7 +45,9 @@ export const renderComponent = (
 };
 
 /**
- * Renders a component definition tree with memoization for better performance
+ * Component Renderer (with memoization)
+ * Renders a widget component definition tree with memoization for better performance
+ * Useful for standalone widget rendering scenarios
  */
 export const ComponentRenderer: React.FC<{
   definition: ComponentDef;

@@ -2,7 +2,7 @@
  * System prompt for LLMs to use Melony's built-in components
  *
  * This prompt teaches the LLM how to use the built-in composable UI components
- * to create rich, interactive interfaces using YAML syntax in markdown code blocks.
+ * to create rich, interactive interfaces using HTML-style syntax.
  */
 export const MELONY_UI_GUIDE = `# Melony UI Components Guide
 
@@ -10,48 +10,48 @@ This guide teaches you how to use Melony's built-in components to compose UIs in
 
 ## Crucial Syntax Rules
 
-1.  **NEVER use JSX or HTML-like tags** like \`<Card>\` or \`<Text>\`. All components MUST be defined in YAML.
-2.  **Card is ALWAYS the root component** inside the \`<section>\` tag. Every UI must start with a YAML definition for \`Card\`.
-3.  **Use YAML for component definitions.** Use proper indentation (2 spaces).
-4.  **Card stacks children vertically.** Use the \`Row\` component for horizontal layouts inside a \`Card\`.
+1.  **Use HTML-like tags** like \`<card>\`, \`<text>\`, \`<button>\` etc. All components use HTML-style syntax.
+2.  **Card is ALWAYS the root component.** Every UI must start with a \`<card>\` element.
+3.  **Use HTML-style syntax for component definitions.** Use proper opening and closing tags.
+4.  **Card stacks children vertically.** Use the \`<row>\` component for horizontal layouts inside a \`<card>\`.
 5.  **Use actions for interactivity.** Use \`onClickAction\`, \`onChangeAction\`, and \`onSubmitAction\` to make UIs interactive.
+6.  **No string chilren are allowed.** All children must be components.
+
+## Action Format
+
+Actions are passed as JSON strings with the following structure:
+
+\`\`\`json
+{
+  "type": "action-name",
+  "payload": { "key": "value" }
+}
+\`\`\`
+
+- \`type\`: The action identifier (required)
+- \`payload\`: Additional data for the action (optional)
+
+Example: \`onClickAction='{"type": "navigate", "payload": {"page": "home"}}'\`
 
 ## Syntax and Composition
 
-To render a UI, use a \`<section data-melony-widget>\` tag containing a YAML definition.
+To render a UI, use HTML-style tags starting with a \`<card>\` element.
 
 ### Correct Usage
 
-This is **CORRECT**. It uses a single YAML block to define the component tree.
+This is **CORRECT**. It uses HTML-style tags starting with a card to define the component tree.
 
-<section data-melony-widget>
-component: Card
-props:
-  title: Welcome
-children:
-  - component: Text
-    props:
-      value: Hello, World!
-</section>
+<card title="Welcome">
+  <text value="Hello, World!" />
+</card>
 
-### Incorrect Usage (DO NOT DO THIS)
-
-This is **WRONG** because it uses JSX-like tags instead of YAML.
-
-\`\`\`html
-<section data-melony-widget>
-  <Card title="Welcome">
-    <Text value="Hello, World!" />
-  </Card>
-</section>
-\`\`\`
-
-**YAML Guidelines:**
-- The root component must be \`Card\`.
-- Each object must have a \`component\` property.
-- Use \`props\` for component properties and \`children\` for an array of child components.
-- Use 2-space indentation.
-- Strings with special characters (like \`:\`) are automatically handled. \`value: "User: John"\` and \`value: User: John\` are both valid.
+**HTML-style Guidelines:**
+- Always start with a \`<card>\` element: \`<card>...</card>\`
+- Use lowercase tag names: \`<card>\`, \`<text>\`, \`<button>\`, etc.
+- Attributes are passed as HTML attributes: \`<button onClickAction="action-name" label="Click Me" />\`
+- Nested components are placed between opening and closing tags.
+- Self-closing tags are supported: \`<spacer height="20" />\`
+- Mixed content is supported: \`<card><text value="Hello" /><button label="Click" /></card>\`
 
 ## Available Components
 
@@ -97,7 +97,7 @@ An item within a List, with a built-in flex layout.
 | \`gap\` | \`"xs"|"sm"|"md"|"lg"|"xl"\` | Spacing between children (default: "md"). |
 | \`align\` | \`"start"|"center"|"end"|"stretch"\` | Alignment (default: "center"). |
 | \`justify\` | \`"start"|"center"|"end"|"between"|"around"\` | Justification (default: "start"). |
-| \`onClickAction\` | \`ActionDefinition\` | Action to handle clicks. |
+| \`onClickAction\` | \`string\` | Action to handle clicks (JSON string with type and payload). |
 
 **Children:** Most components can be nested in a ListItem.
 
@@ -133,7 +133,7 @@ A text input field.
 | \`placeholder\` | \`string\` | Placeholder text. |
 | \`label\` | \`string\` | Label text. |
 | \`name\` | \`string\` | Form field name. |
-| \`onChangeAction\` | \`ActionDefinition\` | Action to handle changes. |
+| \`onChangeAction\` | \`string\` | Action to handle changes (JSON string with type and payload). |
 
 #### Textarea
 A multi-line text input.
@@ -144,7 +144,7 @@ A multi-line text input.
 | \`label\` | \`string\` | Label text. |
 | \`name\` | \`string\` | Form field name. |
 | \`rows\` | \`number\` | Number of visible rows (default: 4). |
-| \`onChangeAction\` | \`ActionDefinition\` | Action to handle changes. |
+| \`onChangeAction\` | \`string\` | Action to handle changes (JSON string with type and payload). |
 
 #### Select
 A dropdown selection menu.
@@ -155,7 +155,7 @@ A dropdown selection menu.
 | \`placeholder\` | \`string\` | Placeholder text. |
 | \`label\` | \`string\` | Label text. |
 | \`name\` | \`string\` | Form field name. |
-| \`onChangeAction\` | \`ActionDefinition\` | Action to handle changes. |
+| \`onChangeAction\` | \`string\` | Action to handle changes (JSON string with type and payload). |
 
 #### Checkbox
 A single checkbox.
@@ -164,7 +164,7 @@ A single checkbox.
 |---|---|---|
 | \`label\` | \`string\` | Label text. |
 | \`name\` | \`string\` | Form field name. |
-| \`onChangeAction\` | \`ActionDefinition\` | Action to handle changes. |
+| \`onChangeAction\` | \`string\` | Action to handle changes (JSON string with type and payload). |
 
 #### RadioGroup
 A group of radio buttons for single-choice selections.
@@ -175,24 +175,24 @@ A group of radio buttons for single-choice selections.
 | \`name\` | \`string\` | **(Required)** Form field name. |
 | \`label\` | \`string\` | Label text. |
 | \`orientation\` | \`"horizontal"|"vertical"\` | Layout direction (default: "vertical"). |
-| \`onChangeAction\` | \`ActionDefinition\` | Action to handle changes. |
+| \`onChangeAction\` | \`string\` | Action to handle changes (JSON string with type and payload). |
 
 #### Button
 An interactive button.
 
 | Prop | Type | Description |
 |---|---|---|
-| \`value\` | \`string\` | **(Required)** The button label. |
+| \`label\` | \`string\` | **(Required)** The button label. |
 | \`variant\` | \`"primary"..."danger"\` | Button style. |
 | \`size\` | \`"sm"|"md"|"lg"\` | Button size. |
-| \`onClickAction\` | \`ActionDefinition\` | Action to handle clicks. |
+| \`onClickAction\` | \`string\` | Action to handle clicks (JSON string with type and payload). |
 
 #### Form
 A container that handles form submissions.
 
 | Prop | Type | Description |
 |---|---|---|
-| \`onSubmitAction\` | \`ActionDefinition\` | Action called with form data on submission. |
+| \`onSubmitAction\` | \`string\` | Action called with form data on submission (JSON string with type and payload). |
 
 **Children:** Form-related components like Input, Select, and Button.
 
@@ -234,7 +234,7 @@ A small badge for status indicators.
 
 | Prop | Type | Description |
 |---|---|---|
-| \`value\` | \`string\` | **(Required)** The badge text. |
+| \`label\` | \`string\` | **(Required)** The badge text. |
 | \`variant\` | \`"primary"..."danger"\` | Badge style. |
 
 #### Spacer
@@ -254,103 +254,40 @@ A visual separator line.
 ## Common Patterns
 
 ### Status Display
-<section data-melony-widget>
-component: Card
-props:
-  title: System Status
-children:
-  - component: Row
-    props:
-      gap: sm
-      align: center
-    children:
-      - component: Text
-        props:
-          value: "Status:"
-      - component: Badge
-        props:
-          variant: success
-          value: Active
-</section>
+<card title="System Status">
+  <row gap="sm" align="center">
+    <text value="Status:" />
+    <badge variant="success" label="Active" />
+  </row>
+</card>
 
 ### Action Group
-<section data-melony-widget>
-component: Card
-props:
-  title: Confirm Action
-children:
-  - component: Row
-    props:
-      gap: sm
-      justify: end
-    children:
-      - component: Button
-        props:
-          variant: secondary
-          value: Cancel
-      - component: Button
-        props:
-          variant: primary
-          value: Confirm
-</section>
+<card title="Confirm Action">
+  <row gap="sm" justify="end">
+    <button variant="secondary" label="Cancel" onClickAction='{"type": "cancel"}' />
+    <button variant="primary" label="Confirm" onClickAction='{"type": "confirm", "payload": {"action": "save"}}' />
+  </row>
+</card>
 
 ### Interactive List
-<section data-melony-widget>
-component: Card
-props:
-  title: Team Members
-  size: full
-children:
-  - component: List
-    children:
-      - component: ListItem
-        props:
-          gap: md
-          align: center
-          onClickAction:
-            action: viewUser
-            payload:
-              id: "1"
-        children:
-          - component: Icon
-            props:
-              name: Info
-          - component: Text
-            props:
-              value: John Doe
-</section>
+<card title="Team Members" size="full">
+  <list>
+    <listitem gap="md" align="center" onClickAction='{"type": "viewUser", "payload": {"userId": "123"}}'>
+      <icon name="Info" />
+      <text value="John Doe" />
+    </listitem>
+  </list>
+</card>
 
 ### Complete Feedback Form
-<section data-melony-widget>
-component: Card
-props:
-  title: User Feedback
-  size: lg
-children:
-  - component: Form
-    props:
-      onSubmitAction:
-        action: submitFeedback
-        payload: {}
-    children:
-      - component: Select
-        props:
-          name: category
-          label: Feedback Category
-          options:
-            - label: Bug Report
-              value: bug
-            - label: Feature Request
-              value: feature
-      - component: Textarea
-        props:
-          name: comments
-          label: Comments
-          rows: 5
-      - component: Button
-        props:
-          variant: primary
-          fullWidth: true
-          value: Submit Feedback
-</section>
+<card title="User Feedback" size="lg">
+  <form onSubmitAction='{"type": "submitFeedback", "payload": {"source": "web"}}'>
+    <select name="category" label="Feedback Category" onChangeAction='{"type": "categoryChanged"}'>
+      <option value="bug">Bug Report</option>
+      <option value="feature">Feature Request</option>
+    </select>
+    <textarea name="comments" label="Comments" rows="5" onChangeAction='{"type": "commentChanged"}'></textarea>
+    <button variant="primary" fullWidth="true" label="Submit Feedback" />
+  </form>
+</card>
 `;

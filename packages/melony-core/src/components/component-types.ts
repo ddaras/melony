@@ -1,7 +1,9 @@
-import { ActionDefinition } from "../types";
+import React from "react";
 import { ICONS } from "../icons";
 import { CSSProperties, HTMLInputTypeAttribute } from "react";
 import { Color, FontSize, FontWeight, Spacing } from "../theme";
+import { Action } from "../types";
+import { ComponentDef } from "../renderer";
 
 // Common types
 type Size = "sm" | "md" | "lg";
@@ -11,39 +13,19 @@ type Wrap = "nowrap" | "wrap" | "wrap-reverse";
 type Background = CSSProperties["background"];
 type Orientation = "horizontal" | "vertical";
 
-type RowOrColContent =
-  | SpacerProps
-  | DividerProps
-  | ImageProps
-  | IconProps
-  | BadgeProps
-  | TextProps
-  | HeadingProps
-  | InputProps
-  | TextareaProps
-  | SelectProps
-  | CheckboxProps
-  | RadioGroupProps
-  | ButtonProps
-  | FormProps
-  | LabelProps
-  | RowProps
-  | ColProps
-  | ListProps
-  | ChartProps;
-
 // Container Component Props
 // This is the only root component. Always start with Card.
 export interface CardProps {
-  children?: RowOrColContent[];
+  children?: React.ReactNode[];
   title?: string;
   subtitle?: string;
   background?: Background;
+  isLoading?: boolean;
 }
 
 // Layout Component Props
 export type RowProps = {
-  children?: RowOrColContent[];
+  children?: React.ReactNode[];
   align?: Align;
   justify?: Justify;
   wrap?: Wrap;
@@ -52,13 +34,25 @@ export type RowProps = {
 };
 
 export type ColProps = {
-  children?: RowOrColContent[];
+  children?: React.ReactNode[];
   align?: Align;
   justify?: Justify;
   wrap?: Wrap;
   flex?: number | string;
   gap?: Spacing;
 };
+
+export interface BoxProps {
+  children?: React.ReactNode[];
+  padding?: Spacing;
+  margin?: Spacing;
+  background?: Background;
+  border?: boolean;
+  borderRadius?: Spacing;
+  width?: string | number;
+  height?: string | number;
+  overflow?: "visible" | "hidden" | "scroll" | "auto";
+}
 
 export interface SpacerProps {
   size?: Spacing;
@@ -76,12 +70,12 @@ export interface ListProps {
 }
 
 export interface ListItemProps {
-  children: RowOrColContent[];
+  children: React.ReactNode[];
   orientation?: Orientation;
   gap?: Spacing;
   align?: Align;
   justify?: Justify;
-  onClickAction?: ActionDefinition;
+  onClickAction?: Action;
 }
 
 // Content Component Props
@@ -115,7 +109,7 @@ export interface ChartProps {
 }
 
 export interface BadgeProps {
-  value: string;
+  label?: string;
   variant?: Extract<
     Color,
     "primary" | "secondary" | "success" | "danger" | "warning"
@@ -139,16 +133,8 @@ export interface HeadingProps {
 
 // Form Component Props
 export interface FormProps {
-  children?: (
-    | InputProps
-    | TextareaProps
-    | SelectProps
-    | CheckboxProps
-    | RadioGroupProps
-    | ButtonProps
-    | LabelProps
-  )[];
-  onSubmitAction?: ActionDefinition;
+  children?: React.ReactNode[];
+  onSubmitAction?: Action;
 }
 
 export interface InputProps {
@@ -159,16 +145,16 @@ export interface InputProps {
   label?: string;
   name?: string;
   disabled?: boolean;
-  onChangeAction?: ActionDefinition;
+  onChangeAction?: Action;
 }
 
 export interface ButtonProps {
-  value: string;
+  label?: string;
   variant?: Extract<Color, "primary" | "secondary" | "success" | "danger">;
   size?: Size;
   disabled?: boolean;
   fullWidth?: boolean;
-  onClickAction?: ActionDefinition;
+  onClickAction?: Action;
 }
 
 export interface LabelProps {
@@ -187,7 +173,7 @@ export interface TextareaProps {
   name?: string;
   disabled?: boolean;
   rows?: number;
-  onChangeAction?: ActionDefinition;
+  onChangeAction?: Action;
 }
 
 export interface SelectOption {
@@ -203,7 +189,7 @@ export interface SelectProps {
   name?: string;
   disabled?: boolean;
   placeholder?: string;
-  onChangeAction?: ActionDefinition;
+  onChangeAction?: Action;
 }
 
 export interface CheckboxProps {
@@ -213,7 +199,7 @@ export interface CheckboxProps {
   checked?: boolean;
   defaultChecked?: boolean;
   disabled?: boolean;
-  onChangeAction?: ActionDefinition;
+  onChangeAction?: Action;
 }
 
 export interface RadioOption {
@@ -230,5 +216,13 @@ export interface RadioGroupProps {
   label?: string;
   disabled?: boolean;
   orientation?: Orientation;
-  onChangeAction?: ActionDefinition;
+  onChangeAction?: Action;
+}
+
+// Loop Component Props
+export interface ForProps {
+  items: any[] | string;
+  children?: React.ReactNode;
+  itemKey?: string; // Key to use for React keys (defaults to index)
+  emptyMessage?: string; // Message to show when array is empty
 }

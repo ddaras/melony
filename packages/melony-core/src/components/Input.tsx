@@ -1,5 +1,5 @@
 import React from "react";
-import { useActionHandler } from "../action-context";
+import { useActionContext } from "../action-context";
 import { useTheme } from "../theme";
 import { InputProps } from "./component-types";
 import { Label } from "./Label";
@@ -14,17 +14,19 @@ export const Input: React.FC<InputProps> = ({
   disabled,
   onChangeAction,
 }) => {
-  const handleAction = useActionHandler();
+  const { onAction } = useActionContext() || {};
   const theme = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChangeAction) {
-      const payload = {
-        name: name || "",
-        value: e.target.value,
-        ...(onChangeAction.payload || {}),
-      };
-      handleAction({ action: onChangeAction.action, payload });
+      onAction?.({
+        ...onChangeAction,
+        payload: {
+          ...onChangeAction.payload,
+          name: name || "",
+          value: e.target.value,
+        },
+      });
     }
   };
 

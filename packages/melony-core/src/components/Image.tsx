@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTheme } from "../theme";
 import { ImageProps } from "./component-types";
+import { useContextValue } from "../context-provider";
+import { TemplateEngine } from "../template-engine";
 
 export const Image: React.FC<ImageProps> = ({ src, alt, size = "sm" }) => {
   const theme = useTheme();
+  const context = useContextValue();
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Process template variables in src and alt
+  const processedSrc = useMemo(() => {
+    return TemplateEngine.render(src, context || {});
+  }, [src, context]);
+
+  const processedAlt = useMemo(() => {
+    return alt ? TemplateEngine.render(alt, context || {}) : "";
+  }, [alt, context]);
 
   const resolvedRadius = size
     ? theme.radius?.[size as keyof typeof theme.radius] || size
@@ -57,8 +69,8 @@ export const Image: React.FC<ImageProps> = ({ src, alt, size = "sm" }) => {
 
   return (
     <img
-      src={src}
-      alt={alt}
+      src={processedSrc}
+      alt={processedAlt}
       onError={handleError}
       onLoad={handleLoad}
       style={{

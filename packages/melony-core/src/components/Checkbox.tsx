@@ -1,5 +1,5 @@
 import React from "react";
-import { useActionHandler } from "../action-context";
+import { useActionContext } from "../action-context";
 import { useTheme } from "../theme";
 import { CheckboxProps } from "./component-types";
 
@@ -12,18 +12,20 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   disabled,
   onChangeAction,
 }) => {
-  const handleAction = useActionHandler();
+  const { onAction } = useActionContext() || {};
   const theme = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChangeAction) {
-      const payload = {
-        name: name || "",
-        value: value,
-        checked: e.target.checked,
-        ...(onChangeAction.payload || {}),
-      };
-      handleAction({ action: onChangeAction.action, payload });
+      onAction?.({
+        ...onChangeAction,
+        payload: {
+          ...onChangeAction.payload,
+          name: name || "",
+          value: value,
+          checked: e.target.checked,
+        },
+      });
     }
   };
 
@@ -68,4 +70,3 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     </div>
   );
 };
-

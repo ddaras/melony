@@ -1,5 +1,5 @@
 import React from "react";
-import { useActionHandler } from "../action-context";
+import { useActionContext } from "../action-context";
 import { useTheme } from "../theme";
 import { TextareaProps } from "./component-types";
 import { Label } from "./Label";
@@ -14,17 +14,19 @@ export const Textarea: React.FC<TextareaProps> = ({
   rows = 4,
   onChangeAction,
 }) => {
-  const handleAction = useActionHandler();
+  const { onAction } = useActionContext() || {};
   const theme = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onChangeAction) {
-      const payload = {
-        name: name || "",
-        value: e.target.value,
-        ...(onChangeAction.payload || {}),
-      };
-      handleAction({ action: onChangeAction.action, payload });
+      onAction?.({
+        ...onChangeAction,
+        payload: {
+          ...onChangeAction.payload,
+          name: name || "",
+          value: e.target.value,
+        },
+      });
     }
   };
 
@@ -65,4 +67,3 @@ export const Textarea: React.FC<TextareaProps> = ({
     </div>
   );
 };
-

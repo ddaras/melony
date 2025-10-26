@@ -4,6 +4,7 @@ export { Card } from "./Card";
 // Layout Components
 export { Row } from "./Row";
 export { Col } from "./Col";
+export { Box } from "./Box";
 export { Spacer } from "./Spacer";
 export { Divider } from "./Divider";
 export { List } from "./List";
@@ -28,6 +29,12 @@ export { RadioGroup } from "./RadioGroup";
 export { Button } from "./Button";
 export { Form } from "./Form";
 export { Label } from "./Label";
+
+// Control Flow Components
+export { For } from "./For";
+
+// Widget Components
+export { Widget } from "./Widget";
 
 // Export types
 export * from "./component-types";

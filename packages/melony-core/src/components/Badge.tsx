@@ -3,7 +3,7 @@ import { useTheme } from "../theme";
 import { BadgeProps } from "./component-types";
 
 export const Badge: React.FC<BadgeProps> = ({
-  value,
+  label,
   variant = "primary",
   size = "md",
 }) => {
@@ -61,7 +61,7 @@ export const Badge: React.FC<BadgeProps> = ({
         whiteSpace: "nowrap",
       }}
     >
-      {value}
+      {label}
     </span>
   );
 };

@@ -1,10 +1,10 @@
 import React from "react";
-import { useActionHandler } from "../action-context";
+import { useActionContext } from "../action-context";
 import { useTheme } from "../theme";
 import { FormProps } from "./component-types";
 
 export const Form: React.FC<FormProps> = ({ children, onSubmitAction }) => {
-  const handleAction = useActionHandler();
+  const { onAction } = useActionContext() || {};
   const theme = useTheme();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -16,11 +16,13 @@ export const Form: React.FC<FormProps> = ({ children, onSubmitAction }) => {
     });
 
     if (onSubmitAction) {
-      const payload = {
-        ...data,
-        ...(onSubmitAction.payload || {}),
-      };
-      handleAction({ action: onSubmitAction.action, payload });
+      onAction?.({
+        ...onSubmitAction,
+        payload: {
+          ...onSubmitAction.payload,
+          ...data,
+        },
+      });
     }
   };
 

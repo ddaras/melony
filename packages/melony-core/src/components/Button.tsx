@@ -1,17 +1,17 @@
 import React from "react";
-import { useActionHandler } from "../action-context";
 import { useTheme } from "../theme";
 import { ButtonProps } from "./component-types";
+import { useActionDispatch } from "../use-action";
 
 export const Button: React.FC<ButtonProps> = ({
-  value,
+  label,
   variant = "primary",
   size = "md",
   disabled = false,
   fullWidth = false,
   onClickAction,
 }) => {
-  const handleAction = useActionHandler();
+  const dispatch = useActionDispatch();
   const theme = useTheme();
 
   const variants = {
@@ -60,7 +60,11 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       disabled={disabled}
-      onClick={() => handleAction(onClickAction)}
+      onClick={() => {
+        if (onClickAction) {
+          dispatch(onClickAction);
+        }
+      }}
       style={{
         ...variants[variant],
         ...sizes[size],
@@ -73,7 +77,7 @@ export const Button: React.FC<ButtonProps> = ({
         transition: "all 0.2s ease",
       }}
     >
-      {value}
+      {label}
     </button>
   );
 };

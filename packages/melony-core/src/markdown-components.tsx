@@ -322,7 +322,7 @@ const MemoUl = memo<UlProps>(
           listStyleType: 'disc',
           listStylePosition: 'outside',
           whiteSpace: 'normal',
-          paddingLeft: 0,
+          paddingLeft: getThemeValue(theme, 'spacing.md', '12px'),
         }}
         data-melony="unordered-list"
         {...props}
@@ -346,7 +346,7 @@ const MemoOl = memo<OlProps>(
           listStyleType: 'decimal',
           listStylePosition: 'outside',
           whiteSpace: 'normal',
-          paddingLeft: 0,
+          paddingLeft: getThemeValue(theme, 'spacing.md', '12px'),
         }}
         data-melony="ordered-list"
         {...props}
@@ -551,6 +551,7 @@ const MemoHr = memo<HrProps>(
           margin: `${getThemeValue(theme, 'spacing.md', '12px')} 0`,
           border: 'none',
           borderTop: `1px solid ${getThemeValue(theme, 'colors.border', '#e2e8f0')}`,
+          width: '100%',
         }}
         data-melony="horizontal-rule"
         {...props}

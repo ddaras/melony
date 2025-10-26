@@ -1,10 +1,2 @@
-// Action types
-export interface ActionDefinition {
-  action: string;
-  payload?: Record<string, any>;
-}
-
-export type ActionHandler = (
-  action: string,
-  payload?: Record<string, any>
-) => void | Promise<void>;
+export type Action = { type: string; payload?: any };
+export type ActionHandler = (action: Action) => void;

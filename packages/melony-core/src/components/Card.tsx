@@ -7,6 +7,7 @@ export const Card: React.FC<CardProps> = ({
   title,
   subtitle,
   background,
+  isLoading = false,
 }) => {
   const theme = useTheme();
 
@@ -20,6 +21,7 @@ export const Card: React.FC<CardProps> = ({
         width: "100%",
         borderRadius: theme.radius?.lg,
         padding: theme.spacing?.sm,
+        opacity: isLoading ? 0.6 : 1,
       }}
     >
       {(title || subtitle) && (

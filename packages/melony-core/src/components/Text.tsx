@@ -1,6 +1,8 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useMemo } from "react";
 import { useTheme } from "../theme";
 import { TextProps } from "./component-types";
+import { useContextValue } from "../context-provider";
+import { TemplateEngine } from "../template-engine";
 
 export const Text: React.FC<TextProps> = ({
   value,
@@ -10,6 +12,11 @@ export const Text: React.FC<TextProps> = ({
   align = "start",
 }) => {
   const theme = useTheme();
+  const context = useContextValue();
+
+  const processedValue = useMemo(() => {
+    return TemplateEngine.render(value, context || {});
+  }, [value, context]);
 
   const alignMap = {
     start: "left",
@@ -28,7 +35,7 @@ export const Text: React.FC<TextProps> = ({
         textAlign: alignMap[align] as CSSProperties["textAlign"],
       }}
     >
-      {value}
+      {processedValue}
     </span>
   );
 };
