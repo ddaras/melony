@@ -29,3 +29,6 @@ export * from "./types";
 
 // Use action
 export * from "./use-action";
+
+// Builder API (Type-safe widget building) - exported as namespace to avoid conflicts
+export * as Builder from "./builder";

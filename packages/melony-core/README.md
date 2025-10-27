@@ -18,6 +18,48 @@ Stream interactive React components directly from LLMs with zero latency. No too
 - 🔄 **Interactive** - Built-in action system for user interactions
 - 📝 **Markdown Support** - Seamless integration with GFM (GitHub Flavored Markdown)
 - 🪶 **Lightweight** - Minimal dependencies, tree-shakeable
+- 🚀 **NEW: Builder API** - Type-safe JSX-like widget building with full intellisense
+
+## 🆕 Builder API - Type-Safe Widget Building
+
+Build custom widgets with **full TypeScript support** and **intellisense**:
+
+```tsx
+import { defineWidget, card, row, text, badge } from "melony/builder";
+import { z } from "zod";
+
+// Define with type-safe schema
+export const WeatherWidget = defineWidget({
+  type: "weather-card",
+  schema: z.object({
+    location: z.string(),
+    temperature: z.number(),
+    condition: z.string(),
+  }),
+  
+  // Build with full intellisense!
+  builder: (props) => 
+    card({ title: `${props.location} Weather` }, [
+      row({ gap: "md" }, [
+        text({ value: `${props.temperature}°F`, size: "xl", weight: "bold" }),
+        badge({ label: props.condition, variant: "primary" }),
+      ]),
+    ]),
+  
+  examples: [
+    { location: "NYC", temperature: 72, condition: "Sunny" },
+  ],
+});
+```
+
+**Benefits:**
+- ✅ Full TypeScript type safety
+- ✅ Autocomplete for all props
+- ✅ Conditional rendering support
+- ✅ Auto-generated AI prompts
+- ✅ No runtime overhead
+
+📖 **[Read the Builder API Guide →](./BUILDER_GUIDE.md)**
 
 ## Installation
 

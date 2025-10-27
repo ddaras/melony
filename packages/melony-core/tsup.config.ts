@@ -38,4 +38,25 @@ export default defineConfig([
       };
     },
   },
+  // Builder API build (type-safe widget building)
+  {
+    entry: ["src/builder-entry.ts"],
+    format: ["esm", "cjs"],
+    dts: true,
+    sourcemap: true,
+    target: "es2020",
+    splitting: false,
+    treeshake: true,
+    skipNodeModulesBundle: true,
+    external: ["react", "react-dom", "zod"],
+    outExtension({ format }) {
+      return {
+        js: format === "esm" ? ".js" : ".cjs",
+      };
+    },
+    outDir: "dist",
+    esbuildOptions(options) {
+      options.outbase = "./src";
+    },
+  },
 ]);

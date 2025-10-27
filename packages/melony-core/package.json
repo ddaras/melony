@@ -50,6 +50,12 @@
       "require": "./dist/server.cjs",
       "default": "./dist/server.js"
     },
+    "./builder": {
+      "types": "./dist/builder-entry.d.ts",
+      "import": "./dist/builder-entry.js",
+      "require": "./dist/builder-entry.cjs",
+      "default": "./dist/builder-entry.js"
+    },
     "./package.json": "./package.json"
   },
   "module": "dist/index.js",
@@ -59,7 +65,8 @@
   ],
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "zod": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -67,18 +74,21 @@
     },
     "react-dom": {
       "optional": false
+    },
+    "zod": {
+      "optional": true
     }
   },
   "dependencies": {
-    "@types/mustache": "^4.2.6",
-    "node-html-parser": "^7.0.1",
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@types/mustache": "^4.2.6",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
+    "node-html-parser": "^7.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "rimraf": "^5.0.10",
