@@ -41,7 +41,6 @@ export function defineWidget<TSchema extends z.ZodType>(
   return compiledWidget;
 }
 
-
 /**
  * Convert Zod schema to widget prop schema
  */
@@ -71,21 +70,9 @@ function zodTypeToPropSchema(
   name: string,
   zodType: z.ZodType
 ): WidgetPropSchema | null {
-  // Unwrap optional and default types
-  let actualType = zodType;
-  let isOptional = false;
-  let defaultValue: any = undefined;
-
-  if (actualType instanceof z.ZodOptional) {
-    isOptional = true;
-    actualType = actualType._def.innerType as z.ZodType;
-  }
-
-  if (actualType instanceof z.ZodDefault) {
-    isOptional = true;
-    defaultValue = (actualType._def as any).defaultValue();
-    actualType = (actualType._def as any).innerType as z.ZodType;
-  }
+  // Recursively unwrap all wrapper types to find the core type and optionality
+  const unwrapped = unwrapZodType(zodType);
+  const { actualType, isOptional, defaultValue } = unwrapped;
 
   // Determine the type
   let type: WidgetPropSchema["type"] = "string";
@@ -107,8 +94,30 @@ function zodTypeToPropSchema(
     type = "string";
     description = `One of: ${actualType.options.join(", ")}`;
   } else if (actualType instanceof z.ZodLiteral) {
-    // Skip literal types (like type: "weather-card")
-    return null;
+    // Include literal types but mark them as required if they're not wrapped in optional
+    type = "string";
+    description = `Literal value: ${JSON.stringify(actualType.value)}`;
+  } else if (actualType instanceof z.ZodUnion) {
+    // Handle union types - try to infer a reasonable type
+    const unionTypes = actualType.options;
+    const hasString = unionTypes.some((t) => t instanceof z.ZodString);
+    const hasNumber = unionTypes.some((t) => t instanceof z.ZodNumber);
+    const hasBoolean = unionTypes.some((t) => t instanceof z.ZodBoolean);
+
+    if (hasString && !hasNumber && !hasBoolean) {
+      type = "string";
+    } else if (hasNumber && !hasString && !hasBoolean) {
+      type = "number";
+    } else if (hasBoolean && !hasString && !hasNumber) {
+      type = "boolean";
+    } else {
+      type = "string"; // fallback for mixed unions
+    }
+    description = "Union type";
+  } else {
+    // Default to string for unknown types
+    type = "string";
+    description = "Unknown type";
   }
 
   return {
@@ -117,6 +126,46 @@ function zodTypeToPropSchema(
     required: !isOptional,
     description,
     default: defaultValue,
+  };
+}
+
+/**
+ * Recursively unwrap Zod types to find the core type and optionality info
+ */
+function unwrapZodType(zodType: z.ZodType): {
+  actualType: z.ZodType;
+  isOptional: boolean;
+  defaultValue?: any;
+} {
+  let currentType = zodType;
+  let isOptional = false;
+  let defaultValue: any = undefined;
+
+  // Keep unwrapping until we find the core type
+  while (true) {
+    if (currentType instanceof z.ZodOptional) {
+      isOptional = true;
+      currentType = currentType._def.innerType as z.ZodType;
+    } else if (currentType instanceof z.ZodDefault) {
+      isOptional = true;
+      defaultValue = (currentType._def as any).defaultValue();
+      currentType = (currentType._def as any).innerType as z.ZodType;
+    } else if (currentType instanceof z.ZodNullable) {
+      isOptional = true;
+      currentType = currentType._def.innerType as z.ZodType;
+    } else if ((currentType as any)._def?.typeName === "ZodEffects") {
+      // For refined/transformed types, unwrap to the base type
+      currentType = (currentType._def as any).schema as z.ZodType;
+    } else {
+      // No more wrappers to unwrap
+      break;
+    }
+  }
+
+  return {
+    actualType: currentType,
+    isOptional,
+    defaultValue,
   };
 }
 

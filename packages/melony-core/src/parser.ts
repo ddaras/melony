@@ -432,8 +432,6 @@ export class MelonyParser {
     // Decode HTML entities first (important for JSON strings from templates)
     const decodedValue = this.decodeHTMLEntities(processedValue);
 
-    console.log("decodedValue", decodedValue);
-
     // Try to parse as JSON (for objects/arrays)
     if (decodedValue.startsWith("{") || decodedValue.startsWith("[")) {
       try {

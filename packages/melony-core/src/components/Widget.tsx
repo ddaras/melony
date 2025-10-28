@@ -18,8 +18,6 @@ export const Widget: React.FC<WidgetProps> = ({ type, ...props }) => {
   const context = useContextValue();
   const widget = widgets.find((widget: WidgetTemplate) => widget.type === type);
 
-  console.log("props", props);
-
   // Create parser with widget schemas
   const parser = useMemo(() => new MelonyParser(widgets), [widgets]);
 
@@ -33,16 +31,12 @@ export const Widget: React.FC<WidgetProps> = ({ type, ...props }) => {
       ...context,
     });
 
-    console.log("processedTemplate", processedTemplate);
-
     return parser.parseContentAsBlocks(processedTemplate);
   }, [widget?.template, props, context, parser]);
 
   if (!widget) {
     return <>No widget found</>;
   }
-
-  console.log("templateBlocks", templateBlocks);
 
   return (
     <ContextProvider context={{ ...context, ...props }}>
