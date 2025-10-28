@@ -219,10 +219,5 @@ export interface RadioGroupProps {
   onChangeAction?: Action;
 }
 
-// Loop Component Props
-export interface ForProps {
-  items: any[] | string;
-  children?: React.ReactNode;
-  itemKey?: string; // Key to use for React keys (defaults to index)
-  emptyMessage?: string; // Message to show when array is empty
-}
+// Note: ForProps and IfProps removed - control flow is now handled 
+// natively by TemplateEngine via {{#condition}} and {{#array}} syntax

@@ -52,6 +52,34 @@ export class TemplateEngine {
   }
 
   /**
+   * Safely evaluate a JavaScript condition expression
+   */
+  private static evaluateCondition(expression: string, context: TemplateContext): any {
+    try {
+      // Handle simple variable lookup first (most common case)
+      if (/^\w+$/.test(expression)) {
+        return context[expression];
+      }
+
+      // For complex expressions, create a safe evaluation environment
+      const contextKeys = Object.keys(context);
+      const contextValues = Object.values(context);
+
+      // Create a safe function that evaluates the expression
+      // eslint-disable-next-line no-new-func
+      const evalFunc = new Function(
+        ...contextKeys,
+        `return (${expression})`
+      );
+
+      return evalFunc(...contextValues);
+    } catch (error) {
+      console.warn(`Failed to evaluate condition expression: ${expression}`, error);
+      return false;
+    }
+  }
+
+  /**
    * Process array sections with enhanced context
    */
   private static processArraySections(
@@ -126,20 +154,22 @@ export class TemplateEngine {
     context: TemplateContext
   ): string {
     // Match {{#condition}}...{{/condition}} patterns (non-array)
-    const conditionalPattern = /\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
+    // Updated to support complex expressions like !!description or !!humidity || !!windSpeed
+    const conditionalPattern = /\{\{#([^}]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
 
     return template.replace(
       conditionalPattern,
-      (match, conditionName, content) => {
-        const condition = context[conditionName];
-
+      (match, conditionExpression, content) => {
+        // Evaluate the condition expression (e.g., "!!description", "!!humidity || !!windSpeed")
+        const conditionResult = this.evaluateCondition(conditionExpression, context);
+        
         // Skip if it's an array (already processed)
-        if (Array.isArray(condition)) {
+        if (Array.isArray(conditionResult)) {
           return match;
         }
 
         // Show content if condition is truthy
-        if (condition) {
+        if (conditionResult) {
           // Process nested arrays and conditionals within the conditional content
           let processedContent = this.processArraySections(content, context);
           processedContent = this.processConditionalSections(
@@ -167,16 +197,18 @@ export class TemplateEngine {
     context: TemplateContext
   ): string {
     // Match {{#!condition}}...{{/!condition}} patterns
+    // Updated to support complex expressions like !showBadge
     const negativeConditionalPattern =
-      /\{\{#!(\w+)\}\}([\s\S]*?)\{\{\/!\1\}\}/g;
+      /\{\{#!([^}]+)\}\}([\s\S]*?)\{\{\/!\1\}\}/g;
 
     return template.replace(
       negativeConditionalPattern,
-      (match, conditionName, content) => {
-        const condition = context[conditionName];
+      (match, conditionExpression, content) => {
+        // Evaluate the condition expression and negate it
+        const conditionResult = this.evaluateCondition(conditionExpression, context);
 
         // Show content if condition is falsy
-        if (!condition) {
+        if (!conditionResult) {
           // Process nested arrays and conditionals within the conditional content
           let processedContent = this.processArraySections(content, context);
           processedContent = this.processConditionalSections(

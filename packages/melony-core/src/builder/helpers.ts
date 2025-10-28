@@ -69,7 +69,10 @@ export interface CardProps {
 /**
  * Card - Root container component (all UIs must start with Card)
  */
-export function card(props: CardProps, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function card(
+  props: CardProps,
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   return createNode("Card", props, children);
 }
 
@@ -88,7 +91,10 @@ export interface RowProps {
 /**
  * Row - Horizontal flex container
  */
-export function row(props: RowProps = {}, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function row(
+  props: RowProps = {},
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   return createNode("Row", props, children);
 }
 
@@ -103,7 +109,10 @@ export interface ColProps {
 /**
  * Col - Vertical flex container
  */
-export function col(props: ColProps = {}, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function col(
+  props: ColProps = {},
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   return createNode("Col", props, children);
 }
 
@@ -119,7 +128,10 @@ export interface BoxProps {
 /**
  * Box - Generic container with flex properties
  */
-export function box(props: BoxProps = {}, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function box(
+  props: BoxProps = {},
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   return createNode("Box", props, children);
 }
 
@@ -141,7 +153,10 @@ export interface ListItemProps {
 /**
  * ListItem - Individual list items with built-in flex layout
  */
-export function listItem(props: ListItemProps = {}, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function listItem(
+  props: ListItemProps = {},
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   const processedProps = { ...props };
   if (props.onClickAction) {
     processedProps.onClickAction = actionToString(props.onClickAction);
@@ -315,7 +330,10 @@ export interface FormProps {
 /**
  * Form - Form container with submission handling
  */
-export function form(props: FormProps = {}, children?: BuilderNode | BuilderNode[]): BuilderNode {
+export function form(
+  props: FormProps = {},
+  children?: BuilderNode | BuilderNode[]
+): BuilderNode {
   const processedProps = { ...props };
   if (props.onSubmitAction) {
     processedProps.onSubmitAction = actionToString(props.onSubmitAction);
@@ -436,14 +454,31 @@ export function chart(props: ChartProps): BuilderNode {
 // ============================================================================
 
 export interface ForProps {
-  items: any[];
+  items: any[] | string;
 }
 
 /**
  * For - Render arrays with template support
  */
-export function forLoop(props: ForProps, children: BuilderNode | BuilderNode[]): BuilderNode {
+export function forLoop(
+  props: ForProps,
+  children: BuilderNode | BuilderNode[]
+): BuilderNode {
   return createNode("For", props, children);
+}
+
+export interface IfProps {
+  condition: string;
+}
+
+/**
+ * If - Conditionally render content based on a condition
+ */
+export function ifBlock(
+  props: IfProps,
+  children: BuilderNode | BuilderNode[]
+): BuilderNode {
+  return createNode("If", props, children);
 }
 
 export interface WidgetProps {
@@ -457,4 +492,3 @@ export interface WidgetProps {
 export function widget(props: WidgetProps): BuilderNode {
   return createNode("Widget", props);
 }
-

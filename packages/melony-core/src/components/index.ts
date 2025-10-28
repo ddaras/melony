@@ -31,7 +31,8 @@ export { Form } from "./Form";
 export { Label } from "./Label";
 
 // Control Flow Components
-export { For } from "./For";
+// Note: If and For are now handled natively by the TemplateEngine
+// via {{#condition}}...{{/condition}} and {{#array}}...{{/array}} syntax
 
 // Widget Components
 export { Widget } from "./Widget";

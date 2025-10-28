@@ -27,7 +27,7 @@ export const Form: React.FC<FormProps> = ({ children, onSubmitAction }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ width: "100%" }}>
       <div
         style={{
           display: "flex",

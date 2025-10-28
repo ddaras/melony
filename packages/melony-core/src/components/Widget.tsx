@@ -6,9 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { renderComponent } from "../renderer";
 import { TemplateEngine } from "../template-engine";
-import { useContextValue } from "../context-provider";
-
-const parser = new MelonyParser();
+import { ContextProvider, useContextValue } from "../context-provider";
 
 export interface WidgetProps {
   type: string;
@@ -20,8 +18,11 @@ export const Widget: React.FC<WidgetProps> = ({ type, ...props }) => {
   const context = useContextValue();
   const widget = widgets.find((widget: WidgetTemplate) => widget.type === type);
 
+  // Create parser with widget schemas
+  const parser = useMemo(() => new MelonyParser(widgets), [widgets]);
+
   // Process template with props and parse the content to extract component tags
-  const blocks = useMemo(() => {
+  const templateBlocks = useMemo(() => {
     if (!widget?.template) return [];
 
     // Use custom template engine to render template with props
@@ -31,15 +32,15 @@ export const Widget: React.FC<WidgetProps> = ({ type, ...props }) => {
     });
 
     return parser.parseContentAsBlocks(processedTemplate);
-  }, [widget?.template, props, parser]);
+  }, [widget?.template, props, context, parser]);
 
   if (!widget) {
     return <>No widget found</>;
   }
 
   return (
-    <>
-      {blocks.map((block, index) => {
+    <ContextProvider context={{ ...context, ...props }}>
+      {templateBlocks.map((block, index) => {
         if (typeof block === "string") {
           return (
             <ReactMarkdown key={`text-${index}`} remarkPlugins={[remarkGfm]}>
@@ -49,6 +50,6 @@ export const Widget: React.FC<WidgetProps> = ({ type, ...props }) => {
         }
         return renderComponent(block, `component-${index}`);
       })}
-    </>
+    </ContextProvider>
   );
 };

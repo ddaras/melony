@@ -4,11 +4,9 @@ import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { markdownComponents } from "./markdown-components";
 import { ContextProvider } from "./context-provider";
-import { MelonyWidget } from "./melony-widget";
-import { ComponentDef } from "./renderer";
+import { renderComponent } from "./renderer";
 import { MelonyParser } from "./parser";
-
-const parser = new MelonyParser();
+import { useWidgets } from "./widgets-context";
 
 export interface MarkdownProps {
   children: string | undefined | null;
@@ -26,11 +24,15 @@ export const MelonyMarkdown = ({
   context = {},
 }: MarkdownProps) => {
   const content = children || "";
+  const widgets = useWidgets();
 
-  // Parse the content to extract markdown text and component tags
+  // Create parser with widget schemas
+  const parser = useMemo(() => new MelonyParser(widgets), [widgets]);
+
+  // Parse the content to extract markdown text and component tags with context
   const blocks = useMemo(() => {
-    return parser.parseContentAsBlocks(content);
-  }, [content, parser]);
+    return parser.parseContentAsBlocks(content, context);
+  }, [content, context, parser]);
 
   // Custom component renderer for regular markdown with Melony components
   const customComponents: Components = {
@@ -53,12 +55,8 @@ export const MelonyMarkdown = ({
             </ReactMarkdown>
           );
         } else {
-          // Delegate widget rendering to MelonyWidget
-          return (
-            <MelonyWidget key={`widget-${index}`} context={context}>
-              {item as ComponentDef}
-            </MelonyWidget>
-          );
+          // Render the component
+          return renderComponent(item, `widget-${index}`);
         }
       })}
     </ContextProvider>

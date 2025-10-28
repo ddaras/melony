@@ -2,8 +2,7 @@ import { useMemo } from "react";
 import { renderComponent, ComponentDef } from "./renderer";
 import { ContextProvider } from "./context-provider";
 import { MelonyParser } from "./parser";
-
-const parser = new MelonyParser();
+import { useWidgets } from "./widgets-context";
 
 export interface MelonyWidgetProps {
   children?: string | ComponentDef;
@@ -15,8 +14,13 @@ export interface MelonyWidgetProps {
  * This is separate from MelonyMarkdown and focuses only on widget rendering
  */
 export const MelonyWidget = ({ children, context = {} }: MelonyWidgetProps) => {
+  const widgets = useWidgets();
+
+  // Create parser with widget schemas
+  const parser = useMemo(() => new MelonyParser(widgets), [widgets]);
+
   // Parse or use the provided content
-  const components = useMemo(() => {
+  const blocks = useMemo(() => {
     if (!children) return [];
 
     // If children is already a ComponentDef, use it directly
@@ -35,7 +39,7 @@ export const MelonyWidget = ({ children, context = {} }: MelonyWidgetProps) => {
 
   return (
     <ContextProvider context={context}>
-      {components.map((component, index) =>
+      {blocks.map((component, index) =>
         renderComponent(component, `widget-${index}`)
       )}
     </ContextProvider>

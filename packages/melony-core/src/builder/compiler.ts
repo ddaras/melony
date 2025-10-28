@@ -16,6 +16,16 @@ export function compileToTemplate(node: BuilderNode): string {
  * Compile a single node
  */
 function compileNode(node: BuilderNode): string {
+  // Handle special template control flow components
+  if (node.component === "If") {
+    return compileIfNode(node);
+  }
+  
+  if (node.component === "For") {
+    return compileForNode(node);
+  }
+
+  // Regular component compilation
   const tagName = node.component.toLowerCase();
   const attributes = compileAttributes(node.props);
   const hasChildren = node.children && node.children.length > 0;
@@ -28,6 +38,60 @@ function compileNode(node: BuilderNode): string {
   // Tag with children
   const childrenString = node.children!.map(compileNode).join("\n  ");
   return `<${tagName}${attributes}>\n  ${childrenString}\n</${tagName}>`;
+}
+
+/**
+ * Compile an If node to template conditional syntax
+ */
+function compileIfNode(node: BuilderNode): string {
+  const condition = node.props.condition;
+  if (!condition) {
+    console.warn("If node missing condition prop");
+    return "";
+  }
+
+  if (!node.children || node.children.length === 0) {
+    console.warn("If node has no children to conditionally render");
+    return "";
+  }
+
+  // Compile children
+  const childrenString = node.children.map(compileNode).join("\n");
+
+  // Check if condition starts with ! for negative conditional
+  if (condition.startsWith("!")) {
+    const actualCondition = condition.slice(1);
+    return `{{#!${actualCondition}}}\n${childrenString}\n{{/!${actualCondition}}}`;
+  }
+
+  // Regular conditional
+  return `{{#${condition}}}\n${childrenString}\n{{/${condition}}}`;
+}
+
+/**
+ * Compile a For node to template array iteration syntax
+ */
+function compileForNode(node: BuilderNode): string {
+  const items = node.props.items;
+  if (!items) {
+    console.warn("For node missing items prop");
+    return "";
+  }
+
+  if (!node.children || node.children.length === 0) {
+    console.warn("For node has no children to iterate over");
+    return "";
+  }
+
+  // Compile children
+  const childrenString = node.children.map(compileNode).join("\n");
+
+  // Use the items property as the array name for template iteration
+  // If items is a string like "products", use it directly
+  // If items is an array, we'd need to handle this differently in the template engine
+  const arrayName = typeof items === "string" ? items : "items";
+
+  return `{{#${arrayName}}}\n${childrenString}\n{{/${arrayName}}}`;
 }
 
 /**

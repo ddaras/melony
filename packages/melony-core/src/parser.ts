@@ -1,6 +1,7 @@
 import { parse, HTMLElement, TextNode } from "node-html-parser";
 import { ComponentDef } from "./renderer";
-import { WidgetTemplateProcessor } from "./widget-template";
+import { TemplateEngine } from "./template-engine";
+import { WidgetTemplate } from "./widget-template";
 
 /**
  * MelonyParser - Parses HTML-like widget component tags into ComponentDef structures
@@ -15,9 +16,11 @@ import { WidgetTemplateProcessor } from "./widget-template";
 export class MelonyParser {
   private componentTags: Set<string>;
   private specialCaseNames: Record<string, string>;
+  private widgetSchemas: Map<string, WidgetTemplate>;
 
-  constructor() {
+  constructor(widgets?: WidgetTemplate[]) {
     // Initialize component tags
+    // Note: "for" and "if" removed - they're now template syntax ({{#condition}}, {{#array}})
     this.componentTags = new Set([
       "card",
       "row",
@@ -41,7 +44,6 @@ export class MelonyParser {
       "list",
       "listitem",
       "chart",
-      "for",
       "widget",
     ]);
 
@@ -50,12 +52,23 @@ export class MelonyParser {
       listitem: "ListItem",
       radiogroup: "RadioGroup",
     };
+
+    // Initialize widget schemas for validation
+    this.widgetSchemas = new Map();
+    if (widgets) {
+      widgets.forEach((widget) => {
+        this.widgetSchemas.set(widget.type, widget);
+      });
+    }
   }
 
   /**
-   * Main parsing method - converts content string into blocks
+   * Main parsing method - converts content string into blocks. replacing reference {{}} with the context value.
+   * @param content - The content string to parse.
+   * @param context - The context object to use for replacing references.
+   * @returns An array of strings and ComponentDef objects.
    */
-  public parseContentAsBlocks(content: string): (string | ComponentDef)[] {
+  public parseContentAsBlocks(content: string, context?: Record<string, any>): (string | ComponentDef)[] {
     const result: (string | ComponentDef)[] = [];
 
     // Check if content has component tags
@@ -63,7 +76,7 @@ export class MelonyParser {
       return [content];
     }
 
-    // Check for incomplete/unclosed tags
+    // Check for incomplete/unclosed tags. card and widgets are required root level tags.
     const incompleteCard = this.detectIncompleteTag(content, 'card');
     const incompleteWidget = this.detectIncompleteWidget(content);
 
@@ -104,7 +117,7 @@ export class MelonyParser {
 
       // Parse child nodes
       for (const child of wrapperDiv.childNodes) {
-        const parsed = this.parseNode(child);
+        const parsed = this.parseNode(child, context);
         if (parsed !== null) {
           result.push(parsed);
         }
@@ -284,7 +297,7 @@ export class MelonyParser {
   /**
    * Parse a single HTML node into either a string or ComponentDef
    */
-  private parseNode(node: any): string | ComponentDef | null {
+  private parseNode(node: any, context?: Record<string, any>): string | ComponentDef | null {
     // Text node
     if (node.nodeType === 3 || node instanceof TextNode) {
       const text = node.text?.trim();
@@ -302,10 +315,27 @@ export class MelonyParser {
       }
 
       // Parse attributes into props
-      const props = this.parseAttributes(node.attributes || {});
+      let props = this.parseAttributes(node.attributes || {}, context);
+
+      // Validate props for widget components
+      if (tagName === "widget" && props.type) {
+        const validation = this.validateProps(props.type, props);
+
+        if (!validation.valid) {
+          console.warn(
+            `Widget validation errors for type="${props.type}":`,
+            validation.errors
+          );
+          // Optionally: you could return an error component here
+          // For now, we'll use the validated props which include defaults
+        }
+
+        // Use validated props (with defaults applied)
+        props = validation.validatedProps;
+      }
 
       // Parse children recursively
-      const children = this.parseChildren(node.childNodes);
+      const children = this.parseChildren(node.childNodes, context);
 
       return {
         component: this.capitalizeComponentName(tagName),
@@ -320,11 +350,11 @@ export class MelonyParser {
   /**
    * Parse HTML attributes into props object
    */
-  private parseAttributes(attrs: Record<string, string>): Record<string, any> {
+  private parseAttributes(attrs: Record<string, string>, context?: Record<string, any>): Record<string, any> {
     const props: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(attrs)) {
-      props[key] = this.parseAttributeValue(value);
+      props[key] = this.parseAttributeValue(value, context);
     }
 
     return props;
@@ -333,11 +363,11 @@ export class MelonyParser {
   /**
    * Parse child nodes recursively
    */
-  private parseChildren(childNodes: any[]): ComponentDef[] {
+  private parseChildren(childNodes: any[], context?: Record<string, any>): ComponentDef[] {
     const children: ComponentDef[] = [];
 
     for (const child of childNodes) {
-      const parsed = this.parseNode(child);
+      const parsed = this.parseNode(child, context);
       if (parsed !== null) {
         if (typeof parsed === "string") {
           // Wrap text content in Text component
@@ -367,11 +397,18 @@ export class MelonyParser {
   /**
    * Parse attribute value and convert to appropriate type
    */
-  private parseAttributeValue(value: string): any {
+  private parseAttributeValue(value: string, context?: Record<string, any>): any {
     if (!value) return true; // Boolean attribute
 
+    let processedValue = value;
+
+    // If context is available and value contains template references, resolve them
+    if (context && typeof value === 'string' && value.includes('{{') && value.includes('}}')) {
+      processedValue = TemplateEngine.render(value, context);
+    }
+
     // Decode HTML entities first (important for JSON strings from templates)
-    const decodedValue = this.decodeHTMLEntities(value);
+    const decodedValue = this.decodeHTMLEntities(processedValue);
 
     // Try to parse as JSON (for objects/arrays)
     if (decodedValue.startsWith("{") || decodedValue.startsWith("[")) {
@@ -428,6 +465,90 @@ export class MelonyParser {
   }
 
   /**
+   * Validate props against widget schema
+   */
+  private validateProps(
+    widgetType: string,
+    props: Record<string, any>
+  ): {
+    valid: boolean;
+    errors: string[];
+    validatedProps: Record<string, any>;
+  } {
+    const widget = this.widgetSchemas.get(widgetType);
+
+    if (!widget || !widget.props) {
+      // No schema available - pass through
+      return { valid: true, errors: [], validatedProps: props };
+    }
+
+    const errors: string[] = [];
+    const validatedProps = { ...props };
+
+    // Apply default values and validate
+    for (const propSchema of widget.props) {
+      const value = validatedProps[propSchema.name];
+
+      // Check required props
+      if (propSchema.required && (value === undefined || value === null)) {
+        errors.push(`Missing required prop: ${propSchema.name}`);
+        continue;
+      }
+
+      // Apply default value if missing
+      if (value === undefined && propSchema.default !== undefined) {
+        validatedProps[propSchema.name] = propSchema.default;
+      }
+
+      // Type validation
+      if (value !== undefined && value !== null) {
+        const actualType = Array.isArray(value) ? "array" : typeof value;
+        const expectedType = propSchema.type;
+
+        if (expectedType === "string" && actualType !== "string") {
+          errors.push(
+            `Prop ${propSchema.name} should be string, got ${actualType}`
+          );
+        } else if (expectedType === "number" && actualType !== "number") {
+          errors.push(
+            `Prop ${propSchema.name} should be number, got ${actualType}`
+          );
+        } else if (expectedType === "boolean" && actualType !== "boolean") {
+          errors.push(
+            `Prop ${propSchema.name} should be boolean, got ${actualType}`
+          );
+        } else if (expectedType === "array" && actualType !== "array") {
+          errors.push(
+            `Prop ${propSchema.name} should be array, got ${actualType}`
+          );
+        } else if (
+          (expectedType === "url" || expectedType === "image") &&
+          actualType !== "string"
+        ) {
+          errors.push(
+            `Prop ${propSchema.name} should be string (${expectedType}), got ${actualType}`
+          );
+        }
+      }
+    }
+
+    // Also apply widget's defaultProps if available
+    if (widget.defaultProps) {
+      for (const [key, defaultValue] of Object.entries(widget.defaultProps)) {
+        if (validatedProps[key] === undefined) {
+          validatedProps[key] = defaultValue;
+        }
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      validatedProps,
+    };
+  }
+
+  /**
    * Register a custom component tag
    */
   public registerComponent(tagName: string, capitalizedName?: string): void {
@@ -458,7 +579,17 @@ export class MelonyParser {
   public getRegisteredComponents(): string[] {
     return Array.from(this.componentTags);
   }
+
+  /**
+   * Update widget schemas (useful for dynamic widget registration)
+   */
+  public updateWidgetSchemas(widgets: WidgetTemplate[]): void {
+    this.widgetSchemas.clear();
+    widgets.forEach((widget) => {
+      this.widgetSchemas.set(widget.type, widget);
+    });
+  }
 }
 
-// Export a singleton instance for convenience
+// Export a singleton instance for convenience (no widgets initially)
 export const defaultParser = new MelonyParser();

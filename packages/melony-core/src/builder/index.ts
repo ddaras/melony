@@ -55,6 +55,7 @@ export {
   chart,
   forLoop,
   widget,
+  ifBlock,
 } from "./helpers";
 
 // Export prop types for each component
@@ -84,6 +85,7 @@ export type {
   WidgetProps,
   SelectOption,
   ChartDataPoint,
+  IfProps,
 } from "./helpers";
 
 // Export widget definition functions
