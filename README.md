@@ -9,7 +9,7 @@
 
 ## Why Melony?
 
-- ⚡ **Zero Latency** - Components render progressively during streaming
+- ⚡ **AI-Composed** - LLM intelligently composes UI widgets based on context
 - 🎯 **Smart Parsing** - Converts HTML-like tags to interactive components on the fly
 - 🎨 **Built-in Components** - 20+ ready-to-use UI components (cards, forms, charts, etc.)
 - 🛡️ **Type Safe** - Full TypeScript support
