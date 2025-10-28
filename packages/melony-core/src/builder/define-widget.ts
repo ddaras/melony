@@ -5,38 +5,19 @@
 
 import { z } from "zod";
 import { WidgetDefinition, CompiledWidget } from "./types";
-import { compileToTemplate, prettyPrint } from "./compiler";
 import { WidgetPropSchema } from "../widget-template";
 
 /**
- * Define a widget with a builder function and schema
+ * Define a widget with a template string and schema
  */
 export function defineWidget<TSchema extends z.ZodType>(
   definition: WidgetDefinition<TSchema>
 ): CompiledWidget {
-  const { type, name, description, schema, builder, examples, defaultProps } =
+  const { type, name, description, schema, template, examples, defaultProps } =
     definition;
 
   // Generate props schema from Zod schema
   const props = zodSchemaToProps(schema);
-
-  // Generate template with dynamic data bindings
-  let template: string;
-
-  try {
-    // Generate placeholder props from schema
-    const placeholderProps = generatePlaceholderProps(schema);
-
-    // Build the node structure with placeholders
-    // Type assertion needed because placeholders match the schema structure
-    const placeholderNode = builder(placeholderProps as z.infer<TSchema>);
-
-    // Compile to template with {{property}} syntax
-    template = prettyPrint(compileToTemplate(placeholderNode));
-  } catch (error) {
-    console.warn(`Failed to generate template for widget "${type}":`, error);
-    template = `<card title="${name || type}"><text value="Widget content" /></card>`;
-  }
 
   // Generate AI prompt
   const prompt = zodSchemaToPrompt({
@@ -60,74 +41,6 @@ export function defineWidget<TSchema extends z.ZodType>(
   return compiledWidget;
 }
 
-/**
- * Generate placeholder props from schema for template generation
- */
-function generatePlaceholderProps(schema: z.ZodType): Record<string, any> {
-  const props: Record<string, any> = {};
-
-  // Handle ZodObject
-  if (schema instanceof z.ZodObject) {
-    const shape = schema.shape;
-
-    for (const [key, value] of Object.entries(shape)) {
-      const zodType = value as z.ZodType;
-      const placeholder = getPlaceholderForType(key, zodType);
-      // Include all properties except literal types (to match builder's conditional logic)
-      if (placeholder !== null) {
-        props[key] = placeholder;
-      }
-    }
-  }
-
-  return props;
-}
-
-/**
- * Get placeholder value for a Zod type
- */
-function getPlaceholderForType(name: string, zodType: z.ZodType): any {
-  let actualType = zodType;
-  let isOptional = false;
-
-  // Unwrap optional and default types
-  if (actualType instanceof z.ZodOptional) {
-    isOptional = true;
-    actualType = actualType._def.innerType as z.ZodType;
-  }
-
-  if (actualType instanceof z.ZodDefault) {
-    isOptional = true;
-    actualType = (actualType._def as any).innerType as z.ZodType;
-  }
-
-  // Skip literal types (like "type" field in schema)
-  if (actualType instanceof z.ZodLiteral) {
-    return null;
-  }
-
-  // For optional types that might be checked with !== undefined,
-  // we need to include them as undefined so conditional logic works
-  // For string/number/boolean placeholders, we'll include them
-
-  // Generate placeholder based on type
-  if (actualType instanceof z.ZodString) {
-    return `{{${name}}}`;
-  } else if (actualType instanceof z.ZodNumber) {
-    return `{{${name}}}`;
-  } else if (actualType instanceof z.ZodBoolean) {
-    return `{{${name}}}`;
-  } else if (actualType instanceof z.ZodArray) {
-    return `{{${name}}}`;
-  } else if (actualType instanceof z.ZodEnum) {
-    return `{{${name}}}`;
-  } else if (actualType instanceof z.ZodObject) {
-    // For nested objects, use {{parent.child}} syntax
-    return `{{${name}}}`;
-  }
-
-  return `{{${name}}}`;
-}
 
 /**
  * Convert Zod schema to widget prop schema

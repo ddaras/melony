@@ -5,12 +5,12 @@ import { WidgetTemplate } from "./widget-template";
 
 /**
  * MelonyParser - Parses HTML-like widget component tags into ComponentDef structures
- * 
+ *
  * This parser is responsible for converting Melony widget syntax (HTML-like tags)
  * into structured ComponentDef objects that can be rendered by the widget renderer.
- * It's used by both MelonyMarkdown (for mixed markdown+widget content) and 
+ * It's used by both MelonyMarkdown (for mixed markdown+widget content) and
  * MelonyWidget (for widget-only content).
- * 
+ *
  * Uses node-html-parser for robust HTML parsing
  */
 export class MelonyParser {
@@ -68,7 +68,10 @@ export class MelonyParser {
    * @param context - The context object to use for replacing references.
    * @returns An array of strings and ComponentDef objects.
    */
-  public parseContentAsBlocks(content: string, context?: Record<string, any>): (string | ComponentDef)[] {
+  public parseContentAsBlocks(
+    content: string,
+    context?: Record<string, any>
+  ): (string | ComponentDef)[] {
     const result: (string | ComponentDef)[] = [];
 
     // Check if content has component tags
@@ -77,13 +80,13 @@ export class MelonyParser {
     }
 
     // Check for incomplete/unclosed tags. card and widgets are required root level tags.
-    const incompleteCard = this.detectIncompleteTag(content, 'card');
+    const incompleteCard = this.detectIncompleteTag(content, "card");
     const incompleteWidget = this.detectIncompleteWidget(content);
 
     try {
       // Normalize escaped quotes in attributes before parsing
       const normalizedContent = this.normalizeAttributeEscapes(content);
-      
+
       // Wrap content in a root element to ensure proper parsing
       const wrapped = `<div>${normalizedContent}</div>`;
       const root = parse(wrapped, {
@@ -163,10 +166,12 @@ export class MelonyParser {
    */
   private detectIncompleteTag(content: string, tagName: string): boolean {
     // Count opening tags (including incomplete ones without closing >)
-    const openingPattern = new RegExp(`<${tagName}(?:[\\s>]|$)`, 'gi');
+    const openingPattern = new RegExp(`<${tagName}(?:[\\s>]|$)`, "gi");
     const openingTags = (content.match(openingPattern) || []).length;
-    const closingTags = (content.match(new RegExp(`<\\/${tagName}>`, 'gi')) || []).length;
-    
+    const closingTags = (
+      content.match(new RegExp(`<\\/${tagName}>`, "gi")) || []
+    ).length;
+
     // If there are more opening tags than closing tags, we have an incomplete tag
     return openingTags > closingTags;
   }
@@ -190,7 +195,7 @@ export class MelonyParser {
 
     // Check if there's an opening tag without proper closure
     const openingTags = openingMatches.length;
-    
+
     // If there are more opening tags than closed tags, we have an incomplete widget
     return openingTags > totalClosedTags;
   }
@@ -212,29 +217,29 @@ export class MelonyParser {
   private normalizeAttributeEscapes(content: string): string {
     let result = "";
     let i = 0;
-    
+
     while (i < content.length) {
       // Check if we're at the start of an attribute
       const attrMatch = content.slice(i).match(/^(\w+)=(['"])/);
-      
+
       if (attrMatch) {
         const attrName = attrMatch[1];
         const quote = attrMatch[2];
         const startPos = i;
-        
+
         // Add attribute name and opening quote
         result += attrName + "=" + quote;
         i += attrMatch[0].length;
-        
+
         // Process the attribute value until we find the unescaped closing quote
         let attrValue = "";
         let depth = 0; // Track nesting depth for braces/brackets (for JSON detection)
         let inNestedQuote = false; // Track if we're inside a nested quote
-        
+
         while (i < content.length) {
           const char = content[i];
           const nextChar = content[i + 1];
-          
+
           // Check for escaped quote
           if (char === "\\" && nextChar === quote) {
             // Convert escaped quote to HTML entity
@@ -242,7 +247,7 @@ export class MelonyParser {
             i += 2; // Skip both the backslash and the quote
             continue;
           }
-          
+
           // Track JSON structure depth
           if (char === "{" || char === "[") {
             depth++;
@@ -255,7 +260,7 @@ export class MelonyParser {
             i++;
             continue;
           }
-          
+
           // Handle quotes inside JSON (when depth > 0)
           if (depth > 0 && char === quote) {
             // We're inside a JSON object/array, so this quote should be escaped
@@ -263,7 +268,7 @@ export class MelonyParser {
             i++;
             continue;
           }
-          
+
           // Handle the opposite quote type (doesn't need escaping in HTML)
           const oppositeQuote = quote === '"' ? "'" : '"';
           if (char === oppositeQuote) {
@@ -271,7 +276,7 @@ export class MelonyParser {
             i++;
             continue;
           }
-          
+
           // Check for closing quote of the attribute (when depth is 0)
           if (char === quote && depth === 0) {
             // Found unescaped closing quote - end of attribute value
@@ -279,7 +284,7 @@ export class MelonyParser {
             i++;
             break;
           }
-          
+
           // Regular character
           attrValue += char;
           i++;
@@ -290,14 +295,17 @@ export class MelonyParser {
         i++;
       }
     }
-    
+
     return result;
   }
 
   /**
    * Parse a single HTML node into either a string or ComponentDef
    */
-  private parseNode(node: any, context?: Record<string, any>): string | ComponentDef | null {
+  private parseNode(
+    node: any,
+    context?: Record<string, any>
+  ): string | ComponentDef | null {
     // Text node
     if (node.nodeType === 3 || node instanceof TextNode) {
       const text = node.text?.trim();
@@ -350,7 +358,10 @@ export class MelonyParser {
   /**
    * Parse HTML attributes into props object
    */
-  private parseAttributes(attrs: Record<string, string>, context?: Record<string, any>): Record<string, any> {
+  private parseAttributes(
+    attrs: Record<string, string>,
+    context?: Record<string, any>
+  ): Record<string, any> {
     const props: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(attrs)) {
@@ -363,7 +374,10 @@ export class MelonyParser {
   /**
    * Parse child nodes recursively
    */
-  private parseChildren(childNodes: any[], context?: Record<string, any>): ComponentDef[] {
+  private parseChildren(
+    childNodes: any[],
+    context?: Record<string, any>
+  ): ComponentDef[] {
     const children: ComponentDef[] = [];
 
     for (const child of childNodes) {
@@ -397,24 +411,35 @@ export class MelonyParser {
   /**
    * Parse attribute value and convert to appropriate type
    */
-  private parseAttributeValue(value: string, context?: Record<string, any>): any {
+  private parseAttributeValue(
+    value: string,
+    context?: Record<string, any>
+  ): any {
     if (!value) return true; // Boolean attribute
 
     let processedValue = value;
 
     // If context is available and value contains template references, resolve them
-    if (context && typeof value === 'string' && value.includes('{{') && value.includes('}}')) {
+    if (
+      context &&
+      typeof value === "string" &&
+      value.includes("{{") &&
+      value.includes("}}")
+    ) {
       processedValue = TemplateEngine.render(value, context);
     }
 
     // Decode HTML entities first (important for JSON strings from templates)
     const decodedValue = this.decodeHTMLEntities(processedValue);
 
+    console.log("decodedValue", decodedValue);
+
     // Try to parse as JSON (for objects/arrays)
     if (decodedValue.startsWith("{") || decodedValue.startsWith("[")) {
       try {
         return JSON.parse(decodedValue);
       } catch {
+        console.warn("Failed to parse JSON:", decodedValue);
         // If JSON parse fails, return as string
       }
     }
@@ -438,16 +463,19 @@ export class MelonyParser {
    */
   private decodeHTMLEntities(str: string): string {
     const htmlEntities: Record<string, string> = {
-      '&quot;': '"',
-      '&#34;': '"',
-      '&apos;': "'",
-      '&#39;': "'",
-      '&amp;': '&',
-      '&lt;': '<',
-      '&gt;': '>',
+      "&quot;": '"',
+      "&#34;": '"',
+      "&apos;": "'",
+      "&#39;": "'",
+      "&amp;": "&",
+      "&lt;": "<",
+      "&gt;": ">",
     };
 
-    return str.replace(/&(?:quot|#34|apos|#39|amp|lt|gt);/g, (match) => htmlEntities[match] || match);
+    return str.replace(
+      /&(?:quot|#34|apos|#39|amp|lt|gt);/g,
+      (match) => htmlEntities[match] || match
+    );
   }
 
   /**
