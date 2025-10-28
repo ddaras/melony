@@ -1,7 +1,6 @@
 # Melony
 
-**Progressive UI generation from AI responses in real-time.**  
-Stream interactive React components directly from LLMs with zero latency. No tool calling overhead. No completion waiting. Just smooth, progressive rendering as the AI thinks.
+**Let AI generate UI widgets for you.**
 
 [![npm version](https://img.shields.io/npm/v/melony.svg)](https://www.npmjs.com/package/melony)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -11,7 +10,7 @@ Stream interactive React components directly from LLMs with zero latency. No too
 ## Why Melony?
 
 - ⚡ **Zero Latency** - Components render progressively during streaming
-- 🎯 **Smart Parsing** - Converts HTML-like tags to React components on the fly
+- 🎯 **Smart Parsing** - Converts HTML-like tags to interactive components on the fly
 - 🎨 **Built-in Components** - 20+ ready-to-use UI components (cards, forms, charts, etc.)
 - 🛡️ **Type Safe** - Full TypeScript support
 - 🔄 **Interactive** - Built-in action system for user interactions
@@ -177,7 +176,7 @@ Actions are passed as JSON strings in component props:
 
 1. **AI Streams Response** - Your LLM streams text and HTML-like component tags
 2. **Progressive Parsing** - Melony identifies complete component blocks as they arrive
-3. **Instant Rendering** - Complete blocks are immediately converted to React components
+3. **Instant Rendering** - Complete blocks are immediately converted to interactive components
 4. **Action Handling** - User interactions trigger your action handler
 
 ## Examples
