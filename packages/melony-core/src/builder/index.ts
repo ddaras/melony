@@ -109,3 +109,5 @@ export {
   countNodes,
 } from "./compiler";
 
+// Export prompt functions
+export { createWidgetPrompt } from "./prompts";
