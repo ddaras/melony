@@ -148,7 +148,8 @@ function unwrapZodType(zodType: z.ZodType): {
       currentType = currentType._def.innerType as z.ZodType;
     } else if (currentType instanceof z.ZodDefault) {
       isOptional = true;
-      defaultValue = (currentType._def as any).defaultValue();
+      const defValue = (currentType._def as any).defaultValue;
+      defaultValue = typeof defValue === 'function' ? defValue() : defValue;
       currentType = (currentType._def as any).innerType as z.ZodType;
     } else if (currentType instanceof z.ZodNullable) {
       isOptional = true;

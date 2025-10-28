@@ -57,8 +57,8 @@ importers:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.0)
       melony:
-        specifier: ^1.8.2
-        version: 1.8.2(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.11)
+        specifier: ^1.8.4
+        version: 1.8.4(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.11)
       motion:
         specifier: ^12.23.22
         version: 12.23.22(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -3340,8 +3340,8 @@ packages:
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
-  melony@1.8.2:
-    resolution: {integrity: sha512-01sDachuzMx/eNpSw5acHjfCof1KQzZyT9ld8JElNDWAJl0PgRmXZ6YJ1zdLW60XZerDThVa3gfuDARWOckPGw==}
+  melony@1.8.4:
+    resolution: {integrity: sha512-m4RYWQDQdSRFa9qb88lXcGGoVpixnqp5j2C0Eik684ae4eSRGqmV7tiOgiNNGbdxLnLK2oJVQAHQQu7+1NMQjA==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -8133,7 +8133,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
-  melony@1.8.2(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.11):
+  melony@1.8.4(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.1.11):
     dependencies:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
