@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "main": "dist/index.js",
   "type": "module",
   "private": false,
@@ -82,13 +82,13 @@
   "dependencies": {
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "node-html-parser": "^7.0.1"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.6",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "node-html-parser": "^7.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "rimraf": "^5.0.10",
