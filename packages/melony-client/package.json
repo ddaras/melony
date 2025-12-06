@@ -1,9 +1,9 @@
 {
-  "name": "@melony/core",
+  "name": "@melony/client",
   "version": "0.0.1",
   "main": "dist/index.js",
   "type": "module",
-  "private": true,
+  "private": false,
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
@@ -14,12 +14,12 @@
   },
   "keywords": [
     "ai",
-    "core",
-    "typescript"
+    "client",
+    "melony"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Core for Melony",
+  "description": "Framework-agnostic client for Melony",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,13 +34,15 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@melony/core": "workspace:*",
+    "node-html-parser": "^7.0.1"
+  },
   "devDependencies": {
     "@types/node": "^24.10.1",
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "zod": "^4.1.11"
   }
 }
+

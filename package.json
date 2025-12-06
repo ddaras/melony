@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=generative-ui-playground",
     "clean": "turbo run clean",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

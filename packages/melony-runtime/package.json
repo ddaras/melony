@@ -1,5 +1,5 @@
 {
-  "name": "@melony/core",
+  "name": "@melony/runtime",
   "version": "0.0.1",
   "main": "dist/index.js",
   "type": "module",
@@ -14,12 +14,12 @@
   },
   "keywords": [
     "ai",
-    "core",
+    "runtime",
     "typescript"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Core for Melony",
+  "description": "Runtime for Melony",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -41,6 +41,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@melony/core": "workspace:*",
     "zod": "^4.1.11"
   }
 }

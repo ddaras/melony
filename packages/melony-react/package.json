@@ -1,9 +1,9 @@
 {
-  "name": "@melony/core",
+  "name": "@melony/react",
   "version": "0.0.1",
   "main": "dist/index.js",
   "type": "module",
-  "private": true,
+  "private": false,
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
@@ -14,12 +14,12 @@
   },
   "keywords": [
     "ai",
-    "core",
-    "typescript"
+    "react",
+    "melony"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Core for Melony",
+  "description": "React integration for Melony",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,13 +34,19 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@types/node": "^24.10.1",
-    "rimraf": "^5.0.10",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+  "peerDependencies": {
+    "react": ">=18"
   },
   "dependencies": {
-    "zod": "^4.1.11"
+    "@melony/client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/mustache": "^4.2.6",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.2.0",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "@melony/core": "workspace:*"
   }
 }

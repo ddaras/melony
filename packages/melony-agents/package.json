@@ -1,5 +1,5 @@
 {
-  "name": "@melony/core",
+  "name": "@melony/agents",
   "version": "0.0.1",
   "main": "dist/index.js",
   "type": "module",
@@ -14,12 +14,12 @@
   },
   "keywords": [
     "ai",
-    "core",
+    "agents",
     "typescript"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Core for Melony",
+  "description": "Agent definitions and utilities for Melony",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -41,6 +41,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@melony/core": "workspace:*",
+    "@melony/runtime": "workspace:*",
     "zod": "^4.1.11"
   }
 }
