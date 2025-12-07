@@ -10,7 +10,8 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "ai",

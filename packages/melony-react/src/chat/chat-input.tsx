@@ -62,7 +62,7 @@ export function ChatInput({
           left: "50%",
           width: "100%",
           maxWidth: "48rem",
-          padding: `${theme.spacing?.lg || "1rem"} ${theme.spacing?.xs || "0.5rem"}`,
+          padding: `10px`,
           background: centered
             ? "transparent"
             : `linear-gradient(to top, ${theme.colors?.background || "#ffffff"}, ${theme.colors?.background ? theme.colors.background + "CC" : "rgba(255,255,255,0.8)"} 50%, ${theme.colors?.background ? theme.colors.background + "00" : "rgba(255,255,255,0)"})`,

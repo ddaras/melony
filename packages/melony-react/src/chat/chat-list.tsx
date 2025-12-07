@@ -30,7 +30,7 @@ export function ChatList({
       style={{
         maxWidth: "48rem",
         width: "100%",
-        padding: "20px 0",
+        padding: "20px",
         margin: "0 auto",
       }}
     >
