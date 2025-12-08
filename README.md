@@ -9,11 +9,12 @@ Melony is a framework for building AI applications with a composable runtime, wi
 ## Features
 
 - ⚡ **Runtime Engine** - Execute actions as async generators with automatic chaining
-- 🤖 **Agent Pattern** - High-level agent abstraction with brain pattern
-- 🎨 **Widget System** - Define reusable UI widgets with templates
+- 🤖 **Agent Pattern** - High-level agent abstraction with brain pattern and HTTP handlers
+- 🎨 **Server-Driven UI** - Render UI components from server events
 - ⚛️ **React Integration** - Ready-to-use React components and hooks
 - 🛡️ **Type Safe** - Full TypeScript support with Zod validation
 - 🔄 **Framework Agnostic** - Core packages work with any framework
+- 👤 **Human-in-the-Loop** - Built-in approval flows for actions requiring user confirmation
 
 ## Packages
 
@@ -21,11 +22,11 @@ Melony is organized as a monorepo with focused packages:
 
 | Package | Description | Docs |
 |---------|-------------|------|
-| [`@melony/core`](./packages/melony-core) | Core types and utilities | [README](./packages/melony-core/README.md) |
-| [`@melony/runtime`](./packages/melony-runtime) | Runtime engine for executing actions | [README](./packages/melony-runtime/README.md) |
-| [`@melony/agents`](./packages/melony-agents) | Agent abstraction with brain pattern | [README](./packages/melony-agents/README.md) |
-| [`@melony/client`](./packages/melony-client) | Framework-agnostic client | [README](./packages/melony-client/README.md) |
-| [`@melony/react`](./packages/melony-react) | React components and hooks | [README](./packages/melony-react/README.md) |
+| [`@melony/core`](./packages/melony-core) | Core types, message parsing, HITL stores, and UI protocol | [README](./packages/melony-core/README.md) |
+| [`@melony/runtime`](./packages/melony-runtime) | Runtime engine for executing actions with HITL support | [README](./packages/melony-runtime/README.md) |
+| [`@melony/agents`](./packages/melony-agents) | Agent abstraction with brain pattern and HTTP handlers | [README](./packages/melony-agents/README.md) |
+| [`@melony/client`](./packages/melony-client) | Framework-agnostic client with transport layer | [README](./packages/melony-client/README.md) |
+| [`@melony/react`](./packages/melony-react) | React components, hooks, and store provider | [README](./packages/melony-react/README.md) |
 
 ## Quick Start
 
@@ -146,29 +147,29 @@ export default function Home() {
 ```
 ┌─────────────┐
 │   @melony   │  Core types & utilities
-│    core     │  Event types, message parsing
+│    core     │  Event types, message parsing, HITL stores, UI protocol
 └──────┬──────┘
        │
        ├───┐
        │   │
 ┌──────▼───▼──────┐
 │  @melony/      │  Runtime engine
-│  runtime       │  Action execution & chaining
+│  runtime       │  Action execution, chaining, HITL approval flows
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
 │  @melony/      │  Agent abstraction
-│  agents        │  Brain pattern, handler creation
+│  agents        │  Brain pattern, HTTP handlers, automatic routing
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
 │  @melony/      │  Framework-agnostic client
-│  client        │  Widgets, templates, transport, runtime client
+│  client        │  Runtime client, transport layer, state management
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
 │  @melony/      │  React integration
-│  react         │  Components, hooks, store provider
+│  react         │  Components, hooks, store provider, Server-Driven UI renderer
 └────────────────┘
 ```
 
@@ -203,6 +204,7 @@ for await (const event of runtime.run({
 ```typescript
 import { defineAgent, createAgentHandler } from "@melony/agents";
 import { defineAction } from "@melony/runtime";
+import { InMemoryPendingActionsStore } from "@melony/core";
 
 const agent = defineAgent({
   name: "MyAgent",
@@ -210,27 +212,32 @@ const agent = defineAgent({
   brain: async function* (context, toolDefinitions, options) {
     // Your LLM logic
     // Actions automatically loop back to brain
+    // Access last action result via context.state.lastActionResult
     return { action: "someAction", params: {} };
   },
+  pendingActionsStore: new InMemoryPendingActionsStore(), // For HITL
 });
 
-// Create HTTP handler - handles message parsing, approvals, routing
+// Create HTTP handler - handles message parsing, approvals, routing automatically
 export const POST = createAgentHandler(agent);
 ```
 
-### Creating Widgets
+### Server-Driven UI
+
+Melony supports Server-Driven UI where the server sends UI components as events:
 
 ```typescript
-import { defineWidget } from "@melony/client";
-
-const weatherWidget = defineWidget({
-  tag: "weather",
-  template: `
-    <card title="Weather in {{city}}">
-      <text value="{{temperature}}°F" />
-    </card>
-  `,
-});
+// In your action
+yield {
+  type: "ui",
+  ui: {
+    type: "card",
+    props: { title: "Weather in San Francisco" },
+    children: [
+      { type: "text", props: { value: "72°F" } }
+    ]
+  }
+};
 ```
 
 ### React Components

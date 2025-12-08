@@ -38,13 +38,16 @@ const agent = defineAgent({
   },
 });
 
-// Run agent
+// Option 1: Run agent directly
 for await (const event of agent.run({
   action: "brain",
   params: { input: "What's the weather in SF?" },
 })) {
   console.log(event);
 }
+
+// Option 2: Use HTTP handler (recommended for web apps)
+export const POST = createAgentHandler(agent);
 ```
 
 ## Key Features
@@ -54,12 +57,35 @@ for await (const event of agent.run({
 - **Tool Definitions**: Helper functions to convert actions to LLM tool schemas
 - **Framework Agnostic**: Brain can use any LLM or custom logic
 
+## HTTP Handler
+
+The package provides `createAgentHandler` to create HTTP request handlers that automatically handle message parsing, approval flow, and routing:
+
+```typescript
+import { defineAgent, createAgentHandler } from "@melony/agents";
+
+const agent = defineAgent({
+  name: "Assistant",
+  actions: { getWeather },
+  brain: agentBrain,
+});
+
+// Create HTTP handler - handles message parsing, approvals, routing automatically
+export const POST = createAgentHandler(agent);
+```
+
+The handler automatically:
+- Parses incoming user messages and approval resumptions
+- Routes user messages to the brain
+- Handles secure approval flow for actions requiring approval
+- Streams events as Server-Sent Events (SSE)
+
 ## API
 
 - **`defineAgent(config)`** - Create an agent instance
 - **`Agent`** - Agent class with `run()` method
+- **`createAgentHandler(agent, options?)`** - Create HTTP request handler
 - **`getToolDefinitions(actions)`** - Convert actions to tool definitions
-- **`convertToolDefinitionsToAISDK(toolDefinitions, toolFn)`** - Convert to AI SDK format
 
 ## Development
 

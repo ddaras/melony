@@ -4,7 +4,7 @@ Runtime engine for executing actions in the Melony framework.
 
 ## Overview
 
-The runtime executes actions as async generators, allowing actions to yield events and chain to other actions. It manages execution context, state, and provides safety limits.
+The runtime executes actions as async generators, allowing actions to yield events and chain to other actions. It manages execution context, state, and provides safety limits. Supports Human-in-the-Loop (HITL) approval flows for actions that require user confirmation.
 
 ## Usage
 
@@ -27,6 +27,8 @@ const myAction = defineAction({
 const runtime = defineRuntime({
   actions: { myAction },
   safetyMaxSteps: 10,
+  // Optional: provide store for HITL pending actions
+  pendingActionsStore: new InMemoryPendingActionsStore(),
 });
 
 // Run
@@ -35,6 +37,22 @@ for await (const event of runtime.run({
 })) {
   console.log(event);
 }
+```
+
+## Human-in-the-Loop (HITL)
+
+Actions can require user approval before execution:
+
+```typescript
+const sendEmail = defineAction({
+  name: "sendEmail",
+  paramsSchema: z.object({ to: z.string(), subject: z.string() }),
+  requiresApproval: true, // Requires user approval
+  execute: async function* (params) {
+    // Only executes after approval
+    yield { type: "text", data: { content: "Email sent!" } };
+  },
+});
 ```
 
 ## API
