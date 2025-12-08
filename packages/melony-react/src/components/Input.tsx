@@ -13,6 +13,8 @@ export const Input: React.FC<InputProps> = ({
   name,
   disabled,
   onChangeAction,
+  className,
+  style,
 }) => {
   const { dispatchEvent } = useMelony();
   const theme = useTheme();
@@ -41,6 +43,7 @@ export const Input: React.FC<InputProps> = ({
         <Label value={label} htmlFor={name} size="sm" weight="medium" />
       )}
       <input
+        className={className}
         type={inputType}
         name={name}
         id={name}
@@ -59,6 +62,7 @@ export const Input: React.FC<InputProps> = ({
           color: theme.colors?.foreground,
           outline: "none",
           transition: "border-color 0.2s ease",
+          ...style,
         }}
       />
     </div>

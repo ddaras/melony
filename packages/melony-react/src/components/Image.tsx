@@ -1,21 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { useTheme } from "../theme";
 import { ImageProps } from "./component-types";
-import { renderTemplate } from "@melony/client";
 
 export const Image: React.FC<ImageProps> = ({ src, alt, size = "sm" }) => {
   const theme = useTheme();
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Process template variables in src and alt
-  const processedSrc = useMemo(() => {
-    return renderTemplate(src);
-  }, [src]);
-
-  const processedAlt = useMemo(() => {
-    return alt ? renderTemplate(alt) : "";
-  }, [alt]);
 
   const resolvedRadius = size
     ? theme.radius?.[size as keyof typeof theme.radius] || size
@@ -67,8 +57,8 @@ export const Image: React.FC<ImageProps> = ({ src, alt, size = "sm" }) => {
 
   return (
     <img
-      src={processedSrc}
-      alt={processedAlt}
+      src={src}
+      alt={alt}
       onError={handleError}
       onLoad={handleLoad}
       style={{

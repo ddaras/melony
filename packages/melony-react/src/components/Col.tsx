@@ -14,6 +14,7 @@ export const Col: React.FC<ColProps> = ({
   padding,
   overflow,
   position = "static",
+  className,
   style,
 }) => {
   const theme = useTheme();
@@ -36,8 +37,18 @@ export const Col: React.FC<ColProps> = ({
     around: "space-around",
   };
 
+  // Automatically add scrollable className for auto/scroll overflow
+  const scrollableClassName = 
+    (overflow === "auto" || overflow === "scroll") 
+      ? "melony-scrollable" 
+      : "";
+  const combinedClassName = [className, scrollableClassName]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
+      className={combinedClassName || undefined}
       style={{
         display: "flex",
         flexDirection: "column",

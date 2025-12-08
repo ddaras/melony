@@ -1,8 +1,5 @@
+import { UINode } from "@melony/core";
+
 // Widget types
-export interface WidgetDefinition {
-  tag: string;
-  template: string;
-  description?: string;
-  propsSchema?: any;
-  [key: string]: any;
-}
+// WidgetDefinition removed as we are moving to server-driven UI
+

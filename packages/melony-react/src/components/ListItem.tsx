@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useTheme } from "../theme";
 import { ListItemProps } from "./component-types";
-import { renderTemplate } from "@melony/client";
 import { useMelony } from "../melony-context";
 
 export const ListItem: React.FC<ListItemProps> = ({
@@ -13,20 +12,24 @@ export const ListItem: React.FC<ListItemProps> = ({
   onClickAction,
   width,
   padding = "md",
+  style,
 }) => {
   const theme = useTheme();
   const { dispatchEvent } = useMelony();
 
+  const paddingMap = {
+    xs: "4px 6px",
+    sm: "6px 8px",
+    md: "8px 12px",
+    lg: "12px 16px",
+    xl: "16px 24px",
+    xxl: "32px 40px",
+  };
+
   const resolvedPadding =
-    theme.spacing?.[padding as keyof typeof theme.spacing] || padding;
+    paddingMap[padding as keyof typeof paddingMap] || padding;
 
-  // Process template variables in onClickAction
-  const processedOnClickAction = useMemo(() => {
-    if (!onClickAction) return undefined;
-    return renderTemplate(JSON.stringify(onClickAction));
-  }, [onClickAction]);
-
-  const isInteractive = !!processedOnClickAction;
+  const isInteractive = !!onClickAction;
   const resolvedGap = theme.spacing?.[gap as keyof typeof theme.spacing] || gap;
 
   // Default align to "start" for vertical orientation, "center" for horizontal
@@ -49,8 +52,8 @@ export const ListItem: React.FC<ListItemProps> = ({
   };
 
   const handleClick = () => {
-    if (processedOnClickAction) {
-      dispatchEvent(JSON.parse(processedOnClickAction));
+    if (onClickAction) {
+      dispatchEvent(onClickAction);
     }
   };
 
@@ -68,6 +71,7 @@ export const ListItem: React.FC<ListItemProps> = ({
         transition: "background-color 0.2s ease",
         borderRadius: theme.radius?.md,
         width: width,
+        ...style,
       }}
       onMouseEnter={(e) => {
         if (isInteractive) {
@@ -77,7 +81,9 @@ export const ListItem: React.FC<ListItemProps> = ({
       }}
       onMouseLeave={(e) => {
         if (isInteractive) {
-          e.currentTarget.style.backgroundColor = "transparent";
+          // Restore the original background color from the style prop
+          e.currentTarget.style.backgroundColor =
+            (style?.backgroundColor as string) || "transparent";
         }
       }}
     >

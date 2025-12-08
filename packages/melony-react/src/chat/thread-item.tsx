@@ -1,26 +1,14 @@
-import { Thread } from "../use-melony-threads";
+import { Thread } from "../use-melony-store";
 import { Text, ListItem } from "../components";
+import { useTheme } from "../theme";
 
 export interface ThreadItemProps {
   thread: Thread;
+  isActive?: boolean;
 }
 
-export function ThreadItem({ thread }: ThreadItemProps) {
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) {
-      return "Today";
-    } else if (days === 1) {
-      return "Yesterday";
-    } else if (days < 7) {
-      return `${days} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
+export function ThreadItem({ thread, isActive = false }: ThreadItemProps) {
+  const theme = useTheme();
 
   return (
     <ListItem
@@ -31,6 +19,9 @@ export function ThreadItem({ thread }: ThreadItemProps) {
       width="100%"
       padding="sm"
       onClickAction={{ type: "switchThread", data: { threadId: thread.id } }}
+      style={{
+        backgroundColor: isActive ? theme.colors?.muted : "transparent",
+      }}
     >
       <Text value={thread.title} />
     </ListItem>

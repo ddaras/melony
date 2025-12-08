@@ -1,35 +1,31 @@
 import { useTheme } from "../theme";
 import { ThreadList } from "./thread-list";
-import { Heading } from "../components/Heading";
-import { Box, Col } from "../components";
+import { Col } from "../components";
+import { Thread } from "../use-melony-store";
 
 export interface ThreadSidebarProps {
-  onThreadSelect?: (threadId: string) => void;
-  onNewThread?: () => void;
+  threads: Thread[];
+  activeThreadId: string | null;
   width?: number | string;
   className?: string;
-  storageKey?: string;
 }
 
 export function ThreadSidebar({
-  onThreadSelect,
-  onNewThread,
+  threads,
+  activeThreadId,
   width = 280,
-  storageKey,
 }: ThreadSidebarProps) {
   const theme = useTheme();
 
   return (
-    <Col width={width} height="100%" overflow="hidden" flex={"unset"}>
-      <Box padding="md">
-        <Heading value="Threads" level={2} />
-      </Box>
-
-      <ThreadList
-        onThreadSelect={onThreadSelect}
-        onNewThread={onNewThread}
-        storageKey={storageKey}
-      />
+    <Col
+      width={width}
+      height="100%"
+      overflow="hidden"
+      flex={"unset"}
+      style={{ backgroundColor: theme.colors?.cardBackground || "#ffffff" }}
+    >
+      <ThreadList threads={threads} activeThreadId={activeThreadId} />
     </Col>
   );
 }

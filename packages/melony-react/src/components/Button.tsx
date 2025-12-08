@@ -11,6 +11,8 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   fullWidth = false,
   onClickAction,
+  className,
+  style,
 }) => {
   const { dispatchEvent } = useMelony();
   const theme = useTheme();
@@ -102,6 +104,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      className={className}
       disabled={disabled}
       onClick={() => {
         if (onClickAction) {
@@ -130,6 +133,7 @@ export const Button: React.FC<ButtonProps> = ({
           isHovered && !disabled && variant !== "outline"
             ? theme.shadows?.md || "0 2px 4px -1px rgba(0, 0, 0, 0.06)"
             : "none",
+        ...style,
       }}
     >
       {label}

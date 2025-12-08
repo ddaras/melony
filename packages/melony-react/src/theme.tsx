@@ -85,9 +85,9 @@ export const defaultTheme: MelonyTheme = {
 
     background: "#0f172a",
     foreground: "#f8fafc",
-    muted: "#1e293b",
+    muted: "#334155",
     mutedForeground: "#94a3b8",
-    border: "#334155",
+    border: "#475569",
 
     cardBackground: "#1e293b",
     cardBorder: "#334155",
@@ -253,6 +253,87 @@ export const ThemeProvider: React.FC<{
     },
     [theme, isDark]
   );
+
+  // Inject global custom scrollbar styles
+  useEffect(() => {
+    const styleId = "melony-global-scrollbar";
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      /* Global custom scrollbar styles for all scrollable elements */
+      .melony-scrollable::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      .melony-scrollable::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      .melony-scrollable::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      
+      .melony-scrollable:hover::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+      }
+      
+      .melony-scrollable:hover::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+      
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        .melony-scrollable:hover::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .melony-scrollable:hover::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+      }
+      
+      .dark .melony-scrollable:hover::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      
+      .dark .melony-scrollable:hover::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      
+      /* For Firefox */
+      .melony-scrollable {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+      }
+      
+      .melony-scrollable:hover {
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .melony-scrollable:hover {
+          scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+      }
+      
+      .dark .melony-scrollable:hover {
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
 
   return (
     <ThemeContext.Provider value={mergedTheme}>

@@ -18,6 +18,7 @@
     "version:patch": "npm version patch"
   },
   "devDependencies": {
+    "prettier": "^3.7.4",
     "turbo": "^2.0.0"
   },
   "engines": {

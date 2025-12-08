@@ -8,21 +8,25 @@ export const Card: React.FC<CardProps> = ({
   subtitle,
   background,
   isLoading = false,
+  className,
+  style,
 }) => {
   const theme = useTheme();
 
   return (
     <div
+      className={className}
       style={{
         border: `1px solid ${theme.colors?.border}`,
         overflow: "hidden",
         background: background ?? theme.colors?.cardBackground,
-        // minWidth: "380px",
-        // width: "100%",
-        width: "400px",
-        borderRadius: theme.radius?.lg,
+        width: "100%",
+        minWidth: "300px",
+        maxWidth: "600px",
+        borderRadius: theme.radius?.md,
         padding: theme.spacing?.sm,
         opacity: isLoading ? 0.6 : 1,
+        ...style,
       }}
     >
       {(title || subtitle) && (

@@ -12,6 +12,8 @@ export const Box: React.FC<BoxProps> = ({
   width,
   height,
   overflow = "visible",
+  className,
+  style,
 }) => {
   const theme = useTheme();
   const resolvedPadding =
@@ -23,8 +25,18 @@ export const Box: React.FC<BoxProps> = ({
       borderRadius
     : undefined;
 
+  // Automatically add scrollable className for auto/scroll overflow
+  const scrollableClassName = 
+    (overflow === "auto" || overflow === "scroll") 
+      ? "melony-scrollable" 
+      : "";
+  const combinedClassName = [className, scrollableClassName]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
+      className={combinedClassName || undefined}
       style={{
         padding: resolvedPadding,
         margin: margin,
@@ -34,6 +46,7 @@ export const Box: React.FC<BoxProps> = ({
         width: width,
         height: height,
         overflow: overflow,
+        ...style,
       }}
     >
       {children as React.ReactNode}

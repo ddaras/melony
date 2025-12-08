@@ -2,7 +2,12 @@ import React from "react";
 import { FontSize, useTheme } from "../theme";
 import { HeadingProps } from "./component-types";
 
-export const Heading: React.FC<HeadingProps> = ({ value, level = 2 }) => {
+export const Heading: React.FC<HeadingProps> = ({
+  value,
+  level = 2,
+  className,
+  style,
+}) => {
   const theme = useTheme();
   const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
@@ -22,10 +27,13 @@ export const Heading: React.FC<HeadingProps> = ({ value, level = 2 }) => {
 
   return (
     <Tag
+      className={className}
       style={{
         fontFamily: theme.typography?.fontFamily,
         fontWeight: theme.typography?.fontWeight?.semibold,
         fontSize,
+        color: theme.colors?.foreground,
+        ...style,
       }}
     >
       {value}

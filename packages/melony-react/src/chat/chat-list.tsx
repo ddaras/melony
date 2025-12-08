@@ -8,14 +8,12 @@ export interface ChatListProps {
   messages: ChatMessageType[];
   isLoading: boolean;
   components?: Record<string, React.FC<any>>;
-  sendMessage?: (message: any, options?: any) => Promise<any>;
 }
 
 export function ChatList({
   messages,
   isLoading,
   components,
-  sendMessage,
 }: ChatListProps) {
   const theme = useTheme();
   const endRef = useRef<HTMLDivElement>(null);
@@ -40,7 +38,6 @@ export function ChatList({
             key={`message-${index}`}
             message={message}
             components={components}
-            sendMessage={sendMessage}
           />
         ))}
         {isLoading && (

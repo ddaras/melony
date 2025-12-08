@@ -1,17 +1,12 @@
 import React from "react";
-import { Response } from "../response";
+import { Renderer } from "../renderer";
 import { useTheme } from "../theme";
-import { useMelony } from "../melony-context";
-import { Widget } from "../widget";
-import { type ChatMessage } from "@melony/client";
-import { MelonyEvent } from "@melony/core";
-import { Text } from "../components/Text";
+import { type ChatMessage as ChatMessageType } from "@melony/client";
 import { Col } from "../components";
 
 export interface ChatMessageProps {
-  message: ChatMessage;
+  message: ChatMessageType;
   components?: Record<string, React.FC<any>>;
-  sendMessage?: (message: any, options?: any) => Promise<any>;
 }
 
 // Helper to extract text content from message parts
@@ -38,13 +33,11 @@ export function getMessageText(message: any): string {
 export function ChatMessage({
   message,
   components,
-  sendMessage,
 }: ChatMessageProps) {
   const theme = useTheme();
-  const { widgets } = useMelony();
   const messageText = getMessageText(message);
   const isUser = message.role === "user";
-  const anyMessage = message as any;
+  const anyMessage = message;
 
   return (
     <Col align={isUser ? "end" : "start"} width="100%">
@@ -65,12 +58,13 @@ export function ChatMessage({
         >
           {messageText}
         </div>
-      ) : Array.isArray(anyMessage.content) ? (
+      ) : (
         <div
           style={{
             maxWidth: "85%",
             display: "flex",
             flexDirection: "column",
+            justifyContent: "start",
             gap: theme.spacing?.md,
             fontSize: theme.typography?.fontSize?.md,
             color: theme.colors?.foreground || "#ffffff",
@@ -79,54 +73,22 @@ export function ChatMessage({
           {anyMessage.content.map((event: any, i: number) => {
             if (event.type === "text") {
               return (
-                <Response
+                <Renderer
                   key={i}
-                  content={event.data?.content || ""}
+                  nodes={event.data?.content || ""}
                   components={components}
                 />
               );
+            } else if (event.ui) {
+              // Server-Driven UI Event
+              return (
+                <Renderer key={i} nodes={event.ui} components={components} />
+              );
             } else {
-              const widgetDef = widgets[event.type?.toLowerCase()];
-              if (widgetDef) {
-                return <Widget key={i} widget={widgetDef} data={event?.data} />;
-              }
+              // Fallback for events without UI
               return <div key={i}>{JSON.stringify(event, null, 2)}</div>;
             }
           })}
-        </div>
-      ) : (
-        <div
-          style={{
-            maxWidth: "85%",
-            display: "flex",
-            flexDirection: "column",
-            gap: theme.spacing?.md,
-            color: theme.colors?.foreground || "#ffffff",
-          }}
-        >
-          {message.content.map((part: MelonyEvent, index) => {
-            if (part.type === "data-widget") {
-              return (
-                <Widget
-                  key={index}
-                  widget={part.data?.widget}
-                  data={part.data?.data}
-                />
-              );
-            }
-
-            return null;
-          })}
-
-          {anyMessage.type === "status" && <Text value={anyMessage.status} />}
-          {anyMessage.type === "error" && (
-            <Text value={anyMessage.error} color="danger" />
-          )}
-          {anyMessage.type === "widget" && (
-            <Text value={JSON.stringify(anyMessage.data, null, 2)} />
-          )}
-
-          <Response content={messageText} components={components} />
         </div>
       )}
     </Col>

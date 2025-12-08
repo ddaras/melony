@@ -5,20 +5,35 @@ import {
   MelonyEvent,
   RuntimeContext,
   NextAction,
+  PendingActionsStore,
 } from "@melony/core";
 import { defineRuntime } from "@melony/runtime";
 import z from "zod";
 
+// Re-export utilities
+export * from "./create-handler";
+
 // -- Types for the Brain Abstraction --
 
 export type ToolDefinition = {
-  [toolName: string]: { name: string; description: string; parameters: any };
+  name: string;
+  description: string;
+  parameters: z.ZodSchema;
 };
 
 export interface AgentConfig {
   name: string;
   description?: string;
   actions: Record<string, Action<any>>;
+  /**
+   * Optional store for HITL pending actions.
+   * Required if any action uses requiresApproval.
+   */
+  pendingActionsStore?: PendingActionsStore;
+  /**
+   * Maximum number of steps before stopping (default: 10)
+   */
+  safetyMaxSteps?: number;
   /**
    * Framework-agnostic brain.
    * Receives the runtime context (with state), tool definitions, and current input.
@@ -29,7 +44,7 @@ export interface AgentConfig {
   brain: (
     context: RuntimeContext,
     toolDefinitions: ToolDefinition[],
-    options?: {
+    options: {
       input?: any;
     }
   ) => AsyncGenerator<MelonyEvent, NextAction | void, unknown>;
@@ -39,35 +54,10 @@ export interface AgentConfig {
 
 export function getToolDefinitions(actions: Record<string, Action<any>>) {
   return Object.entries(actions).map(([name, action]) => ({
-    [name]: {
-      name: action.name,
-      description: action.description || `Execute ${action.name}`,
-      parameters: action.paramsSchema.shape,
-    },
+    name,
+    description: action.description || `Execute ${action.name}`,
+    parameters: action.paramsSchema.shape,
   }));
-}
-
-// -- Helper to convert toolDefinitions array to AI SDK tools format --
-
-/**
- * Converts toolDefinitions array format to a single object format expected by AI SDK's generateText.
- * @param toolDefinitions Array of tool definitions
- * @param toolFn The tool function from AI SDK (e.g., `tool` from "ai")
- * @returns Object mapping tool names to tool instances
- */
-export function convertToolDefinitionsToAISDK(
-  toolDefinitions: ToolDefinition[],
-  toolFn: (config: { description: string; inputSchema: any }) => any
-): Record<string, any> {
-  const tools: Record<string, any> = {};
-  for (const toolDef of toolDefinitions) {
-    const [toolName, toolConfig] = Object.entries(toolDef)[0];
-    tools[toolName] = toolFn({
-      description: toolConfig.description || `Execute ${toolConfig.name}`,
-      inputSchema: z.object(toolConfig.parameters || {}),
-    });
-  }
-  return tools;
 }
 
 // -- Internal Schemas --
@@ -171,13 +161,26 @@ export class Agent {
 
     return defineRuntime({
       actions: wrappedActions,
+      pendingActionsStore: this.config.pendingActionsStore,
+      safetyMaxSteps: this.config.safetyMaxSteps,
     });
   }
 
   public async *run(
     input: NextAction,
-    options: { state?: Record<string, any>; runId?: string } = {}
+    options: {
+      state?: Record<string, any>;
+      runId?: string;
+      pendingActionsStore?: PendingActionsStore;
+    } = {}
   ): AsyncGenerator<MelonyEvent> {
+    // If a pendingActionsStore is provided and we don't have one configured,
+    // reinitialize the runtime with the new store
+    if (options.pendingActionsStore && !this.config.pendingActionsStore) {
+      this.config.pendingActionsStore = options.pendingActionsStore;
+      this.runtime = this.initializeRuntime();
+    }
+
     const runtimeInput: RuntimeInput = {
       start: input,
       state: options.state || {},

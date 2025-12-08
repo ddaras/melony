@@ -8,6 +8,8 @@ export const Text: React.FC<TextProps> = ({
   weight = "normal",
   color,
   align = "start",
+  className,
+  style,
 }) => {
   const theme = useTheme();
 
@@ -20,12 +22,14 @@ export const Text: React.FC<TextProps> = ({
 
   return (
     <span
+      className={className}
       style={{
         fontSize: theme.typography?.fontSize?.[size],
         fontWeight: theme.typography?.fontWeight?.[weight],
         fontFamily: theme.typography?.fontFamily,
         color: color || theme.colors?.foreground,
         textAlign: alignMap[align] as CSSProperties["textAlign"],
+        ...style,
       }}
     >
       {value}

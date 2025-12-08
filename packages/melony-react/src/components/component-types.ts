@@ -12,9 +12,14 @@ type Wrap = "nowrap" | "wrap" | "wrap-reverse";
 type Background = CSSProperties["background"];
 type Orientation = "horizontal" | "vertical";
 
+interface BaseComponentProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
 // Container Component Props
 // This is the only root component. Always start with Card.
-export interface CardProps {
+export interface CardProps extends BaseComponentProps {
   children?: React.ReactNode[];
   title?: string;
   subtitle?: string;
@@ -23,16 +28,16 @@ export interface CardProps {
 }
 
 // Layout Component Props
-export type RowProps = {
+export interface RowProps extends BaseComponentProps {
   children?: React.ReactNode[];
   align?: Align;
   justify?: Justify;
   wrap?: Wrap;
   flex?: number | string;
   gap?: Spacing;
-};
+}
 
-export type ColProps = {
+export interface ColProps extends BaseComponentProps {
   children?: React.ReactNode[] | React.ReactNode;
   align?: Align;
   justify?: Justify;
@@ -44,10 +49,9 @@ export type ColProps = {
   padding?: Spacing;
   overflow?: "visible" | "hidden" | "scroll" | "auto";
   position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
-  style?: CSSProperties;
-};
+}
 
-export interface BoxProps {
+export interface BoxProps extends BaseComponentProps {
   children?: React.ReactNode | React.ReactNode[];
   padding?: Spacing;
   margin?: string | number;
@@ -59,23 +63,23 @@ export interface BoxProps {
   overflow?: "visible" | "hidden" | "scroll" | "auto";
 }
 
-export interface SpacerProps {
+export interface SpacerProps extends BaseComponentProps {
   size?: Spacing;
   direction?: Orientation;
 }
 
-export interface DividerProps {
+export interface DividerProps extends BaseComponentProps {
   orientation?: Orientation;
   size?: Size;
   color?: Color;
 }
 
-export interface ListProps {
+export interface ListProps extends BaseComponentProps {
   children?: React.ReactNode;
   width?: string | number;
 }
 
-export interface ListItemProps {
+export interface ListItemProps extends BaseComponentProps {
   children?: React.ReactNode;
   orientation?: Orientation;
   gap?: Spacing;
@@ -87,7 +91,7 @@ export interface ListItemProps {
 }
 
 // Content Component Props
-export interface ImageProps {
+export interface ImageProps extends BaseComponentProps {
   src: string;
   alt?: string;
   size?: Size;
@@ -95,7 +99,7 @@ export interface ImageProps {
   showFallbackIcon?: boolean;
 }
 
-export interface IconProps {
+export interface IconProps extends BaseComponentProps {
   name: keyof typeof ICONS;
   size?: Size;
   color?: Color;
@@ -107,7 +111,7 @@ export interface ChartDataPoint {
   color?: Color;
 }
 
-export interface ChartProps {
+export interface ChartProps extends BaseComponentProps {
   data: ChartDataPoint[];
   chartType?: "bar" | "line" | "area" | "pie";
   size?: Size;
@@ -116,7 +120,7 @@ export interface ChartProps {
   showTooltips?: boolean;
 }
 
-export interface BadgeProps {
+export interface BadgeProps extends BaseComponentProps {
   label?: string;
   variant?: Extract<
     Color,
@@ -126,7 +130,7 @@ export interface BadgeProps {
 }
 
 // Typography Props
-export interface TextProps {
+export interface TextProps extends BaseComponentProps {
   value: string;
   size?: FontSize;
   weight?: FontWeight;
@@ -134,18 +138,18 @@ export interface TextProps {
   align?: Align;
 }
 
-export interface HeadingProps {
+export interface HeadingProps extends BaseComponentProps {
   value: string;
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 // Form Component Props
-export interface FormProps {
+export interface FormProps extends BaseComponentProps {
   children?: React.ReactNode[];
   onSubmitAction?: MelonyEvent;
 }
 
-export interface InputProps {
+export interface InputProps extends BaseComponentProps {
   inputType?: HTMLInputTypeAttribute;
   placeholder?: string;
   defaultValue?: string;
@@ -156,7 +160,7 @@ export interface InputProps {
   onChangeAction?: MelonyEvent;
 }
 
-export interface ButtonProps {
+export interface ButtonProps extends BaseComponentProps {
   label?: string;
   variant?:
     | Extract<Color, "primary" | "secondary" | "success" | "danger">
@@ -167,15 +171,16 @@ export interface ButtonProps {
   onClickAction?: MelonyEvent;
 }
 
-export interface LabelProps {
+export interface LabelProps extends BaseComponentProps {
   value: string;
   htmlFor?: string;
   required?: boolean;
   size?: FontSize;
   weight?: FontWeight;
+  style?: CSSProperties;
 }
 
-export interface TextareaProps {
+export interface TextareaProps extends BaseComponentProps {
   placeholder?: string;
   defaultValue?: string;
   value?: string;
@@ -191,7 +196,7 @@ export interface SelectOption {
   value: string;
 }
 
-export interface SelectProps {
+export interface SelectProps extends BaseComponentProps {
   options: SelectOption[];
   defaultValue?: string;
   value?: string;
@@ -202,7 +207,7 @@ export interface SelectProps {
   onChangeAction?: MelonyEvent;
 }
 
-export interface CheckboxProps {
+export interface CheckboxProps extends BaseComponentProps {
   label?: string;
   name?: string;
   value?: string;
@@ -218,7 +223,7 @@ export interface RadioOption {
   disabled?: boolean;
 }
 
-export interface RadioGroupProps {
+export interface RadioGroupProps extends BaseComponentProps {
   name: string;
   options: RadioOption[];
   defaultValue?: string;

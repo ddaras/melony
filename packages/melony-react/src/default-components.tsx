@@ -34,14 +34,23 @@ export const createDefaultComponents = (): Record<string, React.FC<any>> => {
   }: {
     componentName?: string;
     children?: React.ReactNode;
-  }) => (
-    <div className="text-red-500 border border-red-200 p-2 my-2 rounded text-sm">
-      Unknown component: {componentName}
-      {children && (
-        <div className="mt-1 pl-2 border-l-2 border-red-100">{children}</div>
-      )}
-    </div>
-  );
+  }) => {
+    // Production: Don't show red error boxes to users
+    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+      // Just render children if possible, or nothing
+      return <>{children}</>;
+    }
+
+    // Development: Show the red box so you can fix it
+    return (
+      <div className="text-red-500 border border-red-200 p-2 my-2 rounded text-sm">
+        Unknown component: {componentName}
+        {children && (
+          <div className="mt-1 pl-2 border-l-2 border-red-100">{children}</div>
+        )}
+      </div>
+    );
+  };
 
   return components;
 };

@@ -1,11 +1,17 @@
-export * from "./parser";
-export * from "./template";
-export * from "./response";
-export * from "./melony-context";
-export * from "./chat/chat";
-export * from "./chat/thread-list";
-export * from "./chat/thread-item";
-export * from "./chat/thread-sidebar";
-export * from "./use-melony-runtime";
-export * from "./use-melony-chat";
-export * from "./use-melony-threads";
+// ===== Essential =====
+export {
+  MelonyStoreProvider,
+  MelonyProvider,
+  useMelony,
+  useDispatchedEvent,
+} from "./melony-context";
+export { Chat } from "./chat/chat";
+export { ThreadSidebar } from "./chat/thread-sidebar";
+
+// ===== Types =====
+export type { Thread } from "./use-melony-store";
+export type { MelonyEvent } from "@melony/core";
+export type { MelonyTheme } from "./theme";
+
+// ===== Utilities =====
+export { generateId } from "@melony/core";

@@ -38,7 +38,8 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@melony/client": "workspace:*"
+    "@melony/client": "workspace:*",
+    "@melony/core": "workspace:*"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.6",
@@ -46,7 +47,6 @@
     "@types/react-dom": "^19.2.0",
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2",
-    "@melony/core": "workspace:*"
+    "typescript": "^5.9.2"
   }
 }
