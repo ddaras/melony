@@ -32,17 +32,17 @@ Melony is organized as a monorepo with focused packages:
 ### 1. Install Packages
 
 ```bash
-npm install @melony/react @melony/runtime @melony/agents
+npm install @melony/react @melony/runtime @melony/agents @melony/client
 ```
 
 ### 2. Define Actions
 
 ```typescript
-// app/api/chat/route.ts
-import { defineRuntime, defineAction } from "@melony/runtime";
+// lib/actions.ts
+import { defineAction } from "@melony/runtime";
 import z from "zod";
 
-const getWeather = defineAction({
+export const getWeather = defineAction({
   name: "getWeather",
   paramsSchema: z.object({ city: z.string() }),
   execute: async function* (params) {
@@ -55,75 +55,120 @@ const getWeather = defineAction({
     };
   },
 });
-
-const runtime = defineRuntime({
-  actions: { getWeather },
-  safetyMaxSteps: 10,
-});
 ```
 
-### 3. Create API Route
+### 3. Create Agent with Brain
 
 ```typescript
-// app/api/chat/route.ts
-import { createStreamResponse } from "@melony/runtime";
+// lib/agent-brain.ts
+import { RuntimeContext, NextAction, MelonyEvent } from "@melony/core";
+import { ToolDefinition } from "@melony/agents";
+import { streamText, convertToModelMessages } from "ai";
+import { openai } from "@ai-sdk/openai";
 
-export async function POST(req: Request) {
-  const { message } = await req.json();
-  
-  const events = runtime.run({
-    start: {
-      action: "getWeather",
-      params: { city: message.content },
-    },
+export async function* agentBrain(
+  context: RuntimeContext,
+  toolDefinitions: ToolDefinition[],
+  options: { input?: string }
+): AsyncGenerator<MelonyEvent, NextAction | void, unknown> {
+  // Convert tools to AI SDK format
+  const tools = Object.fromEntries(
+    toolDefinitions.map((toolDef) => [
+      toolDef.name,
+      {
+        description: toolDef.description,
+        inputSchema: context.actions[toolDef.name]?.paramsSchema,
+      },
+    ])
+  );
+
+  // Call LLM with streaming
+  const result = streamText({
+    model: openai("gpt-4"),
+    messages: [{ role: "user", content: options.input || "" }],
+    tools,
   });
-  
-  return createStreamResponse(events);
+
+  // Stream text events
+  for await (const chunk of result.toUIMessageStream()) {
+    if (chunk.type === "text-delta") {
+      yield { type: "text", data: { content: chunk.delta } };
+    }
+  }
+
+  // Return next action based on tool calls
+  const finalResult = await result;
+  const toolCalls = await finalResult.toolCalls;
+  if (toolCalls?.length > 0) {
+    return { action: toolCalls[0].toolName, params: toolCalls[0].input || {} };
+  }
 }
 ```
 
-### 4. Use in React
+### 4. Create API Route
+
+```typescript
+// app/api/chat/route.ts
+import { defineAgent, createAgentHandler } from "@melony/agents";
+import { getWeather } from "@/lib/actions";
+import { agentBrain } from "@/lib/agent-brain";
+
+const agent = defineAgent({
+  name: "Assistant",
+  actions: { getWeather },
+  brain: agentBrain,
+});
+
+// createAgentHandler handles message parsing, approvals, and routing automatically
+export const POST = createAgentHandler(agent);
+```
+
+### 5. Use in React
 
 ```tsx
 // app/page.tsx
 "use client";
-import { Chat } from "@melony/react";
+import { MelonyStoreProvider, Chat } from "@melony/react";
 
 export default function Home() {
-  return <Chat api="/api/chat" />;
+  return (
+    <MelonyStoreProvider api="/api/chat">
+      <Chat />
+    </MelonyStoreProvider>
+  );
 }
 ```
 
 ## Architecture
 
-### Runtime → Agents → Client → React
+### Core → Runtime → Agents → Client → React
 
 ```
 ┌─────────────┐
 │   @melony   │  Core types & utilities
-│    core     │
+│    core     │  Event types, message parsing
 └──────┬──────┘
        │
        ├───┐
        │   │
 ┌──────▼───▼──────┐
 │  @melony/      │  Runtime engine
-│  runtime       │  Action execution
+│  runtime       │  Action execution & chaining
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
 │  @melony/      │  Agent abstraction
-│  agents        │  Brain pattern
+│  agents        │  Brain pattern, handler creation
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
-│  @melony/      │  Framework-agnostic
-│  client        │  Widgets, templates, transport
+│  @melony/      │  Framework-agnostic client
+│  client        │  Widgets, templates, transport, runtime client
 └──────┬─────────┘
        │
 ┌──────▼──────────┐
 │  @melony/      │  React integration
-│  react         │  Components & hooks
+│  react         │  Components, hooks, store provider
 └────────────────┘
 ```
 
@@ -156,7 +201,7 @@ for await (const event of runtime.run({
 ### Using Agents
 
 ```typescript
-import { defineAgent } from "@melony/agents";
+import { defineAgent, createAgentHandler } from "@melony/agents";
 import { defineAction } from "@melony/runtime";
 
 const agent = defineAgent({
@@ -168,6 +213,9 @@ const agent = defineAgent({
     return { action: "someAction", params: {} };
   },
 });
+
+// Create HTTP handler - handles message parsing, approvals, routing
+export const POST = createAgentHandler(agent);
 ```
 
 ### Creating Widgets
@@ -188,14 +236,50 @@ const weatherWidget = defineWidget({
 ### React Components
 
 ```tsx
-import { MelonyProvider, Chat, useMelonyChat } from "@melony/react";
+import { MelonyStoreProvider, Chat, useMelony } from "@melony/react";
 
 function App() {
   return (
-    <MelonyProvider widgets={[weatherWidget]}>
-      <Chat api="/api/chat" />
-    </MelonyProvider>
+    <MelonyStoreProvider api="/api/chat">
+      <Chat />
+    </MelonyStoreProvider>
   );
+}
+
+// Access store state and dispatch events
+function CustomComponent() {
+  const { messages, isLoading, dispatchEvent } = useMelony();
+  
+  return (
+    <div>
+      {messages.map(msg => <div key={msg.id}>{msg.content}</div>)}
+    </div>
+  );
+}
+```
+
+### Using Runtime Client (Framework Agnostic)
+
+```typescript
+import { MelonyRuntimeClient, createHttpTransport } from "@melony/client";
+
+const client = new MelonyRuntimeClient({
+  transport: createHttpTransport("/api/chat"),
+});
+
+// Subscribe to state changes
+client.subscribe((state) => {
+  console.log("Events:", state.events);
+  console.log("Messages:", state.messages);
+  console.log("Loading:", state.isLoading);
+});
+
+// Send message and stream events
+for await (const event of client.sendMessage({
+  role: "user",
+  content: [{ type: "text", data: { content: "Hello" } }],
+})) {
+  console.log("Event:", event);
 }
 ```
 
@@ -233,8 +317,7 @@ pnpm typecheck  # Type check
 
 ## Example Apps
 
-- [`generative-ui-template`](./apps/generative-ui-template) - Full chat interface example
-- [`assistant-ui-x-melony`](./apps/assistant-ui-x-melony) - Integration with assistant-ui
+- [`generative-ui-template`](./apps/generative-ui-template) - Full chat interface with agent example
 
 ## Documentation
 
