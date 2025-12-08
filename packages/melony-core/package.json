@@ -20,6 +20,9 @@
   "author": "",
   "license": "MIT",
   "description": "Core for Melony",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
