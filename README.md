@@ -1,8 +1,8 @@
 # Melony
 
-**Build AI-powered interfaces with type-safe actions, widgets, and runtime.**
+**Build AI agents that generate interactive UIs through type-safe actions and server-driven components.**
 
-Melony is a framework for building AI applications with a composable runtime, widget system, and React integration. Define actions, create widgets, and let AI generate interactive UIs.
+Melony is a framework for building AI applications with composable actions, intelligent agents, and dynamic UI generation. Define actions, wire up agents, and watch them create interactive interfaces automatically.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
