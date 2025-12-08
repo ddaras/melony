@@ -1,6 +1,6 @@
 # @melony/client
 
-Framework-agnostic client for Melony. Core logic that works with any UI framework.
+Framework-agnostic client for Melony. Provides runtime communication and event streaming for any UI framework.
 
 ## Installation
 
@@ -10,65 +10,110 @@ npm install @melony/client
 
 ## Overview
 
-Provides the foundation for building Melony applications in any framework:
+Provides the core client functionality for building Melony applications:
 
-- **Widget System**: Define and register reusable UI widgets
-- **Template Engine**: Handlebars-style templating with array support
-- **Parser**: Parse HTML-like templates into component trees
-- **Transport**: HTTP and custom transport for runtime communication
-- **Runtime Client**: Client for streaming events from runtime
+- **Runtime Client**: Client for streaming events from the Melony runtime
+- **Transport Layer**: HTTP and custom transport implementations for runtime communication
+- **State Management**: Built-in state management with subscription support
 
 ## Usage
 
-### Widgets
-
-```typescript
-import { defineWidget } from "@melony/client";
-
-const weatherWidget = defineWidget({
-  tag: "weather",
-  template: `
-    <card title="Weather in {{city}}">
-      <text value="{{temperature}}°F" />
-    </card>
-  `,
-});
-```
-
-### Runtime Client
+### Basic Usage
 
 ```typescript
 import { MelonyRuntimeClient, createHttpTransport } from "@melony/client";
 
 const client = new MelonyRuntimeClient({
-  transport: createHttpTransport("/api/chat"),
+  api: "/api/chat", // or use custom transport
 });
 
+// Subscribe to state changes
+const unsubscribe = client.subscribe((state) => {
+  console.log("State updated:", state);
+});
+
+// Send a message and stream events
 for await (const event of client.sendMessage({
   role: "user",
   content: [{ type: "text", data: { content: "Hello" } }],
 })) {
-  console.log(event);
+  console.log("Received event:", event);
 }
+
+// Get current state
+const state = client.getState();
+console.log("Current events:", state.events);
+console.log("Current messages:", state.messages);
+console.log("Thread ID:", state.threadId);
+
+// Clean up
+unsubscribe();
 ```
 
-### Template & Parser
+### Custom Transport
 
 ```typescript
-import { renderTemplate, parseContent } from "@melony/client";
+import { MelonyRuntimeClient, TransportFn } from "@melony/client";
 
-const html = renderTemplate("<text value=\"{{name}}\" />", { name: "John" });
-const blocks = parseContent(html);
+const customTransport: TransportFn = async (request, signal) => {
+  // Your custom transport implementation
+  const response = await fetch("/custom-api", {
+    method: "POST",
+    body: JSON.stringify({
+      message: request.message,
+      threadId: request.threadId,
+    }),
+    signal,
+  });
+  return response.body!;
+};
+
+const client = new MelonyRuntimeClient({
+  transport: customTransport,
+});
+```
+
+### Thread Management
+
+```typescript
+// Create client with existing thread
+const client = new MelonyRuntimeClient({
+  api: "/api/chat",
+  threadId: "existing-thread-id",
+});
+
+// Clear state and start new thread
+client.clear(); // Generates new threadId
 ```
 
 ## API
 
-- **`defineWidget(widget)`** - Define a widget
-- **`WidgetRegistry`** - Register and manage widgets
-- **`MelonyRuntimeClient`** - Client for runtime communication
-- **`createHttpTransport(api)`** - Create HTTP transport
-- **`renderTemplate(template, data)`** - Render template with data
-- **`parseContent(html)`** - Parse HTML into component blocks
+### `MelonyRuntimeClient`
+
+Main client class for runtime communication.
+
+**Constructor Options:**
+- `transport?: TransportFn` - Custom transport function (or use `api`)
+- `api?: string` - API endpoint URL (creates HTTP transport)
+- `threadId?: string` - Optional thread ID (auto-generated if not provided)
+
+**Methods:**
+- `sendMessage(message: ChatMessage): AsyncGenerator<MelonyEvent>` - Send message and stream events
+- `subscribe(listener: (state: MelonyRuntimeClientState) => void): () => void` - Subscribe to state changes
+- `getState(): MelonyRuntimeClientState` - Get current state
+- `clear(): void` - Clear all events and reset state
+
+### `createHttpTransport(api: string): TransportFn`
+
+Create an HTTP transport function for the runtime client.
+
+### Types
+
+- `ChatMessage` - Chat message format with role and content
+- `TransportRequest` - Transport request payload
+- `TransportFn` - Transport function type
+- `MelonyRuntimeClientOptions` - Client constructor options
+- `MelonyRuntimeClientState` - Client state interface
 
 ## Development
 
