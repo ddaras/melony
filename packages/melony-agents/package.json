@@ -44,8 +44,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@melony/core": "workspace:*",
-    "@melony/runtime": "workspace:*",
+    "@melony/core": "^0.0.1",
+    "@melony/runtime": "^0.0.1",
     "zod": "^4.1.11"
   }
 }

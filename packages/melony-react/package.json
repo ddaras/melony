@@ -41,8 +41,8 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@melony/client": "workspace:*",
-    "@melony/core": "workspace:*"
+    "@melony/client": "^0.0.2",
+    "@melony/core": "^0.0.1"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.6",

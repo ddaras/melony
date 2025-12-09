@@ -1,4 +1,4 @@
-import { MelonyEvent } from "@melony/core";
+import { MelonyEvent } from "@melony/core/browser";
 
 /**
  * Chat message format used for transport

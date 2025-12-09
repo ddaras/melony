@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { MelonyEvent, generateId } from "@melony/core";
+import { MelonyEvent, generateId } from "@melony/core/browser";
 import {
   TransportFn,
   createHttpTransport,

@@ -1,4 +1,4 @@
-import { MelonyEvent, generateId } from "@melony/core";
+import { MelonyEvent, generateId } from "@melony/core/browser";
 
 import {
   TransportFn,

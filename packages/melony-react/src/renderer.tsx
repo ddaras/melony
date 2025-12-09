@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { UINode } from "@melony/core";
+import { UINode } from "@melony/core/browser";
 import { createDefaultComponents } from "./default-components";
 
 export interface RendererProps {

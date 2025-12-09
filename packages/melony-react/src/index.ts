@@ -10,8 +10,8 @@ export { ThreadSidebar } from "./chat/thread-sidebar";
 
 // ===== Types =====
 export type { Thread } from "./use-melony-store";
-export type { MelonyEvent } from "@melony/core";
+export type { MelonyEvent } from "@melony/core/browser";
 export type { MelonyTheme } from "./theme";
 
 // ===== Utilities =====
-export { generateId } from "@melony/core";
+export { generateId } from "@melony/core/browser";

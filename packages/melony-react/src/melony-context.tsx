@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { MelonyTheme, ThemeProvider } from "./theme";
-import { MelonyEvent } from "@melony/core";
+import { MelonyEvent } from "@melony/core/browser";
 import { TransportFn } from "@melony/client";
 import {
   useMelonyStore,

@@ -2,7 +2,7 @@ import React from "react";
 import { ICONS } from "../icons";
 import { CSSProperties, HTMLInputTypeAttribute } from "react";
 import { Color, FontSize, FontWeight, Spacing } from "../theme";
-import { MelonyEvent } from "@melony/core";
+import { MelonyEvent } from "@melony/core/browser";
 
 // Common types
 type Size = "sm" | "md" | "lg";

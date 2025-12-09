@@ -1,137 +1,106 @@
-import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 import { PendingAction, PendingActionsStore } from "./types";
 
 /**
- * In-memory implementation of PendingActionsStore.
- * Suitable for development and single-server deployments.
- * For production with multiple servers, use Redis or database-backed store.
+ * Stateless implementation of PendingActionsStore.
+ * Encodes all pending action data into a signed token.
+ * Suitable for serverless and distributed environments without a database.
  */
-export class InMemoryPendingActionsStore implements PendingActionsStore {
-  private store = new Map<string, PendingAction>();
+export class StatelessPendingActionsStore implements PendingActionsStore {
   private secret: string;
 
   constructor(secret?: string) {
-    // Use provided secret or generate a random one
-    // In production, always provide a consistent secret across restarts
     this.secret = secret || randomBytes(32).toString("hex");
   }
 
-  /**
-   * Create HMAC signature for a pending action.
-   * Note: We intentionally DON'T sign params - this allows users to modify
-   * parameters in the approval form (e.g., change unit from fahrenheit to celsius).
-   * The signature protects:
-   * - Which action can be executed (prevents switching to different actions)
-   * - The pending action ID (prevents replay/forgery)
-   * - Expiration (time-limited tokens)
-   * 
-   * For sensitive actions where params must be immutable, consider adding
-   * per-action "lockedParams" support in the future.
-   */
-  private sign(data: Omit<PendingAction, "signature">): string {
-    const payload = JSON.stringify({
-      id: data.id,
-      actionName: data.actionName,
-      // params intentionally excluded - allows user to edit in approval form
-      createdAt: data.createdAt,
-      expiresAt: data.expiresAt,
-      runId: data.runId,
-    });
+  // Encodes data into a url-safe signed token: "base64(json).hmac"
+  private encode(data: any): string {
+    const json = JSON.stringify(data);
+    const base64 = Buffer.from(json).toString("base64url");
+    const signature = createHmac("sha256", this.secret)
+      .update(base64)
+      .digest("base64url");
+    return `${base64}.${signature}`;
+  }
 
-    return createHmac("sha256", this.secret).update(payload).digest("hex");
+  // Decodes and verifies the token
+  private decode(token: string): any | null {
+    const parts = token.split(".");
+    if (parts.length !== 2) return null;
+    
+    const [base64, signature] = parts;
+    if (!base64 || !signature) return null;
+
+    const expectedSignature = createHmac("sha256", this.secret)
+      .update(base64)
+      .digest("base64url");
+
+    const sigBuf = Buffer.from(signature);
+    const expectedBuf = Buffer.from(expectedSignature);
+
+    // Timing safe comparison to prevent forgery
+    if (
+      sigBuf.length !== expectedBuf.length ||
+      !timingSafeEqual(sigBuf, expectedBuf)
+    ) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(Buffer.from(base64, "base64url").toString());
+    } catch {
+      return null;
+    }
   }
 
   async create(
     action: Omit<PendingAction, "id" | "signature">
   ): Promise<PendingAction> {
-    const id = randomUUID();
-    const pendingWithId = { id, ...action };
-    const signature = this.sign(pendingWithId);
-
-    const pending: PendingAction = {
-      ...pendingWithId,
-      signature,
-    };
-
-    this.store.set(id, pending);
-    return pending;
-  }
-
-  async get(id: string): Promise<PendingAction | null> {
-    const action = this.store.get(id);
-
-    if (!action) {
-      return null;
-    }
-
-    // Check expiration
-    if (action.expiresAt < Date.now()) {
-      this.store.delete(id);
-      return null;
-    }
-
-    return action;
-  }
-
-  async verify(id: string, signature: string): Promise<PendingAction | null> {
-    const action = await this.get(id);
-
-    if (!action) {
-      return null;
-    }
-
-    // Recalculate expected signature (params excluded - allows user edits)
-    const expectedSignature = this.sign({
-      id: action.id,
+    // Prepare payload. We omit 'state' to keep the token size small, 
+    // as the runtime re-executes the action and doesn't rely on stored state.
+    // If state is crucial for resumption, it would need to be included or stored externally.
+    const payload = {
       actionName: action.actionName,
-      params: action.params, // Not used in sign(), but required by type
+      params: action.params,
       createdAt: action.createdAt,
       expiresAt: action.expiresAt,
       runId: action.runId,
-      state: action.state,
-    });
+      // We don't include state by default to avoid huge tokens
+    };
 
-    // Use timing-safe comparison to prevent timing attacks
-    try {
-      const sigBuffer = Buffer.from(signature, "hex");
-      const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    // The ID itself is the signed token containing all data
+    const token = this.encode(payload);
 
-      if (sigBuffer.length !== expectedBuffer.length) {
-        return null;
-      }
+    return {
+      id: token,
+      signature: token, // Can mirror the token
+      ...action,
+      state: undefined, // State is not persisted in the token
+    };
+  }
 
-      if (!timingSafeEqual(sigBuffer, expectedBuffer)) {
-        return null;
-      }
-    } catch {
-      // Invalid hex string or other error
-      return null;
-    }
+  async get(id: string): Promise<PendingAction | null> {
+    const data = this.decode(id);
+    if (!data) return null;
 
-    return action;
+    if (data.expiresAt < Date.now()) return null;
+
+    return {
+      id,
+      signature: id,
+      ...data,
+      state: undefined, 
+    };
+  }
+
+  async verify(id: string, signature: string): Promise<PendingAction | null> {
+    // In this pattern, 'id' IS the token. We can just verify 'id'.
+    // Signature provided by client might be the same as ID.
+    return this.get(id);
   }
 
   async delete(id: string): Promise<void> {
-    this.store.delete(id);
-  }
-
-  /**
-   * Clean up expired pending actions (call periodically in long-running processes)
-   */
-  cleanup(): void {
-    const now = Date.now();
-    for (const [id, action] of this.store.entries()) {
-      if (action.expiresAt < now) {
-        this.store.delete(id);
-      }
-    }
-  }
-
-  /**
-   * Get the number of pending actions (useful for monitoring)
-   */
-  size(): number {
-    return this.store.size;
+    // Stateless tokens cannot be deleted server-side; they simply expire.
+    // This is a trade-off for simplicity (no revocation list).
   }
 }
-

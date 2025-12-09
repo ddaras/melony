@@ -38,7 +38,7 @@
     "dist"
   ],
   "dependencies": {
-    "@melony/core": "workspace:*",
+    "@melony/core": "^0.0.1",
     "node-html-parser": "^7.0.1"
   },
   "devDependencies": {

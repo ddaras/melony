@@ -2,7 +2,7 @@ import {
   parseIncomingMessage,
   IncomingMessage,
   PendingActionsStore,
-  InMemoryPendingActionsStore,
+  StatelessPendingActionsStore,
 } from "@melony/core";
 import { createStreamResponse } from "@melony/runtime";
 import type { Agent } from "./index";
@@ -10,7 +10,7 @@ import type { Agent } from "./index";
 export interface AgentHandlerOptions {
   /**
    * Store for HITL pending actions.
-   * If not provided, creates an InMemoryPendingActionsStore internally.
+   * If not provided, creates a StatelessPendingActionsStore internally.
    * For production with multiple servers, provide a Redis or database-backed store.
    */
   pendingActionsStore?: PendingActionsStore;
@@ -48,7 +48,7 @@ export function createAgentHandler(
   const pendingActionsStore =
     options.pendingActionsStore ??
     agent.config.pendingActionsStore ??
-    new InMemoryPendingActionsStore(
+    new StatelessPendingActionsStore(
       options.secret ?? process.env.HITL_SECRET ?? "dev-secret-change-in-production"
     );
 
