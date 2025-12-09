@@ -1,6 +1,6 @@
 {
   "name": "@melony/react",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha.2",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -41,8 +41,8 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@melony/client": "^0.0.2",
-    "@melony/core": "^0.0.1"
+    "@melony/client": "^0.0.2-alpha.2",
+    "@melony/core": "^0.0.2-alpha.2"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.6",
