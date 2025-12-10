@@ -1,6 +1,6 @@
 {
   "name": "@melony/client",
-  "version": "0.0.2-alpha.2",
+  "version": "0.0.2-alpha.3",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -38,7 +38,7 @@
     "dist"
   ],
   "dependencies": {
-    "@melony/core": "workspace:*",
+    "@melony/core": "^0.0.2-alpha.3",
     "node-html-parser": "^7.0.1"
   },
   "devDependencies": {
