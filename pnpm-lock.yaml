@@ -29,6 +29,9 @@ importers:
       '@melony/agents':
         specifier: workspace:*
         version: link:../../packages/melony-agents
+      '@melony/client':
+        specifier: workspace:*
+        version: link:../../packages/melony-client
       '@melony/core':
         specifier: workspace:*
         version: link:../../packages/melony-core
@@ -160,57 +163,11 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  apps/melony-cloud-api:
-    dependencies:
-      '@ai-sdk/openai':
-        specifier: ^2.0.38
-        version: 2.0.42(zod@3.25.76)
-      '@hono/node-server':
-        specifier: ^1.19.7
-        version: 1.19.7(hono@4.10.7)
-      '@melony/agents':
-        specifier: ^0.0.1
-        version: 0.0.1
-      '@melony/core':
-        specifier: ^0.0.1
-        version: 0.0.1
-      '@melony/runtime':
-        specifier: ^0.0.1
-        version: 0.0.1
-      '@prisma/client':
-        specifier: ^5.22.0
-        version: 5.22.0(prisma@5.22.0)
-      ai:
-        specifier: ^5.0.56
-        version: 5.0.60(zod@3.25.76)
-      hono:
-        specifier: ^4.6.0
-        version: 4.10.7
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.20
-      prisma:
-        specifier: ^5.22.0
-        version: 5.22.0
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
-      tsx:
-        specifier: ^4.19.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.6.0
-        version: 5.9.3
-
   packages/melony-agents:
     dependencies:
       '@melony/core':
-        specifier: ^0.0.2-alpha.2
-        version: 0.0.2-alpha.2
+        specifier: workspace:*
+        version: link:../melony-core
       '@melony/runtime':
         specifier: ^0.0.2-alpha.2
         version: 0.0.2-alpha.2
@@ -234,8 +191,8 @@ importers:
   packages/melony-client:
     dependencies:
       '@melony/core':
-        specifier: ^0.0.2-alpha.2
-        version: 0.0.2-alpha.2
+        specifier: workspace:*
+        version: link:../melony-core
       node-html-parser:
         specifier: ^7.0.1
         version: 7.0.1
@@ -284,9 +241,6 @@ importers:
         specifier: '>=18'
         version: 19.2.0
     devDependencies:
-      '@types/mustache':
-        specifier: ^4.2.6
-        version: 4.2.6
       '@types/react':
         specifier: ^19.1.12
         version: 19.2.0
@@ -780,12 +734,6 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@hono/node-server@1.19.7':
-    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -969,9 +917,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@melony/agents@0.0.1':
-    resolution: {integrity: sha512-Du0xNJwVoJ4g/P4Ko3vpDOsxulLaV5qMlmuNYBKpoE+WNsNLc4AFjl3yVrbhtXUGP2Dzx+w6qR6UqYPnlijNzA==}
-
   '@melony/client@0.0.2':
     resolution: {integrity: sha512-wAOh/xdMHTHCOQkNIq9U3EXkRagxPLCkjXoSRyzcbvUw+LPQwVDaFHmfKqVy/5Sb+il6+7UkVL071ugVxDP72g==}
 
@@ -980,9 +925,6 @@ packages:
 
   '@melony/core@0.0.2-alpha.2':
     resolution: {integrity: sha512-kwKsuYEzrfrINy+fM8JNUzdPwm37oT7J6/fWS1Xaojz8Ip0suEpPX8OC1mdFTipfV5UEtUo6H2zJmmpGzQ486A==}
-
-  '@melony/runtime@0.0.1':
-    resolution: {integrity: sha512-ZJ+Am9VCqFjII8Auo0AwPvjbI8xYAP+Uat1NhZzCnQfpd5+sd1ZIKqx/Lq4tcB+wfChm87/vxCzPAD/rcUPQdQ==}
 
   '@melony/runtime@0.0.2-alpha.2':
     resolution: {integrity: sha512-78OcBBcycifQaQTl2zTJ3Kl38Kyub92wn2K2tCTvYz3FlsFCQ5b1BC12HOwf95lfaj2RzFopFn7BkA3ecPUq/Q==}
@@ -1070,30 +1012,6 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
-
-  '@prisma/client@5.22.0':
-    resolution: {integrity: sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA==}
-    engines: {node: '>=16.13'}
-    peerDependencies:
-      prisma: '*'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-
-  '@prisma/debug@5.22.0':
-    resolution: {integrity: sha512-AUt44v3YJeggO2ZU5BkXI7M4hu9BF2zzH2iF2V5pyXT/lRTyWiElZ7It+bRH1EshoMRxHgpYg4VB6rCM+mG5jQ==}
-
-  '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2':
-    resolution: {integrity: sha512-2PTmxFR2yHW/eB3uqWtcgRcgAbG1rwG9ZriSvQw+nnb7c4uCr3RAcGMb6/zfE88SKlC1Nj2ziUvc96Z379mHgQ==}
-
-  '@prisma/engines@5.22.0':
-    resolution: {integrity: sha512-UNjfslWhAt06kVL3CjkuYpHAWSO6L4kDCVPegV6itt7nD1kSJavd3vhgAEhjglLJJKEdJ7oIqDJ+yHk6qO8gPA==}
-
-  '@prisma/fetch-engine@5.22.0':
-    resolution: {integrity: sha512-bkrD/Mc2fSvkQBV5EpoFcZ87AvOgDxbG99488a5cexp5Ccny+UM6MAe/UFkUC0wLYD9+9befNOqGiIJhhq+HbA==}
-
-  '@prisma/get-platform@5.22.0':
-    resolution: {integrity: sha512-pHhpQdr1UPFpt+zFfnPazhulaZYCUqeIcPpJViYoq9R+D/yw4fjE+CtnsnKzPYm0ddUbeXUzjGVGIRVgPDCk4Q==}
 
   '@radix-ui/number@1.1.1':
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -1871,9 +1789,6 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
-
-  '@types/mustache@4.2.6':
-    resolution: {integrity: sha512-t+8/QWTAhOFlrF1IVZqKnMRJi84EgkIK5Kh0p2JV4OLywUvCwJPFxbJAl7XAow7DVIHsF+xW9f1MVzg0L6Szjw==}
 
   '@types/node@20.19.20':
     resolution: {integrity: sha512-2Q7WS25j4pS1cS8yw3d6buNCVJukOTeQ39bAnwR6sOJbaxvyCGebzTMypDFN82CxBLnl+lSWVdCCWbRY6y9yZQ==}
@@ -3022,10 +2937,6 @@ packages:
   highlightjs-vue@1.0.0:
     resolution: {integrity: sha512-PDEfEF102G23vHmPhLyPboFCD+BkMGu+GuJe2d9/eH4FsCwvgBpnc9n0pGE+ffKdph38s6foEZiEjdgHdzp+IA==}
 
-  hono@4.10.7:
-    resolution: {integrity: sha512-icXIITfw/07Q88nLSkB9aiUrd8rYzSweK681Kjo/TSggaGbOX4RRyxxm71v+3PC8C/j+4rlxGeoTRxQDkaJkUw==}
-    engines: {node: '>=16.9.0'}
-
   html-url-attributes@3.0.1:
     resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
 
@@ -3802,11 +3713,6 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  prisma@5.22.0:
-    resolution: {integrity: sha512-vtpjW3XuYCSnMsNVBjLMNkTj6OZbudcPPTPYHqX0CJfpcdWciI1dM8uHETwmDxxiqEwCIE6WvXucWUetJgfu/A==}
-    engines: {node: '>=16.13'}
-    hasBin: true
-
   prismjs@1.27.0:
     resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
     engines: {node: '>=6'}
@@ -4560,9 +4466,6 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
   zod@4.1.11:
     resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
 
@@ -4570,13 +4473,6 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
-
-  '@ai-sdk/gateway@1.0.33(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@3.25.76)
-      '@vercel/oidc': 3.0.1
-      zod: 3.25.76
 
   '@ai-sdk/gateway@1.0.33(zod@4.1.11)':
     dependencies:
@@ -4591,24 +4487,11 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.17(zod@4.1.11)
       zod: 4.1.11
 
-  '@ai-sdk/openai@2.0.42(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@3.25.76)
-      zod: 3.25.76
-
   '@ai-sdk/openai@2.0.42(zod@4.1.11)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.10(zod@4.1.11)
       zod: 4.1.11
-
-  '@ai-sdk/provider-utils@3.0.10(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@standard-schema/spec': 1.0.0
-      eventsource-parser: 3.0.6
-      zod: 3.25.76
 
   '@ai-sdk/provider-utils@3.0.10(zod@4.1.11)':
     dependencies:
@@ -4908,10 +4791,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hono/node-server@1.19.7(hono@4.10.7)':
-    dependencies:
-      hono: 4.10.7
-
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.7':
@@ -5067,12 +4946,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@melony/agents@0.0.1':
-    dependencies:
-      '@melony/core': 0.0.1
-      '@melony/runtime': 0.0.1
-      zod: 4.1.11
-
   '@melony/client@0.0.2':
     dependencies:
       '@melony/core': 0.0.1
@@ -5084,11 +4957,6 @@ snapshots:
 
   '@melony/core@0.0.2-alpha.2':
     dependencies:
-      zod: 4.1.11
-
-  '@melony/runtime@0.0.1':
-    dependencies:
-      '@melony/core': 0.0.1
       zod: 4.1.11
 
   '@melony/runtime@0.0.2-alpha.2':
@@ -5155,31 +5023,6 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
-
-  '@prisma/client@5.22.0(prisma@5.22.0)':
-    optionalDependencies:
-      prisma: 5.22.0
-
-  '@prisma/debug@5.22.0': {}
-
-  '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2': {}
-
-  '@prisma/engines@5.22.0':
-    dependencies:
-      '@prisma/debug': 5.22.0
-      '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
-      '@prisma/fetch-engine': 5.22.0
-      '@prisma/get-platform': 5.22.0
-
-  '@prisma/fetch-engine@5.22.0':
-    dependencies:
-      '@prisma/debug': 5.22.0
-      '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
-      '@prisma/get-platform': 5.22.0
-
-  '@prisma/get-platform@5.22.0':
-    dependencies:
-      '@prisma/debug': 5.22.0
 
   '@radix-ui/number@1.1.1': {}
 
@@ -5931,8 +5774,6 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/mustache@4.2.6': {}
-
   '@types/node@20.19.20':
     dependencies:
       undici-types: 6.21.0
@@ -6123,14 +5964,6 @@ snapshots:
       acorn: 8.15.0
 
   acorn@8.15.0: {}
-
-  ai@5.0.60(zod@3.25.76):
-    dependencies:
-      '@ai-sdk/gateway': 1.0.33(zod@3.25.76)
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@3.25.76)
-      '@opentelemetry/api': 1.9.0
-      zod: 3.25.76
 
   ai@5.0.60(zod@4.1.11):
     dependencies:
@@ -6863,6 +6696,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.1
       '@esbuild/win32-ia32': 0.27.1
       '@esbuild/win32-x64': 0.27.1
+    optional: true
 
   escape-string-regexp@4.0.0: {}
 
@@ -7389,8 +7223,6 @@ snapshots:
   highlight.js@10.7.3: {}
 
   highlightjs-vue@1.0.0: {}
-
-  hono@4.10.7: {}
 
   html-url-attributes@3.0.1: {}
 
@@ -8390,12 +8222,6 @@ snapshots:
 
   prettier@3.7.4: {}
 
-  prisma@5.22.0:
-    dependencies:
-      '@prisma/engines': 5.22.0
-    optionalDependencies:
-      fsevents: 2.3.3
-
   prismjs@1.27.0: {}
 
   prismjs@1.30.0: {}
@@ -9099,6 +8925,7 @@ snapshots:
       get-tsconfig: 4.10.1
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   turbo-darwin-64@2.5.8:
     optional: true
@@ -9411,8 +9238,6 @@ snapshots:
   yallist@5.0.0: {}
 
   yocto-queue@0.1.0: {}
-
-  zod@3.25.76: {}
 
   zod@4.1.11: {}
 

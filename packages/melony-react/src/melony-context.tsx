@@ -1,317 +1,95 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
+  useState,
   useMemo,
   useCallback,
-  useRef,
-  useEffect,
+  ReactNode,
 } from "react";
-import { MelonyTheme, ThemeProvider } from "./theme";
-import { MelonyEvent } from "@melony/core/browser";
-import { TransportFn } from "@melony/client";
 import {
-  useMelonyStore,
-  Thread,
-  ThreadState,
-  UseMelonyStoreOptions,
-} from "./use-melony-store";
-import { ChatMessage } from "@melony/client";
+  MelonyRuntimeClient,
+  MelonyRuntimeClientOptions,
+  MelonyRuntimeClientState,
+} from "@melony/client";
+import { MelonyMessage } from "@melony/core/browser"; // Runtime client uses browser core exports
 
-type EventHandler = (evt: MelonyEvent) => void;
-
-interface MelonyContextType {
-  dispatchEvent: (evt: MelonyEvent) => void;
-  addEventHandler: (listener: EventHandler) => () => void;
-
-  // Store state - available when using MelonyStoreProvider
-  threads: Thread[];
-  activeThreadId: string | null;
-  activeThread: Thread | undefined;
-  messages: ChatMessage[];
-  isLoading: boolean;
-  error: Error | null;
-
-  // Getters
-  getThread: (threadId: string) => Thread | undefined;
-  getThreadMessages: (threadId: string) => ChatMessage[];
-  getThreadState: (threadId: string) => ThreadState | undefined;
+export interface MelonyContextValue extends MelonyRuntimeClientState {
+  sendMessage: (message: MelonyMessage) => Promise<void>;
+  clear: () => void;
+  client: MelonyRuntimeClient;
 }
 
-export const MelonyContext = createContext<MelonyContextType | null>(null);
+const MelonyContext = createContext<MelonyContextValue | undefined>(undefined);
 
-// ============================================================================
-// Base Provider (without store, for custom implementations)
-// ============================================================================
-
-export interface MelonyProviderProps {
-  children: React.ReactNode;
-  theme?: Partial<MelonyTheme>;
-  onEvent?: (event: MelonyEvent) => void;
+export interface MelonyProviderProps extends MelonyRuntimeClientOptions {
+  children: ReactNode;
+  client?: MelonyRuntimeClient;
 }
 
-/**
- * Basic MelonyProvider - provides event dispatch and theme.
- * Use this if you want to manage state yourself.
- * For full thread/chat management, use MelonyStoreProvider.
- */
-export function MelonyProvider({
+export const MelonyProvider: React.FC<MelonyProviderProps> = ({
   children,
-  theme,
-  onEvent,
-}: MelonyProviderProps) {
-  const listenersRef = useRef<Set<EventHandler>>(new Set());
+  client: providedClient,
+  ...options
+}) => {
+  // Initialize client
+  const client = useMemo(() => {
+    return providedClient || new MelonyRuntimeClient(options);
+  }, [providedClient, options.transport, options.threadId]); // Be careful with options dependency stability
 
-  const dispatchEvent = useCallback(
-    (evt: MelonyEvent) => {
-      // Call the onEvent prop if provided
-      if (onEvent) {
-        onEvent(evt);
-      } else {
-        console.log("Event:", evt);
-      }
-
-      // Notify all registered listeners
-      listenersRef.current.forEach((listener) => {
-        listener(evt);
-      });
-    },
-    [onEvent]
+  // State to sync with client
+  const [state, setState] = useState<MelonyRuntimeClientState>(
+    client.getState()
   );
 
-  const addEventHandler = useCallback((listener: EventHandler) => {
-    listenersRef.current.add(listener);
-    return () => {
-      listenersRef.current.delete(listener);
-    };
-  }, []);
-
-  // Empty store state for basic provider
-  const emptyGetThread = useCallback(() => undefined, []);
-  const emptyGetMessages = useCallback(() => [], []);
-  const emptyGetState = useCallback(() => undefined, []);
-
-  const contextValue = useMemo(
-    () => ({
-      dispatchEvent,
-      addEventHandler,
-      // Empty store state
-      threads: [],
-      activeThreadId: null,
-      activeThread: undefined,
-      messages: [],
-      isLoading: false,
-      error: null,
-      getThread: emptyGetThread,
-      getThreadMessages: emptyGetMessages,
-      getThreadState: emptyGetState,
-    }),
-    [dispatchEvent, addEventHandler, emptyGetThread, emptyGetMessages, emptyGetState]
-  );
-
-  return (
-    <MelonyContext.Provider value={contextValue}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
-    </MelonyContext.Provider>
-  );
-}
-
-// ============================================================================
-// Store Provider (with built-in thread/chat management)
-// ============================================================================
-
-export interface MelonyStoreProviderProps {
-  children: React.ReactNode;
-  theme?: Partial<MelonyTheme>;
-  /**
-   * API endpoint for chat
-   */
-  api?: string;
-  /**
-   * Custom transport function
-   */
-  transport?: TransportFn;
-  /**
-   * Callback to load message history when switching threads
-   */
-  onLoadHistory?: (threadId: string) => Promise<ChatMessage[]>;
-  /**
-   * Callback when threads change (for persistence)
-   */
-  onThreadsChange?: (threads: Thread[]) => void;
-  /**
-   * Additional event handler for custom events
-   */
-  onEvent?: (event: MelonyEvent) => void;
-}
-
-/**
- * MelonyStoreProvider - provides full thread/chat management with event-based API.
- * 
- * Events handled:
- * - createThread: Create a new thread
- * - switchThread: Switch to a thread { threadId }
- * - deleteThread: Delete a thread { threadId }
- * - updateThreadTitle: Update thread title { threadId, title }
- * - updateThreadPreview: Update thread preview { threadId, preview }
- * - sendMessage: Send a message { role, content, threadId? }
- * - clearThread: Clear thread messages { threadId? }
- * 
- * Any other events are passed to onEvent callback.
- */
-export function MelonyStoreProvider({
-  children,
-  theme,
-  api,
-  transport,
-  onLoadHistory,
-  onThreadsChange,
-  onEvent,
-}: MelonyStoreProviderProps) {
-  const listenersRef = useRef<Set<EventHandler>>(new Set());
-
-  // Use the unified store
-  const store = useMelonyStore({
-    api,
-    transport,
-    onLoadHistory,
-    onThreadsChange,
-  });
-
-  const dispatchEvent = useCallback(
-    (evt: MelonyEvent) => {
-      // Known store events - handle via store
-      const storeEvents = [
-        "createThread",
-        "switchThread",
-        "deleteThread",
-        "updateThreadTitle",
-        "updateThreadPreview",
-        "sendMessage",
-        "clearThread",
-      ];
-
-      if (storeEvents.includes(evt.type)) {
-        store.handleEvent(evt);
-      }
-
-      // Also call custom onEvent for any event
-      if (onEvent) {
-        onEvent(evt);
-      }
-
-      // Notify all registered listeners
-      listenersRef.current.forEach((listener) => {
-        listener(evt);
-      });
-    },
-    [store, onEvent]
-  );
-
-  const addEventHandler = useCallback((listener: EventHandler) => {
-    listenersRef.current.add(listener);
-    return () => {
-      listenersRef.current.delete(listener);
-    };
-  }, []);
-
-  const contextValue = useMemo(
-    () => ({
-      dispatchEvent,
-      addEventHandler,
-      // Store state
-      threads: store.threads,
-      activeThreadId: store.activeThreadId,
-      activeThread: store.activeThread,
-      messages: store.messages,
-      isLoading: store.isLoading,
-      error: store.error,
-      getThread: store.getThread,
-      getThreadMessages: store.getThreadMessages,
-      getThreadState: store.getThreadState,
-    }),
-    [
-      dispatchEvent,
-      addEventHandler,
-      store.threads,
-      store.activeThreadId,
-      store.activeThread,
-      store.messages,
-      store.isLoading,
-      store.error,
-      store.getThread,
-      store.getThreadMessages,
-      store.getThreadState,
-    ]
-  );
-
-  return (
-    <MelonyContext.Provider value={contextValue}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
-    </MelonyContext.Provider>
-  );
-}
-
-// ============================================================================
-// Hooks
-// ============================================================================
-
-/**
- * Access Melony context for dispatching events and accessing store state
- */
-export function useMelony() {
-  const context = useContext(MelonyContext);
-  if (!context) {
-    throw new Error("useMelony must be used within MelonyProvider or MelonyStoreProvider");
-  }
-  return {
-    dispatchEvent: context.dispatchEvent,
-    // Store state
-    threads: context.threads,
-    activeThreadId: context.activeThreadId,
-    activeThread: context.activeThread,
-    messages: context.messages,
-    isLoading: context.isLoading,
-    error: context.error,
-    // Getters
-    getThread: context.getThread,
-    getThreadMessages: context.getThreadMessages,
-    getThreadState: context.getThreadState,
-  };
-}
-
-/**
- * Hook to listen to dispatched events
- * @param callback - Function to call when an event is dispatched
- * @param deps - Optional dependency array for the callback
- */
-export function useDispatchedEvent(
-  callback: (evt: MelonyEvent) => void,
-  deps?: React.DependencyList
-) {
-  const context = useContext(MelonyContext);
-  const callbackRef = React.useRef(callback);
-
-  // Keep callback ref up to date
-  React.useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-
+  // Subscribe to client updates
   useEffect(() => {
-    if (!context) {
-      console.warn("useDispatchedEvent must be used within MelonyProvider");
-      return;
-    }
+    // Sync initial state in case it changed before effect ran
+    setState(client.getState());
 
-    // Create a stable listener that always calls the latest callback
-    const listener = (evt: MelonyEvent) => {
-      callbackRef.current(evt);
-    };
+    const unsubscribe = client.subscribe((newState) => {
+      setState(newState);
+    });
 
-    // Subscribe to events
-    const unsubscribe = context.addEventHandler(listener);
-
-    // Cleanup on unmount or deps change
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context, ...(deps || [])]);
-}
+  }, [client]);
+
+  // Wrapper to consume the generator
+  const sendMessage = useCallback(
+    async (message: MelonyMessage) => {
+      const generator = client.sendMessage(message);
+      // Consume the generator to ensure it executes and updates state
+      for await (const _ of generator) {
+        // We can ignore the events here because the client updates its state,
+        // which triggers our subscription.
+      }
+    },
+    [client]
+  );
+
+  const clear = useCallback(() => {
+    client.clear();
+  }, [client]);
+
+  const value = useMemo(
+    () => ({
+      ...state,
+      sendMessage,
+      clear,
+      client,
+    }),
+    [state, sendMessage, clear, client]
+  );
+
+  return (
+    <MelonyContext.Provider value={value}>{children}</MelonyContext.Provider>
+  );
+};
+
+export const useMelony = (): MelonyContextValue => {
+  const context = useContext(MelonyContext);
+  if (context === undefined) {
+    throw new Error("useMelony must be used within a MelonyProvider");
+  }
+  return context;
+};

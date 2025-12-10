@@ -1,21 +1,15 @@
-import { MelonyEvent, generateId } from "@melony/core/browser";
+import { MelonyEvent, MelonyMessage, generateId } from "@melony/core/browser";
 
-import {
-  TransportFn,
-  createHttpTransport,
-  ChatMessage,
-  TransportRequest,
-} from "./transport";
+import { TransportFn, TransportRequest } from "./transport";
 
 export interface MelonyRuntimeClientOptions {
   transport?: TransportFn;
-  api?: string;
   threadId?: string; // Optional: provide existing threadId, or one will be generated
 }
 
 export interface MelonyRuntimeClientState {
   events: MelonyEvent[];
-  messages: ChatMessage[];
+  messages: MelonyMessage[];
   isLoading: boolean;
   error: Error | null;
   threadId: string;
@@ -37,12 +31,8 @@ export class MelonyRuntimeClient {
   constructor(options: MelonyRuntimeClientOptions) {
     if (options.transport) {
       this.transport = options.transport;
-    } else if (options.api) {
-      this.transport = createHttpTransport(options.api);
     } else {
-      throw new Error(
-        "Either transport or api must be provided to MelonyRuntimeClient"
-      );
+      throw new Error("Transport must be provided to MelonyRuntimeClient");
     }
 
     // Use provided threadId or keep generated one
@@ -80,7 +70,7 @@ export class MelonyRuntimeClient {
    * Send a message and stream events (chat-based API)
    * Only sends the new message with threadId - backend can fetch history if needed
    */
-  async *sendMessage(message: ChatMessage): AsyncGenerator<MelonyEvent> {
+  async *sendMessage(message: MelonyMessage): AsyncGenerator<MelonyEvent> {
     // Abort previous run if still in progress
     if (this.abortController) {
       this.abortController.abort();
@@ -92,6 +82,9 @@ export class MelonyRuntimeClient {
     // Add message to state
     const updatedMessages = [...this.state.messages, message];
     this.setState({ messages: updatedMessages });
+
+    // Track which message index corresponds to which runId
+    const runIdToMessageIndex = new Map<string | undefined, number>();
 
     try {
       // Send only the new message with threadId
@@ -132,10 +125,79 @@ export class MelonyRuntimeClient {
           if (line.startsWith("data: ")) {
             try {
               const event: MelonyEvent = JSON.parse(line.slice(6));
+              
+              // Update events array for backward compatibility
               this.setState({
                 events: [...this.state.events, event],
               });
-              // Update messages with event (simplified - full merging would need the mergeMessageEvent function)
+
+              // Get or create message for this runId
+              const eventRunId = event.runId;
+              let messageIndex = runIdToMessageIndex.get(eventRunId);
+
+              if (messageIndex === undefined) {
+                // Create new assistant message for this runId
+                const assistantMessage: MelonyMessage = {
+                  role: "assistant",
+                  content: [event],
+                  runId: eventRunId,
+                };
+                
+                const currentMessages = [...this.state.messages];
+                messageIndex = currentMessages.length;
+                currentMessages.push(assistantMessage);
+                runIdToMessageIndex.set(eventRunId, messageIndex);
+                
+                this.setState({ messages: currentMessages });
+              } else {
+                // Append event to existing message
+                const currentMessages = [...this.state.messages];
+                const existingMessage = currentMessages[messageIndex];
+                
+                if (existingMessage && existingMessage.role === "assistant") {
+                  const updatedContent = [...existingMessage.content];
+                  
+                  // Check if this is a text-delta event that should be merged
+                  if (event.type === "text-delta" && event.data?.delta) {
+                    // Find the last text-delta event in the content (search backwards)
+                    let lastTextDeltaIndex = -1;
+                    for (let i = updatedContent.length - 1; i >= 0; i--) {
+                      if (updatedContent[i].type === "text-delta") {
+                        lastTextDeltaIndex = i;
+                        break;
+                      }
+                    }
+                    
+                    if (lastTextDeltaIndex !== -1) {
+                      // Merge deltas: accumulate the new delta into the existing one
+                      const lastTextDelta = updatedContent[lastTextDeltaIndex];
+                      const accumulatedDelta = 
+                        (lastTextDelta.data?.delta || "") + event.data.delta;
+                      
+                      updatedContent[lastTextDeltaIndex] = {
+                        ...lastTextDelta,
+                        data: {
+                          ...lastTextDelta.data,
+                          delta: accumulatedDelta,
+                        },
+                      };
+                    } else {
+                      // No existing text-delta event, add this one
+                      updatedContent.push(event);
+                    }
+                  } else {
+                    // Not a text-delta or doesn't have delta, add normally
+                    updatedContent.push(event);
+                  }
+                  
+                  currentMessages[messageIndex] = {
+                    ...existingMessage,
+                    content: updatedContent,
+                  };
+                  this.setState({ messages: currentMessages });
+                }
+              }
+
               yield event;
             } catch (e) {
               console.error("Failed to parse event:", e);
@@ -164,6 +226,7 @@ export class MelonyRuntimeClient {
     if (this.abortController) {
       this.abortController.abort();
     }
+
     this.setState({
       events: [],
       messages: [],

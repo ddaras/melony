@@ -1,30 +1,11 @@
-import { MelonyEvent } from "@melony/core/browser";
-
-/**
- * Chat message format used for transport
- *
- * Key concepts:
- * - Events are the fundamental unit (MelonyEvent)
- * - Messages group events by runId (from backend, always assistant role)
- * - Client can send messages (user/system role) with events inside
- */
-export interface ChatMessage {
-  role: "user" | "assistant" | "system";
-  /**
-   * Content is always an array of events for consistency
-   * - For assistant messages (from backend): array of events grouped by runId
-   * - For user/system messages (from client): array of events
-   */
-  content: MelonyEvent[]; // Always events array
-  runId?: string; // Only present for assistant messages (grouped events from backend)
-}
+import { MelonyEvent, MelonyMessage } from "@melony/core/browser";
 
 /**
  * Transport request payload - sends only the new message with optional threadId
  * Backend can fetch full conversation history using threadId if needed
  */
 export interface TransportRequest {
-  message: ChatMessage;
+  message: MelonyMessage;
   threadId?: string;
 }
 

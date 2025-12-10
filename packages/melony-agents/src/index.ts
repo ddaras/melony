@@ -6,6 +6,7 @@ import {
   RuntimeContext,
   NextAction,
   PendingActionsStore,
+  MelonyMessage,
 } from "@melony/core";
 import { defineRuntime } from "@melony/runtime";
 import z from "zod";
@@ -42,10 +43,10 @@ export interface AgentConfig {
    * Yield any events you want, and return a NextAction to continue or void/undefined to stop.
    */
   brain: (
-    context: RuntimeContext,
-    toolDefinitions: ToolDefinition[],
-    options: {
-      input?: any;
+    message: MelonyMessage,
+    params: {
+      context: RuntimeContext;
+      toolDefinitions: ToolDefinition[];
     }
   ) => AsyncGenerator<MelonyEvent, NextAction | void, unknown>;
 }
@@ -63,7 +64,7 @@ export function getToolDefinitions(actions: Record<string, Action<any>>) {
 // -- Internal Schemas --
 
 const BrainParamsSchema = z.object({
-  input: z.any().optional(), // Allow any input type - users can structure it as needed
+  message: z.custom<MelonyMessage>(),
 });
 
 // -- Main Agent Class --
@@ -128,8 +129,9 @@ export class Agent {
         // CALL THE BRAIN (User's Framework Agnostic Logic)
         // Pass the full runtime context - users can access state, runId, stepCount, etc.
         // Last result is available in context.state.lastResult
-        const brainGenerator = brain(context, toolDefinitions, {
-          input: params.input,
+        const brainGenerator = brain(params.message, {
+          context,
+          toolDefinitions,
         });
 
         let decision: NextAction | void = undefined;

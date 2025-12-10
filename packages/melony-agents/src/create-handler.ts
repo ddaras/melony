@@ -1,8 +1,8 @@
 import {
-  parseIncomingMessage,
-  IncomingMessage,
   PendingActionsStore,
   StatelessPendingActionsStore,
+  MelonyMessage,
+  NextAction,
 } from "@melony/core";
 import { createStreamResponse } from "@melony/runtime";
 import type { Agent } from "./index";
@@ -49,44 +49,44 @@ export function createAgentHandler(
     options.pendingActionsStore ??
     agent.config.pendingActionsStore ??
     new StatelessPendingActionsStore(
-      options.secret ?? process.env.HITL_SECRET ?? "dev-secret-change-in-production"
+      options.secret ??
+        process.env.HITL_SECRET ??
+        "dev-secret-change-in-production"
     );
 
   return async (req: Request): Promise<Response> => {
     const body = await req.json();
-    const message = body.message as IncomingMessage | undefined;
+    const message = body.message as MelonyMessage;
     // threadId can be used for multi-turn conversations (future feature)
     // const threadId = body.threadId as string | undefined;
 
-    const parsed = parseIncomingMessage(message);
-
-    // Handle invalid messages
-    if (parsed.type === "invalid") {
-      return new Response(
-        JSON.stringify({
-          error: "Invalid message format",
-          reason: parsed.reason,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+    if (!message) {
+      return new Response(JSON.stringify({ error: "Invalid message format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    let startAction: { action: string; params?: Record<string, unknown> };
+    let startAction: NextAction;
     let initialState: Record<string, unknown> = {};
 
     // Handle user text message - start with brain
-    if (parsed.type === "user") {
+    if (message.role === "user") {
       startAction = {
         action: "brain",
-        params: { input: parsed.userText },
+        params: {
+          message,
+        },
       };
     }
     // Handle secure approval resumption
-    else if (parsed.type === "approval") {
-      const { pendingActionId, signature, editedParams } = parsed.approvalData;
+    else if (message.role === "system") {
+      const { pendingActionId, signature, editedParams } = message.content?.[0]
+        ?.data as {
+        pendingActionId: string;
+        signature: string;
+        editedParams: Record<string, unknown>;
+      };
 
       // Get the pending action to find the action name and original params
       const pending = await pendingActionsStore.get(pendingActionId);
@@ -134,4 +134,3 @@ export function createAgentHandler(
     );
   };
 }
-

@@ -12,6 +12,25 @@ export type MelonyEvent = {
   timestamp?: number;
 };
 
+/**
+ * Chat message format used for transport
+ *
+ * Key concepts:
+ * - Events are the fundamental unit (MelonyEvent)
+ * - Messages group events by runId (from backend, always assistant role)
+ * - Client can send messages (user/system role) with events inside
+ */
+export interface MelonyMessage {
+  role: "user" | "assistant" | "system";
+  /**
+   * Content is always an array of events for consistency
+   * - For assistant messages (from backend): array of events grouped by runId
+   * - For user/system messages (from client): array of events
+   */
+  content: MelonyEvent[]; // Always events array
+  runId?: string; // Only present for assistant messages (grouped events from backend)
+}
+
 // ============================================
 // Human-in-the-Loop (HITL) Types
 // ============================================

@@ -45,7 +45,6 @@
     "@melony/core": "^0.0.2-alpha.2"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.6",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.2.0",
     "rimraf": "^5.0.10",
