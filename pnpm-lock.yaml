@@ -166,8 +166,8 @@ importers:
   packages/melony-agents:
     dependencies:
       '@melony/core':
-        specifier: workspace:*
-        version: link:../melony-core
+        specifier: ^0.0.2-alpha.3
+        version: 0.0.2-alpha.3
       '@melony/runtime':
         specifier: ^0.0.2-alpha.2
         version: 0.0.2-alpha.2
@@ -191,8 +191,8 @@ importers:
   packages/melony-client:
     dependencies:
       '@melony/core':
-        specifier: workspace:*
-        version: link:../melony-core
+        specifier: ^0.0.2-alpha.3
+        version: 0.0.2-alpha.3
       node-html-parser:
         specifier: ^7.0.1
         version: 7.0.1
@@ -232,11 +232,11 @@ importers:
   packages/melony-react:
     dependencies:
       '@melony/client':
-        specifier: ^0.0.2-alpha.2
+        specifier: ^0.0.2-alpha.3
         version: 0.0.2
       '@melony/core':
-        specifier: ^0.0.2-alpha.2
-        version: 0.0.2-alpha.2
+        specifier: ^0.0.2-alpha.3
+        version: 0.0.2-alpha.3
       react:
         specifier: '>=18'
         version: 19.2.0
@@ -925,6 +925,9 @@ packages:
 
   '@melony/core@0.0.2-alpha.2':
     resolution: {integrity: sha512-kwKsuYEzrfrINy+fM8JNUzdPwm37oT7J6/fWS1Xaojz8Ip0suEpPX8OC1mdFTipfV5UEtUo6H2zJmmpGzQ486A==}
+
+  '@melony/core@0.0.2-alpha.3':
+    resolution: {integrity: sha512-xcD6ukwgZQrMdeSwgbdt+GJBKgMGqMI2sweyOeITCWxLZGuj2L4CjfFm2U6iCkfHHN8+strBSgc/VTQrcDrFJg==}
 
   '@melony/runtime@0.0.2-alpha.2':
     resolution: {integrity: sha512-78OcBBcycifQaQTl2zTJ3Kl38Kyub92wn2K2tCTvYz3FlsFCQ5b1BC12HOwf95lfaj2RzFopFn7BkA3ecPUq/Q==}
@@ -4959,9 +4962,13 @@ snapshots:
     dependencies:
       zod: 4.1.11
 
+  '@melony/core@0.0.2-alpha.3':
+    dependencies:
+      zod: 4.1.11
+
   '@melony/runtime@0.0.2-alpha.2':
     dependencies:
-      '@melony/core': 0.0.2-alpha.2
+      '@melony/core': 0.0.2-alpha.3
       zod: 4.1.11
 
   '@mermaid-js/parser@0.6.3':
