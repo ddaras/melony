@@ -14,14 +14,6 @@ import z from "zod";
 // Re-export utilities
 export * from "./create-handler";
 
-// -- Types for the Brain Abstraction --
-
-export type ToolDefinition = {
-  name: string;
-  description: string;
-  parameters: z.ZodSchema;
-};
-
 export interface AgentConfig {
   name: string;
   description?: string;
@@ -46,19 +38,8 @@ export interface AgentConfig {
     message: MelonyMessage,
     params: {
       context: RuntimeContext;
-      toolDefinitions: ToolDefinition[];
     }
   ) => AsyncGenerator<MelonyEvent, NextAction | void, unknown>;
-}
-
-// -- Helper to convert Melony Actions to LLM Tool Schemas --
-
-export function getToolDefinitions(actions: Record<string, Action<any>>) {
-  return Object.entries(actions).map(([name, action]) => ({
-    name,
-    description: action.description || `Execute ${action.name}`,
-    parameters: action.paramsSchema.shape,
-  }));
 }
 
 // -- Internal Schemas --
@@ -81,7 +62,6 @@ export class Agent {
   private initializeRuntime(): Runtime {
     const { actions, brain } = this.config;
     const wrappedActions: Record<string, Action<any>> = {};
-    const toolDefinitions = getToolDefinitions(actions);
 
     // 1. WRAP USER ACTIONS
     // Forces every action to loop back to 'brain' after execution
@@ -131,7 +111,6 @@ export class Agent {
         // Last result is available in context.state.lastResult
         const brainGenerator = brain(params.message, {
           context,
-          toolDefinitions,
         });
 
         let decision: NextAction | void = undefined;
