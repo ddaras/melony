@@ -1,10 +1,10 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { Event, Role } from "melony"
-import { Message } from "@/types"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { Event } from "@melony/core";
+import { Message } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function groupEventsToMessages(events: Event[]): Message[] {

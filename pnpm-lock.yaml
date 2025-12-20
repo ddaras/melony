@@ -20,15 +20,15 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.7(hono@4.11.1)
+      '@melony/core':
+        specifier: workspace:*
+        version: link:../../packages/melony
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
       hono:
         specifier: ^4.6.11
         version: 4.11.1
-      melony:
-        specifier: workspace:*
-        version: link:../../packages/melony
       zod:
         specifier: ^4.1.11
         version: 4.2.1
@@ -51,6 +51,9 @@ importers:
       '@fontsource-variable/inter':
         specifier: ^5.2.8
         version: 5.2.8
+      '@melony/core':
+        specifier: workspace:*
+        version: link:../../packages/melony
       '@melony/react':
         specifier: workspace:*
         version: link:../../packages/melony-react
@@ -66,9 +69,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      melony:
-        specifier: workspace:*
-        version: link:../../packages/melony
       react:
         specifier: ^19.2.0
         version: 19.2.3
@@ -152,6 +152,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.0.0
         version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@melony/core':
+        specifier: workspace:*
+        version: link:../melony
       '@tabler/icons-react':
         specifier: ^3.36.0
         version: 3.36.0(react@19.2.3)
@@ -161,9 +164,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      melony:
-        specifier: workspace:*
-        version: link:../melony
       react:
         specifier: '>=18'
         version: 19.2.3

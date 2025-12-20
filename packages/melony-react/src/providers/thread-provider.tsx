@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { Event } from "melony";
-import { generateId } from "melony/client";
+import { Event } from "@melony/core";
+import { generateId } from "@melony/core/client";
 import { Message, ThreadData, ThreadService } from "@/types";
 import { groupEventsToMessages } from "@/lib/utils";
 

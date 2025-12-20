@@ -15,7 +15,7 @@
     "@tabler/icons-react": "^3.36.0",
     "@tailwindcss/vite": "^4.1.17",
     "@melony/react": "workspace:*",
-    "melony": "workspace:*",
+    "@melony/core": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "react": "^19.2.0",

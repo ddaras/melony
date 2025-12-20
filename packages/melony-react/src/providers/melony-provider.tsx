@@ -6,19 +6,24 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { Client, ClientState } from "melony/client";
-import { Event } from "melony";
+import { Client, ClientState } from "@melony/core/client";
+import { Event } from "@melony/core";
 import { Message } from "@/types";
 import { groupEventsToMessages } from "@/lib/utils";
 
 export interface MelonyContextValue extends ClientState {
   messages: Message[];
-  sendEvent: (event: Event, options?: { runId?: string; state?: Record<string, any> }) => Promise<void>;
+  sendEvent: (
+    event: Event,
+    options?: { runId?: string; state?: Record<string, any> }
+  ) => Promise<void>;
   clear: () => void;
   client: Client;
 }
 
-export const MelonyContext = createContext<MelonyContextValue | undefined>(undefined);
+export const MelonyContext = createContext<MelonyContextValue | undefined>(
+  undefined
+);
 
 export interface MelonyProviderProps {
   children: ReactNode;
@@ -33,11 +38,16 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
 
   useEffect(() => {
     setState(client.getState());
-    return () => { client.subscribe(setState); };
+    return () => {
+      client.subscribe(setState);
+    };
   }, [client]);
 
   const sendEvent = useCallback(
-    async (event: Event, options?: { runId?: string; state?: Record<string, any> }) => {
+    async (
+      event: Event,
+      options?: { runId?: string; state?: Record<string, any> }
+    ) => {
       const generator = client.sendEvent(event, options);
       for await (const _ of generator) {
         // State updates automatically via subscription

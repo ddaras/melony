@@ -1,6 +1,6 @@
 {
   "name": "@melony/react",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -10,8 +10,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
-    "postpack": "node ../../scripts/restore-workspace-protocols.mjs",
-    "publish": "npm publish --access public"
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "keywords": [
     "ai",
