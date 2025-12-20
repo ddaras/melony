@@ -3,8 +3,6 @@ import {
   AccountDialog,
   AuthProvider,
   ChatPopup,
-  createMelonyAuthService,
-  createMelonyThreadService,
   MelonyProvider,
   ThreadProvider,
   ChatFull,
@@ -12,6 +10,8 @@ import {
 import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/theme-toggle";
 import { STARTER_PROMPTS } from "./lib/starter-prompts";
+import { createMelonyThreadService } from "./lib/services/thread-service";
+import { createMelonyAuthService } from "./lib/services/auth-service";
 
 const client = new Client(
   createHttpTransport("http://localhost:3000/api/v1/chat")

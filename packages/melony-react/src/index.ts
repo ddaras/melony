@@ -3,9 +3,6 @@ export * from "./providers/melony-provider";
 export * from "./providers/auth-provider";
 export * from "./providers/thread-provider";
 
-// Services
-export * from "./lib/default-services";
-
 // Hooks
 export * from "./hooks/use-melony";
 export * from "./hooks/use-auth";
