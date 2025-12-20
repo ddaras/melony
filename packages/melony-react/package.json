@@ -10,7 +10,8 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
-    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs",
+    "publish": "npm run publish --access public"
   },
   "keywords": [
     "ai",
