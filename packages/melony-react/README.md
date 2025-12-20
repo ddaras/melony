@@ -11,15 +11,15 @@ npm install @melony/react
 ## Quick Start
 
 ```tsx
-import { MelonyStoreProvider, Chat, ThreadSidebar, useMelony } from "@melony/react";
+import { MelonyStoreProvider, Thread, ThreadSidebar, useMelony } from "@melony/react";
 
-function ChatApp() {
+function ThreadApp() {
   const { threads, activeThreadId, messages, isLoading } = useMelony();
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <ThreadSidebar threads={threads} activeThreadId={activeThreadId} />
-      <Chat messages={messages} isLoading={isLoading} />
+      <Thread messages={messages} isLoading={isLoading} />
     </div>
   );
 }
@@ -27,7 +27,7 @@ function ChatApp() {
 export default function App() {
   return (
     <MelonyStoreProvider api="/api/chat">
-      <ChatApp />
+      <ThreadApp />
     </MelonyStoreProvider>
   );
 }
@@ -83,12 +83,12 @@ The main provider that manages threads, messages, and API communication.
 </MelonyStoreProvider>
 ```
 
-### `Chat`
+### `Thread`
 
-The main chat interface component.
+The main thread interface component.
 
 ```tsx
-<Chat
+<Thread
   messages={messages}
   isLoading={isLoading}
   placeholder="Type a message..."
@@ -128,7 +128,7 @@ const {
   error,             // Error | null
   
   // Methods
-  dispatchEvent,     // (event: MelonyEvent) => void
+  dispatchEvent,     // (event: Event) => void
   getThread,         // (id: string) => Thread | undefined
   getThreadMessages, // (id: string) => ChatMessage[]
 } = useMelony();
@@ -205,11 +205,11 @@ yield {
 
 ## Migration from Legacy Hooks
 
-If you're using the deprecated hooks (`useMelonyRuntime`, `useMelonyChat`, `useMelonyThreads`):
+If you're using the deprecated hooks (`useMelonyRuntime`, `useMelonyThread`, `useMelonyThreads`):
 
 ```tsx
 // Before:
-const { messages, sendMessage } = useMelonyChat({ api: '/api/chat' });
+const { messages, sendMessage } = useMelonyThread({ api: '/api/chat' });
 const { threads, createThread } = useMelonyThreads({ threads, activeThreadId });
 
 // After:

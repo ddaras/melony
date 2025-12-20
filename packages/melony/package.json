@@ -1,5 +1,5 @@
 {
-  "name": "@melony/react",
+  "name": "melony",
   "version": "0.1.0",
   "main": "dist/index.js",
   "type": "module",
@@ -13,18 +13,29 @@
   },
   "keywords": [
     "ai",
-    "react",
-    "melony",
+    "agents",
+    "framework",
+    "typescript",
     "sdui"
   ],
   "author": "",
   "license": "MIT",
-  "description": "React components and hooks for Melony.",
+  "description": "The universal AI agent framework with built-in SDUI and HITL.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "default": "./dist/client.js"
+    },
+    "./adapters/*": {
+      "types": "./dist/adapters/*.d.ts",
+      "import": "./dist/adapters/*.js",
+      "default": "./dist/adapters/*.js"
     },
     "./package.json": "./package.json"
   },
@@ -33,22 +44,14 @@
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "react": ">=18"
-  },
-  "dependencies": {
-    "@base-ui/react": "^1.0.0",
-    "melony": "workspace:*",
-    "@tabler/icons-react": "^3.36.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.4.0"
-  },
   "devDependencies": {
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.2.0",
+    "@types/node": "^24.10.1",
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "zod": "^4.1.11",
+    "node-html-parser": "^7.0.1"
   }
 }

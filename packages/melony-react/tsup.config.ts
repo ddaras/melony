@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import { resolve } from "path";
 
 export default defineConfig({
   entry: ["src/index.ts"],
@@ -10,6 +11,11 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   skipNodeModulesBundle: true,
+  esbuildOptions(options) {
+    options.alias = {
+      "@": resolve(__dirname, "./src"),
+    };
+  },
   outExtension({ format }) {
     return {
       js: format === "esm" ? ".js" : ".cjs",
