@@ -1,6 +1,6 @@
 {
   "name": "@melony/react",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
-    "melony": "workspace:*",
+    "@melony/core": "workspace:*",
     "@tabler/icons-react": "^3.36.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
