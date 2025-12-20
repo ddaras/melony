@@ -9,7 +9,8 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepack": "npm run build"
+    "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "keywords": [
     "ai",

@@ -5,3 +5,4 @@ node_modules
 examples/**/node_modules
 .turbo
 .pnpm-store
+*.original
