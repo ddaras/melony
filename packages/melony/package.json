@@ -1,6 +1,6 @@
 {
-  "name": "melony",
-  "version": "1.9.1",
+  "name": "@melony/core",
+  "version": "0.1.9",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
