@@ -10,8 +10,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
-    "postpack": "node ../../scripts/restore-workspace-protocols.mjs",
-    "publish": "npm run publish --access public"
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "keywords": [
     "ai",
@@ -23,6 +22,9 @@
   "author": "",
   "license": "MIT",
   "description": "The universal AI agent framework with built-in SDUI and HITL.",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

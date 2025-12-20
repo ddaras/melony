@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
     "postpack": "node ../../scripts/restore-workspace-protocols.mjs",
-    "publish": "npm run publish --access public"
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "ai",
@@ -22,6 +22,9 @@
   "author": "",
   "license": "MIT",
   "description": "React components and hooks for Melony.",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
