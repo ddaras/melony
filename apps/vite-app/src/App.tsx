@@ -6,6 +6,8 @@ import {
   MelonyClientProvider,
   ThreadProvider,
   ChatFull,
+  ThreadPopover,
+  CreateThreadButton,
 } from "@melony/react";
 import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/theme-toggle";
@@ -31,6 +33,12 @@ export function App() {
                 <ChatFull
                   starterPrompts={STARTER_PROMPTS}
                   headerProps={{
+                    leftContent: (
+                      <div className="flex gap-2">
+                        <ThreadPopover />
+                        <CreateThreadButton />
+                      </div>
+                    ),
                     rightContent: (
                       <div className="flex gap-2">
                         <ThemeToggle />

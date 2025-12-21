@@ -17,6 +17,8 @@ export * from "./components/chat-popup";
 export * from "./components/chat-sidebar";
 export * from "./components/chat-full";
 export * from "./components/thread-list";
+export * from "./components/thread-popover";
+export * from "./components/create-thread-button";
 export * from "./components/account-dialog";
 export * from "./components/theme-toggle";
 export * from "./components/ui-renderer";
