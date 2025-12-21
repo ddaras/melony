@@ -1,6 +1,6 @@
 {
   "name": "create-melony-app",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Create a new Melony app with one command",
   "type": "module",
   "bin": {
