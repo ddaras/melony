@@ -1,6 +1,6 @@
 # Melony Next.js App
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [create-melony-app](https://github.com/yourusername/melony).
+This is a [Next.js](https://nextjs.org) project bootstrapped with [create-melony-app](https://github.com/ddaras/melony).
 
 ## Getting Started
 
@@ -18,6 +18,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Learn More
 
-- [Melony Documentation](https://github.com/yourusername/melony)
+- [Melony Documentation](https://github.com/ddaras/melony)
 - [Next.js Documentation](https://nextjs.org/docs)
 

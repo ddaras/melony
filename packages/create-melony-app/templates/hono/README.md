@@ -1,6 +1,6 @@
 # Melony Hono Server
 
-This is a [Hono](https://hono.dev) server bootstrapped with [create-melony-app](https://github.com/yourusername/melony).
+This is a [Hono](https://hono.dev) server bootstrapped with [create-melony-app](https://github.com/ddaras/melony).
 
 ## Getting Started
 
@@ -42,6 +42,6 @@ PORT=3000
 
 ## Learn More
 
-- [Melony Documentation](https://github.com/yourusername/melony)
+- [Melony Documentation](https://github.com/ddaras/melony)
 - [Hono Documentation](https://hono.dev)
 

@@ -1,6 +1,6 @@
 # Melony Vite App
 
-This is a [Vite](https://vitejs.dev) + React project bootstrapped with [create-melony-app](https://github.com/yourusername/melony).
+This is a [Vite](https://vitejs.dev) + React project bootstrapped with [create-melony-app](https://github.com/ddaras/melony).
 
 ## Getting Started
 
@@ -30,6 +30,6 @@ Open [http://localhost:5173](http://localhost:5173) with your browser to see the
 
 ## Learn More
 
-- [Melony Documentation](https://github.com/yourusername/melony)
+- [Melony Documentation](https://github.com/ddaras/melony)
 - [Vite Documentation](https://vitejs.dev)
 

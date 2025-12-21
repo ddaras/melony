@@ -190,7 +190,7 @@ async function main() {
     }
 
     console.log(
-      chalk.cyan("\n📚 Learn more: https://github.com/yourusername/melony\n")
+      chalk.cyan("\n📚 Learn more: https://github.com/ddaras/melony\n")
     );
   } catch (error: any) {
     console.error(chalk.red(`\n❌ Error: ${error.message}\n`));
