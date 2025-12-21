@@ -18,7 +18,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <CardBase
-      className={cn("w-full max-w-2xl shadow-sm", className)}
+      className={cn("min-w-96", className)}
       style={style}
     >
       {(title || subtitle) && (

@@ -151,7 +151,7 @@ export interface UIContract {
   };
   button: {
     label: string;
-    variant?: "primary" | "secondary" | "success" | "danger" | "outline";
+    variant?: "primary" | "secondary" | "success" | "danger" | "outline" | "ghost" | "link";
     size?: UISize;
     disabled?: boolean;
     onClickAction?: Event;

@@ -14,7 +14,7 @@ import { createMelonyThreadService } from "./lib/services/thread-service";
 import { createMelonyAuthService } from "./lib/services/auth-service";
 
 const client = new MelonyClient(
-  createHttpTransport("http://localhost:3000/api/v1/chat")
+  createHttpTransport("http://localhost:3006/api/chat")
 );
 
 const threadService = createMelonyThreadService();

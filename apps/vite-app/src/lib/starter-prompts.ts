@@ -1,7 +1,7 @@
 export const STARTER_PROMPTS = [
   {
-    label: "What is the weather in Tokyo?",
-    prompt: "What is the weather in Tokyo?",
+    label: "Generate a banner with make up data",
+    prompt: "generate a banner with make up data",
   },
   {
     label: "What is the weather in London?",

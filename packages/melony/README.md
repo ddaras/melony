@@ -1,77 +1,103 @@
-# Melony 🍈
+# @melony/core
 
-The universal AI agent framework with built-in **Server-Driven UI (SDUI)** and **Human-in-the-Loop (HITL)** support.
+Melony Core is a small **event-streaming runtime** for AI agents with first-class **Server‑Driven UI (SDUI)**.
 
-## Features
+You write a `brain` (decides what to do) and `actions` (do work and stream events). Actions/brains can stream:
 
-- 🚀 **Killer DX**: Define agents and actions in seconds.
-- 🎨 **Universal UI**: Push React components directly from your backend actions.
-- 🤝 **HITL Native**: Built-in approval flows for sensitive actions.
-- 📦 **Consolidated**: One package for runtime, client, and adapters.
+- **Text** (`{ type: "text" }` / `{ type: "text-delta" }`)
+- **UI trees** (`event.ui = ui.card(...)`) that React (and other renderers) can display
+- Any custom events you want (`{ type: "tool-result", data: ... }`)
 
 ## Installation
 
 ```bash
-npm install melony
+npm install @melony/core zod
 ```
 
-## Quick Start
+## 60-second usage
 
-### 1. Define your Assistant
+### 1) Define an agent runtime
 
-```typescript
-import { melony, ui } from 'melony';
-import { z } from 'zod';
+```ts
+import { melony, action, ui } from "@melony/core";
+import { z } from "zod";
 
 export const assistant = melony({
-  name: "ShopAssistant",
-  
   actions: {
-    searchProducts: {
+    searchProducts: action({
+      name: "searchProducts",
+      description: "Search products by keyword",
       paramsSchema: z.object({ query: z.string() }),
-      execute: async function* (params, { ui }) {
-        yield ui.text(`Searching for ${params.query}...`);
-        // Return SDUI directly
-        yield ui.card({
-          title: "Results",
-          children: [ui.text("Product A - $10")]
-        });
-      }
-    }
+      execute: async function* ({ query }) {
+        yield { type: "text", data: { content: `Searching for "${query}"...` } };
+
+        // SDUI: stream real UI to the frontend
+        yield {
+          type: "ui",
+          ui: ui.card({
+            title: "Results",
+            children: [
+              ui.list([
+                ui.listItem({ children: [ui.text("Product A — $10")] }),
+                ui.listItem({ children: [ui.text("Product B — $12")] }),
+              ]),
+            ],
+          }),
+        };
+      },
+    }),
   },
 
-  onMessage: async function* (message, context) {
-    // Decision logic here
-    return { action: "searchProducts", params: { query: "shoes" } };
-  }
+  // The brain receives events and returns the next action to run.
+  brain: async function* (event) {
+    if (event.type === "text") {
+      return { action: "searchProducts", params: { query: event.data?.content } };
+    }
+  },
 });
 ```
 
-### 2. Deploy with Hono
+### 2) Serve it (Hono adapter)
 
-```typescript
-import { handle } from 'melony/adapters/hono';
-import { assistant } from './assistant';
+```ts
+import { Hono } from "hono";
+import { handle } from "@melony/core/adapters/hono";
+import { assistant } from "./assistant";
 
-app.post('/api/chat', handle(assistant));
+const app = new Hono();
+app.post("/api/chat", handle(assistant));
 ```
 
-### 3. Connect from React
+### 3) Stream from the client
 
-```tsx
-import { MelonyClient, createHttpTransport } from '@melony/core/client';
-import { MelonyClientProvider, Thread } from '@melony/react';
+```ts
+import { MelonyClient, createHttpTransport } from "@melony/core/client";
 
-const client = new MelonyClient(createHttpTransport('/api/chat'));
+const client = new MelonyClient(createHttpTransport("/api/chat"));
 
-function App() {
-  return (
-    <MelonyClientProvider client={client}>
-      <Thread />
-    </MelonyClientProvider>
-  );
+for await (const event of client.sendEvent({
+  type: "text",
+  role: "user",
+  data: { content: "running shoes" },
+})) {
+  console.log("event:", event);
 }
 ```
+
+## Core concepts
+
+- **Event**: the universal unit of streaming.
+- **Action**: an async generator that yields events and (optionally) returns a `NextAction`.
+- **Brain**: an async generator that decides the next action to run based on incoming events/results.
+- **Plugins/Hooks**: intercept runs, actions, and events (great place for HITL, logging, persistence).
+
+## SDUI (Server‑Driven UI)
+
+Melony ships a typed UI contract and builder:
+
+- `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc.
+- Put the resulting `UINode` into `event.ui`
+- `@melony/react` renders it automatically
 
 ## License
 

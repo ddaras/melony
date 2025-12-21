@@ -21,6 +21,8 @@ export const Button: React.FC<ButtonProps> = ({
     secondary: "secondary",
     danger: "destructive",
     outline: "outline",
+    ghost: "ghost",
+    link: "link",
     success: "default", // Success doesn't have a direct shadcn mapping in base variant, default is usually primary
   };
 

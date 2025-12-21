@@ -1,0 +1,42 @@
+import React from "react";
+import { StarterPrompt } from "@/types";
+import { Button } from "./elements";
+
+interface StarterPromptsProps {
+  prompts: StarterPrompt[];
+  onPromptClick: (prompt: string) => void;
+}
+
+export function StarterPrompts({
+  prompts,
+  onPromptClick,
+}: StarterPromptsProps) {
+  if (!prompts || prompts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-auto max-w-2xl">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          What can I help with today?
+        </h2>
+      </div>
+      <div className="flex flex-col gap-2 w-full">
+        {prompts.map((item, index) => (
+          <Button
+            key={index}
+            label={item.label}
+            variant="ghost"
+            onClickAction={{
+              type: "text",
+              role: "user",
+              data: { content: item.prompt },
+            }}
+            className="w-full justify-start"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

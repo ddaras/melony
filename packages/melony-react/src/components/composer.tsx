@@ -38,18 +38,12 @@ export function Composer({
           placeholder={placeholder}
           className="min-h-[44px] max-h-[200px] border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 py-2 text-[15px] resize-none"
         />
-        <div className="flex justify-end items-center px-2 pb-0.5">
+        <div className="flex justify-end items-center">
           <Button
             type="submit"
             disabled={(!value.trim() && !isLoading) || isLoading}
-            size="icon"
+            size="icon-lg"
             onClick={() => onSubmit()}
-            className={cn(
-              "h-8 w-8 rounded-full transition-all shrink-0",
-              value.trim()
-                ? "bg-foreground text-background hover:bg-foreground/90"
-                : "bg-muted-foreground/20 text-muted-foreground/40"
-            )}
           >
             <IconArrowUp className="h-5 w-5" />
           </Button>
