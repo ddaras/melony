@@ -44,7 +44,7 @@ export function ChatPopup({
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 font-sans">
       {isOpen && (
-        <Card className="py-0 w-[440px] h-[640px] flex flex-col overflow-hidden border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-2xl animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
+        <Card className="py-0 w-[440px] h-[640px] gap-0 flex flex-col overflow-hidden border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-2xl animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
           <ChatHeader
             title={view === "history" ? "History" : title}
             leftContent={
