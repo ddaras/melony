@@ -1,4 +1,4 @@
-import { Event } from "melony";
+import { Event } from "@melony/core";
 
 export const brain = async function* (event: Event) {
   if (event.role === "user" && event.type === "text") {

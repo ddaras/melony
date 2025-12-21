@@ -6,7 +6,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { Client, ClientState } from "@melony/core/client";
+import { MelonyClient, ClientState } from "@melony/core/client";
 import { Event } from "@melony/core";
 import { Message } from "@/types";
 import { groupEventsToMessages } from "@/lib/utils";
@@ -17,29 +17,42 @@ export interface MelonyContextValue extends ClientState {
     event: Event,
     options?: { runId?: string; state?: Record<string, any> }
   ) => Promise<void>;
-  clear: () => void;
-  client: Client;
+  reset: (events?: Event[]) => void;
+  client: MelonyClient;
 }
 
 export const MelonyContext = createContext<MelonyContextValue | undefined>(
   undefined
 );
 
-export interface MelonyProviderProps {
+export interface MelonyClientProviderProps {
   children: ReactNode;
-  client: Client;
+  client: MelonyClient;
+  initialEvents?: Event[];
 }
 
-export const MelonyProvider: React.FC<MelonyProviderProps> = ({
+export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
   children,
   client,
+  initialEvents,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
 
   useEffect(() => {
+    if (
+      initialEvents &&
+      initialEvents.length > 0 &&
+      client.getState().events.length === 0
+    ) {
+      client.reset(initialEvents);
+    }
+  }, [client, initialEvents]);
+
+  useEffect(() => {
     setState(client.getState());
+    const unsubscribe = client.subscribe(setState);
     return () => {
-      client.subscribe(setState);
+      unsubscribe();
     };
   }, [client]);
 
@@ -56,17 +69,20 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     [client]
   );
 
-  const clear = useCallback(() => client.clear(), [client]);
+  const reset = useCallback(
+    (events?: Event[]) => client.reset(events),
+    [client]
+  );
 
   const value = useMemo(
     () => ({
       ...state,
       messages: groupEventsToMessages(state.events),
       sendEvent,
-      clear,
+      reset,
       client,
     }),
-    [state, sendEvent, clear, client]
+    [state, sendEvent, reset, client]
   );
 
   return (

@@ -1,4 +1,4 @@
-import { ui } from "melony";
+import { ui } from "@melony/core";
 import { checkWeatherParamsSchema } from "../actions/check-weather";
 import { z } from "zod";
 

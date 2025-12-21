@@ -1,4 +1,4 @@
-import { Event } from "melony";
+import { Event } from "@melony/core";
 
 export interface EventStorage {
   store(event: Event, metadata?: Record<string, any>): Promise<void>;

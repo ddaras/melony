@@ -10,16 +10,16 @@ export interface ClientState {
   error: Error | null;
 }
 
-export class Client {
+export class MelonyClient {
   private transport: TransportFn;
   private state: ClientState;
   private abortController: AbortController | null = null;
   private stateListeners: Set<(state: ClientState) => void> = new Set();
 
-  constructor(transport: TransportFn) {
+  constructor(transport: TransportFn, options?: { initialEvents?: Event[] }) {
     this.transport = transport;
     this.state = {
-      events: [],
+      events: options?.initialEvents ?? [],
       isLoading: false,
       error: null,
     };
@@ -27,7 +27,9 @@ export class Client {
 
   subscribe(listener: (state: ClientState) => void) {
     this.stateListeners.add(listener);
-    return () => this.stateListeners.delete(listener);
+    return () => {
+      this.stateListeners.delete(listener);
+    };
   }
 
   getState() {
@@ -126,9 +128,9 @@ export class Client {
     this.setState({ events });
   }
 
-  clear() {
+  reset(events: Event[] = []) {
     if (this.abortController) this.abortController.abort();
-    this.setState({ events: [], error: null, isLoading: false });
+    this.setState({ events, error: null, isLoading: false });
   }
 }
 

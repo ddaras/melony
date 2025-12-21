@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import type { Context } from "hono";
-import { handle } from "melony/adapters/hono";
+import { handle } from "@melony/core/adapters/hono";
 import { rootAgent } from "./agent";
 
 const app = new Hono();

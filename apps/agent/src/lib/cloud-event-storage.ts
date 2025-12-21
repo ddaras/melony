@@ -1,4 +1,4 @@
-import { Event } from "melony";
+import { Event } from "@melony/core";
 import { EventStorage } from "./types";
 
 export interface CloudEventStorageConfig {

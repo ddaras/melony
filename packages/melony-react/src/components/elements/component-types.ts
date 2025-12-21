@@ -1,7 +1,7 @@
 import React from "react";
 import { CSSProperties } from "react";
 import { Color, FontSize, FontWeight, Spacing } from "./theme";
-import { UIContract } from "melony";
+import { UIContract } from "@melony/core";
 
 // Common types
 type Size = "sm" | "md" | "lg";

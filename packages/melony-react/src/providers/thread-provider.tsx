@@ -8,8 +8,7 @@ import React, {
 } from "react";
 import { Event } from "@melony/core";
 import { generateId } from "@melony/core/client";
-import { Message, ThreadData, ThreadService } from "@/types";
-import { groupEventsToMessages } from "@/lib/utils";
+import { ThreadData, ThreadService } from "@/types";
 
 export interface ThreadContextValue {
   threads: ThreadData[];
@@ -21,11 +20,12 @@ export interface ThreadContextValue {
   deleteThread: (threadId: string) => Promise<void>;
   refreshThreads: () => Promise<void>;
   threadEvents: Event[];
-  threadMessages: Message[];
   isLoadingEvents: boolean;
 }
 
-export const ThreadContext = createContext<ThreadContextValue | undefined>(undefined);
+export const ThreadContext = createContext<ThreadContextValue | undefined>(
+  undefined
+);
 
 export interface ThreadProviderProps {
   children: ReactNode;
@@ -75,7 +75,9 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   }, []);
 
   const createThread = useCallback(async (): Promise<string> => {
-    const newId = service.createThread ? await service.createThread() : generateId();
+    const newId = service.createThread
+      ? await service.createThread()
+      : generateId();
     const newThread: ThreadData = {
       id: newId,
       updatedAt: new Date(),
@@ -94,7 +96,9 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
           const remainingThreads = prev.filter((t) => t.id !== threadId);
           setActiveThreadId((current) => {
             if (current === threadId) {
-              return remainingThreads.length > 0 ? remainingThreads[0].id : null;
+              return remainingThreads.length > 0
+                ? remainingThreads[0].id
+                : null;
             }
             return current;
           });
@@ -113,10 +117,6 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   const refreshThreads = useCallback(async () => {
     await fetchThreads();
   }, [fetchThreads]);
-
-  const threadMessages = useMemo(() => {
-    return groupEventsToMessages(threadEvents);
-  }, [threadEvents]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -146,7 +146,9 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
     };
 
     fetchEvents();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [activeThreadId, service]);
 
   const value = useMemo(
@@ -160,7 +162,6 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       deleteThread,
       refreshThreads,
       threadEvents,
-      threadMessages,
       isLoadingEvents,
     }),
     [
@@ -173,7 +174,6 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       deleteThread,
       refreshThreads,
       threadEvents,
-      threadMessages,
       isLoadingEvents,
     ]
   );

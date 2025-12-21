@@ -1,9 +1,9 @@
-import { Client, createHttpTransport } from "@melony/core/client";
+import { MelonyClient, createHttpTransport } from "@melony/core/client";
 import {
   AccountDialog,
   AuthProvider,
   ChatPopup,
-  MelonyProvider,
+  MelonyClientProvider,
   ThreadProvider,
   ChatFull,
 } from "@melony/react";
@@ -13,7 +13,7 @@ import { STARTER_PROMPTS } from "./lib/starter-prompts";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import { createMelonyAuthService } from "./lib/services/auth-service";
 
-const client = new Client(
+const client = new MelonyClient(
   createHttpTransport("http://localhost:3000/api/v1/chat")
 );
 
@@ -23,7 +23,7 @@ const authService = createMelonyAuthService();
 export function App() {
   return (
     <ThemeProvider>
-      <MelonyProvider client={client}>
+      <MelonyClientProvider client={client}>
         <AuthProvider service={authService}>
           <ThreadProvider service={threadService}>
             <div className="flex flex-col h-screen relative bg-background">
@@ -40,7 +40,7 @@ export function App() {
             </div>
           </ThreadProvider>
         </AuthProvider>
-      </MelonyProvider>
+      </MelonyClientProvider>
     </ThemeProvider>
   );
 }

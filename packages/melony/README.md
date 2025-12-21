@@ -59,16 +59,16 @@ app.post('/api/chat', handle(assistant));
 ### 3. Connect from React
 
 ```tsx
-import { Client, createHttpTransport } from 'melony/client';
-import { MelonyProvider, Thread } from '@melony/react';
+import { MelonyClient, createHttpTransport } from '@melony/core/client';
+import { MelonyClientProvider, Thread } from '@melony/react';
 
-const client = new Client(createHttpTransport('/api/chat'));
+const client = new MelonyClient(createHttpTransport('/api/chat'));
 
 function App() {
   return (
-    <MelonyProvider client={client}>
+    <MelonyClientProvider client={client}>
       <Thread />
-    </MelonyProvider>
+    </MelonyClientProvider>
   );
 }
 ```
