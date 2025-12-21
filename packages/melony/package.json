@@ -1,5 +1,5 @@
 {
-  "name": "@melony/core",
+  "name": "melony",
   "version": "0.1.12",
   "main": "dist/index.js",
   "type": "module",
