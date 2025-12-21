@@ -9,7 +9,7 @@ import React, {
 import { MelonyClient, ClientState } from "melony/client";
 import { Event } from "melony";
 import { Message } from "@/types";
-import { groupEventsToMessages } from "@/lib/utils";
+import { groupEventsToMessages } from "@/lib/group-events-to-messages";
 
 export interface MelonyContextValue extends ClientState {
   messages: Message[];

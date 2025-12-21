@@ -3,16 +3,22 @@ import { IconArrowLeft, IconHistory, IconMessage, IconPlus, IconX } from "@table
 import { Thread } from "./thread";
 import { ThreadList } from "./thread-list";
 import { Button } from "./ui/button";
-import { Card, CardHeader, CardTitle } from "./ui/card";
+import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import { StarterPrompt } from "@/types";
 import { useThreads } from "@/hooks/use-threads";
+import { ChatHeader, ChatHeaderProps } from "./chat-header";
 
 export interface ChatPopupProps {
   title?: string;
   placeholder?: string;
   starterPrompts?: StarterPrompt[];
   defaultOpen?: boolean;
+  /**
+   * Props for customizing the header. Note: leftContent and rightContent in headerProps
+   * will be merged with the default popup header actions (back, history, new chat, close).
+   */
+  headerProps?: Omit<ChatHeaderProps, "title" | "leftContent" | "rightContent">;
 }
 
 export function ChatPopup({
@@ -20,6 +26,7 @@ export function ChatPopup({
   placeholder = "Message the AI",
   starterPrompts,
   defaultOpen = false,
+  headerProps,
 }: ChatPopupProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [view, setView] = useState<"chat" | "history">("chat");
@@ -38,9 +45,10 @@ export function ChatPopup({
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 font-sans">
       {isOpen && (
         <Card className="py-0 w-[440px] h-[640px] flex flex-col overflow-hidden border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-2xl animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
-          <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-y-0 h-14 shrink-0">
-            <div className="flex items-center gap-2">
-              {view === "history" && (
+          <ChatHeader
+            title={view === "history" ? "History" : title}
+            leftContent={
+              view === "history" ? (
                 <Button
                   variant="ghost"
                   size="icon-xs"
@@ -49,42 +57,42 @@ export function ChatPopup({
                 >
                   <IconArrowLeft className="size-4" />
                 </Button>
-              )}
-              <CardTitle className="text-sm font-semibold">
-                {view === "history" ? "History" : title}
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-1">
-              {view === "chat" && (
+              ) : undefined
+            }
+            rightContent={
+              <>
+                {view === "chat" && (
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => setView("history")}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="History"
+                  >
+                    <IconHistory className="size-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  onClick={() => setView("history")}
+                  onClick={handleNewChat}
                   className="text-muted-foreground hover:text-foreground"
-                  title="History"
+                  title="New Chat"
                 >
-                  <IconHistory className="size-4" />
+                  <IconPlus className="size-4" />
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={handleNewChat}
-                className="text-muted-foreground hover:text-foreground"
-                title="New Chat"
-              >
-                <IconPlus className="size-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon-xs" 
-                onClick={() => setIsOpen(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <IconX className="size-4" />
-              </Button>
-            </div>
-          </CardHeader>
+                <Button 
+                  variant="ghost" 
+                  size="icon-xs" 
+                  onClick={() => setIsOpen(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <IconX className="size-4" />
+                </Button>
+              </>
+            }
+            {...headerProps}
+          />
           <div className="flex-1 overflow-hidden">
             {view === "chat" ? (
               <Thread 

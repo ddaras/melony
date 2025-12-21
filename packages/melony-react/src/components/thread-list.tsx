@@ -15,13 +15,8 @@ export const ThreadList: React.FC<ThreadListProps> = ({
   emptyState,
   onThreadSelect,
 }) => {
-  const {
-    threads,
-    activeThreadId,
-    selectThread,
-    createThread,
-    deleteThread,
-  } = useThreads();
+  const { threads, activeThreadId, selectThread, createThread, deleteThread } =
+    useThreads();
 
   const handleThreadClick = (threadId: string) => {
     if (threadId !== activeThreadId) {
@@ -68,9 +63,9 @@ export const ThreadList: React.FC<ThreadListProps> = ({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      <div className="p-2 border-b">
+      <div className="p-2">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={handleNewThread}
           className="w-full justify-start"
@@ -102,31 +97,17 @@ export const ThreadList: React.FC<ThreadListProps> = ({
                   key={thread.id}
                   onClick={() => handleThreadClick(thread.id)}
                   className={cn(
-                    "group relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted"
+                    "group relative flex items-center gap-3 px-3 py-1.5 rounded-lg cursor-pointer transition-colors",
+                    isActive ? "bg-muted" : "hover:bg-muted"
                   )}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p
-                        className={cn(
-                          "text-sm font-medium truncate",
-                          isActive && "text-primary-foreground"
-                        )}
-                      >
+                      <p className={cn("text-sm font-medium truncate")}>
                         {thread.title || `Thread ${thread.id.slice(0, 8)}`}
                       </p>
                       {thread.updatedAt && (
-                        <span
-                          className={cn(
-                            "text-xs shrink-0",
-                            isActive
-                              ? "text-primary-foreground/70"
-                              : "text-muted-foreground"
-                          )}
-                        >
+                        <span className={cn("text-xs shrink-0")}>
                           {formatDate(thread.updatedAt)}
                         </span>
                       )}

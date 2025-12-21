@@ -1,34 +1,35 @@
+"use client";
+
 import { MelonyClient, createHttpTransport } from "melony/client";
 import {
-  AccountDialog,
   AuthProvider,
-  ChatPopup,
   MelonyClientProvider,
   ThreadProvider,
   ChatFull,
+  ThemeProvider,
+  ThemeToggle,
+  AccountDialog,
+  ThreadList,
 } from "@melony/react";
-import { ThemeProvider } from "./components/theme-provider";
-import { ThemeToggle } from "./components/theme-toggle";
-import { STARTER_PROMPTS } from "./lib/starter-prompts";
-import { createMelonyThreadService } from "./lib/services/thread-service";
-import { createMelonyAuthService } from "./lib/services/auth-service";
+import { STARTER_PROMPTS } from "@/app/lib/starter-prompts";
+import { createMelonyThreadService } from "@/app/lib/services/thread-service";
+import { createMelonyAuthService } from "@/app/lib/services/auth-service";
 
-const client = new MelonyClient(
-  createHttpTransport("http://localhost:3006/api/chat")
-);
+const client = new MelonyClient(createHttpTransport("/api/chat"));
 
 const threadService = createMelonyThreadService();
 const authService = createMelonyAuthService();
 
-export function App() {
+export default function Home() {
   return (
-    <ThemeProvider>
-      <MelonyClientProvider client={client}>
+    <MelonyClientProvider client={client}>
+      <ThemeProvider>
         <AuthProvider service={authService}>
           <ThreadProvider service={threadService}>
             <div className="flex flex-col h-screen relative bg-background">
               <main className="flex-1 overflow-hidden">
                 <ChatFull
+                  title="Melony"
                   starterPrompts={STARTER_PROMPTS}
                   headerProps={{
                     rightContent: (
@@ -38,16 +39,17 @@ export function App() {
                       </div>
                     ),
                   }}
+                  leftSidebar={
+                    <div className="w-[18rem]">
+                      <ThreadList />
+                    </div>
+                  }
                 />
               </main>
-
-              <ChatPopup starterPrompts={STARTER_PROMPTS} />
             </div>
           </ThreadProvider>
         </AuthProvider>
-      </MelonyClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </MelonyClientProvider>
   );
 }
-
-export default App;

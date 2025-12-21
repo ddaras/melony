@@ -16,7 +16,7 @@ export function StarterPrompts({
   }
 
   return (
-    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-auto max-w-2xl">
+    <div className="flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-auto max-w-2xl">
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold tracking-tight">
           What can I help with today?
@@ -28,6 +28,7 @@ export function StarterPrompts({
             key={index}
             label={item.label}
             variant="ghost"
+            size="lg"
             onClickAction={{
               type: "text",
               role: "user",
