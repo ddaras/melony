@@ -180,6 +180,25 @@ importers:
         specifier: ^7.2.4
         version: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)
 
+  packages/create-melony-app:
+    dependencies:
+      chalk:
+        specifier: ^5.3.0
+        version: 5.6.2
+      prompts:
+        specifier: ^2.4.2
+        version: 2.4.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.27
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   packages/melony:
     dependencies:
       node-html-parser:
