@@ -1,4 +1,4 @@
-import { plugin } from "@melony/core";
+import { plugin } from "melony";
 import { CloudEventStorage } from "../lib/cloud-event-storage";
 
 // Initialize storages

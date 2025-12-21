@@ -1,4 +1,4 @@
-# @melony/core
+# melony
 
 Melony Core is a small **event-streaming runtime** for AI agents with first-class **Server‑Driven UI (SDUI)**.
 
@@ -11,7 +11,7 @@ You write a `brain` (decides what to do) and `actions` (do work and stream event
 ## Installation
 
 ```bash
-npm install @melony/core zod
+npm install melony zod
 ```
 
 ## 60-second usage
@@ -19,7 +19,7 @@ npm install @melony/core zod
 ### 1) Define an agent runtime
 
 ```ts
-import { melony, action, ui } from "@melony/core";
+import { melony, action, ui } from "melony";
 import { z } from "zod";
 
 export const assistant = melony({
@@ -61,7 +61,7 @@ export const assistant = melony({
 
 ```ts
 import { Hono } from "hono";
-import { handle } from "@melony/core/adapters/hono";
+import { handle } from "melony/adapters/hono";
 import { assistant } from "./assistant";
 
 const app = new Hono();
@@ -71,7 +71,7 @@ app.post("/api/chat", handle(assistant));
 ### 3) Stream from the client
 
 ```ts
-import { MelonyClient, createHttpTransport } from "@melony/core/client";
+import { MelonyClient, createHttpTransport } from "melony/client";
 
 const client = new MelonyClient(createHttpTransport("/api/chat"));
 

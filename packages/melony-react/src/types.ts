@@ -1,4 +1,4 @@
-import { Event, Role } from "@melony/core";
+import { Event, Role } from "melony";
 
 export interface User {
   id: string;

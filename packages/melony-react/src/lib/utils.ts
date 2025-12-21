@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Event } from "@melony/core";
+import { Event } from "melony";
 import { Message } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {

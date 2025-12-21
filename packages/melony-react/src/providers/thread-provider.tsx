@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { Event } from "@melony/core";
-import { generateId } from "@melony/core/client";
+import { Event } from "melony";
+import { generateId } from "melony/client";
 import { ThreadData, ThreadService } from "@/types";
 
 export interface ThreadContextValue {

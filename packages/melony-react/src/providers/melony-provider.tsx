@@ -6,8 +6,8 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { MelonyClient, ClientState } from "@melony/core/client";
-import { Event } from "@melony/core";
+import { MelonyClient, ClientState } from "melony/client";
+import { Event } from "melony";
 import { Message } from "@/types";
 import { groupEventsToMessages } from "@/lib/utils";
 

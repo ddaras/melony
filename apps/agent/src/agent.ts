@@ -1,4 +1,4 @@
-import { melony } from "@melony/core";
+import { melony } from "melony";
 
 import { checkWeather } from "./actions/check-weather";
 import { persistEventsPlugin } from "./plugins/persist-events";

@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { MelonyContext, MelonyContextValue } from "@/providers/melony-provider";
-import { Event } from "@melony/core";
+import { Event } from "melony";
 
 export interface UseMelonyOptions {
   initialEvents?: Event[];

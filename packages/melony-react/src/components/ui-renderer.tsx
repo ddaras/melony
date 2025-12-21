@@ -1,5 +1,5 @@
 import React from "react";
-import type { UINode } from "@melony/core";
+import type { UINode } from "melony";
 import * as Elements from "./elements";
 
 export interface UIRendererProps {

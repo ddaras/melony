@@ -1,5 +1,5 @@
 import type { ThreadService, ThreadData } from "@melony/react";
-import { generateId } from "@melony/core/client";
+import { generateId } from "melony/client";
 import { TOKEN_STORAGE_KEY } from "./auth-service";
 
 const DEFAULT_THREADS_ENDPOINT =

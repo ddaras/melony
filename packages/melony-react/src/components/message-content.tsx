@@ -1,5 +1,5 @@
 import React from "react";
-import { Event } from "@melony/core";
+import { Event } from "melony";
 import { UIRenderer } from "@/components/ui-renderer";
 
 interface MessageContentProps {

@@ -13,7 +13,7 @@ If you’re building *product* (approval flows, forms, dashboards, tool results)
 - **SDUI out of the box**: `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc. — emitted from actions/brains.
 - **Event-first runtime**: a tiny orchestration loop: `Event → Brain → Action → Events`.
 - **HITL-friendly architecture**: approvals and guardrails belong in **plugins** / hooks.
-- **Frontend-ready**: `@melony/react` renders chat + SDUI and `@melony/core/client` streams events over HTTP.
+- **Frontend-ready**: `@melony/react` renders chat + SDUI and `melony/client` streams events over HTTP.
 
 ## Quick start (full stack)
 
@@ -21,8 +21,8 @@ If you’re building *product* (approval flows, forms, dashboards, tool results)
 
 ```ts
 import { Hono } from "hono";
-import { melony, action, ui } from "@melony/core";
-import { handle } from "@melony/core/adapters/hono";
+import { melony, action, ui } from "melony";
+import { handle } from "melony/adapters/hono";
 import { z } from "zod";
 
 const app = new Hono();
@@ -51,7 +51,7 @@ export default app;
 
 ```tsx
 import React from "react";
-import { MelonyClient, createHttpTransport } from "@melony/core/client";
+import { MelonyClient, createHttpTransport } from "melony/client";
 import { MelonyClientProvider, Thread } from "@melony/react";
 
 const client = new MelonyClient(createHttpTransport("/api/chat"));
@@ -67,7 +67,7 @@ export default function App() {
 
 ## Packages
 
-- **`@melony/core`**: runtime (`melony()`), SDUI contract (`ui`), plugins/hooks, streaming helpers, adapters.
+- **`melony`**: runtime (`melony()`), SDUI contract (`ui`), plugins/hooks, streaming helpers, adapters.
 - **`@melony/react`**: chat UI + providers/hooks + SDUI renderer for React.
 
 ## Examples in this repo

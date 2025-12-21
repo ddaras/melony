@@ -1,4 +1,4 @@
-import { action, ui } from "@melony/core";
+import { action, ui } from "melony";
 import { z } from "zod";
 import { weatherCard } from "../uis/weather-card";
 

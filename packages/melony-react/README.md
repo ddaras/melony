@@ -5,14 +5,14 @@ React UI + providers/hooks for building chat experiences on top of **Melony’s 
 ## Installation
 
 ```bash
-npm install @melony/react @melony/core react
+npm install @melony/react melony react
 ```
 
 ## Quick start
 
 ```tsx
 import React from "react";
-import { MelonyClient, createHttpTransport } from "@melony/core/client";
+import { MelonyClient, createHttpTransport } from "melony/client";
 import { MelonyClientProvider, Thread } from "@melony/react";
 
 const client = new MelonyClient(createHttpTransport("/api/chat"));
@@ -53,12 +53,12 @@ function Controls() {
 - **`Thread`**: a full chat thread (composer + message list + streaming).
 - **`ChatSidebar`**: a sidebar-style chat UI container.
 - **`ChatFull` / `ChatPopup`**: ready-to-embed layouts (see exports).
-- **`UIRenderer`**: renders SDUI `UINode` trees from `@melony/core`.
+- **`UIRenderer`**: renders SDUI `UINode` trees from `melony`.
 
 ## Providers & hooks
 
 - **`MelonyClientProvider`** + **`useMelony()`**
-  - wraps a `MelonyClient` from `@melony/core/client`
+  - wraps a `MelonyClient` from `melony/client`
   - exposes `events`, `messages`, `isLoading`, `error`, and `sendEvent()`
 
 - **`ThreadProvider`** + **`useThreads()`** (optional)
@@ -75,7 +75,7 @@ If the backend yields events with `event.ui`, Melony React renders them automati
 Backend example:
 
 ```ts
-import { ui } from "@melony/core";
+import { ui } from "melony";
 
 yield {
   type: "ui",

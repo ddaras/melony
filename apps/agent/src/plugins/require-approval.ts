@@ -1,4 +1,4 @@
-import { ui, plugin } from "@melony/core";
+import { ui, plugin } from "melony";
 import { StatelessPendingActionStorage } from "../lib/pending-action-storage";
 
 const actionStorage = new StatelessPendingActionStorage(

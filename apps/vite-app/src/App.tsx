@@ -1,4 +1,4 @@
-import { MelonyClient, createHttpTransport } from "@melony/core/client";
+import { MelonyClient, createHttpTransport } from "melony/client";
 import {
   AccountDialog,
   AuthProvider,
