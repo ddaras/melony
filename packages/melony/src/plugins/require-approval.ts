@@ -40,34 +40,65 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
     name: "require-approval",
 
     /**
-     * Step 1: Handle the resumption when the user clicks "Approve".
+     * Step 1: Handle the resumption when the user clicks "Approve" or "Cancel".
+     * We verify the one-time-use approvalId to prevent replay attacks or double-clicks.
      */
     onBeforeRun: async ({ event }, context) => {
-      if (event.type === "action-approved") {
-        const { action, params, token, ...rest } = event.data;
+      if (
+        event.type === "action-approved" ||
+        event.type === "action-rejected"
+      ) {
+        const { action, params, token, approvalId, ...rest } = event.data;
 
-        // Security: Verify the token if a secret was provided
-        if (options.secret) {
-          const expectedToken = await signPayload(
-            { action, params },
-            options.secret
-          );
-          if (token !== expectedToken) {
-            return {
-              type: "error",
-              data: {
-                message:
-                  "Security Warning: Approval token mismatch. Execution blocked.",
-              },
-            };
-          }
+        // 1. Check if this specific request exists and hasn't been used
+        const pending = context.state.__pending_approvals?.[approvalId];
+        if (!pending) {
+          context.suspend();
+          return {
+            type: "error",
+            data: {
+              message:
+                "Security Error: This approval request is invalid or has already been used.",
+            },
+          };
         }
 
-        // Store approval in ephemeral state for the upcoming action execution
-        context.state.__approved_action = { action, params };
+        // 2. Consume the token immediately (Destroy after usage)
+        delete context.state.__pending_approvals[approvalId];
 
-        // Return the action to jump-start the loop exactly where we left off
-        return { action, params, ...rest };
+        if (event.type === "action-approved") {
+          // 3. Security: Verify the token if a secret was provided
+          if (options.secret) {
+            const expectedToken = await signPayload(
+              { action, params, approvalId },
+              options.secret
+            );
+            if (token !== expectedToken) {
+              return {
+                type: "error",
+                data: {
+                  message:
+                    "Security Warning: Approval token mismatch. Execution blocked.",
+                },
+              };
+            }
+          }
+
+          // 4. Store approval in ephemeral state for the upcoming action execution
+          context.state.__approved_action = { action, params };
+
+          // Return the action to jump-start the loop exactly where we left off
+          return { action, params, ...rest };
+        }
+
+        // Handle Rejection
+        context.suspend();
+        return {
+          type: "error",
+          data: {
+            message: `Action '${action}' was rejected by the user.`,
+          },
+        };
       }
     },
 
@@ -100,11 +131,19 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         return; // Proceed to execution
       }
 
-      // 3. Suspend and request approval
+      // 3. Suspend and request approval with a one-time-use nonce
       context.suspend();
 
+      const approvalId = Math.random().toString(36).substring(2, 15);
+      context.state.__pending_approvals =
+        context.state.__pending_approvals || {};
+      context.state.__pending_approvals[approvalId] = true;
+
       const token = options.secret
-        ? await signPayload({ action: action.name, params }, options.secret)
+        ? await signPayload(
+            { action: action.name, params, approvalId },
+            options.secret
+          )
         : undefined;
 
       const message =
@@ -115,7 +154,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
 
       return {
         type: "hitl-required",
-        data: { ...nextAction, token },
+        data: { ...nextAction, token, approvalId },
         ui: ui.card({
           title: "Approval Required",
           children: [
@@ -136,7 +175,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   onClickAction: {
                     role: "user",
                     type: "action-approved",
-                    data: { ...nextAction, token },
+                    data: { ...nextAction, token, approvalId },
                     ui: ui.text("Approval granted"),
                   },
                 }),
@@ -145,7 +184,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   variant: "outline",
                   onClickAction: {
                     type: "action-rejected",
-                    data: { action: action.name },
+                    data: { action: action.name, approvalId },
                   },
                 }),
               ],
