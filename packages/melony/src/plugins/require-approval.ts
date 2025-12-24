@@ -55,11 +55,20 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         if (!pending) {
           context.suspend();
           return {
+            role: "assistant",
             type: "error",
             data: {
               message:
                 "Security Error: This approval request is invalid or has already been used.",
             },
+            ui: ui.card({
+              title: "Security Error",
+              children: [
+                ui.text(
+                  "This approval request is invalid or has already been used."
+                ),
+              ],
+            }),
           };
         }
 
