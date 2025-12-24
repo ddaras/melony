@@ -40,7 +40,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
      */
     onBeforeRun: async ({ event }, context) => {
       if (event.type === "action-approved") {
-        const { action, params, token } = event.data;
+        const { action, params, token, ...rest } = event.data;
 
         // Security: Verify the token if a secret was provided
         if (options.secret) {
@@ -57,14 +57,14 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         context.state.__approved_action = { action, params };
 
         // Return the action to jump-start the loop exactly where we left off
-        return { action, params };
+        return { action, params, ...rest };
       }
     },
 
     /**
      * Step 2: Intercept actions that require approval.
      */
-    onBeforeAction: async ({ action, params }, context) => {
+    onBeforeAction: async ({ action, params, nextAction }, context) => {
       // 1. Check if this action needs approval
       const isTargetAction = !options.actions || options.actions.includes(action.name);
       if (!isTargetAction) return;
@@ -98,7 +98,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
 
       return {
         type: "hitl-required",
-        data: { action: action.name, params, token },
+        data: { ...nextAction, token },
         ui: ui.card({
           title: "Approval Required",
           children: [
@@ -118,7 +118,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   variant: "success",
                   onClickAction: {
                     type: "action-approved",
-                    data: { action: action.name, params, token },
+                    data: { ...nextAction, token },
                   },
                 }),
                 ui.button({

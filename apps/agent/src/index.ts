@@ -18,7 +18,7 @@ app.get("/health", (c: Context) => {
   return c.json({ status: "ok" });
 });
 
-app.post("/api/v1/chat", handle(rootAgent));
+app.post("/api/chat", handle(rootAgent));
 
 const port = Number(process.env.PORT) || 3000;
 

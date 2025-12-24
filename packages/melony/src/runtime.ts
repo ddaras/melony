@@ -51,9 +51,9 @@ export class Runtime {
         );
         if (result) {
           if ("type" in result) {
-            yield* this.emit(result, context);
+            yield* this.emit(result as Event, context);
           } else {
-            nextAction = result;
+            nextAction = result as NextAction;
           }
         }
       }
@@ -67,9 +67,9 @@ export class Runtime {
       );
       if (result) {
         if ("type" in result) {
-          yield* this.emit(result, context);
+          yield* this.emit(result as Event, context);
         } else {
-          nextAction = result;
+          nextAction = result as NextAction;
         }
       }
     }
@@ -117,7 +117,7 @@ export class Runtime {
       }
 
       // 2. Execute Action
-      const result = yield* this.executeAction(action, current.params, context);
+      const result = yield* this.executeAction(action, current, context);
 
       // 3. Decide Next Step
       if (this.config.brain) {
@@ -127,6 +127,7 @@ export class Runtime {
           {
             type: "action-result",
             data: {
+              ...current, // Preserve all metadata (like toolCallId)
               action: actionName,
               params: current.params,
               result,
@@ -169,14 +170,16 @@ export class Runtime {
 
   private async *executeAction(
     action: Action,
-    params: any,
+    nextAction: NextAction,
     context: RuntimeContext
   ): AsyncGenerator<Event, NextAction | void> {
+    const params = nextAction.params;
+
     // 1. Trigger Plugins: onBeforeAction
     for (const plugin of this.config.plugins || []) {
       if (plugin.onBeforeAction) {
         const hookResult = await plugin.onBeforeAction(
-          { action, params },
+          { action, params, nextAction },
           context
         );
         if (hookResult) {
@@ -189,7 +192,7 @@ export class Runtime {
     // 2. Trigger Hook: onBeforeAction
     if (this.config.hooks?.onBeforeAction) {
       const hookResult = await this.config.hooks.onBeforeAction(
-        { action, params },
+        { action, params, nextAction },
         context
       );
       if (hookResult) {

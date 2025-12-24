@@ -315,6 +315,7 @@ export interface NextAction {
   action?: string;
   params?: any;
   description?: string;
+  [key: string]: any; // Allow metadata like toolCallId
 }
 
 export interface RuntimeContext<TState = any> {
@@ -357,7 +358,7 @@ export interface Hooks {
    * Return an event to intercept/suspend the action.
    */
   onBeforeAction?: (
-    call: { action: Action<any>; params: any },
+    call: { action: Action<any>; params: any; nextAction: NextAction },
     context: RuntimeContext
   ) => HookResult;
 
