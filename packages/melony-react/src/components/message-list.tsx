@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Message } from "@/types";
 import { MessageBubble } from "./message";
 import { LoadingIndicator } from "./loading-indicator";
@@ -14,7 +14,12 @@ interface MessageListProps {
   };
 }
 
-export function MessageList({ messages, isLoading, error, loadingStatus }: MessageListProps) {
+export function MessageList({
+  messages,
+  isLoading,
+  error,
+  loadingStatus,
+}: MessageListProps) {
   if (messages.length === 0) {
     return null;
   }
@@ -23,17 +28,20 @@ export function MessageList({ messages, isLoading, error, loadingStatus }: Messa
   const isTextStreaming = useMemo(() => {
     if (messages.length === 0 || !isLoading) return false;
     const lastMessage = messages[messages.length - 1];
-    return lastMessage.content.some(event => event.type === "text-delta");
+    return lastMessage.content.some((event) => event.type === "text-delta");
   }, [messages, isLoading]);
+
+  console.log("MESSAGES", messages);
 
   return (
     <div className="space-y-6">
       {messages.map((message, index) => (
         <MessageBubble key={index} message={message} />
       ))}
-      {isLoading && !isTextStreaming && <LoadingIndicator status={loadingStatus} />}
+      {isLoading && !isTextStreaming && (
+        <LoadingIndicator status={loadingStatus} />
+      )}
       {error && <ErrorDisplay error={error} />}
     </div>
   );
 }
-
