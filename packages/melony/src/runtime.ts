@@ -266,6 +266,7 @@ export class Runtime {
       runId: context.runId,
       timestamp: event.timestamp ?? Date.now(),
       role: event.role ?? "assistant",
+      state: context.state,
     };
 
     // Yield the actual event first

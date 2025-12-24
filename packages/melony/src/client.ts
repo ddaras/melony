@@ -17,6 +17,7 @@ export interface ClientState {
 export class MelonyClient {
   private transport: TransportFn;
   private state: ClientState;
+  private lastServerState: any = null;
   private abortController: AbortController | null = null;
   private stateListeners: Set<(state: ClientState) => void> = new Set();
 
@@ -54,6 +55,7 @@ export class MelonyClient {
     this.abortController = new AbortController();
 
     const runId = options?.runId ?? generateId();
+    const state = options?.state ?? this.lastServerState;
     const optimisticEvent: Event = {
       ...event,
       runId,
@@ -70,7 +72,7 @@ export class MelonyClient {
 
     try {
       const stream = await this.transport(
-        { event: optimisticEvent, ...options, runId },
+        { event: optimisticEvent, ...options, runId, state },
         this.abortController.signal
       );
 
@@ -110,6 +112,9 @@ export class MelonyClient {
   }
 
   private handleIncomingEvent(event: Event) {
+    if (event.state) {
+      this.lastServerState = event.state;
+    }
     const events = [...this.state.events];
 
     // Track loading-status events

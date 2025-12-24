@@ -295,6 +295,7 @@ export type Event = {
   runId?: string;
   timestamp?: number;
   role?: Role;
+  state?: any;
 };
 
 // ============================================

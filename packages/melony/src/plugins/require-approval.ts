@@ -11,7 +11,7 @@ export interface RequireApprovalOptions {
 
   /**
    * Optional secret to sign the approval payload.
-   * If provided, the plugin will verify that the parameters haven't been 
+   * If provided, the plugin will verify that the parameters haven't been
    * tampered with between the request and the approval.
    */
   secret?: string;
@@ -24,7 +24,11 @@ export interface RequireApprovalOptions {
   /**
    * Optional condition to check if approval is needed dynamically.
    */
-  shouldApprove?: (action: Action<any>, params: any, context: RuntimeContext) => boolean | Promise<boolean>;
+  shouldApprove?: (
+    action: Action<any>,
+    params: any,
+    context: RuntimeContext
+  ) => boolean | Promise<boolean>;
 }
 
 /**
@@ -44,11 +48,17 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
 
         // Security: Verify the token if a secret was provided
         if (options.secret) {
-          const expectedToken = await signPayload({ action, params }, options.secret);
+          const expectedToken = await signPayload(
+            { action, params },
+            options.secret
+          );
           if (token !== expectedToken) {
             return {
               type: "error",
-              data: { message: "Security Warning: Approval token mismatch. Execution blocked." },
+              data: {
+                message:
+                  "Security Warning: Approval token mismatch. Execution blocked.",
+              },
             };
           }
         }
@@ -66,11 +76,16 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
      */
     onBeforeAction: async ({ action, params, nextAction }, context) => {
       // 1. Check if this action needs approval
-      const isTargetAction = !options.actions || options.actions.includes(action.name);
+      const isTargetAction =
+        !options.actions || options.actions.includes(action.name);
       if (!isTargetAction) return;
 
       if (options.shouldApprove) {
-        const needsApproval = await options.shouldApprove(action, params, context);
+        const needsApproval = await options.shouldApprove(
+          action,
+          params,
+          context
+        );
         if (!needsApproval) return;
       }
 
@@ -88,13 +103,15 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
       // 3. Suspend and request approval
       context.suspend();
 
-      const token = options.secret 
+      const token = options.secret
         ? await signPayload({ action: action.name, params }, options.secret)
         : undefined;
 
-      const message = typeof options.message === "function"
-        ? options.message(action.name, params)
-        : options.message || `The agent wants to execute **${action.name}**. Do you approve?`;
+      const message =
+        typeof options.message === "function"
+          ? options.message(action.name, params)
+          : options.message ||
+            `The agent wants to execute **${action.name}**. Do you approve?`;
 
       return {
         type: "hitl-required",
@@ -158,4 +175,3 @@ async function signPayload(data: any, secret: string): Promise<string> {
   const signature = await crypto.subtle.sign("HMAC", key, dataToSign);
   return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }
-
