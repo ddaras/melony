@@ -134,8 +134,10 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   label: "Approve",
                   variant: "success",
                   onClickAction: {
+                    role: "user",
                     type: "action-approved",
                     data: { ...nextAction, token },
+                    ui: ui.text("Approval granted"),
                   },
                 }),
                 ui.button({
