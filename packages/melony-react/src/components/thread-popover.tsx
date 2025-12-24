@@ -37,7 +37,7 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
   className,
   buttonClassName,
   buttonVariant = "ghost",
-  buttonSize = "sm",
+  buttonSize = "icon",
   emptyState,
   onThreadSelect,
 }) => {
@@ -70,8 +70,7 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
           size={buttonSize}
           className={cn(buttonClassName)}
         >
-          <IconHistory className="mr-2 size-4" />
-          History
+          <IconHistory className="size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

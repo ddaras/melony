@@ -5,7 +5,7 @@ import { ThreadList } from "./thread-list";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
-import { StarterPrompt } from "@/types";
+import { StarterPrompt, ComposerOption, ComposerOptionGroup } from "@/types";
 import { useThreads } from "@/hooks/use-threads";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
 
@@ -13,20 +13,27 @@ export interface ChatPopupProps {
   title?: string;
   placeholder?: string;
   starterPrompts?: StarterPrompt[];
+  options?: ComposerOptionGroup[];
   defaultOpen?: boolean;
   /**
    * Props for customizing the header. Note: leftContent and rightContent in headerProps
    * will be merged with the default popup header actions (back, history, new chat, close).
    */
   headerProps?: Omit<ChatHeaderProps, "title" | "leftContent" | "rightContent">;
+  /**
+   * IDs of options to be selected by default
+   */
+  defaultSelectedIds?: string[];
 }
 
 export function ChatPopup({
   title = "Chat",
   placeholder = "Message the AI",
   starterPrompts,
+  options,
   defaultOpen = false,
   headerProps,
+  defaultSelectedIds,
 }: ChatPopupProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [view, setView] = useState<"chat" | "history">("chat");
@@ -95,10 +102,12 @@ export function ChatPopup({
           />
           <div className="flex-1 overflow-hidden">
             {view === "chat" ? (
-              <Thread 
-                placeholder={placeholder} 
-                starterPrompts={starterPrompts} 
+              <Thread
+                placeholder={placeholder}
+                starterPrompts={starterPrompts}
+                options={options}
                 className="h-full"
+                defaultSelectedIds={defaultSelectedIds}
               />
             ) : (
               <ThreadList 

@@ -1,10 +1,15 @@
 import { Event, Role } from "melony";
 
 export interface User {
-  id: string;
+  id?: string;
+  uid: string;
   email: string;
-  name: string;
+  name?: string;
+  displayName?: string;
   picture?: string;
+  createdAt?: string;
+  lastSignIn?: string | null;
+  emailVerified?: boolean;
 }
 
 export interface Message {
@@ -24,6 +29,19 @@ export interface StarterPrompt {
   label: string;
   prompt: string;
   icon?: React.ReactNode;
+}
+
+export interface ComposerOption {
+  id: string;
+  label: string;
+  value: any;
+}
+
+export interface ComposerOptionGroup {
+  id: string;
+  label: string;
+  options: ComposerOption[];
+  type?: "single" | "multiple";
 }
 
 export interface AuthService {

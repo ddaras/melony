@@ -8,6 +8,10 @@ export interface ClientState {
   events: Event[];
   isLoading: boolean;
   error: Error | null;
+  loadingStatus?: {
+    message: string;
+    details?: string;
+  };
 }
 
 export class MelonyClient {
@@ -22,6 +26,7 @@ export class MelonyClient {
       events: options?.initialEvents ?? [],
       isLoading: false,
       error: null,
+      loadingStatus: undefined,
     };
   }
 
@@ -59,6 +64,7 @@ export class MelonyClient {
     this.setState({
       isLoading: true,
       error: null,
+      loadingStatus: undefined,
       events: [...this.state.events, optimisticEvent],
     });
 
@@ -91,20 +97,41 @@ export class MelonyClient {
           }
         }
       }
-      this.setState({ isLoading: false });
+      this.setState({ isLoading: false, loadingStatus: undefined });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
-        this.setState({ isLoading: false });
+        this.setState({ isLoading: false, loadingStatus: undefined });
         return;
       }
       const error = err instanceof Error ? err : new Error(String(err));
-      this.setState({ error, isLoading: false });
+      this.setState({ error, isLoading: false, loadingStatus: undefined });
       throw error;
     }
   }
 
   private handleIncomingEvent(event: Event) {
     const events = [...this.state.events];
+
+    // Track loading-status events
+    if (event.type === "loading-status") {
+      const currentStatus = this.state.loadingStatus;
+      const newMessage = event.data?.message ?? currentStatus?.message ?? "Processing...";
+      const newDelta = event.data?.delta;
+
+      let newDetails = currentStatus?.details ?? "";
+      if (newDelta !== undefined) {
+        newDetails += newDelta;
+      } else if (event.data?.details !== undefined) {
+        newDetails = event.data.details;
+      }
+
+      this.setState({
+        loadingStatus: {
+          message: newMessage,
+          details: newDetails || undefined,
+        },
+      });
+    }
 
     // Contiguous text-delta merging for the same run
     const lastEvent = events[events.length - 1];
@@ -130,7 +157,7 @@ export class MelonyClient {
 
   reset(events: Event[] = []) {
     if (this.abortController) this.abortController.abort();
-    this.setState({ events, error: null, isLoading: false });
+    this.setState({ events, error: null, isLoading: false, loadingStatus: undefined });
   }
 }
 

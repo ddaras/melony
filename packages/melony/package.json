@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -40,6 +40,11 @@
       "types": "./dist/adapters/*.d.ts",
       "import": "./dist/adapters/*.js",
       "default": "./dist/adapters/*.js"
+    },
+    "./plugins/*": {
+      "types": "./dist/plugins/*.d.ts",
+      "import": "./dist/plugins/*.js",
+      "default": "./dist/plugins/*.js"
     },
     "./package.json": "./package.json"
   },

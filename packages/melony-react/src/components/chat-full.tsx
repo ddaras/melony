@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Thread } from "./thread";
 import { cn } from "@/lib/utils";
-import { StarterPrompt } from "@/types";
+import { StarterPrompt, ComposerOption, ComposerOptionGroup } from "@/types";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
 import { Button } from "./ui/button";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
@@ -10,6 +10,7 @@ export interface ChatFullProps {
   title?: string;
   placeholder?: string;
   starterPrompts?: StarterPrompt[];
+  options?: ComposerOptionGroup[];
   className?: string;
   /**
    * Props for customizing the header. If provided, title prop will be passed to header.
@@ -63,12 +64,21 @@ export interface ChatFullProps {
    * Callback when right sidebar collapse state changes
    */
   onRightSidebarCollapseChange?: (collapsed: boolean) => void;
+  /**
+   * Whether the composer should be auto focused
+   */
+  autoFocus?: boolean;
+  /**
+   * IDs of options to be selected by default
+   */
+  defaultSelectedIds?: string[];
 }
 
 export function ChatFull({
   title = "Chat",
   placeholder = "Message the AI",
   starterPrompts,
+  options,
   className,
   headerProps,
   leftSidebar,
@@ -83,6 +93,8 @@ export function ChatFull({
   rightSidebarCollapsed: controlledRightCollapsed,
   onLeftSidebarCollapseChange,
   onRightSidebarCollapseChange,
+  autoFocus = false,
+  defaultSelectedIds,
 }: ChatFullProps) {
   // Internal state for uncontrolled mode
   const [internalLeftCollapsed, setInternalLeftCollapsed] = useState(
@@ -170,7 +182,13 @@ export function ChatFull({
           </>
         )}
         <div className="flex-1 overflow-hidden min-w-0">
-          <Thread placeholder={placeholder} starterPrompts={starterPrompts} />
+          <Thread
+            placeholder={placeholder}
+            starterPrompts={starterPrompts}
+            options={options}
+            autoFocus={autoFocus}
+            defaultSelectedIds={defaultSelectedIds}
+          />
         </div>
         {rightSidebar && (
           <>

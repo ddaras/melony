@@ -1,8 +1,8 @@
 import { melony } from "melony";
+import { requireApproval } from "melony/plugins/require-approval";
 
 import { checkWeather } from "./actions/check-weather";
 import { persistEventsPlugin } from "./plugins/persist-events";
-import { requireApprovalPlugin } from "./plugins/require-approval";
 import { brain } from "./brains/brain";
 
 export const rootAgent = melony({
@@ -10,6 +10,6 @@ export const rootAgent = melony({
   actions: { checkWeather },
   plugins: [
     persistEventsPlugin,
-    requireApprovalPlugin({ actions: ["checkWeather"] }),
+    requireApproval({ actions: ["checkWeather"] }),
   ],
 });

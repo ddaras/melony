@@ -6,15 +6,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { IconBrandGoogle, IconLogout, IconUser } from "@tabler/icons-react";
+import {
+  IconBrandGoogle,
+  IconLogout,
+  IconUser,
+  IconX,
+} from "@tabler/icons-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export interface AccountDialogProps {
   className?: string;
@@ -30,12 +45,24 @@ export interface AccountDialogProps {
 
 export const AccountDialog: React.FC<AccountDialogProps> = ({
   className,
-  variant,
+  variant = "outline",
   size,
 }) => {
-  const { isLoading, isAuthenticated, login, logout } = useAuth();
+  const { isLoading, isAuthenticated, user, login, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
+  const [accountInfoOpen, setAccountInfoOpen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const initials = React.useMemo(() => {
+    const name = user?.displayName || user?.name;
+    if (!name) return "";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [user?.displayName, user?.name]);
 
   const handleGoogleSignIn = async () => {
     login();
@@ -43,31 +70,119 @@ export const AccountDialog: React.FC<AccountDialogProps> = ({
 
   if (isAuthenticated) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={(props) => (
-            <Button
-              variant={variant}
-              size={size}
-              {...props}
-              className={className}
-            >
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <Button
+                variant={variant}
+                size="icon"
+                {...props}
+                className={cn("rounded-full", className)}
+              >
+                {user?.picture ? (
+                  <img
+                    src={user.picture}
+                    alt={user.displayName || user.name}
+                    className="size-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-bold">
+                    {initials || <IconUser className="size-4" />}
+                  </div>
+                )}
+              </Button>
+            )}
+          />
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="flex items-center gap-2 p-2">
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user.displayName || user.name}
+                  className="size-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-bold">
+                  {initials || <IconUser className="size-4" />}
+                </div>
+              )}
+              <div className="flex flex-col space-y-0.5 overflow-hidden">
+                <p className="truncate text-sm font-medium">
+                  {user?.displayName || user?.name}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+            <Separator className="my-1" />
+            <DropdownMenuItem onClick={() => setAccountInfoOpen(true)}>
               <IconUser className="mr-2 size-4" />
-              Account
-            </Button>
-          )}
-        />
-        <DropdownMenuContent>
-          <DropdownMenuItem>
-            <IconUser className="mr-2 size-4" />
-            Account
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={logout}>
-            <IconLogout className="mr-2 size-4" />
-            Logout
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              Account Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={logout} className="text-destructive">
+              <IconLogout className="mr-2 size-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Dialog open={accountInfoOpen} onOpenChange={setAccountInfoOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Account Information</DialogTitle>
+              <DialogDescription>
+                Your account details and settings.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogClose>
+              <IconX className="size-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+            <div className="flex flex-col gap-4 py-4">
+              <div className="flex items-center gap-4">
+                {user?.picture ? (
+                  <img
+                    src={user.picture}
+                    alt={user.displayName || user.name}
+                    className="size-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-16 items-center justify-center rounded-full bg-muted text-xl font-bold">
+                    {initials || (
+                      <IconUser className="size-8 text-muted-foreground" />
+                    )}
+                  </div>
+                )}
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-semibold">
+                    {user?.displayName || user?.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
+              </div>
+              <Separator />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    User ID
+                  </p>
+                  <p className="font-mono text-xs truncate">
+                    {user?.uid || user?.id}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Created At
+                  </p>
+                  <p className="text-xs">{user?.createdAt || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

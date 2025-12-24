@@ -7,8 +7,22 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 export interface CreateThreadButtonProps {
   className?: string;
-  variant?: "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
-  size?: "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg";
+  variant?:
+    | "default"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "destructive"
+    | "link";
+  size?:
+    | "default"
+    | "xs"
+    | "sm"
+    | "lg"
+    | "icon"
+    | "icon-xs"
+    | "icon-sm"
+    | "icon-lg";
   children?: React.ReactNode;
   onThreadCreated?: (threadId: string) => void;
 }
@@ -16,7 +30,7 @@ export interface CreateThreadButtonProps {
 export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
   className,
   variant = "ghost",
-  size = "sm",
+  size = "icon",
   children,
   onThreadCreated,
 }) => {
@@ -58,9 +72,7 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
       disabled={isCreating}
       className={cn(className)}
     >
-      <IconPlus className="mr-2 size-4" />
-      {children || "New Thread"}
+      <IconPlus className="size-4" />
     </Button>
   );
 };
-
