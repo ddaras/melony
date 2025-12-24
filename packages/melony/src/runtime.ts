@@ -119,6 +119,10 @@ export class Runtime {
       // 2. Execute Action
       const result = yield* this.executeAction(action, current, context);
 
+      // If the action or a plugin suspended the run (e.g. for HITL approval), 
+      // stop immediately before feeding the result back to the brain.
+      if (context.isDone) break;
+
       // 3. Decide Next Step
       if (this.config.brain) {
         // If we have a brain, feed the result back to it to decide what to do next.
