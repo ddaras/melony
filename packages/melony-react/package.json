@@ -1,6 +1,6 @@
 {
   "name": "@melony/react",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -42,10 +42,12 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
-    "melony": "workspace:*",
     "@tabler/icons-react": "^3.36.0",
+    "@tanstack/react-query": "^5.90.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "melony": "workspace:*",
+    "nuqs": "^2.8.6",
     "react-hotkeys-hook": "^4.6.1",
     "tailwind-merge": "^3.4.0"
   },

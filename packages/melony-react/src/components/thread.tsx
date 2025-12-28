@@ -5,6 +5,8 @@ import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { Composer } from "./composer";
 import { StarterPrompts } from "./starter-prompts";
 import { MessageList } from "./message-list";
+import { useThreads } from "@/hooks/use-threads";
+import { LoadingIndicator } from "./loading-indicator";
 
 interface ThreadProps {
   className?: string;
@@ -19,13 +21,22 @@ interface ThreadProps {
 export function Thread({
   className,
   placeholder = "Type a message...",
-  starterPrompts,
+  starterPrompts: localStarterPrompts,
   onStarterPromptClick,
-  options,
+  options: localOptions,
   autoFocus = false,
   defaultSelectedIds,
 }: ThreadProps) {
-  const { messages, isLoading, error, sendEvent, loadingStatus } = useMelony();
+  const { activeThreadId, threadEvents, isLoadingEvents } = useThreads();
+
+  const { messages, isLoading, error, sendEvent, loadingStatus, config } =
+    useMelony({
+      initialEvents: threadEvents,
+    });
+
+  const starterPrompts = localStarterPrompts ?? config?.starterPrompts;
+  const options = localOptions ?? config?.options;
+
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -41,13 +52,14 @@ export function Thread({
     if (!text || isLoading) return;
 
     if (!overrideInput) setInput("");
+
     await sendEvent(
       {
         type: "text",
         role: "user",
         data: { content: text },
       },
-      { state }
+      { state: { ...state, threadId: activeThreadId ?? undefined } }
     );
   };
 
@@ -60,7 +72,10 @@ export function Thread({
   };
 
   const showStarterPrompts =
-    messages.length === 0 && starterPrompts && starterPrompts.length > 0;
+    messages.length === 0 &&
+    starterPrompts &&
+    starterPrompts.length > 0 &&
+    !isLoadingEvents;
 
   return (
     <div
@@ -73,18 +88,26 @@ export function Thread({
             showStarterPrompts && "min-h-full flex flex-col"
           )}
         >
-          {showStarterPrompts && (
-            <StarterPrompts
-              prompts={starterPrompts}
-              onPromptClick={handleStarterPromptClick}
-            />
+          {isLoadingEvents && messages.length === 0 ? (
+            <div className="flex items-center justify-center py-20">
+              <LoadingIndicator status={{ message: "Loading messages..." }} />
+            </div>
+          ) : (
+            <>
+              {showStarterPrompts && (
+                <StarterPrompts
+                  prompts={starterPrompts}
+                  onPromptClick={handleStarterPromptClick}
+                />
+              )}
+              <MessageList
+                messages={messages}
+                isLoading={isLoading}
+                error={error}
+                loadingStatus={loadingStatus}
+              />
+            </>
           )}
-          <MessageList
-            messages={messages}
-            isLoading={isLoading}
-            error={error}
-            loadingStatus={loadingStatus}
-          />
         </div>
         <div ref={messagesEndRef} />
       </div>

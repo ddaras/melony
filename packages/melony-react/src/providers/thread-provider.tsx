@@ -1,14 +1,18 @@
 import React, {
   createContext,
-  useState,
   useCallback,
   ReactNode,
-  useEffect,
   useMemo,
 } from "react";
 import { Event } from "melony";
 import { generateId } from "melony/client";
 import { ThreadData, ThreadService } from "@/types";
+import { useQueryState, parseAsString } from "nuqs";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 export interface ThreadContextValue {
   threads: ThreadData[];
@@ -38,129 +42,88 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   service,
   initialThreadId: providedInitialThreadId,
 }) => {
+  const queryClient = useQueryClient();
   const defaultInitialThreadId = useMemo(() => generateId(), []);
   const initialThreadId = providedInitialThreadId || defaultInitialThreadId;
 
-  const [threads, setThreads] = useState<ThreadData[]>([]);
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(
-    initialThreadId
+  const [activeThreadId, setActiveThreadId] = useQueryState(
+    "threadId",
+    parseAsString.withDefault(initialThreadId)
   );
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [threadEvents, setThreadEvents] = useState<Event[]>([]);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
-  const fetchThreads = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const processedThreads = await service.getThreads();
-      setThreads(processedThreads);
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to fetch threads");
-      setError(error);
-      console.error("Failed to fetch threads:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [service]);
+  // Fetch all threads
+  const {
+    data: threads = [],
+    isLoading,
+    error: threadsError,
+    refetch: refreshThreads,
+  } = useQuery({
+    queryKey: ["threads"],
+    queryFn: () => service.getThreads(),
+  });
 
-  useEffect(() => {
-    fetchThreads();
-  }, [fetchThreads]);
+  // Fetch events for active thread
+  const { data: threadEvents = [], isLoading: isLoadingEvents } = useQuery({
+    queryKey: ["threads", activeThreadId, "events"],
+    queryFn: () => service.getEvents(activeThreadId!),
+    enabled: !!activeThreadId,
+  });
 
-  const selectThread = useCallback((threadId: string) => {
-    setActiveThreadId(threadId);
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      const newId = service.createThread
+        ? await service.createThread()
+        : generateId();
+      return newId;
+    },
+    onSuccess: async (newId) => {
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+      await setActiveThreadId(newId);
+    },
+  });
 
-  const createThread = useCallback(async (): Promise<string> => {
-    const newId = service.createThread
-      ? await service.createThread()
-      : generateId();
-    const newThread: ThreadData = {
-      id: newId,
-      updatedAt: new Date(),
-    };
-    setThreads((prev) => [newThread, ...prev]);
-    setActiveThreadId(newId);
-    return newId;
-  }, [service]);
+  const deleteMutation = useMutation({
+    mutationFn: (threadId: string) => service.deleteThread(threadId),
+    onSuccess: async (_, threadId) => {
+      await queryClient.invalidateQueries({ queryKey: ["threads"] });
+      if (activeThreadId === threadId) {
+        const remainingThreads = threads.filter((t) => t.id !== threadId);
+        const nextId = remainingThreads.length > 0 ? remainingThreads[0].id : null;
+        await setActiveThreadId(nextId);
+      }
+    },
+  });
+
+  const selectThread = useCallback(
+    (threadId: string) => {
+      setActiveThreadId(threadId);
+    },
+    [setActiveThreadId]
+  );
+
+  const createThread = useCallback(async () => {
+    return createMutation.mutateAsync();
+  }, [createMutation]);
 
   const deleteThread = useCallback(
     async (threadId: string) => {
-      try {
-        await service.deleteThread(threadId);
-
-        setThreads((prev) => {
-          const remainingThreads = prev.filter((t) => t.id !== threadId);
-          setActiveThreadId((current) => {
-            if (current === threadId) {
-              return remainingThreads.length > 0
-                ? remainingThreads[0].id
-                : null;
-            }
-            return current;
-          });
-          return remainingThreads;
-        });
-      } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error("Failed to delete thread");
-        setError(error);
-        throw error;
-      }
+      return deleteMutation.mutateAsync(threadId);
     },
-    [service]
+    [deleteMutation]
   );
-
-  const refreshThreads = useCallback(async () => {
-    await fetchThreads();
-  }, [fetchThreads]);
-
-  useEffect(() => {
-    if (!activeThreadId) {
-      setThreadEvents([]);
-      setIsLoadingEvents(false);
-      return;
-    }
-
-    let cancelled = false;
-    const fetchEvents = async () => {
-      setIsLoadingEvents(true);
-      try {
-        const events = await service.getEvents(activeThreadId);
-        if (!cancelled) {
-          setThreadEvents(events);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Failed to fetch events:", err);
-          setThreadEvents([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingEvents(false);
-        }
-      }
-    };
-
-    fetchEvents();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeThreadId, service]);
 
   const value = useMemo(
     () => ({
       threads,
       activeThreadId,
       isLoading,
-      error,
+      error: (threadsError as Error) || null,
       selectThread,
       createThread,
       deleteThread,
-      refreshThreads,
+      refreshThreads: async () => {
+        await refreshThreads();
+      },
       threadEvents,
       isLoadingEvents,
     }),
@@ -168,7 +131,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       threads,
       activeThreadId,
       isLoading,
-      error,
+      threadsError,
       selectThread,
       createThread,
       deleteThread,

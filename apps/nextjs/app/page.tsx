@@ -11,18 +11,18 @@ import {
   AccountDialog,
   ThreadList,
 } from "@melony/react";
-import { STARTER_PROMPTS } from "@/app/lib/starter-prompts";
 import { createMelonyThreadService } from "@/app/lib/services/thread-service";
 import { createMelonyAuthService } from "@/app/lib/services/auth-service";
 
-const client = new MelonyClient(createHttpTransport("/api/chat"));
+const CHAT_API_URL = "/api/chat";
+const client = new MelonyClient(createHttpTransport(CHAT_API_URL));
 
 const threadService = createMelonyThreadService();
 const authService = createMelonyAuthService();
 
 export default function Home() {
   return (
-    <MelonyClientProvider client={client}>
+    <MelonyClientProvider client={client} configApi={CHAT_API_URL}>
       <ThemeProvider>
         <AuthProvider service={authService}>
           <ThreadProvider service={threadService}>
@@ -30,7 +30,6 @@ export default function Home() {
               <main className="flex-1 overflow-hidden">
                 <ChatFull
                   title="Melony"
-                  starterPrompts={STARTER_PROMPTS}
                   headerProps={{
                     rightContent: (
                       <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { MelonyContext, MelonyContextValue } from "@/providers/melony-provider";
 import { Event } from "melony";
 
@@ -14,14 +14,22 @@ export const useMelony = (options?: UseMelonyOptions): MelonyContextValue => {
 
   const { client, reset } = context;
   const { initialEvents } = options || {};
+  const prevInitialEventsRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (
-      initialEvents &&
-      initialEvents.length > 0 &&
-      client.getState().events.length === 0
-    ) {
-      reset(initialEvents);
+    // Serialize current initialEvents for comparison
+    const currentSerialized = initialEvents
+      ? JSON.stringify(initialEvents)
+      : undefined;
+
+    // Reset when initialEvents changes (e.g., when switching threads)
+    if (currentSerialized !== prevInitialEventsRef.current) {
+      if (initialEvents) {
+        reset(initialEvents);
+      } else {
+        reset([]);
+      }
+      prevInitialEventsRef.current = currentSerialized;
     }
   }, [client, initialEvents, reset]);
 

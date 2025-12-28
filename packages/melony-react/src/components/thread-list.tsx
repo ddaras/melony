@@ -1,7 +1,12 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IconPlus, IconMessage, IconTrash } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconMessage,
+  IconTrash,
+  IconLoader2,
+} from "@tabler/icons-react";
 import { useThreads } from "@/hooks/use-threads";
 
 export interface ThreadListProps {
@@ -15,8 +20,14 @@ export const ThreadList: React.FC<ThreadListProps> = ({
   emptyState,
   onThreadSelect,
 }) => {
-  const { threads, activeThreadId, selectThread, createThread, deleteThread } =
-    useThreads();
+  const {
+    threads,
+    activeThreadId,
+    selectThread,
+    createThread,
+    deleteThread,
+    isLoading,
+  } = useThreads();
 
   const handleThreadClick = (threadId: string) => {
     if (threadId !== activeThreadId) {
@@ -76,7 +87,11 @@ export const ThreadList: React.FC<ThreadListProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {threads.length === 0 ? (
+        {isLoading && threads.length === 0 ? (
+          <div className="flex items-center justify-center py-8">
+            <IconLoader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : threads.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground">
             {emptyState || (
               <div className="space-y-2">

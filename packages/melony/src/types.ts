@@ -151,7 +151,14 @@ export interface UIContract {
   };
   button: {
     label: string;
-    variant?: "primary" | "secondary" | "success" | "danger" | "outline" | "ghost" | "link";
+    variant?:
+      | "primary"
+      | "secondary"
+      | "success"
+      | "danger"
+      | "outline"
+      | "ghost"
+      | "link";
     size?: UISize;
     disabled?: boolean;
     onClickAction?: Event;
@@ -169,19 +176,27 @@ export type UINode<T extends keyof UIContract = keyof UIContract> = {
  * Typed using the UIContract source of truth.
  */
 export const ui = {
-  card: (props: UIContract["card"] & { children?: UINode<any>[] }): UINode<"card"> => {
+  card: (
+    props: UIContract["card"] & { children?: UINode<any>[] }
+  ): UINode<"card"> => {
     const { children, ...rest } = props;
     return { type: "card", props: rest, children };
   },
-  row: (props: UIContract["row"] & { children?: UINode<any>[] }): UINode<"row"> => {
+  row: (
+    props: UIContract["row"] & { children?: UINode<any>[] }
+  ): UINode<"row"> => {
     const { children, ...rest } = props;
     return { type: "row", props: rest, children };
   },
-  col: (props: UIContract["col"] & { children?: UINode<any>[] }): UINode<"col"> => {
+  col: (
+    props: UIContract["col"] & { children?: UINode<any>[] }
+  ): UINode<"col"> => {
     const { children, ...rest } = props;
     return { type: "col", props: rest, children };
   },
-  box: (props: UIContract["box"] & { children?: UINode<any>[] }): UINode<"box"> => {
+  box: (
+    props: UIContract["box"] & { children?: UINode<any>[] }
+  ): UINode<"box"> => {
     const { children, ...rest } = props;
     return { type: "box", props: rest, children };
   },
@@ -215,11 +230,7 @@ export const ui = {
     type: "badge",
     props: { label, variant, size },
   }),
-  image: (
-    src: string,
-    alt?: string,
-    size: UISize = "md"
-  ): UINode<"image"> => ({
+  image: (src: string, alt?: string, size: UISize = "md"): UINode<"image"> => ({
     type: "image",
     props: { src, alt, size },
   }),
@@ -245,7 +256,9 @@ export const ui = {
     const { children, ...rest } = props;
     return { type: "listItem", props: rest, children };
   },
-  form: (props: UIContract["form"] & { children?: UINode<any>[] }): UINode<"form"> => {
+  form: (
+    props: UIContract["form"] & { children?: UINode<any>[] }
+  ): UINode<"form"> => {
     const { children, ...rest } = props;
     return { type: "form", props: rest, children };
   },
@@ -293,6 +306,7 @@ export type Event = {
   data?: any;
   ui?: UINode;
   runId?: string;
+  threadId?: string;
   timestamp?: number;
   role?: Role;
   state?: any;
@@ -391,4 +405,15 @@ export interface Config {
   hooks?: Hooks;
   plugins?: Plugin[];
   safetyMaxSteps?: number;
+  starterPrompts?: Array<{
+    label: string;
+    prompt: string;
+    icon?: string;
+  }>;
+  options?: Array<{
+    id: string;
+    label: string;
+    options: Array<{ id: string; label: string; value: any }>;
+    type?: "single" | "multiple";
+  }>;
 }

@@ -42,6 +42,23 @@ export class MelonyClient {
     return { ...this.state };
   }
 
+  async getConfig(api?: string): Promise<{
+    starterPrompts: any[];
+    options: any[];
+  }> {
+    if (!api) return { starterPrompts: [], options: [] };
+    
+    const response = await fetch(api, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+  }
+
   private setState(updates: Partial<ClientState>) {
     this.state = { ...this.state, ...updates };
     this.stateListeners.forEach((l) => l(this.getState()));
@@ -120,7 +137,8 @@ export class MelonyClient {
     // Track loading-status events
     if (event.type === "loading-status") {
       const currentStatus = this.state.loadingStatus;
-      const newMessage = event.data?.message ?? currentStatus?.message ?? "Processing...";
+      const newMessage =
+        event.data?.message ?? currentStatus?.message ?? "Processing...";
       const newDelta = event.data?.delta;
 
       let newDetails = currentStatus?.details ?? "";
@@ -162,7 +180,12 @@ export class MelonyClient {
 
   reset(events: Event[] = []) {
     if (this.abortController) this.abortController.abort();
-    this.setState({ events, error: null, isLoading: false, loadingStatus: undefined });
+    this.setState({
+      events,
+      error: null,
+      isLoading: false,
+      loadingStatus: undefined,
+    });
   }
 }
 
