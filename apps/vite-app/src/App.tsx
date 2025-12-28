@@ -62,7 +62,6 @@ const ChatApp = () => {
     <div className="flex flex-col h-screen relative bg-background">
       <main className="flex-1 overflow-hidden">
         <ChatFull
-          defaultSelectedIds={["square", "vertical"]}
           headerProps={{
             leftContent: (
               <div className="flex gap-2">
