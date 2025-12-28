@@ -42,6 +42,7 @@ export interface ComposerOptionGroup {
   label: string;
   options: ComposerOption[];
   type?: "single" | "multiple";
+  defaultSelectedIds?: string[];
 }
 
 export interface AuthService {

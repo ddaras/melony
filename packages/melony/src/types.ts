@@ -415,5 +415,6 @@ export interface Config {
     label: string;
     options: Array<{ id: string; label: string; value: any }>;
     type?: "single" | "multiple";
+    defaultSelectedIds?: string[];
   }>;
 }

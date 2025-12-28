@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 import { StarterPrompt, ComposerOptionGroup } from "@/types";
@@ -36,6 +36,17 @@ export function Thread({
 
   const starterPrompts = localStarterPrompts ?? config?.starterPrompts;
   const options = localOptions ?? config?.options;
+
+  // Extract defaultSelectedIds from all option groups and combine with explicitly passed ones
+  const allDefaultSelectedIds = useMemo(() => {
+    const defaultSelectedIdsFromOptions = options?.flatMap(
+      (group) => group.defaultSelectedIds ?? []
+    ) ?? [];
+    
+    return [
+      ...new Set([...defaultSelectedIdsFromOptions, ...(defaultSelectedIds ?? [])]),
+    ];
+  }, [options, defaultSelectedIds]);
 
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -122,7 +133,7 @@ export function Thread({
             isLoading={isLoading}
             options={options}
             autoFocus={autoFocus}
-            defaultSelectedIds={defaultSelectedIds}
+            defaultSelectedIds={allDefaultSelectedIds}
           />
         </div>
       </div>

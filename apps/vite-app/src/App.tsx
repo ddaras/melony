@@ -17,7 +17,7 @@ import {
   TOKEN_STORAGE_KEY,
 } from "./lib/services/auth-service";
 
-const CHAT_API_URL = "https://melony-cloud-api-549776254754.us-central1.run.app/api/chat";
+const CHAT_API_URL = "http://localhost:3006/api/agent";
 
 const transport: TransportFn = async (request, signal) => {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY);
