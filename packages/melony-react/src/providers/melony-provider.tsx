@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { MelonyClient, ClientState } from "melony/client";
-import { Event } from "melony";
+import { Config, Event } from "melony";
 import { Message } from "@/types";
 import { groupEventsToMessages } from "@/lib/group-events-to-messages";
 import { NuqsAdapter } from "nuqs/adapters/react";
@@ -25,10 +25,7 @@ export interface MelonyContextValue extends ClientState {
   ) => Promise<void>;
   reset: (events?: Event[]) => void;
   client: MelonyClient;
-  config?: {
-    starterPrompts: any[];
-    options: any[];
-  };
+  config?: Config;
 }
 
 export const MelonyContext = createContext<MelonyContextValue | undefined>(
@@ -122,7 +119,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
       sendEvent,
       reset,
       client,
-      config,
+      config: config as Config,
     }),
     [state, sendEvent, reset, client, config]
   );
@@ -141,7 +138,9 @@ export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
   queryClient = defaultQueryClient,
   configApi,
 }) => {
-  const [contextValue, setContextValue] = useState<MelonyContextValue | undefined>(undefined);
+  const [contextValue, setContextValue] = useState<
+    MelonyContextValue | undefined
+  >(undefined);
 
   return (
     <MelonyContext.Provider value={contextValue}>

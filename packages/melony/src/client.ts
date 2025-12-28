@@ -45,6 +45,12 @@ export class MelonyClient {
   async getConfig(api?: string): Promise<{
     starterPrompts: any[];
     options: any[];
+    fileAttachments?: {
+      enabled?: boolean;
+      accept?: string;
+      maxFiles?: number;
+      maxFileSize?: number;
+    };
   }> {
     if (!api) return { starterPrompts: [], options: [] };
     

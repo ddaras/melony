@@ -10,6 +10,7 @@ export const handle = (instance: { run: any; config: any }) => {
       return c.json({
         starterPrompts: instance.config.starterPrompts || [],
         options: instance.config.options || [],
+        fileAttachments: instance.config.fileAttachments,
       });
     }
 

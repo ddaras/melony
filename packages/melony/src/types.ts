@@ -417,4 +417,10 @@ export interface Config {
     type?: "single" | "multiple";
     defaultSelectedIds?: string[];
   }>;
+  fileAttachments?: {
+    enabled?: boolean;
+    accept?: string; // e.g., "image/*,.pdf" for file input accept attribute
+    maxFiles?: number; // Maximum number of files allowed
+    maxFileSize?: number; // Maximum file size in bytes
+  };
 }

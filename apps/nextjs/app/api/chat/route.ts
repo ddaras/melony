@@ -6,6 +6,7 @@ export async function GET() {
   return Response.json({
     starterPrompts: rootAgent.config.starterPrompts || [],
     options: rootAgent.config.options || [],
+    fileAttachments: rootAgent.config.fileAttachments,
   });
 }
 

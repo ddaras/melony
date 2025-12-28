@@ -60,7 +60,10 @@ export function Thread({
     overrideInput?: string
   ) => {
     const text = (overrideInput ?? input).trim();
-    if (!text || isLoading) return;
+    const hasFiles = state?.files && Array.isArray(state.files) && state.files.length > 0;
+    
+    // Allow submission if there's text OR files
+    if ((!text && !hasFiles) || isLoading) return;
 
     if (!overrideInput) setInput("");
 
@@ -68,7 +71,7 @@ export function Thread({
       {
         type: "text",
         role: "user",
-        data: { content: text },
+        data: { content: text || "" },
       },
       { state: { ...state, threadId: activeThreadId ?? undefined } }
     );
@@ -134,6 +137,7 @@ export function Thread({
             options={options}
             autoFocus={autoFocus}
             defaultSelectedIds={allDefaultSelectedIds}
+            fileAttachments={config?.fileAttachments}
           />
         </div>
       </div>
