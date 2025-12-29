@@ -8,9 +8,10 @@ import {
   ChatFull,
   ThreadPopover,
   CreateThreadButton,
+  ThreadList,
+  ThemeProvider,
+  ThemeToggle,
 } from "@melony/react";
-import { ThemeProvider } from "./components/theme-provider";
-import { ThemeToggle } from "./components/theme-toggle";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
   createMelonyAuthService,
@@ -62,9 +63,15 @@ const ChatApp = () => {
     <div className="flex flex-col h-screen relative bg-background">
       <main className="flex-1 overflow-hidden">
         <ChatFull
+          leftSidebar={
+            <div className="w-[18rem]">
+              <ThreadList />
+            </div>
+          }
           headerProps={{
             leftContent: (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <div className="text-lg font-bold">Melony</div>
                 <ThreadPopover />
                 <CreateThreadButton />
               </div>

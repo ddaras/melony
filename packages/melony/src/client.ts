@@ -53,7 +53,7 @@ export class MelonyClient {
     };
   }> {
     if (!api) return { starterPrompts: [], options: [] };
-    
+
     const response = await fetch(api, {
       method: "GET",
       headers: {

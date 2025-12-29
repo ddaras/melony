@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import {
   IconArrowUp,
@@ -8,6 +9,7 @@ import {
   IconChevronDown,
   IconLoader2,
   IconPaperclip,
+  IconPlus,
   IconX,
 } from "@tabler/icons-react";
 import { ComposerOption, ComposerOptionGroup } from "../types";
@@ -16,6 +18,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -37,10 +40,6 @@ interface ComposerProps {
     maxFiles?: number; // Maximum number of files allowed
     maxFileSize?: number; // Maximum file size in bytes
   };
-  // Legacy props for backward compatibility
-  accept?: string;
-  maxFiles?: number;
-  maxFileSize?: number;
 }
 
 export function Composer({
@@ -54,16 +53,11 @@ export function Composer({
   autoFocus = false,
   defaultSelectedIds = [],
   fileAttachments,
-  // Legacy props for backward compatibility
-  accept: legacyAccept,
-  maxFiles: legacyMaxFiles,
-  maxFileSize: legacyMaxFileSize,
 }: ComposerProps) {
-  // Use config values if provided, otherwise fall back to legacy props or defaults
-  const enabled = fileAttachments?.enabled !== false; // Default to enabled if not specified
-  const accept = fileAttachments?.accept ?? legacyAccept;
-  const maxFiles = fileAttachments?.maxFiles ?? legacyMaxFiles ?? 10;
-  const maxFileSize = fileAttachments?.maxFileSize ?? legacyMaxFileSize ?? 10 * 1024 * 1024; // 10MB default
+  const enabled = fileAttachments?.enabled || false;
+  const accept = fileAttachments?.accept;
+  const maxFiles = fileAttachments?.maxFiles ?? 10;
+  const maxFileSize = fileAttachments?.maxFileSize ?? 10 * 1024 * 1024;
   const [selectedOptions, setSelectedOptions] = React.useState<Set<string>>(
     () => new Set(defaultSelectedIds)
   );
@@ -98,12 +92,14 @@ export function Composer({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     // Filter out files that are too large
     const validFiles = files.filter((file) => {
       if (file.size > maxFileSize) {
         // You might want to show a toast/error here
-        console.warn(`File ${file.name} exceeds maximum size of ${maxFileSize} bytes`);
+        console.warn(
+          `File ${file.name} exceeds maximum size of ${maxFileSize} bytes`
+        );
         return false;
       }
       return true;
@@ -114,11 +110,13 @@ export function Composer({
     const filesToAdd = validFiles.slice(0, remainingSlots);
 
     if (filesToAdd.length < validFiles.length) {
-      console.warn(`Only ${filesToAdd.length} files can be added (max: ${maxFiles})`);
+      console.warn(
+        `Only ${filesToAdd.length} files can be added (max: ${maxFiles})`
+      );
     }
 
     setAttachedFiles((prev) => [...prev, ...filesToAdd]);
-    
+
     // Reset the input so the same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -173,15 +171,12 @@ export function Composer({
                 reject(new Error("FileReader returned empty result"));
                 return;
               }
-              // Remove data URL prefix (e.g., "data:image/png;base64,")
-              const base64Data = base64.includes(",") 
-                ? base64.split(",")[1] 
-                : base64;
+
               resolve({
                 name: file.name,
                 type: file.type,
                 size: file.size,
-                data: base64Data,
+                data: base64,
               });
             } catch (error) {
               reject(error);
@@ -209,7 +204,7 @@ export function Composer({
     }
 
     onSubmit(state);
-    
+
     // Clear files after submission
     setAttachedFiles([]);
   };
@@ -223,33 +218,6 @@ export function Composer({
 
   return (
     <div className={cn("relative flex flex-col w-full", className)}>
-      {/* Display attached files above the input - only show if enabled */}
-      {enabled && attachedFiles.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-2">
-          {attachedFiles.map((file, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-sm"
-            >
-              <span className="truncate max-w-[200px]" title={file.name}>
-                {file.name}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {formatFileSize(file.size)}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleRemoveFile(index)}
-                className="ml-1 hover:bg-muted-foreground/20 rounded p-0.5 transition-colors"
-                aria-label="Remove file"
-              >
-                <IconX className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="relative flex flex-col w-full border-input border-[1.5px] rounded-3xl bg-background shadow-sm focus-within:border-ring transition-all p-2">
         <Textarea
           value={value}
@@ -274,23 +242,91 @@ export function Composer({
                   className="hidden"
                   disabled={isLoading || attachedFiles.length >= maxFiles}
                 />
-                
-                {/* File attachment button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading || attachedFiles.length >= maxFiles}
-                  className="text-muted-foreground"
-                  title={
-                    attachedFiles.length >= maxFiles
-                      ? `Maximum ${maxFiles} files allowed`
-                      : "Attach file"
-                  }
-                >
-                  <IconPaperclip className="h-4 w-4" />
-                </Button>
+
+                {/* File attachment button/dropdown */}
+                {attachedFiles.length === 0 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    className="text-muted-foreground"
+                    title="Attach file"
+                  >
+                    <IconPaperclip className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground gap-2"
+                          title={`${attachedFiles.length} files attached`}
+                        >
+                          <IconPaperclip className="h-4 w-4" />
+                          <Badge className="h-[18px] min-w-[18px] px-1.5 text-[10px]">
+                            {attachedFiles.length}
+                          </Badge>
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent align="start" className="w-64">
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>
+                          Attached Files ({attachedFiles.length}/{maxFiles})
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {attachedFiles.map((file, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            className="flex items-center justify-between group"
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span
+                                className="truncate text-sm"
+                                title={file.name}
+                              >
+                                {file.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {formatFileSize(file.size)}
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveFile(index)}
+                            >
+                              <IconX className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                      {attachedFiles.length < maxFiles && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              fileInputRef.current?.click();
+                            }}
+                            className="text-primary focus:text-primary"
+                          >
+                            <IconPlus className="mr-2 h-4 w-4" />
+                            <span>Add more files</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </>
             )}
 
@@ -304,7 +340,7 @@ export function Composer({
                   ? group.label
                   : selectedInGroup.length === 1
                     ? selectedInGroup[0].label
-                    : `${group.label} (${selectedInGroup.length})`;
+                    : group.label;
 
               const isSingle = group.type === "single";
 
@@ -316,12 +352,18 @@ export function Composer({
                         variant="ghost"
                         size="sm"
                         className={cn(
+                          "gap-2",
                           selectedInGroup.length > 0
                             ? "text-foreground bg-muted/50"
                             : "text-muted-foreground"
                         )}
                       >
                         {label}
+                        {selectedInGroup.length > 1 && (
+                          <Badge className="h-[18px] min-w-[18px] px-1.5 text-[10px]">
+                            {selectedInGroup.length}
+                          </Badge>
+                        )}
                         <IconChevronDown className="h-3 w-3 opacity-50" />
                       </Button>
                     }
@@ -354,7 +396,10 @@ export function Composer({
           </div>
           <Button
             type="submit"
-            disabled={(!value.trim() && attachedFiles.length === 0 && !isLoading) || isLoading}
+            disabled={
+              (!value.trim() && attachedFiles.length === 0 && !isLoading) ||
+              isLoading
+            }
             size="icon-lg"
             onClick={() => handleInternalSubmit().catch(console.error)}
           >

@@ -37,14 +37,18 @@ export function Thread({
   const starterPrompts = localStarterPrompts ?? config?.starterPrompts;
   const options = localOptions ?? config?.options;
 
+  const fileAttachments = config?.fileAttachments;
+
   // Extract defaultSelectedIds from all option groups and combine with explicitly passed ones
   const allDefaultSelectedIds = useMemo(() => {
-    const defaultSelectedIdsFromOptions = options?.flatMap(
-      (group) => group.defaultSelectedIds ?? []
-    ) ?? [];
-    
+    const defaultSelectedIdsFromOptions =
+      options?.flatMap((group) => group.defaultSelectedIds ?? []) ?? [];
+
     return [
-      ...new Set([...defaultSelectedIdsFromOptions, ...(defaultSelectedIds ?? [])]),
+      ...new Set([
+        ...defaultSelectedIdsFromOptions,
+        ...(defaultSelectedIds ?? []),
+      ]),
     ];
   }, [options, defaultSelectedIds]);
 
@@ -60,8 +64,9 @@ export function Thread({
     overrideInput?: string
   ) => {
     const text = (overrideInput ?? input).trim();
-    const hasFiles = state?.files && Array.isArray(state.files) && state.files.length > 0;
-    
+    const hasFiles =
+      state?.files && Array.isArray(state.files) && state.files.length > 0;
+
     // Allow submission if there's text OR files
     if ((!text && !hasFiles) || isLoading) return;
 
@@ -137,7 +142,7 @@ export function Thread({
             options={options}
             autoFocus={autoFocus}
             defaultSelectedIds={allDefaultSelectedIds}
-            fileAttachments={config?.fileAttachments}
+            fileAttachments={fileAttachments}
           />
         </div>
       </div>

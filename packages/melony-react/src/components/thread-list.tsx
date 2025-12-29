@@ -1,12 +1,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  IconPlus,
-  IconMessage,
-  IconTrash,
-  IconLoader2,
-} from "@tabler/icons-react";
+import { IconMessage, IconTrash, IconLoader2 } from "@tabler/icons-react";
 import { useThreads } from "@/hooks/use-threads";
 
 export interface ThreadListProps {
@@ -74,18 +69,6 @@ export const ThreadList: React.FC<ThreadListProps> = ({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      <div className="p-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNewThread}
-          className="w-full justify-start"
-        >
-          <IconPlus className="mr-2 size-4" />
-          New Thread
-        </Button>
-      </div>
-
       <div className="flex-1 overflow-y-auto">
         {isLoading && threads.length === 0 ? (
           <div className="flex items-center justify-center py-8">
