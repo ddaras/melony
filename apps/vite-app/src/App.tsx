@@ -6,11 +6,11 @@ import {
   MelonyClientProvider,
   ThreadProvider,
   ChatFull,
-  ThreadPopover,
   CreateThreadButton,
   ThreadList,
   ThemeProvider,
   ThemeToggle,
+  SidebarToggle,
 } from "@melony/react";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
@@ -70,9 +70,9 @@ const ChatApp = () => {
           }
           headerProps={{
             leftContent: (
-              <div className="flex gap-2 items-center">
-                <div className="text-lg font-bold">Melony</div>
-                <ThreadPopover />
+              <div className="flex gap-1 items-center">
+                <div className="font-bold mr-4">Melony</div>
+                <SidebarToggle side="left" />
                 <CreateThreadButton />
               </div>
             ),

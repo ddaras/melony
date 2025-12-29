@@ -8,6 +8,7 @@ export * from "./components/theme-provider";
 export * from "./hooks/use-melony";
 export * from "./hooks/use-auth";
 export * from "./hooks/use-threads";
+export * from "./hooks/use-screen-size";
 
 // Components
 export * from "./components/thread";
@@ -16,6 +17,8 @@ export * from "./components/chat-header";
 export * from "./components/chat-popup";
 export * from "./components/chat-sidebar";
 export * from "./components/chat-full";
+export * from "./components/sidebar-toggle";
+export * from "./components/chat-sidebar-context";
 export * from "./components/thread-list";
 export * from "./components/thread-popover";
 export * from "./components/create-thread-button";

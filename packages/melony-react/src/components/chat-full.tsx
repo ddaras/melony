@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Thread } from "./thread";
 import { cn } from "@/lib/utils";
-import { StarterPrompt, ComposerOption, ComposerOptionGroup } from "@/types";
+import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
-import { Button } from "./ui/button";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { ChatSidebarContext } from "./chat-sidebar-context";
+import { useScreenSize } from "@/hooks/use-screen-size";
 
 export interface ChatFullProps {
   title?: string;
@@ -33,38 +33,6 @@ export interface ChatFullProps {
    */
   rightSidebarClassName?: string;
   /**
-   * Whether the left sidebar is collapsible
-   */
-  leftSidebarCollapsible?: boolean;
-  /**
-   * Whether the right sidebar is collapsible
-   */
-  rightSidebarCollapsible?: boolean;
-  /**
-   * Default collapsed state for the left sidebar
-   */
-  defaultLeftSidebarCollapsed?: boolean;
-  /**
-   * Default collapsed state for the right sidebar
-   */
-  defaultRightSidebarCollapsed?: boolean;
-  /**
-   * Controlled collapsed state for the left sidebar. If provided, component becomes controlled.
-   */
-  leftSidebarCollapsed?: boolean;
-  /**
-   * Controlled collapsed state for the right sidebar. If provided, component becomes controlled.
-   */
-  rightSidebarCollapsed?: boolean;
-  /**
-   * Callback when left sidebar collapse state changes
-   */
-  onLeftSidebarCollapseChange?: (collapsed: boolean) => void;
-  /**
-   * Callback when right sidebar collapse state changes
-   */
-  onRightSidebarCollapseChange?: (collapsed: boolean) => void;
-  /**
    * Whether the composer should be auto focused
    */
   autoFocus?: boolean;
@@ -85,159 +53,105 @@ export function ChatFull({
   rightSidebar,
   leftSidebarClassName,
   rightSidebarClassName,
-  leftSidebarCollapsible = false,
-  rightSidebarCollapsible = false,
-  defaultLeftSidebarCollapsed = false,
-  defaultRightSidebarCollapsed = false,
-  leftSidebarCollapsed: controlledLeftCollapsed,
-  rightSidebarCollapsed: controlledRightCollapsed,
-  onLeftSidebarCollapseChange,
-  onRightSidebarCollapseChange,
   autoFocus = false,
   defaultSelectedIds,
 }: ChatFullProps) {
+  // Screen size detection
+  const { isMobile, isTablet } = useScreenSize();
+  const isSmallScreen = isMobile || isTablet;
+
   // Internal state for uncontrolled mode
-  const [internalLeftCollapsed, setInternalLeftCollapsed] = useState(
-    defaultLeftSidebarCollapsed
-  );
-  const [internalRightCollapsed, setInternalRightCollapsed] = useState(
-    defaultRightSidebarCollapsed
-  );
+  const [internalLeftCollapsed, setInternalLeftCollapsed] = useState(() => {
+    // Initialize collapsed on small screens
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 1024;
+    }
+    return false;
+  });
+  const [internalRightCollapsed, setInternalRightCollapsed] = useState(() => {
+    // Initialize collapsed on small screens
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 1024;
+    }
+    return false;
+  });
+
+  // Auto-collapse sidebars when transitioning to mobile/tablet devices
+  useEffect(() => {
+    if (isSmallScreen) {
+      setInternalLeftCollapsed(true);
+      setInternalRightCollapsed(true);
+    }
+  }, [isSmallScreen]);
 
   // Use controlled state if provided, otherwise use internal state
-  const leftCollapsed =
-    controlledLeftCollapsed !== undefined
-      ? controlledLeftCollapsed
-      : internalLeftCollapsed;
-  const rightCollapsed =
-    controlledRightCollapsed !== undefined
-      ? controlledRightCollapsed
-      : internalRightCollapsed;
+  const leftCollapsed = internalLeftCollapsed;
+  const rightCollapsed = internalRightCollapsed;
 
-  const handleLeftToggle = () => {
-    const newCollapsed = !leftCollapsed;
-    if (controlledLeftCollapsed === undefined) {
-      setInternalLeftCollapsed(newCollapsed);
-    }
-    onLeftSidebarCollapseChange?.(newCollapsed);
-  };
+  const handleLeftToggle = useCallback((collapsed: boolean) => {
+    setInternalLeftCollapsed(collapsed);
+  }, []);
 
-  const handleRightToggle = () => {
-    const newCollapsed = !rightCollapsed;
-    if (controlledRightCollapsed === undefined) {
-      setInternalRightCollapsed(newCollapsed);
-    }
-    onRightSidebarCollapseChange?.(newCollapsed);
-  };
+  const handleRightToggle = useCallback((collapsed: boolean) => {
+    setInternalRightCollapsed(collapsed);
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      leftCollapsed,
+      rightCollapsed,
+      setLeftCollapsed: handleLeftToggle,
+      setRightCollapsed: handleRightToggle,
+      leftCollapsible: true,
+      rightCollapsible: true,
+    }),
+    [leftCollapsed, rightCollapsed, handleLeftToggle, handleRightToggle]
+  );
 
   return (
-    <div className={cn("flex flex-col h-full w-full bg-background", className)}>
-      {title && <ChatHeader title={title} {...headerProps} />}
-      <div className="flex-1 overflow-hidden flex relative">
-        {leftSidebar && (
-          <>
+    <ChatSidebarContext.Provider value={contextValue}>
+      <div
+        className={cn("flex flex-col h-full w-full bg-background", className)}
+      >
+        {title && <ChatHeader title={title} {...headerProps} />}
+        <div className="flex-1 overflow-hidden flex relative">
+          {leftSidebar && (
             <div
               className={cn(
                 "flex-shrink-0 border-r border-border bg-background transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
-                leftCollapsed && leftSidebarCollapsible
-                  ? "w-0 border-r-0 min-w-0"
-                  : "",
+                leftCollapsed ? "w-0 border-r-0 min-w-0" : "",
                 !leftCollapsed && leftSidebarClassName
               )}
             >
-              {!leftCollapsed && (
-                <>
-                  {leftSidebarCollapsible && (
-                    <div className="flex justify-end p-2 border-b border-border shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={handleLeftToggle}
-                        aria-label="Collapse left sidebar"
-                        className="h-8 w-8"
-                      >
-                        <IconChevronLeft className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex-1 overflow-hidden min-h-0">
-                    {leftSidebar}
-                  </div>
-                </>
-              )}
+              <div className="flex-1 overflow-hidden min-h-0">
+                {leftSidebar}
+              </div>
             </div>
-            {leftSidebarCollapsible && leftCollapsed && (
-              <div className="flex-shrink-0 border-r border-border bg-background flex items-center justify-center w-10">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={handleLeftToggle}
-                  aria-label="Expand left sidebar"
-                  className="h-8 w-8"
-                >
-                  <IconChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-        <div className="flex-1 overflow-hidden min-w-0">
-          <Thread
-            placeholder={placeholder}
-            starterPrompts={starterPrompts}
-            options={options}
-            autoFocus={autoFocus}
-            defaultSelectedIds={defaultSelectedIds}
-          />
-        </div>
-        {rightSidebar && (
-          <>
-            {rightSidebarCollapsible && rightCollapsed && (
-              <div className="flex-shrink-0 border-l border-border bg-background flex items-center justify-center w-10">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={handleRightToggle}
-                  aria-label="Expand right sidebar"
-                  className="h-8 w-8"
-                >
-                  <IconChevronLeft className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+          )}
+          <div className="flex-1 overflow-hidden min-w-0">
+            <Thread
+              placeholder={placeholder}
+              starterPrompts={starterPrompts}
+              options={options}
+              autoFocus={autoFocus}
+              defaultSelectedIds={defaultSelectedIds}
+            />
+          </div>
+          {rightSidebar && (
             <div
               className={cn(
                 "flex-shrink-0 border-l border-border bg-background transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
-                rightCollapsed && rightSidebarCollapsible
-                  ? "w-0 border-l-0 min-w-0"
-                  : "",
+                rightCollapsed ? "w-0 border-l-0 min-w-0" : "",
                 !rightCollapsed && rightSidebarClassName
               )}
             >
-              {!rightCollapsed && (
-                <>
-                  {rightSidebarCollapsible && (
-                    <div className="flex justify-start p-2 border-b border-border shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={handleRightToggle}
-                        aria-label="Collapse right sidebar"
-                        className="h-8 w-8"
-                      >
-                        <IconChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex-1 overflow-hidden min-h-0">
-                    {rightSidebar}
-                  </div>
-                </>
-              )}
+              <div className="flex-1 overflow-hidden min-h-0">
+                {rightSidebar}
+              </div>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </ChatSidebarContext.Provider>
   );
 }
