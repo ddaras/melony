@@ -7,8 +7,6 @@ export const Col: React.FC<ColProps> = ({
   gap = "sm",
   align = "start",
   justify = "start",
-  wrap = "nowrap",
-  flex = 1,
   width,
   height,
   padding,
@@ -62,14 +60,13 @@ export const Col: React.FC<ColProps> = ({
         "flex flex-col",
         gapClasses[gap as keyof typeof gapClasses] || "gap-2",
         alignClasses[align as keyof typeof alignClasses] || "items-start",
-        justifyClasses[justify as keyof typeof justifyClasses] || "justify-start",
-        wrap === "wrap" ? "flex-wrap" : "flex-nowrap",
-        overflow && (overflowClasses[overflow as keyof typeof overflowClasses]),
+        justifyClasses[justify as keyof typeof justifyClasses] ||
+          "justify-start",
+        overflow && overflowClasses[overflow as keyof typeof overflowClasses],
         position && positionClasses[position as keyof typeof positionClasses],
         className
       )}
       style={{
-        flex: flex,
         width: width,
         height: height,
         padding: padding,

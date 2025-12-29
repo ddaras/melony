@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 export const Checkbox: React.FC<CheckboxProps> = ({
   label,
   name,
-  value = "on",
   checked,
   defaultChecked,
   disabled,
@@ -23,7 +22,6 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         ...onChangeAction,
         data: {
           name: name || "",
-          value: value,
           checked: e.target.checked,
         },
       } as any);
@@ -31,15 +29,11 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   };
 
   return (
-    <div
-      className={cn("flex items-center gap-2", className)}
-      style={style}
-    >
+    <div className={cn("flex items-center gap-2", className)} style={style}>
       <input
         type="checkbox"
         name={name}
         id={name}
-        value={value}
         checked={checked}
         defaultChecked={defaultChecked}
         disabled={disabled}

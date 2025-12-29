@@ -11,6 +11,7 @@ import {
   ThemeProvider,
   ThemeToggle,
   SidebarToggle,
+  Button,
 } from "@melony/react";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
@@ -71,7 +72,14 @@ const ChatApp = () => {
           headerProps={{
             leftContent: (
               <div className="flex gap-1 items-center">
-                <div className="font-bold mr-4">Melony</div>
+                <Button
+                  onClickAction={{
+                    type: "navigate",
+                    data: { url: "/threads" },
+                  }}
+                  variant="ghost"
+                  label="Craffted"
+                />
                 <SidebarToggle side="left" />
                 <CreateThreadButton />
               </div>

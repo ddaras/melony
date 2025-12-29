@@ -1,4 +1,4 @@
-import { Event } from "./types";
+import { Config, Event } from "./types";
 import { generateId } from "./utils/generate-id";
 
 export type { Event };
@@ -42,17 +42,8 @@ export class MelonyClient {
     return { ...this.state };
   }
 
-  async getConfig(api?: string): Promise<{
-    starterPrompts: any[];
-    options: any[];
-    fileAttachments?: {
-      enabled?: boolean;
-      accept?: string;
-      maxFiles?: number;
-      maxFileSize?: number;
-    };
-  }> {
-    if (!api) return { starterPrompts: [], options: [] };
+  async getConfig(api?: string): Promise<Config> {
+    if (!api) return { actions: {}, starterPrompts: [], options: [] };
 
     const response = await fetch(api, {
       method: "GET",

@@ -44,10 +44,10 @@ export const Select: React.FC<SelectProps> = ({
         defaultValue={defaultValue}
         value={value}
         disabled={disabled}
-        onValueChange={handleValueChange}
+        onValueChange={(value) => handleValueChange(value || "")}
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder={placeholder || "Select an option"} />
+          <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

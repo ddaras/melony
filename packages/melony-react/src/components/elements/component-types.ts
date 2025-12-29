@@ -148,5 +148,7 @@ export interface RadioOption {
 
 export type RadioGroupProps = BaseComponentProps &
   UIContract["radioGroup"] & {
+    value?: string;
+    defaultValue?: string;
     disabled?: boolean;
   };
