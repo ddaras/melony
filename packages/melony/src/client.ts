@@ -14,17 +14,27 @@ export interface ClientState {
   };
 }
 
+export interface MelonyClientOptions {
+  url: string;
+  initialEvents?: Event[];
+  headers?:
+    | Record<string, string>
+    | (() => Record<string, string> | Promise<Record<string, string>>);
+}
+
 export class MelonyClient {
-  private transport: TransportFn;
   private state: ClientState;
+  public readonly url: string;
+  private headers?: MelonyClientOptions["headers"];
   private lastServerState: any = null;
   private abortController: AbortController | null = null;
   private stateListeners: Set<(state: ClientState) => void> = new Set();
 
-  constructor(transport: TransportFn, options?: { initialEvents?: Event[] }) {
-    this.transport = transport;
+  constructor(options: MelonyClientOptions) {
+    this.url = options.url;
+    this.headers = options.headers;
     this.state = {
-      events: options?.initialEvents ?? [],
+      events: options.initialEvents ?? [],
       isLoading: false,
       error: null,
       loadingStatus: undefined,
@@ -42,14 +52,26 @@ export class MelonyClient {
     return { ...this.state };
   }
 
-  async getConfig(api?: string): Promise<Config> {
-    if (!api) return { actions: {}, starterPrompts: [], options: [] };
+  private async getRequestHeaders() {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
 
-    const response = await fetch(api, {
+    if (this.headers) {
+      const extraHeaders =
+        typeof this.headers === "function"
+          ? await this.headers()
+          : this.headers;
+      Object.assign(headers, extraHeaders);
+    }
+    return headers;
+  }
+
+  async getConfig(): Promise<Config> {
+    const headers = await this.getRequestHeaders();
+    const response = await fetch(this.url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
     });
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -85,12 +107,18 @@ export class MelonyClient {
     });
 
     try {
-      const stream = await this.transport(
-        { event: optimisticEvent, ...options, runId, state },
-        this.abortController.signal
-      );
+      const headers = await this.getRequestHeaders();
+      const response = await fetch(this.url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ event: optimisticEvent, ...options, runId, state }),
+        signal: this.abortController.signal,
+      });
 
-      const reader = stream.getReader();
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
@@ -131,7 +159,6 @@ export class MelonyClient {
     }
     const events = [...this.state.events];
 
-    // Track loading-status events
     if (event.type === "loading-status") {
       const currentStatus = this.state.loadingStatus;
       const newMessage =
@@ -153,7 +180,6 @@ export class MelonyClient {
       });
     }
 
-    // Contiguous text-delta merging for the same run
     const lastEvent = events[events.length - 1];
     if (
       event.type === "text-delta" &&
@@ -184,31 +210,4 @@ export class MelonyClient {
       loadingStatus: undefined,
     });
   }
-}
-
-export interface TransportRequest {
-  event: Event;
-  runId?: string;
-  state?: Record<string, any>;
-}
-
-export type TransportFn = (
-  request: TransportRequest,
-  signal?: AbortSignal
-) => Promise<ReadableStream<Uint8Array>>;
-
-export function createHttpTransport(api: string): TransportFn {
-  return async (request: TransportRequest, signal?: AbortSignal) => {
-    const response = await fetch(api, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-      signal,
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    if (!response.body) throw new Error("No response body");
-
-    return response.body;
-  };
 }

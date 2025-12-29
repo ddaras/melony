@@ -37,7 +37,6 @@ export interface MelonyClientProviderProps {
   client: MelonyClient;
   initialEvents?: Event[];
   queryClient?: QueryClient;
-  configApi?: string;
 }
 
 const defaultQueryClient = new QueryClient({
@@ -53,7 +52,6 @@ interface MelonyContextProviderInnerProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
-  configApi?: string;
   setContextValue: (value: MelonyContextValue) => void;
 }
 
@@ -61,15 +59,13 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   children,
   client,
   initialEvents,
-  configApi,
   setContextValue,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
 
   const { data: config } = useQuery({
-    queryKey: ["melony-config", configApi],
-    queryFn: () => client.getConfig(configApi),
-    enabled: !!configApi,
+    queryKey: ["melony-config", client.url],
+    queryFn: () => client.getConfig(),
     staleTime: Infinity,
   });
 
@@ -91,6 +87,49 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
     };
   }, [client]);
 
+  const reset = useCallback(
+    (events?: Event[]) => client.reset(events),
+    [client]
+  );
+
+  const dispatchClientAction = useCallback(
+    async (event: Event) => {
+      if (!event.type.startsWith("client:")) return false;
+
+      switch (event.type) {
+        case "client:navigate": {
+          const url = event.data?.url;
+          if (url) {
+            window.history.pushState(null, "", url);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }
+          return true;
+        }
+        case "client:open-url": {
+          const { url, target = "_blank" } = event.data || {};
+          if (url) {
+            window.open(url, target);
+          }
+          return true;
+        }
+        case "client:copy": {
+          const { text } = event.data || {};
+          if (text) {
+            await navigator.clipboard.writeText(text);
+          }
+          return true;
+        }
+        case "client:reset": {
+          reset([]);
+          return true;
+        }
+        default:
+          return false;
+      }
+    },
+    [client, reset]
+  );
+
   const sendEvent = useCallback(
     async (
       event: Event,
@@ -99,17 +138,16 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
         state?: Record<string, any>;
       }
     ) => {
+      const handled = await dispatchClientAction(event);
+      if (handled) return;
+
       const generator = client.sendEvent(event, options);
-      for await (const _ of generator) {
-        // State updates automatically via subscription
+      for await (const incomingEvent of generator) {
+        // Also allow server to trigger client actions
+        await dispatchClientAction(incomingEvent);
       }
     },
-    [client]
-  );
-
-  const reset = useCallback(
-    (events?: Event[]) => client.reset(events),
-    [client]
+    [client, dispatchClientAction]
   );
 
   const value = useMemo(
@@ -136,7 +174,6 @@ export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
   client,
   initialEvents,
   queryClient = defaultQueryClient,
-  configApi,
 }) => {
   const [contextValue, setContextValue] = useState<
     MelonyContextValue | undefined
@@ -148,7 +185,6 @@ export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
         <MelonyContextProviderInner
           client={client}
           initialEvents={initialEvents}
-          configApi={configApi}
           setContextValue={setContextValue}
         >
           {children}

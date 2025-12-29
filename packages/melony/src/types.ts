@@ -293,6 +293,15 @@ export const ui = {
     type: "button",
     props,
   }),
+  actions: {
+    navigate: (url: string): Event => ({ type: "client:navigate", data: { url } }),
+    openUrl: (url: string, target = "_blank"): Event => ({
+      type: "client:open-url",
+      data: { url, target },
+    }),
+    copy: (text: string): Event => ({ type: "client:copy", data: { text } }),
+    reset: (): Event => ({ type: "client:reset" }),
+  },
 };
 
 // ============================================

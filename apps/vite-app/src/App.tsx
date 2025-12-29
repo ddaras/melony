@@ -1,4 +1,4 @@
-import { MelonyClient, type TransportFn } from "melony/client";
+import { MelonyClient } from "melony/client";
 import {
   AccountDialog,
   AuthProvider,
@@ -18,27 +18,16 @@ import {
   createMelonyAuthService,
   TOKEN_STORAGE_KEY,
 } from "./lib/services/auth-service";
+import { ui } from "melony";
 
 const CHAT_API_URL = "http://localhost:3006/api/agent";
 
-const transport: TransportFn = async (request, signal) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-
-  const response = await fetch(CHAT_API_URL, {
-    method: "POST",
-    body: JSON.stringify(request),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    signal,
-  });
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  if (!response.body) throw new Error("No response body");
-  return response.body;
-};
-
-const client = new MelonyClient(transport);
+const client = new MelonyClient({
+  url: CHAT_API_URL,
+  headers: () => ({
+    Authorization: `Bearer ${localStorage.getItem(TOKEN_STORAGE_KEY)}`,
+  }),
+});
 
 const threadService = createMelonyThreadService();
 const authService = createMelonyAuthService();
@@ -46,7 +35,7 @@ const authService = createMelonyAuthService();
 export function App() {
   return (
     <ThemeProvider>
-      <MelonyClientProvider client={client} configApi={CHAT_API_URL}>
+      <MelonyClientProvider client={client}>
         <AuthProvider service={authService}>
           <ThreadProvider service={threadService}>
             <ChatApp />
@@ -73,12 +62,10 @@ const ChatApp = () => {
             leftContent: (
               <div className="flex gap-1 items-center">
                 <Button
-                  onClickAction={{
-                    type: "navigate",
-                    data: { url: "/threads" },
-                  }}
+                  onClickAction={ui.actions.navigate("/")}
                   variant="ghost"
                   label="Craffted"
+                  className="font-bold tracking-wider"
                 />
                 <SidebarToggle side="left" />
                 <CreateThreadButton />
