@@ -1,4 +1,4 @@
-import { MelonyClient, createHttpTransport } from "melony/client";
+import { MelonyClient } from "melony/client";
 import {
   AccountDialog,
   AuthProvider,
@@ -12,9 +12,9 @@ import { STARTER_PROMPTS } from "./lib/starter-prompts";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import { createMelonyAuthService } from "./lib/services/auth-service";
 
-const client = new MelonyClient(
-  createHttpTransport("http://localhost:3000/api/chat")
-);
+const client = new MelonyClient({
+  url: "http://localhost:3000/api/chat"
+});
 
 const threadService = createMelonyThreadService();
 const authService = createMelonyAuthService();

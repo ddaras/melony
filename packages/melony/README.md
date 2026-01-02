@@ -71,9 +71,11 @@ app.post("/api/chat", handle(assistant));
 ### 3) Stream from the client
 
 ```ts
-import { MelonyClient, createHttpTransport } from "melony/client";
+import { MelonyClient } from "melony/client";
 
-const client = new MelonyClient(createHttpTransport("/api/chat"));
+const client = new MelonyClient({
+  url: "/api/chat"
+});
 
 for await (const event of client.sendEvent({
   type: "text",

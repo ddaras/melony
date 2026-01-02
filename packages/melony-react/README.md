@@ -12,10 +12,12 @@ npm install @melony/react melony react
 
 ```tsx
 import React from "react";
-import { MelonyClient, createHttpTransport } from "melony/client";
+import { MelonyClient } from "melony/client";
 import { MelonyClientProvider, Thread } from "@melony/react";
 
-const client = new MelonyClient(createHttpTransport("/api/chat"));
+const client = new MelonyClient({
+  url: "/api/chat"
+});
 
 export default function App() {
   return (

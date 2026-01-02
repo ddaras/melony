@@ -1,6 +1,6 @@
 "use client";
 
-import { MelonyClient, createHttpTransport } from "melony/client";
+import { MelonyClient } from "melony/client";
 import {
   AuthProvider,
   MelonyClientProvider,
@@ -15,7 +15,9 @@ import { createMelonyThreadService } from "@/app/lib/services/thread-service";
 import { createMelonyAuthService } from "@/app/lib/services/auth-service";
 
 const CHAT_API_URL = "/api/chat";
-const client = new MelonyClient(createHttpTransport(CHAT_API_URL));
+const client = new MelonyClient({
+  url: CHAT_API_URL
+});
 
 const threadService = createMelonyThreadService();
 const authService = createMelonyAuthService();
