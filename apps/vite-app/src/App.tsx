@@ -2,16 +2,18 @@ import { MelonyClient } from "melony/client";
 import {
   AccountDialog,
   AuthProvider,
-  ChatPopup,
+  PopupChat,
   MelonyClientProvider,
   ThreadProvider,
-  ChatFull,
+  FullChat,
   CreateThreadButton,
   ThreadList,
   ThemeProvider,
   ThemeToggle,
   SidebarToggle,
   Button,
+  SidebarProvider,
+  Sidebar,
 } from "@melony/react";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
@@ -36,7 +38,17 @@ export function App() {
   return (
     <ThemeProvider>
       <MelonyClientProvider client={client}>
-        <AuthProvider service={authService}>
+        <AuthProvider
+          service={authService}
+          welcomeScreenProps={{
+            title: "Welcome to Craffted",
+            description:
+              "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
+            imageUrl:
+              "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
+            imageAlt: "Craffted logo",
+          }}
+        >
           <ThreadProvider service={threadService}>
             <ChatApp />
           </ThreadProvider>
@@ -50,46 +62,46 @@ export default App;
 
 const ChatApp = () => {
   return (
-    <div className="flex flex-col h-screen relative bg-background">
-      <main className="flex-1 overflow-hidden">
-        <ChatFull
-          welcomeScreenProps={{
-            title: "Welcome to Craffted",
-            description:
-              "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
-            imageUrl: "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
-            imageAlt: "Craffted logo",
-          }}
-          showWelcomeScreen={true}
-          leftSidebar={
-            <div className="w-[18rem]">
-              <ThreadList />
-            </div>
-          }
-          headerProps={{
-            leftContent: (
-              <div className="flex gap-1 items-center">
-                <Button
-                  onClickAction={ui.actions.navigate("/")}
-                  variant="ghost"
-                  label="Craffted"
-                  className="font-bold tracking-wider"
-                />
-                <SidebarToggle side="left" />
-                {/* <CreateThreadButton /> */}
-              </div>
-            ),
-            rightContent: (
-              <div className="flex gap-2">
-                <ThemeToggle />
-                <AccountDialog />
-              </div>
-            ),
-          }}
-        />
-      </main>
+    <SidebarProvider>
+      <div className="flex h-screen relative bg-background overflow-hidden">
+        <Sidebar side="left" className="2xl:w-[18rem] w-[16rem]">
+          <div className="flex gap-1 items-center justify-between w-full p-2">
+            <Button
+              onClickAction={ui.actions.navigate("/")}
+              variant="ghost"
+              size="lg"
+              label="Craffted"
+              className="font-bold tracking-wider"
+            />
+            {/* <CreateThreadButton /> */}
+          </div>
 
-      <ChatPopup />
-    </div>
+          <div className="p-2">
+            <CreateThreadButton />
+          </div>
+
+          <ThreadList />
+        </Sidebar>
+        <main className="flex-1 overflow-hidden">
+          <FullChat
+            headerProps={{
+              leftContent: (
+                <>
+                  <SidebarToggle side="left" />
+                </>
+              ),
+              rightContent: (
+                <div className="flex gap-2">
+                  <ThemeToggle />
+                  <AccountDialog />
+                </div>
+              ),
+            }}
+          />
+        </main>
+
+        <PopupChat />
+      </div>
+    </SidebarProvider>
   );
 };

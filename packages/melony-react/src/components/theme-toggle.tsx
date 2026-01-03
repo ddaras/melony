@@ -1,4 +1,4 @@
-import { useTheme } from "./theme-provider";
+import { useTheme } from "../providers/theme-provider";
 import { IconMoon, IconSun, IconDeviceDesktop } from "@tabler/icons-react";
 import { Button } from "./ui/button";
 

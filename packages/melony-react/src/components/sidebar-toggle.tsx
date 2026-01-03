@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "./ui/button";
 import {
   IconLayoutSidebarLeftCollapse,
@@ -6,7 +5,7 @@ import {
   IconLayoutSidebarRightCollapse,
   IconLayoutSidebarRightExpand,
 } from "@tabler/icons-react";
-import { useChatSidebar } from "./chat-sidebar-context";
+import { useSidebar } from "../providers/sidebar-provider";
 import { cn } from "@/lib/utils";
 
 export interface SidebarToggleProps {
@@ -22,13 +21,14 @@ export function SidebarToggle({ side, className }: SidebarToggleProps) {
     setRightCollapsed,
     leftCollapsible,
     rightCollapsible,
-  } = useChatSidebar();
+  } = useSidebar();
 
   if (side === "left") {
     if (!leftCollapsible) return null;
     return (
       <Button
         variant="ghost"
+        size="icon"
         onClick={() => setLeftCollapsed(!leftCollapsed)}
         aria-label={
           leftCollapsed ? "Expand left sidebar" : "Collapse left sidebar"
@@ -49,6 +49,7 @@ export function SidebarToggle({ side, className }: SidebarToggleProps) {
     return (
       <Button
         variant="ghost"
+        size="icon"
         onClick={() => setRightCollapsed(!rightCollapsed)}
         aria-label={
           rightCollapsed ? "Expand right sidebar" : "Collapse right sidebar"

@@ -1,11 +1,7 @@
-import React, {
-  createContext,
-  useState,
-  useCallback,
-  ReactNode,
-  useEffect,
-} from "react";
+import React, { createContext, useCallback, ReactNode } from "react";
 import { User, AuthService } from "@/types";
+import { WelcomeScreen, WelcomeScreenProps } from "@/components/welcome-screen";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface AuthContextValue {
   user: User | null;
@@ -23,31 +19,28 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 export interface AuthProviderProps {
   children: ReactNode;
   service: AuthService;
+  welcomeScreenProps?: WelcomeScreenProps;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
   service,
+  welcomeScreenProps,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchMe = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const userData = await service.getMe();
-      setUser(userData);
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [service]);
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["auth-user", service],
+    queryFn: () => service.getMe(),
+    retry: false,
+  });
 
-  useEffect(() => {
-    fetchMe();
-  }, [fetchMe]);
+  const logoutMutation = useMutation({
+    mutationFn: () => service.logout(),
+    onSuccess: () => {
+      queryClient.setQueryData(["auth-user", service], null);
+    },
+  });
 
   const login = useCallback(() => {
     service.login();
@@ -55,21 +48,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const logout = useCallback(async () => {
     try {
-      await service.logout();
-      setUser(null);
+      await logoutMutation.mutateAsync();
     } catch (error) {
       console.error("Failed to logout:", error);
     }
-  }, [service]);
-
-  const value = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-    getToken: service.getToken,
-  };
+  }, [logoutMutation]);
 
   if (isLoading) {
     return (
@@ -90,5 +73,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     );
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const value = {
+    user: user || null,
+    isAuthenticated: !!user,
+    isLoading,
+    login,
+    logout,
+    getToken: service.getToken,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {!value.isAuthenticated && welcomeScreenProps ? (
+        <WelcomeScreen {...welcomeScreenProps} />
+      ) : (
+        children
+      )}
+    </AuthContext.Provider>
+  );
 };

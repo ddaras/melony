@@ -11,6 +11,8 @@ import {
   IconPaperclip,
   IconPlus,
   IconX,
+  IconFile,
+  IconFileText,
 } from "@tabler/icons-react";
 import { ComposerOption, ComposerOptionGroup } from "../types";
 import {
@@ -62,7 +64,26 @@ export function Composer({
     () => new Set(defaultSelectedIds)
   );
   const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]);
+  const [previews, setPreviews] = React.useState<
+    { name: string; type: string; url: string; size: number }[]
+  >([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const newPreviews = attachedFiles.map((file) => ({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      url: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
+    }));
+    setPreviews(newPreviews);
+
+    return () => {
+      newPreviews.forEach((p) => {
+        if (p.url) URL.revokeObjectURL(p.url);
+      });
+    };
+  }, [attachedFiles]);
 
   const toggleOption = (
     id: string,
@@ -216,13 +237,71 @@ export function Composer({
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (!enabled) return;
+
+    const items = Array.from(e.clipboardData.items);
+    const files = items
+      .map((item) => item.getAsFile())
+      .filter((file): file is File => file !== null);
+
+    if (files.length > 0) {
+      // Create a fake ChangeEvent-like object or just call a shared handler
+      const remainingSlots = maxFiles - attachedFiles.length;
+      const validFiles = files.filter((f) => f.size <= maxFileSize);
+      const filesToAdd = validFiles.slice(0, remainingSlots);
+
+      if (filesToAdd.length > 0) {
+        setAttachedFiles((prev) => [...prev, ...filesToAdd]);
+      }
+    }
+  };
+
   return (
     <div className={cn("relative flex flex-col w-full", className)}>
       <div className="relative flex flex-col w-full border-input border-[1.5px] rounded-3xl bg-background shadow-sm focus-within:border-ring transition-all p-2">
+        {previews.length > 0 && (
+          <div className="flex flex-wrap gap-3 p-2 px-3 pb-3">
+            {previews.map((preview, index) => (
+              <div
+                key={index}
+                className="group relative flex flex-col items-center justify-center w-20 h-20 rounded-xl border bg-muted/30 overflow-hidden shadow-sm"
+              >
+                {preview.type.startsWith("image/") ? (
+                  <img
+                    src={preview.url}
+                    alt={preview.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-2 text-center">
+                    {preview.type.includes("text") ||
+                    preview.type.includes("pdf") ? (
+                      <IconFileText className="h-8 w-8 text-muted-foreground" />
+                    ) : (
+                      <IconFile className="h-8 w-8 text-muted-foreground" />
+                    )}
+                    <span className="text-[9px] truncate w-full px-1 mt-1 text-muted-foreground">
+                      {preview.name}
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(index)}
+                  className="absolute top-1 right-1 p-1 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <IconX className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           placeholder={placeholder}
           className="min-h-[44px] max-h-[200px] border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 py-2 text-[15px] resize-none"
           autoFocus={autoFocus}
@@ -243,90 +322,22 @@ export function Composer({
                   disabled={isLoading || attachedFiles.length >= maxFiles}
                 />
 
-                {/* File attachment button/dropdown */}
-                {attachedFiles.length === 0 ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isLoading}
-                    className="text-muted-foreground"
-                    title="Attach file"
-                  >
-                    <IconPaperclip className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-muted-foreground gap-2"
-                          title={`${attachedFiles.length} files attached`}
-                        >
-                          <IconPaperclip className="h-4 w-4" />
-                          <Badge className="h-[18px] min-w-[18px] px-1.5 text-[10px]">
-                            {attachedFiles.length}
-                          </Badge>
-                        </Button>
-                      }
-                    />
-                    <DropdownMenuContent align="start" className="w-64">
-                      <DropdownMenuGroup>
-                        <DropdownMenuLabel>
-                          Attached Files ({attachedFiles.length}/{maxFiles})
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {attachedFiles.map((file, index) => (
-                          <DropdownMenuItem
-                            key={index}
-                            className="flex items-center justify-between group"
-                            onSelect={(e) => e.preventDefault()}
-                          >
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <span
-                                className="truncate text-sm"
-                                title={file.name}
-                              >
-                                {file.name}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground">
-                                {formatFileSize(file.size)}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => handleRemoveFile(index)}
-                            >
-                              <IconX className="h-3 w-3" />
-                            </Button>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuGroup>
-                      {attachedFiles.length < maxFiles && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              fileInputRef.current?.click();
-                            }}
-                            className="text-primary focus:text-primary"
-                          >
-                            <IconPlus className="mr-2 h-4 w-4" />
-                            <span>Add more files</span>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || attachedFiles.length >= maxFiles}
+                  className="text-muted-foreground"
+                  title="Attach file"
+                >
+                  <IconPaperclip className="h-4 w-4" />
+                  {attachedFiles.length > 0 && (
+                    <Badge className="ml-1 h-[18px] min-w-[18px] px-1.5 text-[10px]">
+                      {attachedFiles.length}
+                    </Badge>
+                  )}
+                </Button>
               </>
             )}
 

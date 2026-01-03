@@ -2,7 +2,8 @@
 export * from "./providers/melony-provider";
 export * from "./providers/auth-provider";
 export * from "./providers/thread-provider";
-export * from "./components/theme-provider";
+export * from "./providers/sidebar-provider";
+export * from "./providers/theme-provider";
 
 // Hooks
 export * from "./hooks/use-melony";
@@ -14,12 +15,12 @@ export * from "./hooks/use-screen-size";
 export * from "./components/thread";
 export * from "./components/composer";
 export * from "./components/chat-header";
-export * from "./components/chat-popup";
-export * from "./components/chat-sidebar";
-export * from "./components/chat-full";
+export * from "./components/popup-chat";
+export * from "./components/sidebar";
+export * from "./components/full-chat";
 export * from "./components/welcome-screen";
 export * from "./components/sidebar-toggle";
-export * from "./components/chat-sidebar-context";
+export * from "./providers/sidebar-provider";
 export * from "./components/thread-list";
 export * from "./components/thread-popover";
 export * from "./components/create-thread-button";

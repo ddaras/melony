@@ -194,8 +194,7 @@ export const AccountDialog: React.FC<AccountDialogProps> = ({
         onClick={() => setOpen(true)}
         className={className}
       >
-        <IconBrandGoogle className="mr-2 size-4" />
-        Sign in with Google
+        Sign in
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>

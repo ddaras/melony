@@ -30,7 +30,7 @@ export interface CreateThreadButtonProps {
 export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
   className,
   variant = "ghost",
-  size = "icon",
+  size = "default",
   children,
   onThreadCreated,
 }) => {
@@ -73,6 +73,7 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
       className={cn(className)}
     >
       <IconPlus className="size-4" />
+      New chat
     </Button>
   );
 };
