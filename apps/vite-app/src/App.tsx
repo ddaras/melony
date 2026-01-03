@@ -53,6 +53,14 @@ const ChatApp = () => {
     <div className="flex flex-col h-screen relative bg-background">
       <main className="flex-1 overflow-hidden">
         <ChatFull
+          welcomeScreenProps={{
+            title: "Welcome to Craffted",
+            description:
+              "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
+            imageUrl: "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
+            imageAlt: "Craffted logo",
+          }}
+          showWelcomeScreen={true}
           leftSidebar={
             <div className="w-[18rem]">
               <ThreadList />
@@ -68,7 +76,7 @@ const ChatApp = () => {
                   className="font-bold tracking-wider"
                 />
                 <SidebarToggle side="left" />
-                <CreateThreadButton />
+                {/* <CreateThreadButton /> */}
               </div>
             ),
             rightContent: (

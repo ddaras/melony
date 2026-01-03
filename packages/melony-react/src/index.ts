@@ -17,6 +17,7 @@ export * from "./components/chat-header";
 export * from "./components/chat-popup";
 export * from "./components/chat-sidebar";
 export * from "./components/chat-full";
+export * from "./components/welcome-screen";
 export * from "./components/sidebar-toggle";
 export * from "./components/chat-sidebar-context";
 export * from "./components/thread-list";

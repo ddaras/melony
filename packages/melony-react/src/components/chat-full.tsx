@@ -5,6 +5,8 @@ import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
 import { ChatSidebarContext } from "./chat-sidebar-context";
 import { useScreenSize } from "@/hooks/use-screen-size";
+import { useAuth } from "@/hooks/use-auth";
+import { WelcomeScreen, WelcomeScreenProps } from "./welcome-screen";
 
 export interface ChatFullProps {
   title?: string;
@@ -40,11 +42,20 @@ export interface ChatFullProps {
    * IDs of options to be selected by default
    */
   defaultSelectedIds?: string[];
+  /**
+   * Whether to show a welcome screen when the user is not authenticated.
+   * Defaults to false.
+   */
+  showWelcomeScreen?: boolean;
+  /**
+   * Props to customize the welcome screen
+   */
+  welcomeScreenProps?: WelcomeScreenProps;
 }
 
 export function ChatFull({
   title = "Chat",
-  placeholder = "Message the AI",
+  placeholder,
   starterPrompts,
   options,
   className,
@@ -55,9 +66,12 @@ export function ChatFull({
   rightSidebarClassName,
   autoFocus = false,
   defaultSelectedIds,
+  showWelcomeScreen = false,
+  welcomeScreenProps,
 }: ChatFullProps) {
   // Screen size detection
   const { isMobile, isTablet } = useScreenSize();
+  const { isAuthenticated, isLoading } = useAuth();
   const isSmallScreen = isMobile || isTablet;
 
   // Internal state for uncontrolled mode
@@ -107,6 +121,10 @@ export function ChatFull({
     }),
     [leftCollapsed, rightCollapsed, handleLeftToggle, handleRightToggle]
   );
+
+  if (showWelcomeScreen && !isAuthenticated && !isLoading) {
+    return <WelcomeScreen {...welcomeScreenProps} />;
+  }
 
   return (
     <ChatSidebarContext.Provider value={contextValue}>
