@@ -346,10 +346,13 @@ export interface RuntimeContext<TState = any> {
   state: TState;
   runId: string;
   stepCount: number;
-  isDone: boolean;
   actions: Record<string, Action<any>>;
   ui: typeof ui;
-  suspend: () => void;
+  /**
+   * Immediately interrupts the runtime execution.
+   * If an event is provided, it will be emitted before the runtime stops.
+   */
+  suspend: (event?: Event) => never;
 }
 
 /**

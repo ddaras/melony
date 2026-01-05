@@ -53,9 +53,7 @@ export const requireApprovalPlugin = (options?: {
           expiresAt: Date.now() + 3600000, // 1 hour
         });
 
-        context.suspend();
-
-        return {
+        context.suspend({
           type: "hitl-required",
           data: {
             message: `Approval needed for ${action.name}`,
@@ -94,7 +92,7 @@ export const requireApprovalPlugin = (options?: {
               }),
             ],
           }),
-        };
+        });
       }
 
       if (needsApproval && params.confirmed) {

@@ -32,7 +32,7 @@ export const MelonyContext = createContext<MelonyContextValue | undefined>(
   undefined
 );
 
-export interface MelonyClientProviderProps {
+export interface MelonyProviderProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
@@ -169,7 +169,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   return <NuqsAdapter>{children}</NuqsAdapter>;
 };
 
-export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
+export const MelonyProvider: React.FC<MelonyProviderProps> = ({
   children,
   client,
   initialEvents,

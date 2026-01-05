@@ -39,14 +39,11 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
       const elapsed = Date.now() - startTime;
 
       if (elapsed > maxDuration) {
-        // Suspend the runtime
-        context.suspend();
-
-        // Remove the internal start time from state before yielding
+        // Remove the internal start time from state before suspending
         delete context.state.__run_start_time;
 
-        // Yield a special event that the client can use to resume
-        return {
+        // Suspend the runtime and yield a special event that the client can use to resume
+        context.suspend({
           type: "run-suspended",
           data: {
             nextAction,
@@ -54,7 +51,7 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
             maxDuration,
           },
           role: "system",
-        };
+        });
       }
     },
 

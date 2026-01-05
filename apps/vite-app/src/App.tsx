@@ -3,7 +3,7 @@ import {
   AccountDialog,
   AuthProvider,
   PopupChat,
-  MelonyClientProvider,
+  MelonyProvider,
   ThreadProvider,
   FullChat,
   CreateThreadButton,
@@ -36,8 +36,8 @@ const authService = createMelonyAuthService();
 
 export function App() {
   return (
-    <ThemeProvider>
-      <MelonyClientProvider client={client}>
+    <MelonyProvider client={client}>
+      <ThemeProvider>
         <AuthProvider
           service={authService}
           welcomeScreenProps={{
@@ -53,8 +53,8 @@ export function App() {
             <ChatApp />
           </ThreadProvider>
         </AuthProvider>
-      </MelonyClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </MelonyProvider>
   );
 }
 
@@ -73,7 +73,6 @@ const ChatApp = () => {
               label="Craffted"
               className="font-bold tracking-wider"
             />
-            {/* <CreateThreadButton /> */}
           </div>
 
           <div className="p-2">
@@ -82,23 +81,22 @@ const ChatApp = () => {
 
           <ThreadList />
         </Sidebar>
-        <main className="flex-1 overflow-hidden">
-          <FullChat
-            headerProps={{
-              leftContent: (
-                <>
-                  <SidebarToggle side="left" />
-                </>
-              ),
-              rightContent: (
-                <div className="flex gap-2">
-                  <ThemeToggle />
-                  <AccountDialog />
-                </div>
-              ),
-            }}
-          />
-        </main>
+        <FullChat
+          className="flex-1 overflow-hidden"
+          headerProps={{
+            leftContent: (
+              <>
+                <SidebarToggle side="left" />
+              </>
+            ),
+            rightContent: (
+              <div className="flex gap-2">
+                <ThemeToggle />
+                <AccountDialog />
+              </div>
+            ),
+          }}
+        />
 
         <PopupChat />
       </div>

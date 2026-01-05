@@ -103,7 +103,7 @@ export function Thread({
       <div className="flex-1 overflow-y-auto p-4 pb-36">
         <div
           className={cn(
-            "max-w-4xl mx-auto w-full p-4",
+            "max-w-[48rem] mx-auto w-full p-4",
             showStarterPrompts && "min-h-full flex flex-col"
           )}
         >
@@ -132,7 +132,7 @@ export function Thread({
       </div>
 
       <div className="absolute bottom-0 p-4 w-full">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-[48rem] mx-auto">
           <Composer
             value={input}
             onChange={setInput}

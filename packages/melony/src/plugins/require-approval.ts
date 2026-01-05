@@ -53,8 +53,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         // 1. Check if this specific request exists and hasn't been used
         const pending = context.state.__pending_approvals?.[approvalId];
         if (!pending) {
-          context.suspend();
-          return {
+          context.suspend({
             role: "assistant",
             type: "error",
             data: {
@@ -69,7 +68,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                 ),
               ],
             }),
-          };
+          });
         }
 
         // 2. Consume the token immediately (Destroy after usage)
@@ -101,13 +100,12 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         }
 
         // Handle Rejection
-        context.suspend();
-        return {
+        context.suspend({
           type: "error",
           data: {
             message: `Action '${action}' was rejected by the user.`,
           },
-        };
+        });
       }
     },
 
@@ -141,8 +139,6 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
       }
 
       // 3. Suspend and request approval with a one-time-use nonce
-      context.suspend();
-
       const approvalId = Math.random().toString(36).substring(2, 15);
       context.state.__pending_approvals =
         context.state.__pending_approvals || {};
@@ -161,7 +157,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
           : options.message ||
             `The agent wants to execute **${action.name}**. Do you approve?`;
 
-      return {
+      context.suspend({
         type: "hitl-required",
         data: { ...nextAction, token, approvalId },
         ui: ui.card({
@@ -200,7 +196,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
             }),
           ],
         }),
-      };
+      });
     },
   });
 };
