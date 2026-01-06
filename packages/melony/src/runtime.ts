@@ -12,14 +12,10 @@ import { generateId } from "./utils/generate-id";
 import { z } from "zod";
 
 /**
- * Special error to immediately interrupt the runtime.
- * This is used for Human-In-The-Loop (HITL) or other suspension cases.
+ * Helper to check if a value is a Melony Event.
  */
-export class RuntimeInterruption extends Error {
-  constructor(public event?: Event) {
-    super("Runtime interrupted");
-    this.name = "RuntimeInterruption";
-  }
+function isEvent(val: any): val is Event {
+  return val && typeof val === "object" && typeof val.type === "string";
 }
 
 /**
@@ -45,7 +41,7 @@ export class Runtime {
       actions: this.config.actions,
       ui,
       suspend: (event?: Event) => {
-        throw new RuntimeInterruption(event);
+        throw event || { type: "run-suspended" };
       },
     };
 
@@ -153,14 +149,26 @@ export class Runtime {
         yield* this.callHook(this.config.hooks.onAfterRun(context), context);
       }
     } catch (error) {
-      if (error instanceof RuntimeInterruption) {
-        // If the suspension carried an event, emit it before finishing
-        if (error.event) {
-          yield* this.emit(error.event, context);
-        }
-        return;
+      let eventToEmit: Event | undefined;
+
+      if (isEvent(error)) {
+        eventToEmit = error;
+      } else {
+        // Wrap unexpected errors into an Event
+        eventToEmit = {
+          type: "error",
+          data: {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          },
+        };
       }
-      throw error;
+
+      if (eventToEmit) {
+        yield* this.emit(eventToEmit, context);
+      }
+
+      return; // Gracefully stop the runtime
     }
   }
 
@@ -246,18 +254,16 @@ export class Runtime {
 
       return result;
     } catch (error) {
-      if (error instanceof RuntimeInterruption) throw error;
+      if (isEvent(error)) throw error;
 
-      yield* this.emit(
-        {
-          type: "error",
-          data: {
-            action: action.name,
-            error: error instanceof Error ? error.message : String(error),
-          },
+      throw {
+        type: "error",
+        data: {
+          action: action.name,
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
         },
-        context
-      );
+      };
     }
   }
 
