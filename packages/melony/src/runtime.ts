@@ -202,7 +202,11 @@ export class Runtime {
           context
         );
         if (hookResult) {
-          yield* this.emit(hookResult, context);
+          if ("type" in hookResult) {
+            yield* this.emit(hookResult as Event, context);
+          } else {
+            nextAction = hookResult as NextAction;
+          }
         }
       }
     }
@@ -214,7 +218,11 @@ export class Runtime {
         context
       );
       if (hookResult) {
-        yield* this.emit(hookResult, context);
+        if ("type" in hookResult) {
+          yield* this.emit(hookResult as Event, context);
+        } else {
+          nextAction = hookResult as NextAction;
+        }
       }
     }
 
@@ -238,7 +246,13 @@ export class Runtime {
             { action, data: result },
             context
           );
-          if (extra) yield* this.emit(extra, context);
+          if (extra) {
+            if ("type" in extra) {
+              yield* this.emit(extra as Event, context);
+            } else {
+              nextAction = extra as NextAction;
+            }
+          }
         }
       }
 
@@ -248,7 +262,13 @@ export class Runtime {
           { action, data: result },
           context
         );
-        if (extra) yield* this.emit(extra, context);
+        if (extra) {
+          if ("type" in extra) {
+            yield* this.emit(extra as Event, context);
+          } else {
+            nextAction = extra as NextAction;
+          }
+        }
       }
 
       return result;

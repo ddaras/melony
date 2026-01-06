@@ -372,7 +372,7 @@ export interface Hooks {
   onBeforeRun?: (
     input: { event: Event; runId: string; state: Record<string, any> },
     context: RuntimeContext
-  ) => HookResult;
+  ) => HookResult | NextAction;
 
   /**
    * Called when a run session completes.
@@ -391,7 +391,7 @@ export interface Hooks {
   onBeforeAction?: (
     call: { action: Action<any>; params: any; nextAction: NextAction },
     context: RuntimeContext
-  ) => HookResult;
+  ) => HookResult | NextAction;
 
   /**
    * Called after an action completes.
@@ -399,7 +399,7 @@ export interface Hooks {
   onAfterAction?: (
     result: { action: Action<any>; data: NextAction | void },
     context: RuntimeContext
-  ) => HookResult;
+  ) => HookResult | NextAction;
 }
 
 /**
