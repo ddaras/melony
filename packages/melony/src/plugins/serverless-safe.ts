@@ -20,7 +20,7 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
   return plugin({
     name: "serverless-safe",
 
-    onBeforeRun: async ({ event }, context) => {
+    onBeforeRun: async function* ({ event }, context) {
       // 1. If this is a resumption, return the nextAction to jump-start the loop
       if (event.type === "run-suspended" && event.data?.nextAction) {
         // Reset the start time for the new execution window
@@ -32,7 +32,7 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
       context.state.__run_start_time = Date.now();
     },
 
-    onBeforeAction: async ({ nextAction }, context) => {
+    onBeforeAction: async function* ({ nextAction }, context) {
       const startTime = context.state.__run_start_time;
       if (!startTime) return;
 
@@ -55,7 +55,7 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
       }
     },
 
-    onAfterRun: async (context) => {
+    onAfterRun: async function* (context) {
       // Cleanup
       delete context.state.__run_start_time;
     },

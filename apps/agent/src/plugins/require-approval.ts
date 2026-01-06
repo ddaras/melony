@@ -14,7 +14,7 @@ export const requireApprovalPlugin = (options?: {
 }) =>
   plugin({
     name: "require-approval",
-    onBeforeRun: async ({ event }) => {
+    onBeforeRun: async function* ({ event }) {
       if (event.type === "action-approved") {
         const pendingAction = await actionStorage.verify(
           event.data?.pendingActionToken
@@ -35,7 +35,7 @@ export const requireApprovalPlugin = (options?: {
         };
       }
     },
-    onBeforeAction: async ({ action, params }, context) => {
+    onBeforeAction: async function* ({ action, params }, context) {
       console.log("onBeforeAction", action?.name, params);
 
       // Check if this action requires approval
@@ -96,13 +96,15 @@ export const requireApprovalPlugin = (options?: {
       }
 
       if (needsApproval && params.confirmed) {
-        return {
+        yield {
           type: "action-approved",
           data: {
             actionName: action.name,
             params: params,
           },
         };
+        // In the previous unary version, returning an event was how it worked.
+        // Now events are yielded.
       }
     },
   });

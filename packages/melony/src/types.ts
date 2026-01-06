@@ -360,38 +360,43 @@ export interface RuntimeContext<TState = any> {
 }
 
 /**
- * Standardized Hook Result for consistent DX.
+ * Standardized Hook Result.
+ * Now a generator to allow yielding multiple events and returning a result.
  */
-export type HookResult = Promise<Event | void>;
+export type HookGenerator<TReturn = void> = AsyncGenerator<
+  Event,
+  TReturn | void,
+  unknown
+>;
 
 export interface Hooks {
   /**
    * Called when a run session begins.
-   * Can return an Event to be emitted, or a NextAction to jump-start the loop.
+   * Can yield Events to be emitted, and return a NextAction to jump-start the loop.
    */
   onBeforeRun?: (
     input: { event: Event },
     context: RuntimeContext
-  ) => HookResult | NextAction;
+  ) => HookGenerator<NextAction>;
 
   /**
    * Called when a run session completes.
    */
-  onAfterRun?: (context: RuntimeContext) => HookResult;
+  onAfterRun?: (context: RuntimeContext) => HookGenerator;
 
   /**
    * Called whenever an event is yielded by the runtime.
    */
-  onEvent?: (event: Event, context: RuntimeContext) => HookResult;
+  onEvent?: (event: Event, context: RuntimeContext) => HookGenerator;
 
   /**
    * Called before an action is executed.
-   * Return an event to intercept/suspend the action.
+   * Yield events to intercept, and return a NextAction to redirect/suspend.
    */
   onBeforeAction?: (
     call: { action: Action<any>; params: any; nextAction: NextAction },
     context: RuntimeContext
-  ) => HookResult | NextAction;
+  ) => HookGenerator<NextAction>;
 
   /**
    * Called after an action completes.
@@ -399,7 +404,7 @@ export interface Hooks {
   onAfterAction?: (
     result: { action: Action<any>; data: NextAction | void },
     context: RuntimeContext
-  ) => HookResult | NextAction;
+  ) => HookGenerator<NextAction>;
 }
 
 /**

@@ -13,7 +13,7 @@ const eventStorage = new CloudEventStorage({
  */
 export const persistEventsPlugin = plugin({
   name: "persist-events",
-  onEvent: async (event) => {
+  onEvent: async function* (event) {
     // Background the storage call to avoid blocking the main execution flow.
     // We don't await this so the user gets a fast response.
     // Errors are handled internally by the storage implementation.

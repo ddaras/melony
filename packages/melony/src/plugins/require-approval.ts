@@ -43,7 +43,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
      * Step 1: Handle the resumption when the user clicks "Approve" or "Cancel".
      * We verify the one-time-use approvalId to prevent replay attacks or double-clicks.
      */
-    onBeforeRun: async ({ event }, context) => {
+    onBeforeRun: async function* ({ event }, context) {
       if (
         event.type === "action-approved" ||
         event.type === "action-rejected"
@@ -82,13 +82,14 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
               options.secret
             );
             if (token !== expectedToken) {
-              return {
+              yield {
                 type: "error",
                 data: {
                   message:
                     "Security Warning: Approval token mismatch. Execution blocked.",
                 },
               };
+              return;
             }
           }
 
@@ -112,7 +113,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
     /**
      * Step 2: Intercept actions that require approval.
      */
-    onBeforeAction: async ({ action, params, nextAction }, context) => {
+    onBeforeAction: async function* ({ action, params, nextAction }, context) {
       // 1. Check if this action needs approval
       const isTargetAction =
         !options.actions || options.actions.includes(action.name);

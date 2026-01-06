@@ -6,6 +6,7 @@ import {
   Config,
   Plugin,
   ui,
+  HookGenerator,
 } from "./types";
 import { generateId } from "./utils/generate-id";
 import { z } from "zod";
@@ -54,32 +55,24 @@ export class Runtime {
       // 1. Trigger Plugins: onBeforeRun
       for (const plugin of this.config.plugins || []) {
         if (plugin.onBeforeRun) {
-          const result = await plugin.onBeforeRun(
-            { event: input.event },
+          const result = yield* this.callHook(
+            plugin.onBeforeRun({ event: input.event }, context),
             context
           );
           if (result) {
-            if ("type" in result) {
-              yield* this.emit(result as Event, context);
-            } else {
-              nextAction = result as NextAction;
-            }
+            nextAction = result as NextAction;
           }
         }
       }
 
       // 2. Trigger Hook: onBeforeRun
       if (this.config.hooks?.onBeforeRun) {
-        const result = await this.config.hooks.onBeforeRun(
-          { event: input.event },
+        const result = yield* this.callHook(
+          this.config.hooks.onBeforeRun({ event: input.event }, context),
           context
         );
         if (result) {
-          if ("type" in result) {
-            yield* this.emit(result as Event, context);
-          } else {
-            nextAction = result as NextAction;
-          }
+          nextAction = result as NextAction;
         }
       }
 
@@ -151,15 +144,13 @@ export class Runtime {
       // 1. Trigger Plugins: onAfterRun
       for (const plugin of this.config.plugins || []) {
         if (plugin.onAfterRun) {
-          const extra = await plugin.onAfterRun(context);
-          if (extra) yield* this.emit(extra, context);
+          yield* this.callHook(plugin.onAfterRun(context), context);
         }
       }
 
       // 2. Trigger Hook: onAfterRun
       if (this.config.hooks?.onAfterRun) {
-        const extra = await this.config.hooks.onAfterRun(context);
-        if (extra) yield* this.emit(extra, context);
+        yield* this.callHook(this.config.hooks.onAfterRun(context), context);
       }
     } catch (error) {
       if (error instanceof RuntimeInterruption) {
@@ -195,32 +186,24 @@ export class Runtime {
     // 1. Trigger Plugins: onBeforeAction
     for (const plugin of this.config.plugins || []) {
       if (plugin.onBeforeAction) {
-        const hookResult = await plugin.onBeforeAction(
-          { action, params, nextAction },
+        const hookResult = yield* this.callHook(
+          plugin.onBeforeAction({ action, params, nextAction }, context),
           context
         );
         if (hookResult) {
-          if ("type" in hookResult) {
-            yield* this.emit(hookResult as Event, context);
-          } else {
-            nextAction = hookResult as NextAction;
-          }
+          nextAction = hookResult as NextAction;
         }
       }
     }
 
     // 2. Trigger Hook: onBeforeAction
     if (this.config.hooks?.onBeforeAction) {
-      const hookResult = await this.config.hooks.onBeforeAction(
-        { action, params, nextAction },
+      const hookResult = yield* this.callHook(
+        this.config.hooks.onBeforeAction({ action, params, nextAction }, context),
         context
       );
       if (hookResult) {
-        if ("type" in hookResult) {
-          yield* this.emit(hookResult as Event, context);
-        } else {
-          nextAction = hookResult as NextAction;
-        }
+        nextAction = hookResult as NextAction;
       }
     }
 
@@ -240,32 +223,24 @@ export class Runtime {
       // 3. Trigger Plugins: onAfterAction
       for (const plugin of this.config.plugins || []) {
         if (plugin.onAfterAction) {
-          const extra = await plugin.onAfterAction(
-            { action, data: result },
+          const extra = yield* this.callHook(
+            plugin.onAfterAction({ action, data: result }, context),
             context
           );
           if (extra) {
-            if ("type" in extra) {
-              yield* this.emit(extra as Event, context);
-            } else {
-              nextAction = extra as NextAction;
-            }
+            nextAction = extra as NextAction;
           }
         }
       }
 
       // 4. Trigger Hook: onAfterAction
       if (this.config.hooks?.onAfterAction) {
-        const extra = await this.config.hooks.onAfterAction(
-          { action, data: result },
+        const extra = yield* this.callHook(
+          this.config.hooks.onAfterAction({ action, data: result }, context),
           context
         );
         if (extra) {
-          if ("type" in extra) {
-            yield* this.emit(extra as Event, context);
-          } else {
-            nextAction = extra as NextAction;
-          }
+          nextAction = extra as NextAction;
         }
       }
 
@@ -283,6 +258,22 @@ export class Runtime {
         },
         context
       );
+    }
+  }
+
+  /**
+   * Internal helper to call a hook (generator) and yield its events.
+   */
+  private async *callHook<T>(
+    generator: HookGenerator<T> | undefined,
+    context: RuntimeContext
+  ): AsyncGenerator<Event, T | void> {
+    if (!generator) return;
+
+    while (true) {
+      const { value, done } = await generator.next();
+      if (done) return value as T | void;
+      yield* this.emit(value as Event, context);
     }
   }
 
@@ -307,8 +298,8 @@ export class Runtime {
     // 1. Trigger Plugins: onEvent
     for (const plugin of this.config.plugins || []) {
       if (plugin.onEvent) {
-        const extra = await plugin.onEvent(finalEvent, context);
-        if (extra) {
+        const generator = plugin.onEvent(finalEvent, context);
+        for await (const extra of generator) {
           yield { ...extra, runId: context.runId, timestamp: Date.now() };
         }
       }
@@ -316,8 +307,8 @@ export class Runtime {
 
     // 2. Trigger Hook: onEvent for side-effects or extra events
     if (this.config.hooks?.onEvent) {
-      const extra = await this.config.hooks.onEvent(finalEvent, context);
-      if (extra) {
+      const generator = this.config.hooks.onEvent(finalEvent, context);
+      for await (const extra of generator) {
         // Yield extra event from hook, ensuring it has required metadata
         yield { ...extra, runId: context.runId, timestamp: Date.now() };
       }
