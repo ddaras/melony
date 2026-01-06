@@ -5,11 +5,9 @@ import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import {
   IconArrowUp,
-  IconAdjustmentsHorizontal,
   IconChevronDown,
   IconLoader2,
   IconPaperclip,
-  IconPlus,
   IconX,
   IconFile,
   IconFileText,
@@ -20,7 +18,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -146,12 +143,6 @@ export function Composer({
 
   const handleRemoveFile = (index: number) => {
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   const handleInternalSubmit = async () => {
@@ -358,10 +349,11 @@ export function Composer({
               return (
                 <DropdownMenu key={group.id}>
                   <DropdownMenuTrigger
-                    render={
+                    render={(props) => (
                       <Button
                         variant="ghost"
                         size="sm"
+                        {...props}
                         className={cn(
                           "gap-2",
                           selectedInGroup.length > 0
@@ -377,7 +369,7 @@ export function Composer({
                         )}
                         <IconChevronDown className="h-3 w-3 opacity-50" />
                       </Button>
-                    }
+                    )}
                   />
                   <DropdownMenuContent align="start" className="w-56">
                     <DropdownMenuGroup>
@@ -408,7 +400,10 @@ export function Composer({
           <Button
             type="submit"
             disabled={
-              (!value.trim() && attachedFiles.length === 0 && !isLoading) ||
+              (!value.trim() &&
+                attachedFiles.length === 0 &&
+                selectedOptions.size === 0 &&
+                !isLoading) ||
               isLoading
             }
             size="icon-lg"

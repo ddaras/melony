@@ -1,12 +1,5 @@
 import * as React from "react";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -31,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
-export interface AccountDialogProps {
+export interface AccountButtonProps {
   className?: string;
   variant?:
     | "default"
@@ -43,7 +36,7 @@ export interface AccountDialogProps {
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-export const AccountDialog: React.FC<AccountDialogProps> = ({
+export const AccountButton: React.FC<AccountButtonProps> = ({
   className,
   variant = "outline",
   size,
@@ -197,15 +190,19 @@ export const AccountDialog: React.FC<AccountDialogProps> = ({
         Sign in
       </Button>
 
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Sign in to continue</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sign in to continue</DialogTitle>
+            <DialogDescription>
               Choose your preferred sign-in method to access your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex flex-col gap-3 py-4">
+            </DialogDescription>
+          </DialogHeader>
+          <DialogClose>
+            <IconX className="size-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+          <div className="flex flex-col gap-3">
             {error && (
               <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
@@ -222,8 +219,8 @@ export const AccountDialog: React.FC<AccountDialogProps> = ({
               {isLoading ? "Signing in..." : "Continue with Google"}
             </Button>
           </div>
-        </AlertDialogContent>
-      </AlertDialog>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

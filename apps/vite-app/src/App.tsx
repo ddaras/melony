@@ -1,19 +1,20 @@
 import { MelonyClient } from "melony/client";
 import {
-  AccountDialog,
+  AccountButton,
   AuthProvider,
   PopupChat,
   MelonyProvider,
   ThreadProvider,
   FullChat,
-  CreateThreadButton,
-  ThreadList,
   ThemeProvider,
   ThemeToggle,
   SidebarToggle,
-  Button,
   SidebarProvider,
   Sidebar,
+  CreateThreadNavItem,
+  List,
+  ListItem,
+  ThreadList,
 } from "@melony/react";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
@@ -21,6 +22,7 @@ import {
   TOKEN_STORAGE_KEY,
 } from "./lib/services/auth-service";
 import { ui } from "melony";
+import { IconDeviceHeartMonitor } from "@tabler/icons-react";
 
 const CHAT_API_URL = "http://localhost:3006/api/agent";
 
@@ -65,21 +67,21 @@ const ChatApp = () => {
     <SidebarProvider>
       <div className="flex h-screen relative bg-background overflow-hidden">
         <Sidebar side="left" className="2xl:w-[18rem] w-[16rem]">
-          <div className="flex gap-1 items-center justify-between w-full p-2">
-            <Button
+          <List className="p-2">
+            <ListItem
               onClickAction={ui.actions.navigate("/")}
-              variant="ghost"
-              size="lg"
-              label="Craffted"
-              className="font-bold tracking-wider"
-            />
-          </div>
+              className="font-bold tracking-wider text-foreground"
+            >
+              <IconDeviceHeartMonitor className="size-4" />
+              Craffted
+            </ListItem>
+          </List>
 
-          <div className="p-2">
-            <CreateThreadButton />
-          </div>
+          <List className="p-2">
+            <CreateThreadNavItem />
+          </List>
 
-          <ThreadList />
+          <ThreadList className="p-2" />
         </Sidebar>
         <FullChat
           className="flex-1 overflow-hidden"
@@ -92,7 +94,7 @@ const ChatApp = () => {
             rightContent: (
               <div className="flex gap-2">
                 <ThemeToggle />
-                <AccountDialog />
+                <AccountButton />
               </div>
             ),
           }}

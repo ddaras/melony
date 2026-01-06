@@ -30,7 +30,6 @@ export interface ThreadPopoverProps {
     | "icon-sm"
     | "icon-lg";
   emptyState?: React.ReactNode;
-  onThreadSelect?: (threadId: string) => void;
 }
 
 export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
@@ -39,7 +38,6 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
   buttonVariant = "ghost",
   buttonSize = "icon",
   emptyState,
-  onThreadSelect,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -56,11 +54,6 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
       enableOnContentEditable: false, // Don't trigger in contenteditable elements
     }
   );
-
-  const handleThreadSelect = (threadId: string) => {
-    setIsOpen(false);
-    onThreadSelect?.(threadId);
-  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -80,11 +73,7 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
         sideOffset={8}
       >
         <div className="flex flex-col h-[400px]">
-          <ThreadList
-            emptyState={emptyState}
-            onThreadSelect={handleThreadSelect}
-            className="h-full"
-          />
+          <ThreadList emptyState={emptyState} className="h-full" />
         </div>
       </PopoverContent>
     </Popover>

@@ -20,7 +20,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   const paddingClasses: Record<string, string> = {
     xs: "px-1.5 py-1",
     sm: "px-2 py-1.5",
-    md: "px-3 py-2",
+    md: "px-3 py-1.5",
     lg: "px-4 py-3",
     xl: "px-6 py-4",
   };
@@ -62,7 +62,7 @@ export const ListItem: React.FC<ListItemProps> = ({
     <div
       onClick={isInteractive ? handleClick : undefined}
       className={cn(
-        "flex rounded-md transition-colors",
+        "flex rounded-md transition-colors text-sm",
         orientation === "horizontal" ? "flex-row" : "flex-col",
         gapClasses[gap as keyof typeof gapClasses] || "gap-3",
         alignClasses[resolvedAlign as keyof typeof alignClasses],

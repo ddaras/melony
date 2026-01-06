@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   IconArrowLeft,
   IconHistory,
@@ -7,13 +7,13 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { Thread } from "./thread";
-import { ThreadList } from "./thread-list";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { useThreads } from "@/hooks/use-threads";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
+import { ThreadList } from "./thread-list";
 
 export interface PopupChatProps {
   title?: string;
@@ -117,7 +117,6 @@ export function PopupChat({
               />
             ) : (
               <ThreadList
-                onThreadSelect={() => setView("chat")}
                 className="h-full"
               />
             )}

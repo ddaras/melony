@@ -160,6 +160,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
       context.suspend({
         type: "hitl-required",
         data: { ...nextAction, token, approvalId },
+        slot: "approval",
         ui: ui.card({
           title: "Approval Required",
           children: [

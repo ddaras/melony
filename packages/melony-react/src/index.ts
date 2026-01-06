@@ -24,9 +24,11 @@ export * from "./providers/sidebar-provider";
 export * from "./components/thread-list";
 export * from "./components/thread-popover";
 export * from "./components/create-thread-button";
-export * from "./components/account-dialog";
+export * from "./components/account-button";
 export * from "./components/theme-toggle";
 export * from "./components/ui-renderer";
+export * from "./components/elements/Dropdown";
+export * from "./components/create-thread-nav-item";
 
 // Elements
 export * from "./components/elements/Button";

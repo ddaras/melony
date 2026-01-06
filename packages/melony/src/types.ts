@@ -294,7 +294,10 @@ export const ui = {
     props,
   }),
   actions: {
-    navigate: (url: string): Event => ({ type: "client:navigate", data: { url } }),
+    navigate: (url: string): Event => ({
+      type: "client:navigate",
+      data: { url },
+    }),
     openUrl: (url: string, target = "_blank"): Event => ({
       type: "client:open-url",
       data: { url, target },
@@ -314,6 +317,7 @@ export type Event = {
   type: string;
   data?: any;
   ui?: UINode;
+  slot?: string;
   runId?: string;
   threadId?: string;
   timestamp?: number;
@@ -368,7 +372,7 @@ export interface Hooks {
   onBeforeRun?: (
     input: { event: Event; runId: string; state: Record<string, any> },
     context: RuntimeContext
-  ) => Promise<Event | NextAction | void>;
+  ) => HookResult;
 
   /**
    * Called when a run session completes.

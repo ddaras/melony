@@ -1,8 +1,6 @@
-import React from "react";
-import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { AccountButton } from "./account-button";
 
 export interface WelcomeScreenProps {
   title?: string;
@@ -91,7 +89,9 @@ export function WelcomeScreen({
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2">
               {features.map((feature, i) => (
                 <div key={i} className="space-y-2">
-                  <h3 className="font-bold text-lg text-foreground">{feature.title}</h3>
+                  <h3 className="font-bold text-lg text-foreground">
+                    {feature.title}
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
@@ -106,34 +106,16 @@ export function WelcomeScreen({
       <div className="flex w-4/12 flex-col overflow-y-auto p-8 md:p-12 lg:p-20 bg-background transition-colors duration-300">
         <div className="w-full max-w-sm space-y-8 my-auto mx-auto">
           <div className="space-y-3 text-center md:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Get Started</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">
+              Get Started
+            </h2>
             <p className="text-muted-foreground text-lg">
               Sign in to your account to continue
             </p>
           </div>
 
           <div className="space-y-4">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full h-16 text-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 border-2 font-medium bg-background text-foreground hover:bg-accent"
-              onClick={handleLogin}
-              disabled={isLoading}
-            >
-              <IconBrandGoogle className="size-6" />
-              {isLoading ? "Signing in..." : "Continue with Google"}
-            </Button>
-
-            <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-3 text-muted-foreground tracking-widest font-medium">
-                  Secure access
-                </span>
-              </div>
-            </div>
+            <AccountButton />
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed text-center md:text-left">
@@ -162,4 +144,3 @@ export function WelcomeScreen({
     </div>
   );
 }
-

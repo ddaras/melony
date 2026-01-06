@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
-import { StarterPrompt, ComposerOptionGroup } from "@/types";
+import { StarterPrompt, ComposerOptionGroup, Message } from "@/types";
+import { Event } from "melony";
 import { Composer } from "./composer";
 import { StarterPrompts } from "./starter-prompts";
 import { MessageList } from "./message-list";
@@ -66,9 +67,11 @@ export function Thread({
     const text = (overrideInput ?? input).trim();
     const hasFiles =
       state?.files && Array.isArray(state.files) && state.files.length > 0;
+    const hasOptions =
+      state && Object.keys(state).filter((k) => k !== "threadId").length > 0;
 
-    // Allow submission if there's text OR files
-    if ((!text && !hasFiles) || isLoading) return;
+    // Allow submission if there's text OR files OR options
+    if ((!text && !hasFiles && !hasOptions) || isLoading) return;
 
     if (!overrideInput) setInput("");
 
@@ -78,7 +81,12 @@ export function Thread({
         role: "user",
         data: { content: text || "" },
       },
-      { state: { ...state, threadId: activeThreadId ?? undefined } }
+      {
+        state: {
+          ...state,
+          threadId: activeThreadId ?? undefined,
+        },
+      }
     );
   };
 
