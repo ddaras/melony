@@ -84,17 +84,17 @@ export class MelonyClient {
   }
 
   async *sendEvent(
-    event: Event,
-    options?: { runId?: string; state?: Record<string, any> }
+    event: Event
   ): AsyncGenerator<Event> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    const runId = options?.runId ?? generateId();
-    const state = options?.state ?? this.lastServerState;
+    const runId = event.runId ?? generateId();
+    const state = event.state ?? this.lastServerState;
     const optimisticEvent: Event = {
       ...event,
       runId,
+      state,
       role: event.role ?? "user",
       timestamp: event.timestamp ?? Date.now(),
     };
@@ -111,7 +111,7 @@ export class MelonyClient {
       const response = await fetch(this.url, {
         method: "POST",
         headers,
-        body: JSON.stringify({ event: optimisticEvent, ...options, runId, state }),
+        body: JSON.stringify({ event: optimisticEvent }),
         signal: this.abortController.signal,
       });
 

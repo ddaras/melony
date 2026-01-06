@@ -25,8 +25,6 @@ export async function POST(request: NextRequest) {
     return createStreamResponse(
       rootAgent.run({
         event,
-        runId: body.runId,
-        state: body.state,
       })
     );
   } catch (error) {

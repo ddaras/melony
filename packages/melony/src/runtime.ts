@@ -34,13 +34,11 @@ export class Runtime {
 
   public async *run(input: {
     event: Event;
-    runId?: string;
-    state?: Record<string, any>;
   }): AsyncGenerator<Event> {
-    const runId = input.runId ?? generateId();
+    const runId = input.event.runId ?? generateId();
 
     const context: RuntimeContext = {
-      state: input.state ?? {},
+      state: input.event.state ?? {},
       runId,
       stepCount: 0,
       actions: this.config.actions,
@@ -57,7 +55,7 @@ export class Runtime {
       for (const plugin of this.config.plugins || []) {
         if (plugin.onBeforeRun) {
           const result = await plugin.onBeforeRun(
-            { event: input.event, runId, state: context.state },
+            { event: input.event },
             context
           );
           if (result) {
@@ -73,7 +71,7 @@ export class Runtime {
       // 2. Trigger Hook: onBeforeRun
       if (this.config.hooks?.onBeforeRun) {
         const result = await this.config.hooks.onBeforeRun(
-          { event: input.event, runId, state: context.state },
+          { event: input.event },
           context
         );
         if (result) {

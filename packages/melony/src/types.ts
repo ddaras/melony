@@ -370,7 +370,7 @@ export interface Hooks {
    * Can return an Event to be emitted, or a NextAction to jump-start the loop.
    */
   onBeforeRun?: (
-    input: { event: Event; runId: string; state: Record<string, any> },
+    input: { event: Event },
     context: RuntimeContext
   ) => HookResult | NextAction;
 

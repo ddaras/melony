@@ -80,8 +80,6 @@ export function Thread({
         type: "text",
         role: "user",
         data: { content: text || "" },
-      },
-      {
         state: {
           ...state,
           threadId: activeThreadId ?? undefined,

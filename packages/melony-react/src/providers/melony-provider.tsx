@@ -20,8 +20,7 @@ import {
 export interface MelonyContextValue extends ClientState {
   messages: Message[];
   sendEvent: (
-    event: Event,
-    options?: { runId?: string; state?: Record<string, any> }
+    event: Event
   ) => Promise<void>;
   reset: (events?: Event[]) => void;
   client: MelonyClient;
@@ -132,16 +131,12 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
 
   const sendEvent = useCallback(
     async (
-      event: Event,
-      options?: {
-        runId?: string;
-        state?: Record<string, any>;
-      }
+      event: Event
     ) => {
       const handled = await dispatchClientAction(event);
       if (handled) return;
 
-      const generator = client.sendEvent(event, options);
+      const generator = client.sendEvent(event);
       for await (const incomingEvent of generator) {
         // Also allow server to trigger client actions
         await dispatchClientAction(incomingEvent);

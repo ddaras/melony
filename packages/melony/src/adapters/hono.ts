@@ -22,14 +22,15 @@ export const handle = (instance: { run: any; config: any }) => {
       return c.json({ error: "Invalid request: event required" }, 400);
     }
 
+    // Merge headers into event state
+    event.state = {
+      ...event.state,
+      requestHeaders: headers,
+    };
+
     return createStreamResponse(
       instance.run({
         event,
-        runId: body.runId,
-        state: {
-          ...body.state,
-          requestHeaders: headers,
-        },
       })
     );
   };
