@@ -25,7 +25,7 @@ export interface RequireApprovalOptions {
    * Optional condition to check if approval is needed dynamically.
    */
   shouldApprove?: (
-    action: Action<any, any>,
+    action: Action<any>,
     params: any,
     context: RuntimeContext
   ) => boolean | Promise<boolean>;

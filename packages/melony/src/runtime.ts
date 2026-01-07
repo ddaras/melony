@@ -108,7 +108,7 @@ export class Runtime<TState = any> {
           break;
         }
 
-        const action: Action<TState, any> = this.config.actions[actionName];
+        const action: Action<any, TState> = this.config.actions[actionName];
 
         if (!action) {
           yield* this.emit(
@@ -193,7 +193,7 @@ export class Runtime<TState = any> {
   }
 
   private async *executeAction(
-    action: Action<TState, any>,
+    action: Action<any, TState>,
     nextAction: NextAction,
     context: RuntimeContext<TState>
   ): AsyncGenerator<Event, NextAction | void> {
@@ -341,9 +341,9 @@ export const melony = <TState = any>(config: Config<TState>) => {
 /**
  * Helper to define an action with full type inference.
  */
-export const action = <TState = any, T extends z.ZodSchema = z.ZodSchema>(
-  config: Action<TState, T>
-): Action<TState, T> => config;
+export const action = <T extends z.ZodSchema, TState = any>(
+  config: Action<T, TState>
+): Action<T, TState> => config;
 
 /**
  * Helper to define a plugin.
