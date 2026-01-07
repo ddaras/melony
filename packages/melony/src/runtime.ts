@@ -22,10 +22,10 @@ function isEvent(val: any): val is Event {
  * The Slim Runtime.
  * Single Responsibility: Orchestrate Event -> Action -> Event transitions.
  */
-export class Runtime {
-  private config: Config;
+export class Runtime<TState = any> {
+  private config: Config<TState>;
 
-  constructor(config: Config) {
+  constructor(config: Config<TState>) {
     this.config = config;
   }
 
@@ -34,8 +34,8 @@ export class Runtime {
   }): AsyncGenerator<Event> {
     const runId = input.event.runId ?? generateId();
 
-    const context: RuntimeContext = {
-      state: input.event.state ?? {},
+    const context: RuntimeContext<TState> = {
+      state: (input.event.state ?? {}) as TState,
       runId,
       stepCount: 0,
       actions: this.config.actions,
@@ -97,9 +97,20 @@ export class Runtime {
         nextAction = undefined; // Reset
 
         // 1. Resolve Action
-        const actionName: string =
-          current.action ?? Object.keys(this.config.actions)[0];
-        const action: Action<any> = this.config.actions[actionName];
+        const actionName: string | undefined = current.action;
+
+        if (!actionName) {
+          yield* this.emit(
+            {
+              type: "error",
+              data: { message: "No action name provided in NextAction" },
+            },
+            context
+          );
+          break;
+        }
+
+        const action: Action<any, TState> = this.config.actions[actionName];
 
         if (!action) {
           yield* this.emit(
@@ -125,7 +136,6 @@ export class Runtime {
               data: {
                 ...current, // Preserve all metadata (like toolCallId)
                 action: actionName,
-                params: current.params,
                 result,
               },
             },
@@ -174,7 +184,7 @@ export class Runtime {
 
   private async *dispatchToBrain(
     event: Event,
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ): AsyncGenerator<Event, NextAction | void> {
     const generator = this.config.brain!(event, context);
     while (true) {
@@ -185,9 +195,9 @@ export class Runtime {
   }
 
   private async *executeAction(
-    action: Action,
+    action: Action<any, TState>,
     nextAction: NextAction,
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ): AsyncGenerator<Event, NextAction | void> {
     const params = nextAction.params;
 
@@ -272,7 +282,7 @@ export class Runtime {
    */
   private async *callHook<T>(
     generator: HookGenerator<T> | undefined,
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ): AsyncGenerator<Event, T | void> {
     if (!generator) return;
 
@@ -288,7 +298,7 @@ export class Runtime {
    */
   private async *emit(
     event: Event,
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ): AsyncGenerator<Event> {
     const finalEvent = {
       ...event,
@@ -322,8 +332,8 @@ export class Runtime {
   }
 }
 
-export const melony = (config: Config) => {
-  const runtime = new Runtime(config);
+export const melony = <TState = any>(config: Config<TState>) => {
+  const runtime = new Runtime<TState>(config);
   return {
     config,
     run: runtime.run.bind(runtime),
@@ -333,10 +343,12 @@ export const melony = (config: Config) => {
 /**
  * Helper to define an action with full type inference.
  */
-export const action = <T extends z.ZodSchema>(config: Action<T>): Action<T> =>
-  config;
+export const action = <T extends z.ZodSchema, TState = any>(
+  config: Action<T, TState>
+): Action<T, TState> => config;
 
 /**
  * Helper to define a plugin.
  */
-export const plugin = (config: Plugin): Plugin => config;
+export const plugin = <TState = any>(config: Plugin<TState>): Plugin<TState> =>
+  config;

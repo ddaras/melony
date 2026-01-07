@@ -329,14 +329,22 @@ export type Event = {
 // Runtime & Hooks
 // ============================================
 
-export interface Action<TParams extends z.ZodSchema = z.ZodObject<any>> {
+export type ActionExecute<
+  TParams extends z.ZodSchema = z.ZodSchema,
+  TState = any,
+> = (
+  params: z.infer<TParams>,
+  context: RuntimeContext<TState>,
+) => AsyncGenerator<Event, NextAction | void, unknown>;
+
+export interface Action<
+  TParams extends z.ZodSchema = z.ZodObject<any>,
+  TState = any,
+> {
   name: string;
   description?: string;
   paramsSchema: TParams;
-  execute: (
-    params: z.infer<TParams>,
-    context: RuntimeContext
-  ) => AsyncGenerator<Event, NextAction | void, unknown>;
+  execute: ActionExecute<TParams, TState>;
 }
 
 export interface NextAction {
@@ -352,6 +360,7 @@ export interface RuntimeContext<TState = any> {
   stepCount: number;
   actions: Record<string, Action<any>>;
   ui: typeof ui;
+
   /**
    * Immediately interrupts the runtime execution.
    * If an event is provided, it will be emitted before the runtime stops.
@@ -369,25 +378,25 @@ export type HookGenerator<TReturn = void> = AsyncGenerator<
   unknown
 >;
 
-export interface Hooks {
+export interface Hooks<TState = any> {
   /**
    * Called when a run session begins.
    * Can yield Events to be emitted, and return a NextAction to jump-start the loop.
    */
   onBeforeRun?: (
     input: { event: Event },
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ) => HookGenerator<NextAction>;
 
   /**
    * Called when a run session completes.
    */
-  onAfterRun?: (context: RuntimeContext) => HookGenerator;
+  onAfterRun?: (context: RuntimeContext<TState>) => HookGenerator;
 
   /**
    * Called whenever an event is yielded by the runtime.
    */
-  onEvent?: (event: Event, context: RuntimeContext) => HookGenerator;
+  onEvent?: (event: Event, context: RuntimeContext<TState>) => HookGenerator;
 
   /**
    * Called before an action is executed.
@@ -395,7 +404,7 @@ export interface Hooks {
    */
   onBeforeAction?: (
     call: { action: Action<any>; params: any; nextAction: NextAction },
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ) => HookGenerator<NextAction>;
 
   /**
@@ -403,28 +412,30 @@ export interface Hooks {
    */
   onAfterAction?: (
     result: { action: Action<any>; data: NextAction | void },
-    context: RuntimeContext
+    context: RuntimeContext<TState>
   ) => HookGenerator<NextAction>;
 }
 
 /**
  * A plugin is just a named set of hooks.
  */
-export interface Plugin extends Hooks {
+export interface Plugin<TState = any> extends Hooks<TState> {
   name: string;
 }
 
-export interface Config {
-  actions: Record<string, Action<any>>;
+export type Brain<TState = any> = (
+  event: Event,
+  context: RuntimeContext<TState>
+) => AsyncGenerator<Event, NextAction | void, unknown>;
+
+export interface Config<TState = any> {
+  actions: Record<string, Action<any, TState>>;
   /**
    * The central brain for handling incoming events.
    */
-  brain?: (
-    event: Event,
-    context: RuntimeContext
-  ) => AsyncGenerator<Event, NextAction | void, unknown>;
-  hooks?: Hooks;
-  plugins?: Plugin[];
+  brain?: Brain<TState>;
+  hooks?: Hooks<TState>;
+  plugins?: Plugin<TState>[];
   safetyMaxSteps?: number;
   starterPrompts?: Array<{
     label: string;
