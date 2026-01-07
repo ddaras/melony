@@ -31,7 +31,6 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
   className,
   variant = "ghost",
   size = "default",
-  children,
   onThreadCreated,
 }) => {
   const { createThread } = useThreads();
@@ -42,7 +41,9 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
     try {
       setIsCreating(true);
       const threadId = await createThread();
-      onThreadCreated?.(threadId);
+      if (threadId) {
+        onThreadCreated?.(threadId);
+      }
     } catch (error) {
       console.error("Failed to create thread:", error);
     } finally {

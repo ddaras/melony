@@ -15,6 +15,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 export interface MelonyContextValue extends ClientState {
@@ -61,6 +62,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   setContextValue,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
+  const queryClient = useQueryClient();
 
   const { data: config } = useQuery({
     queryKey: ["melony-config", client.url],
@@ -122,11 +124,18 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
           reset([]);
           return true;
         }
+        case "client:invalidate-query": {
+          const { queryKey } = event.data || {};
+          if (queryKey) {
+            await queryClient.invalidateQueries({ queryKey });
+          }
+          return true;
+        }
         default:
           return false;
       }
     },
-    [client, reset]
+    [client, reset, queryClient]
   );
 
   const sendEvent = useCallback(

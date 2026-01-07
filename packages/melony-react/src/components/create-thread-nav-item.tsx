@@ -47,7 +47,7 @@ export const CreateThreadNavItem: React.FC<CreateThreadNavItemProps> = ({
       onClickAction={{
         type: "client:navigate",
         data: {
-          url: `?threadId=${generateId()}`,
+          url: "?",
         },
       }}
       className={cn(className)}

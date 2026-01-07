@@ -10,8 +10,7 @@ export interface ThreadListProps {
 }
 
 export const ThreadList: React.FC<ThreadListProps> = ({ className }) => {
-  const { threads, activeThreadId, selectThread, deleteThread, isLoading } =
-    useThreads();
+  const { threads, activeThreadId, deleteThread } = useThreads();
 
   const sortedThreads = React.useMemo(() => {
     return [...threads].sort((a, b) => {

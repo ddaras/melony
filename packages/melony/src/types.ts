@@ -304,6 +304,10 @@ export const ui = {
     }),
     copy: (text: string): Event => ({ type: "client:copy", data: { text } }),
     reset: (): Event => ({ type: "client:reset" }),
+    invalidateQuery: (queryKey: any[]): Event => ({
+      type: "client:invalidate-query",
+      data: { queryKey },
+    }),
   },
 };
 
@@ -320,6 +324,7 @@ export type Event = {
   slot?: string;
   runId?: string;
   threadId?: string;
+  threadTitle?: string;
   timestamp?: number;
   role?: Role;
   state?: any;

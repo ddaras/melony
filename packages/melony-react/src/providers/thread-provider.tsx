@@ -3,6 +3,7 @@ import React, {
   useCallback,
   ReactNode,
   useMemo,
+  useEffect,
 } from "react";
 import { Event } from "melony";
 import { generateId } from "melony/client";
@@ -20,7 +21,7 @@ export interface ThreadContextValue {
   isLoading: boolean;
   error: Error | null;
   selectThread: (threadId: string) => void;
-  createThread: () => Promise<string>;
+  createThread: () => Promise<string | null>;
   deleteThread: (threadId: string) => Promise<void>;
   refreshThreads: () => Promise<void>;
   threadEvents: Event[];
@@ -43,13 +44,17 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   initialThreadId: providedInitialThreadId,
 }) => {
   const queryClient = useQueryClient();
-  const defaultInitialThreadId = useMemo(() => generateId(), []);
-  const initialThreadId = providedInitialThreadId || defaultInitialThreadId;
 
   const [activeThreadId, setActiveThreadId] = useQueryState(
     "threadId",
-    parseAsString.withDefault(initialThreadId)
+    parseAsString
   );
+
+  useEffect(() => {
+    if (!activeThreadId && providedInitialThreadId) {
+      setActiveThreadId(providedInitialThreadId);
+    }
+  }, [activeThreadId, providedInitialThreadId, setActiveThreadId]);
 
   // Fetch all threads
   const {
@@ -71,14 +76,11 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const newId = service.createThread
-        ? await service.createThread()
-        : generateId();
-      return newId;
+      return null;
     },
-    onSuccess: async (newId) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["threads"] });
-      await setActiveThreadId(newId);
+      await setActiveThreadId(null);
     },
   });
 
