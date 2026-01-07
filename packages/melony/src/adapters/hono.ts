@@ -29,9 +29,7 @@ export const handle = (instance: { run: any; config: any }) => {
     };
 
     return createStreamResponse(
-      instance.run({
-        event,
-      })
+      instance.run(event)
     );
   };
 };

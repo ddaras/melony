@@ -29,13 +29,11 @@ export class Runtime<TState = any> {
     this.config = config;
   }
 
-  public async *run(input: {
-    event: Event;
-  }): AsyncGenerator<Event> {
-    const runId = input.event.runId ?? generateId();
+  public async *run(event: Event): AsyncGenerator<Event> {
+    const runId = event.runId ?? generateId();
 
     const context: RuntimeContext<TState> = {
-      state: (input.event.state ?? {}) as TState,
+      state: (event.state ?? {}) as TState,
       runId,
       stepCount: 0,
       actions: this.config.actions,
@@ -52,7 +50,7 @@ export class Runtime<TState = any> {
       for (const plugin of this.config.plugins || []) {
         if (plugin.onBeforeRun) {
           const result = yield* this.callHook(
-            plugin.onBeforeRun({ event: input.event }, context),
+            plugin.onBeforeRun({ event }, context),
             context
           );
           if (result) {
@@ -64,7 +62,7 @@ export class Runtime<TState = any> {
       // 2. Trigger Hook: onBeforeRun
       if (this.config.hooks?.onBeforeRun) {
         const result = yield* this.callHook(
-          this.config.hooks.onBeforeRun({ event: input.event }, context),
+          this.config.hooks.onBeforeRun({ event }, context),
           context
         );
         if (result) {
@@ -73,14 +71,14 @@ export class Runtime<TState = any> {
       }
 
       yield* this.emit(
-        { type: "run-started", data: { inputEvent: input.event } },
+        { type: "run-started", data: { inputEvent: event } },
         context
       );
 
       // Initial dispatch of the incoming event to the agent's brain
       // Only if onBeforeRun didn't already provide a nextAction
       if (!nextAction && this.config.brain) {
-        nextAction = yield* this.dispatchToBrain(input.event, context);
+        nextAction = yield* this.dispatchToBrain(event, context);
       }
 
       // Agentic loop
@@ -110,7 +108,7 @@ export class Runtime<TState = any> {
           break;
         }
 
-        const action: Action<any, TState> = this.config.actions[actionName];
+        const action: Action<TState, any> = this.config.actions[actionName];
 
         if (!action) {
           yield* this.emit(
@@ -195,7 +193,7 @@ export class Runtime<TState = any> {
   }
 
   private async *executeAction(
-    action: Action<any, TState>,
+    action: Action<TState, any>,
     nextAction: NextAction,
     context: RuntimeContext<TState>
   ): AsyncGenerator<Event, NextAction | void> {
@@ -343,9 +341,9 @@ export const melony = <TState = any>(config: Config<TState>) => {
 /**
  * Helper to define an action with full type inference.
  */
-export const action = <T extends z.ZodSchema, TState = any>(
-  config: Action<T, TState>
-): Action<T, TState> => config;
+export const action = <TState = any, T extends z.ZodSchema = z.ZodSchema>(
+  config: Action<TState, T>
+): Action<TState, T> => config;
 
 /**
  * Helper to define a plugin.

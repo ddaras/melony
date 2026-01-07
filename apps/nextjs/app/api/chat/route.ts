@@ -23,9 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     return createStreamResponse(
-      rootAgent.run({
-        event,
-      })
+      rootAgent.run(event)
     );
   } catch (error) {
     console.error("Error in chat route:", error);

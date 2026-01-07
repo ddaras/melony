@@ -330,21 +330,21 @@ export type Event = {
 // ============================================
 
 export type ActionExecute<
-  TParams extends z.ZodSchema = z.ZodSchema,
   TState = any,
+  TParams extends z.ZodSchema = z.ZodSchema,
 > = (
   params: z.infer<TParams>,
   context: RuntimeContext<TState>,
 ) => AsyncGenerator<Event, NextAction | void, unknown>;
 
 export interface Action<
-  TParams extends z.ZodSchema = z.ZodObject<any>,
   TState = any,
+  TParams extends z.ZodSchema = z.ZodSchema,
 > {
   name: string;
   description?: string;
   paramsSchema: TParams;
-  execute: ActionExecute<TParams, TState>;
+  execute: ActionExecute<TState, TParams>;
 }
 
 export interface NextAction {
@@ -358,7 +358,7 @@ export interface RuntimeContext<TState = any> {
   state: TState;
   runId: string;
   stepCount: number;
-  actions: Record<string, Action<any>>;
+  actions: Record<string, Action<TState, any>>;
   ui: typeof ui;
 
   /**
@@ -403,7 +403,7 @@ export interface Hooks<TState = any> {
    * Yield events to intercept, and return a NextAction to redirect/suspend.
    */
   onBeforeAction?: (
-    call: { action: Action<any>; params: any; nextAction: NextAction },
+    call: { action: Action<TState, any>; params: any; nextAction: NextAction },
     context: RuntimeContext<TState>
   ) => HookGenerator<NextAction>;
 
@@ -411,7 +411,7 @@ export interface Hooks<TState = any> {
    * Called after an action completes.
    */
   onAfterAction?: (
-    result: { action: Action<any>; data: NextAction | void },
+    result: { action: Action<TState, any>; data: NextAction | void },
     context: RuntimeContext<TState>
   ) => HookGenerator<NextAction>;
 }
@@ -429,7 +429,7 @@ export type Brain<TState = any> = (
 ) => AsyncGenerator<Event, NextAction | void, unknown>;
 
 export interface Config<TState = any> {
-  actions: Record<string, Action<any, TState>>;
+  actions: Record<string, Action<TState, any>>;
   /**
    * The central brain for handling incoming events.
    */
