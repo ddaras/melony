@@ -21,14 +21,7 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
     name: "serverless-safe",
 
     onBeforeRun: async function* ({ event }, context) {
-      // 1. If this is a resumption, return the nextAction to jump-start the loop
-      if (event.type === "run-suspended" && event.data?.nextAction) {
-        // Reset the start time for the new execution window
-        context.state.__run_start_time = Date.now();
-        return event.data.nextAction as NextAction;
-      }
-
-      // 2. Initialize the start time for a fresh run
+      // 1. Initialize or reset the start time
       context.state.__run_start_time = Date.now();
     },
 
@@ -42,11 +35,12 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
         // Remove the internal start time from state before suspending
         delete context.state.__run_start_time;
 
-        // Suspend the runtime and yield a special event that the client can use to resume
+        // Suspend the runtime and yield a special event that the client can use to resume.
+        // We now put nextAction at the top level of the event.
         context.suspend({
           type: "run-suspended",
+          nextAction,
           data: {
-            nextAction,
             elapsed,
             maxDuration,
           },

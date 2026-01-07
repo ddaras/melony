@@ -48,7 +48,9 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         event.type === "action-approved" ||
         event.type === "action-rejected"
       ) {
-        const { action, params, token, approvalId, ...rest } = event.data;
+        const { token, approvalId } = event.data || {};
+        const action = event.nextAction?.action;
+        const params = event.nextAction?.params;
 
         // 1. Check if this specific request exists and hasn't been used
         const pending = context.state.__pending_approvals?.[approvalId];
@@ -93,14 +95,16 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
             }
           }
 
-          // 4. Store approval in ephemeral state for the upcoming action execution
-          context.state.__approved_action = { action, params };
+        // 4. Store approval in ephemeral state for the upcoming action execution
+        context.state.__approved_action = { action, params };
 
-          // Return the action to jump-start the loop exactly where we left off
-          return { action, params, ...rest };
-        }
+        // No need to return anything here!
+        // The Runtime will automatically pick up `event.nextAction`
+        // which was attached to the "action-approved" event.
+        return;
+      }
 
-        // Handle Rejection
+      // Handle Rejection
         context.suspend({
           type: "error",
           data: {
@@ -160,7 +164,8 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
 
       context.suspend({
         type: "hitl-required",
-        data: { ...nextAction, token, approvalId },
+        nextAction,
+        data: { token, approvalId },
         slot: "approval",
         ui: ui.card({
           title: "Approval Required",
@@ -182,7 +187,8 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   onClickAction: {
                     role: "user",
                     type: "action-approved",
-                    data: { ...nextAction, token, approvalId },
+                    nextAction,
+                    data: { token, approvalId },
                     ui: ui.text("Approval granted"),
                   },
                 }),
@@ -191,7 +197,8 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   variant: "outline",
                   onClickAction: {
                     type: "action-rejected",
-                    data: { action: action.name, approvalId },
+                    nextAction,
+                    data: { approvalId },
                   },
                 }),
               ],

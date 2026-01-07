@@ -76,7 +76,14 @@ export class Runtime<TState = any> {
       );
 
       // Initial dispatch of the incoming event to the agent's brain
-      // Only if onBeforeRun didn't already provide a nextAction
+      // Priority:
+      // 1. nextAction already set by onBeforeRun hooks
+      // 2. nextAction provided in the event itself
+      // 3. Dispatch to brain to decide nextAction
+      if (!nextAction && event.nextAction) {
+        nextAction = event.nextAction;
+      }
+
       if (!nextAction && this.config.brain) {
         nextAction = yield* this.dispatchToBrain(event, context);
       }

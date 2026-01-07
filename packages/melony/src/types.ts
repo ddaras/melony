@@ -323,6 +323,11 @@ export type Event = {
   timestamp?: number;
   role?: Role;
   state?: any;
+  /**
+   * Optional next action to execute immediately.
+   * If provided, the runtime will skip the initial brain dispatch.
+   */
+  nextAction?: NextAction;
 };
 
 // ============================================
