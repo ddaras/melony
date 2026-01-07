@@ -6,14 +6,9 @@ import React, {
   useEffect,
 } from "react";
 import { Event } from "melony";
-import { generateId } from "melony/client";
 import { ThreadData, ThreadService } from "@/types";
 import { useQueryState, parseAsString } from "nuqs";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface ThreadContextValue {
   threads: ThreadData[];
@@ -90,7 +85,8 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       await queryClient.invalidateQueries({ queryKey: ["threads"] });
       if (activeThreadId === threadId) {
         const remainingThreads = threads.filter((t) => t.id !== threadId);
-        const nextId = remainingThreads.length > 0 ? remainingThreads[0].id : null;
+        const nextId =
+          remainingThreads.length > 0 ? remainingThreads[0].id : null;
         await setActiveThreadId(nextId);
       }
     },

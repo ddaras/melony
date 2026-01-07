@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Message } from "@/types";
+import { Message } from "melony";
 import { MessageBubble } from "./message";
 import { LoadingIndicator } from "./loading-indicator";
 import { ErrorDisplay } from "./error-display";

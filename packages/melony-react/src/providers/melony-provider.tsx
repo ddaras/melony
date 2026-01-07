@@ -7,9 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { MelonyClient, ClientState } from "melony/client";
-import { Config, Event } from "melony";
-import { Message } from "@/types";
-import { groupEventsToMessages } from "@/lib/group-events-to-messages";
+import { Config, Event, Message, convertEventsToMessages } from "melony";
 import { NuqsAdapter } from "nuqs/adapters/react";
 import {
   QueryClient,
@@ -20,9 +18,7 @@ import {
 
 export interface MelonyContextValue extends ClientState {
   messages: Message[];
-  sendEvent: (
-    event: Event
-  ) => Promise<void>;
+  sendEvent: (event: Event) => Promise<void>;
   reset: (events?: Event[]) => void;
   client: MelonyClient;
   config?: Config;
@@ -139,9 +135,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   );
 
   const sendEvent = useCallback(
-    async (
-      event: Event
-    ) => {
+    async (event: Event) => {
       const handled = await dispatchClientAction(event);
       if (handled) return;
 
@@ -157,7 +151,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   const value = useMemo(
     () => ({
       ...state,
-      messages: groupEventsToMessages(state.events),
+      messages: convertEventsToMessages(state.events),
       sendEvent,
       reset,
       client,

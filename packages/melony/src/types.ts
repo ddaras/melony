@@ -335,6 +335,13 @@ export type Event = {
   nextAction?: NextAction;
 };
 
+export interface Message {
+  role: Role;
+  content: Event[];
+  runId?: string;
+  threadId?: string;
+}
+
 // ============================================
 // Runtime & Hooks
 // ============================================
@@ -344,7 +351,7 @@ export type ActionExecute<
   TState = any,
 > = (
   params: z.infer<TParams>,
-  context: RuntimeContext<TState>,
+  context: RuntimeContext<TState>
 ) => AsyncGenerator<Event, NextAction | void, unknown>;
 
 export interface Action<

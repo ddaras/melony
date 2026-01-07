@@ -55,6 +55,3 @@ export * from "./components/elements/Badge";
 
 // Types
 export * from "./types";
-
-// Utils
-export * from "./lib/group-events-to-messages";

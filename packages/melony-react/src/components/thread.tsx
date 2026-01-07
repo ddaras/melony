@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
-import { StarterPrompt, ComposerOptionGroup, Message } from "@/types";
-import { Event } from "melony";
+import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { Composer } from "./composer";
 import { StarterPrompts } from "./starter-prompts";
 import { MessageList } from "./message-list";
@@ -75,17 +74,15 @@ export function Thread({
 
     if (!overrideInput) setInput("");
 
-    await sendEvent(
-      {
-        type: "text",
-        role: "user",
-        data: { content: text || "" },
-        state: {
-          ...state,
-          threadId: activeThreadId ?? undefined,
-        },
-      }
-    );
+    await sendEvent({
+      type: "text",
+      role: "user",
+      data: { content: text || "" },
+      state: {
+        ...state,
+        threadId: activeThreadId ?? undefined,
+      },
+    });
   };
 
   const handleStarterPromptClick = (prompt: string) => {

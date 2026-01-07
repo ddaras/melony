@@ -1,5 +1,4 @@
-import React from "react";
-import { Message } from "@/types";
+import { Message } from "melony";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "./message-content";
 
@@ -11,12 +10,7 @@ export function MessageBubble({ message }: MessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div
-      className={cn(
-        "flex flex-col",
-        isUser ? "items-end" : "items-start"
-      )}
-    >
+    <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
           "flex flex-col items-start max-w-[85%] rounded-2xl px-4 py-2 space-y-4 whitespace-pre-wrap",
@@ -30,4 +24,3 @@ export function MessageBubble({ message }: MessageProps) {
     </div>
   );
 }
-

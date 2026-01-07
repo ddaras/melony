@@ -1,7 +1,6 @@
-import { Event } from "melony";
-import { Message } from "@/types";
+import { Event, Message } from "../types";
 
-export function groupEventsToMessages(events: Event[]): Message[] {
+export function convertEventsToMessages(events: Event[]): Message[] {
   if (events.length === 0) return [];
 
   const messages: Message[] = [];

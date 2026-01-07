@@ -12,13 +12,6 @@ export interface User {
   emailVerified?: boolean;
 }
 
-export interface Message {
-  role: Role;
-  content: Event[];
-  runId?: string;
-  threadId?: string;
-}
-
 export interface ThreadData {
   id: string;
   title?: string;
