@@ -97,8 +97,17 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
         case "client:navigate": {
           const url = event.data?.url;
           if (url) {
-            window.history.pushState(null, "", url);
-            window.dispatchEvent(new PopStateEvent("popstate"));
+            // If we are currently streaming/loading, we perform a "silent" URL update 
+            // using replaceState without dispatching a popstate event. This prevents 
+            // routers (like nuqs) from triggering re-renders that could interrupt 
+            // the active stream or reset the chat state.
+            const isStreaming = client.getState().isLoading;
+            if (isStreaming) {
+              window.history.replaceState(null, "", url);
+            } else {
+              window.history.pushState(null, "", url);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }
           }
           return true;
         }
