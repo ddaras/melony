@@ -4,6 +4,7 @@ import React, {
   ReactNode,
   useMemo,
   useEffect,
+  useRef,
 } from "react";
 import { Event } from "melony";
 import { ThreadData, ThreadService } from "@/types";
@@ -45,6 +46,12 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
     parseAsString
   );
 
+  const prevActiveThreadIdRef = useRef<string | null>(activeThreadId);
+
+  useEffect(() => {
+    prevActiveThreadIdRef.current = activeThreadId;
+  }, [activeThreadId]);
+
   useEffect(() => {
     if (!activeThreadId && providedInitialThreadId) {
       setActiveThreadId(providedInitialThreadId);
@@ -60,6 +67,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   } = useQuery({
     queryKey: ["threads"],
     queryFn: () => service.getThreads(),
+    staleTime: !prevActiveThreadIdRef.current && activeThreadId ? Infinity : 0,
   });
 
   // Fetch events for active thread
