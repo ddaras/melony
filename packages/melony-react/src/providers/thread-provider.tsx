@@ -5,11 +5,13 @@ import React, {
   useMemo,
   useEffect,
   useRef,
+  useContext,
 } from "react";
 import { Event } from "melony";
 import { ThreadData, ThreadService } from "@/types";
 import { useQueryState, parseAsString } from "nuqs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MelonyContext } from "./melony-provider";
 
 export interface ThreadContextValue {
   threads: ThreadData[];
@@ -40,6 +42,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   initialThreadId: providedInitialThreadId,
 }) => {
   const queryClient = useQueryClient();
+  const melonyContext = useContext(MelonyContext);
 
   const [activeThreadId, setActiveThreadId] = useQueryState(
     "threadId",
@@ -62,19 +65,27 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   const {
     data: threads = [],
     isLoading,
+    isFetched: isFetchedThreads,
     error: threadsError,
     refetch: refreshThreads,
   } = useQuery({
     queryKey: ["threads"],
     queryFn: () => service.getThreads(),
-    staleTime: !prevActiveThreadIdRef.current && activeThreadId ? Infinity : 0,
+    staleTime: prevActiveThreadIdRef.current === null && activeThreadId !== null ? Infinity : 0,
   });
+
+  const isNewThread = useMemo(() => {
+    if (!activeThreadId || !isFetchedThreads) return false;
+    return !threads.some((t) => t.id === activeThreadId);
+  }, [activeThreadId, threads, isFetchedThreads]);
 
   // Fetch events for active thread
   const { data: threadEvents = [], isLoading: isLoadingEvents } = useQuery({
     queryKey: ["threads", activeThreadId, "events"],
     queryFn: () => service.getEvents(activeThreadId!),
     enabled: !!activeThreadId,
+    initialData: isNewThread ? melonyContext?.events : undefined,
+    staleTime: isNewThread ? Infinity : 0,
   });
 
   const createMutation = useMutation({
