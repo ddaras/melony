@@ -69,6 +69,7 @@ export type ImageProps = BaseComponentProps &
   UIContract["image"] & {
     fallbackText?: string;
     showFallbackIcon?: boolean;
+    groupId?: string;
   };
 
 export type IconProps = BaseComponentProps & UIContract["icon"];

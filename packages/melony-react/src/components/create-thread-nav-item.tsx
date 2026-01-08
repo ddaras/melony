@@ -50,7 +50,7 @@ export const CreateThreadNavItem: React.FC<CreateThreadNavItemProps> = ({
           url: "?",
         },
       }}
-      className={cn(className)}
+      className={cn(className, "border roudned-lg")}
     >
       <IconPlus className="size-4" />
       New chat

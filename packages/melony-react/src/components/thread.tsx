@@ -66,11 +66,9 @@ export function Thread({
     const text = (overrideInput ?? input).trim();
     const hasFiles =
       state?.files && Array.isArray(state.files) && state.files.length > 0;
-    const hasOptions =
-      state && Object.keys(state).filter((k) => k !== "threadId").length > 0;
 
     // Allow submission if there's text OR files OR options
-    if ((!text && !hasFiles && !hasOptions) || isLoading) return;
+    if ((!text && !hasFiles) || isLoading) return;
 
     if (!overrideInput) setInput("");
 

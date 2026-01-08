@@ -87,6 +87,7 @@ export interface UIContract {
     src: string;
     alt?: string;
     size?: UISize;
+    groupId?: string;
   };
   icon: {
     name: string;
@@ -230,9 +231,14 @@ export const ui = {
     type: "badge",
     props: { label, variant, size },
   }),
-  image: (src: string, alt?: string, size: UISize = "md"): UINode<"image"> => ({
+  image: (
+    src: string,
+    alt?: string,
+    size: UISize = "md",
+    groupId?: string
+  ): UINode<"image"> => ({
     type: "image",
-    props: { src, alt, size },
+    props: { src, alt, size, groupId },
   }),
   icon: (
     name: string,

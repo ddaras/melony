@@ -31,8 +31,6 @@ export function MessageList({
     return lastMessage.content.some((event) => event.type === "text-delta");
   }, [messages, isLoading]);
 
-  console.log("MESSAGES", messages);
-
   return (
     <div className="space-y-6">
       {messages.map((message, index) => (
