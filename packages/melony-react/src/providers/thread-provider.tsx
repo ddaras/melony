@@ -74,7 +74,6 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       return null;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["threads"] });
       await setActiveThreadId(null);
     },
   });
