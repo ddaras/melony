@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "0.1.40",
+  "version": "0.1.45",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,

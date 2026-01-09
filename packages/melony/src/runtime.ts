@@ -70,11 +70,6 @@ export class Runtime<TState = any> {
         }
       }
 
-      yield* this.emit(
-        { type: "run-started", data: { inputEvent: event } },
-        context
-      );
-
       // Initial dispatch of the incoming event to the agent's brain
       // Priority:
       // 1. nextAction already set by onBeforeRun hooks
@@ -222,7 +217,10 @@ export class Runtime<TState = any> {
     // 2. Trigger Hook: onBeforeAction
     if (this.config.hooks?.onBeforeAction) {
       const hookResult = yield* this.callHook(
-        this.config.hooks.onBeforeAction({ action, params, nextAction }, context),
+        this.config.hooks.onBeforeAction(
+          { action, params, nextAction },
+          context
+        ),
         context
       );
       if (hookResult) {

@@ -29,10 +29,21 @@ export function Thread({
 }: ThreadProps) {
   const { activeThreadId, threadEvents, isLoadingEvents } = useThreads();
 
-  const { messages, isLoading, error, sendEvent, loadingStatus, config } =
-    useMelony({
-      initialEvents: threadEvents,
-    });
+  const {
+    messages: initialMessages,
+    isLoading,
+    error,
+    sendEvent,
+    loadingStatus,
+    config,
+  } = useMelony({
+    initialEvents: threadEvents,
+  });
+
+  // filter only user and assistant role messages in Thread
+  const messages = initialMessages.filter((x) =>
+    ["user", "assistant"].includes(x.role)
+  );
 
   const starterPrompts = localStarterPrompts ?? config?.starterPrompts;
   const options = localOptions ?? config?.options;

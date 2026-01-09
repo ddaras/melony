@@ -5,6 +5,7 @@ import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 
 export const Button: React.FC<ButtonProps> = ({
+  type,
   label,
   variant = "primary",
   size = "default",
@@ -16,7 +17,10 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const { sendEvent } = useMelony();
 
-  const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"> = {
+  const variantMap: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
+  > = {
     primary: "default",
     secondary: "secondary",
     danger: "destructive",
@@ -28,6 +32,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <ButtonBase
+      type={type}
       variant={variantMap[variant as keyof typeof variantMap] || "default"}
       size={size === "md" ? "default" : (size as any)}
       disabled={disabled}

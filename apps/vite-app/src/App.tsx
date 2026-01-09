@@ -11,7 +11,7 @@ import {
   SidebarToggle,
   SidebarProvider,
   Sidebar,
-  CreateThreadNavItem,
+  CreateThreadListItem,
   List,
   ListItem,
   ThreadList,
@@ -23,6 +23,8 @@ import {
 } from "./lib/services/auth-service";
 import { ui } from "melony";
 import { IconDeviceHeartMonitor } from "@tabler/icons-react";
+import { useAuth } from "@melony/react";
+import { brandKitUI } from "./ui/brand-kit-form";
 
 const CHAT_API_URL = "http://localhost:3006/api/agent";
 
@@ -42,14 +44,14 @@ export function App() {
       <ThemeProvider>
         <AuthProvider
           service={authService}
-          welcomeScreenProps={{
-            title: "Welcome to Craffted",
-            description:
-              "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
-            imageUrl:
-              "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
-            imageAlt: "Craffted logo",
-          }}
+          // welcomeScreenProps={{
+          //   title: "Welcome to Craffted",
+          //   description:
+          //     "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
+          //   imageUrl:
+          //     "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
+          //   imageAlt: "Craffted logo",
+          // }}
         >
           <ThreadProvider service={threadService}>
             <ChatApp />
@@ -63,6 +65,14 @@ export function App() {
 export default App;
 
 const ChatApp = () => {
+  const { user } = useAuth();
+
+  const appUserMetadata =
+    user?.apps?.find((app: any) => app.id === "rUtMCDbkn3BVBfYp6BHw")
+      ?.metadata || {};
+
+  const brandKit = appUserMetadata?.brandKit || {};
+
   return (
     <SidebarProvider>
       <div className="flex h-screen relative bg-background overflow-hidden">
@@ -78,10 +88,22 @@ const ChatApp = () => {
           </List>
 
           <List className="p-2">
-            <CreateThreadNavItem />
+            <CreateThreadListItem />
+            <ListItem
+              onClickAction={{
+                type: "client:open-dialog",
+                data: {
+                  title: "Brand Kit",
+                  description: "Configure your brand kit here",
+                  ui: brandKitUI(brandKit),
+                },
+              }}
+            >
+              <IconDeviceHeartMonitor className="size-4" /> Brand Kit
+            </ListItem>
           </List>
 
-          <ThreadList className="p-2" />
+          <ThreadList className="p-2 h-full overflow-y-auto" />
         </Sidebar>
         <FullChat
           className="flex-1 overflow-hidden"

@@ -110,6 +110,7 @@ export type InputProps = BaseComponentProps &
 export type ButtonProps = BaseComponentProps &
   UIContract["button"] & {
     fullWidth?: boolean;
+    type?: "button" | "submit";
   };
 
 export type LabelProps = BaseComponentProps &

@@ -4,13 +4,12 @@ import { useThreads } from "@/hooks/use-threads";
 import { cn } from "@/lib/utils";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ListItem } from "./elements";
-import { generateId } from "melony/client";
 
-export interface CreateThreadNavItemProps {
+export interface CreateThreadListItemProps {
   className?: string;
 }
 
-export const CreateThreadNavItem: React.FC<CreateThreadNavItemProps> = ({
+export const CreateThreadListItem: React.FC<CreateThreadListItemProps> = ({
   className,
 }) => {
   const { createThread } = useThreads();

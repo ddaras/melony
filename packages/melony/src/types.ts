@@ -105,7 +105,7 @@ export interface UIContract {
     gap?: UISpacing;
   };
   form: {
-    onSubmitAction?: Event;
+    onSubmitAction?: Event | ((data: any) => Event);
   };
   input: {
     name: string;
@@ -151,6 +151,7 @@ export interface UIContract {
     required?: boolean;
   };
   button: {
+    type?: string;
     label: string;
     variant?:
       | "primary"

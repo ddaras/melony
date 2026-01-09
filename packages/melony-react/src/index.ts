@@ -28,7 +28,7 @@ export * from "./components/account-button";
 export * from "./components/theme-toggle";
 export * from "./components/ui-renderer";
 export * from "./components/elements/Dropdown";
-export * from "./components/create-thread-nav-item";
+export * from "./components/create-thread-list-item";
 
 // Elements
 export * from "./components/elements/Button";
