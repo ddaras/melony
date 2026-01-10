@@ -137,6 +137,10 @@ export interface UIContract {
     checked?: boolean;
     onChangeAction?: Event;
   };
+  hidden: {
+    name: string;
+    value: string;
+  };
   radioGroup: {
     name: string;
     options: Array<{ label: string; value: string; disabled?: boolean }>;
@@ -149,6 +153,12 @@ export interface UIContract {
     value: string;
     htmlFor?: string;
     required?: boolean;
+  };
+  upload: {
+    label?: string;
+    multiple?: boolean;
+    accept?: string;
+    onUploadAction?: Event | ((data: any) => Event);
   };
   button: {
     type?: string;
@@ -285,6 +295,10 @@ export const ui = {
     type: "checkbox",
     props,
   }),
+  hidden: (props: UIContract["hidden"]): UINode<"hidden"> => ({
+    type: "hidden",
+    props,
+  }),
   radioGroup: (props: UIContract["radioGroup"]): UINode<"radioGroup"> => ({
     type: "radioGroup",
     props,
@@ -295,6 +309,10 @@ export const ui = {
   ): UINode<"label"> => ({
     type: "label",
     props: { ...props, value },
+  }),
+  upload: (props: UIContract["upload"]): UINode<"upload"> => ({
+    type: "upload",
+    props,
   }),
   button: (props: UIContract["button"]): UINode<"button"> => ({
     type: "button",

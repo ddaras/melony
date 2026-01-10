@@ -24,9 +24,22 @@ export const brandKitUI = (values: any) =>
             defaultValue: values?.tagline,
           }),
           ui.input({
-            name: "logo",
+            name: "website",
+            label: "website",
+            defaultValue: values?.website,
+          }),
+          ui.input({
+            name: "handle",
+            label: "handle",
+            defaultValue: values?.handle,
+          }),
+          ui.upload({
             label: "logo",
-            defaultValue: values?.logo,
+            onUploadAction: (data) => ({
+              role: "system",
+              type: "upload-logo",
+              nextAction: { action: "uploadFileAction", params: data },
+            }),
           }),
           ui.spacer({}),
           ui.input({

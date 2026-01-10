@@ -103,7 +103,7 @@ const ChatApp = () => {
             </ListItem>
           </List>
 
-          <ThreadList className="p-2 h-full overflow-y-auto" />
+          <ThreadList className="p-2 flex-1 overflow-y-auto" />
         </Sidebar>
         <FullChat
           className="flex-1 overflow-hidden"

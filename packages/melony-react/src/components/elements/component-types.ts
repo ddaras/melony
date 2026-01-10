@@ -107,6 +107,8 @@ export type InputProps = BaseComponentProps &
     value?: string;
   };
 
+export type HiddenProps = BaseComponentProps & UIContract["hidden"];
+
 export type ButtonProps = BaseComponentProps &
   UIContract["button"] & {
     fullWidth?: boolean;
@@ -118,6 +120,8 @@ export type LabelProps = BaseComponentProps &
     size?: FontSize;
     weight?: FontWeight;
   };
+
+export type UploadProps = BaseComponentProps & UIContract["upload"];
 
 export type TextareaProps = BaseComponentProps &
   UIContract["textarea"] & {

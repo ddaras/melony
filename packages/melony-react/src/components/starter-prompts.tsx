@@ -22,7 +22,7 @@ export function StarterPrompts({
           What can I help with today?
         </h2>
       </div>
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col gap-1 w-full">
         {prompts.map((item, index) => (
           <Button
             key={index}

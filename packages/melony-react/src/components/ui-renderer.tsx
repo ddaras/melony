@@ -24,6 +24,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     heading: Elements.Heading,
     badge: Elements.Badge,
     input: Elements.Input,
+    hidden: Elements.Hidden,
     textarea: Elements.Textarea,
     select: Elements.Select,
     checkbox: Elements.Checkbox,
@@ -38,6 +39,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     form: Elements.Form,
     chart: Elements.Chart,
     label: Elements.Label,
+    upload: Elements.Upload,
   };
 
   const Component = typeMap[type];

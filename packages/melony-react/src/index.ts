@@ -38,6 +38,7 @@ export * from "./components/elements/Select";
 export * from "./components/elements/Checkbox";
 export * from "./components/elements/RadioGroup";
 export * from "./components/elements/Form";
+export * from "./components/elements/Upload";
 export * from "./components/elements/Heading";
 export * from "./components/elements/Image";
 export * from "./components/elements/Label";

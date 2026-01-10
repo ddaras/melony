@@ -1,6 +1,6 @@
 {
   "name": "@melony/react",
-  "version": "0.1.45",
+  "version": "0.1.46",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
