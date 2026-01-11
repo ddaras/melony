@@ -24,11 +24,6 @@ export const brandKitUI = (values: any) =>
             defaultValue: values?.tagline,
           }),
           ui.input({
-            name: "website",
-            label: "website",
-            defaultValue: values?.website,
-          }),
-          ui.input({
             name: "handle",
             label: "handle",
             defaultValue: values?.handle,
