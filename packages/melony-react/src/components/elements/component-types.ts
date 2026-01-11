@@ -121,7 +121,17 @@ export type LabelProps = BaseComponentProps &
     weight?: FontWeight;
   };
 
-export type UploadProps = BaseComponentProps & UIContract["upload"];
+export type ColorPickerProps = BaseComponentProps &
+  UIContract["colorPicker"] & {
+    value?: string;
+    disabled?: boolean;
+  };
+
+export type UploadProps = BaseComponentProps &
+  UIContract["upload"] & {
+    initialFiles?: { name: string; url: string }[];
+    mode?: "append" | "replace";
+  };
 
 export type TextareaProps = BaseComponentProps &
   UIContract["textarea"] & {

@@ -26,6 +26,7 @@ export { Textarea } from "./Textarea";
 export { Select } from "./Select";
 export { Checkbox } from "./Checkbox";
 export { Hidden } from "./Hidden";
+export { ColorPicker } from "./ColorPicker";
 export { RadioGroup } from "./RadioGroup";
 export { Button } from "./Button";
 export { Upload } from "./Upload";

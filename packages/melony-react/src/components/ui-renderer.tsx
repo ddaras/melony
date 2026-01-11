@@ -29,6 +29,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     select: Elements.Select,
     checkbox: Elements.Checkbox,
     radioGroup: Elements.RadioGroup,
+    colorPicker: Elements.ColorPicker,
     spacer: Elements.Spacer,
     divider: Elements.Divider,
     box: Elements.Box,

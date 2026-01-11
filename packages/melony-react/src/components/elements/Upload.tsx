@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { UploadProps } from "./component-types";
 import { Button } from "../ui/button";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 import { IconUpload, IconLoader2, IconCheck, IconX } from "@tabler/icons-react";
 import { UIRenderer } from "../ui-renderer";
+import { Image } from "../elements/Image";
 
 export const Upload: React.FC<UploadProps> = ({
   label = "Upload",
@@ -13,11 +14,25 @@ export const Upload: React.FC<UploadProps> = ({
   onUploadAction,
   className,
   style,
+  initialFiles,
+  mode = "append",
 }) => {
   const { sendEvent, events } = useMelony();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+
+  const uploadedFilesEvents = events.filter(
+    (event) => event.type === "uploaded-files"
+  );
+
+  const displayEvents =
+    mode === "replace" && uploadedFilesEvents.length > 0
+      ? [uploadedFilesEvents[uploadedFilesEvents.length - 1]]
+      : uploadedFilesEvents;
+
+  const showInitialFiles =
+    mode === "replace" ? displayEvents.length === 0 : true;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -102,40 +117,45 @@ export const Upload: React.FC<UploadProps> = ({
         disabled={isUploading}
       />
 
-      {events
-        .filter((event) => event.type === "files-uploaded" && !!event.ui)
-        .map((event, index) =>
+      <div className="flex flex-wrap gap-2 mb-2 items-center">
+        {showInitialFiles &&
+          initialFiles?.map((file, index) => (
+            <Image key={index} src={file.url} alt={file.name} size="md" />
+          ))}
+
+        {displayEvents.map((event, index) =>
           event.ui ? <UIRenderer key={index} node={event.ui} /> : null
         )}
 
-      <Button
-        type="button"
-        disabled={isUploading}
-        onClick={() => fileInputRef.current?.click()}
-        className="gap-2"
-        variant={
-          status === "error"
-            ? "destructive"
-            : status === "success"
-              ? "outline"
-              : "default"
-        }
-      >
-        {isUploading ? (
-          <IconLoader2 className="h-4 w-4 animate-spin" />
-        ) : status === "success" ? (
-          <IconCheck className="h-4 w-4 text-green-500" />
-        ) : status === "error" ? (
-          <IconX className="h-4 w-4" />
-        ) : (
-          <IconUpload className="h-4 w-4" />
-        )}
-        {status === "success"
-          ? "Uploaded"
-          : status === "error"
-            ? "Failed"
-            : label}
-      </Button>
+        <Button
+          type="button"
+          disabled={isUploading}
+          onClick={() => fileInputRef.current?.click()}
+          className="gap-2"
+          variant={
+            status === "error"
+              ? "destructive"
+              : status === "success"
+                ? "outline"
+                : "default"
+          }
+        >
+          {isUploading ? (
+            <IconLoader2 className="h-4 w-4 animate-spin" />
+          ) : status === "success" ? (
+            <IconCheck className="h-4 w-4 text-green-500" />
+          ) : status === "error" ? (
+            <IconX className="h-4 w-4" />
+          ) : (
+            <IconUpload className="h-4 w-4" />
+          )}
+          {status === "success"
+            ? "Uploaded"
+            : status === "error"
+              ? "Failed"
+              : label}
+        </Button>
+      </div>
     </div>
   );
 };

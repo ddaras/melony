@@ -35,6 +35,10 @@ export const brandKitUI = (values: any) =>
           }),
           ui.upload({
             label: "logo",
+            mode: "replace",
+            initialFiles: values?.logo
+              ? [{ name: values.logo, url: values.logo }]
+              : [],
             onUploadAction: (data) => ({
               role: "system",
               type: "upload-logo",
@@ -42,32 +46,32 @@ export const brandKitUI = (values: any) =>
             }),
           }),
           ui.spacer({}),
-          ui.input({
+          ui.colorPicker({
             name: "colorBgPrimary",
             label: "colorBgPrimary",
             defaultValue: values?.colorBgPrimary,
           }),
-          ui.input({
+          ui.colorPicker({
             name: "colorBgSecondary",
             label: "colorBgSecondary",
             defaultValue: values?.colorBgSecondary,
           }),
-          ui.input({
+          ui.colorPicker({
             name: "colorAccent1",
             label: "colorAccent1",
             defaultValue: values?.colorAccent1,
           }),
-          ui.input({
+          ui.colorPicker({
             name: "colorAccent2",
             label: "colorAccent2",
             defaultValue: values?.colorAccent2,
           }),
-          ui.input({
+          ui.colorPicker({
             name: "colorTextPrimary",
             label: "colorTextPrimary",
             defaultValue: values?.colorTextPrimary,
           }),
-          ui.input({
+          ui.colorPicker({
             name: "colorTextSecondary",
             label: "colorTextSecondary",
             defaultValue: values?.colorTextSecondary,

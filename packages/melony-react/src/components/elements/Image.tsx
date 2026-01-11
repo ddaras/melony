@@ -13,7 +13,6 @@ export const Image: React.FC<ImageProps> = ({
   src,
   alt,
   size = "sm",
-  groupId,
   className,
   style,
 }) => {

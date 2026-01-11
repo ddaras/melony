@@ -154,11 +154,19 @@ export interface UIContract {
     htmlFor?: string;
     required?: boolean;
   };
+  colorPicker: {
+    name: string;
+    label?: string;
+    defaultValue?: string;
+    onChangeAction?: Event;
+  };
   upload: {
     label?: string;
     multiple?: boolean;
     accept?: string;
+    initialFiles?: { name: string; url: string }[];
     onUploadAction?: Event | ((data: any) => Event);
+    mode?: "append" | "replace";
   };
   button: {
     type?: string;
@@ -309,6 +317,10 @@ export const ui = {
   ): UINode<"label"> => ({
     type: "label",
     props: { ...props, value },
+  }),
+  colorPicker: (props: UIContract["colorPicker"]): UINode<"colorPicker"> => ({
+    type: "colorPicker",
+    props,
   }),
   upload: (props: UIContract["upload"]): UINode<"upload"> => ({
     type: "upload",
