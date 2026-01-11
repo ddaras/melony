@@ -53,7 +53,6 @@ export * from "./components/elements/Row";
 export * from "./components/elements/Col";
 export * from "./components/elements/Text";
 export * from "./components/elements/Badge";
-export { Icon } from "./components/elements/Icon";
 export * from "./components/elements/Hidden";
 export * from "./components/elements/ColorPicker";
 
