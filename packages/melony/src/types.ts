@@ -89,6 +89,16 @@ export interface UIContract {
     size?: UISize;
     groupId?: string;
   };
+  video: {
+    src: string;
+    poster?: string;
+    autoPlay?: boolean;
+    controls?: boolean;
+    loop?: boolean;
+    muted?: boolean;
+    aspectRatio?: "16/9" | "4/3" | "1/1" | "9/16";
+    width?: string | number;
+  };
   icon: {
     name: string;
     size?: UISize;
@@ -258,6 +268,13 @@ export const ui = {
   ): UINode<"image"> => ({
     type: "image",
     props: { src, alt, size, groupId },
+  }),
+  video: (
+    src: string,
+    props?: Omit<UIContract["video"], "src">
+  ): UINode<"video"> => ({
+    type: "video",
+    props: { ...props, src },
   }),
   icon: (
     name: string,

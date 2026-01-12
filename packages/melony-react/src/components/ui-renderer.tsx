@@ -34,6 +34,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     divider: Elements.Divider,
     box: Elements.Box,
     image: Elements.Image,
+    video: Elements.Video,
     icon: Elements.Icon,
     list: Elements.List,
     listItem: Elements.ListItem,

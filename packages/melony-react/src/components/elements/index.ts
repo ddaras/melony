@@ -12,6 +12,7 @@ export { ListItem } from "./ListItem";
 
 // Content Components
 export { Image } from "./Image";
+export { Video } from "./Video";
 export { Icon } from "./Icon";
 export { Badge } from "./Badge";
 export { Chart } from "./Chart";

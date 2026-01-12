@@ -72,6 +72,8 @@ export type ImageProps = BaseComponentProps &
     groupId?: string;
   };
 
+export type VideoProps = BaseComponentProps & UIContract["video"];
+
 export type IconProps = BaseComponentProps & UIContract["icon"];
 
 export interface ChartDataPoint {
