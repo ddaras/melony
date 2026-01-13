@@ -49,7 +49,7 @@ export const CreateThreadListItem: React.FC<CreateThreadListItemProps> = ({
           url: "?",
         },
       }}
-      className={cn(className, "border roudned-lg")}
+      className={cn(className)}
     >
       <IconPlus className="size-4" />
       New chat
