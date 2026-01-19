@@ -1,4 +1,4 @@
-import { plugin } from "../runtime";
+import { plugin } from "../plugin";
 import { ui } from "../ui";
 import type { Action, RuntimeContext } from "../types";
 
