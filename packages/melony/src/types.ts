@@ -252,6 +252,15 @@ export interface UIContract {
     offsetY?: UISpacing;
     showOnHover?: boolean;
   };
+  dropdown: {
+    items: Array<{
+      label: string;
+      icon?: string;
+      onClickAction?: Event;
+    }>;
+    className?: string;
+    triggerClassName?: string;
+  };
 }
 
 export type UINode<T extends keyof UIContract = keyof UIContract> = {

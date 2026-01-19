@@ -1,5 +1,4 @@
 import * as React from "react";
-import { IconTrash } from "@tabler/icons-react";
 import { useThreads } from "@/hooks/use-threads";
 import { Dropdown } from "./elements/Dropdown";
 import { List, ListItem } from "./elements";
@@ -13,7 +12,7 @@ export interface ThreadListProps {
 }
 
 export const ThreadList: React.FC<ThreadListProps> = ({ padding, background, gap, radius = "md" }) => {
-  const { threads, activeThreadId, deleteThread } = useThreads();
+  const { threads, activeThreadId, } = useThreads();
 
   const sortedThreads = React.useMemo(() => {
     return [...threads].sort((a, b) => {
@@ -22,14 +21,6 @@ export const ThreadList: React.FC<ThreadListProps> = ({ padding, background, gap
       return dateB - dateA;
     });
   }, [threads]);
-
-  const handleDelete = async (threadId: string) => {
-    try {
-      await deleteThread(threadId);
-    } catch (error) {
-      console.error("Failed to delete thread:", error);
-    }
-  };
 
   return (
     <List padding={padding} gap={gap} flex="1" overflow="scroll">
@@ -60,8 +51,14 @@ export const ThreadList: React.FC<ThreadListProps> = ({ padding, background, gap
                 items={[
                   {
                     label: "Delete",
-                    icon: <IconTrash className="size-4" />,
-                    onClick: () => handleDelete(thread.id),
+                    icon: "trash",
+                    onClickAction: {
+                      role:'system',
+                      type: "delete-thread",
+                      data: {
+                        threadId: thread.id,
+                      },
+                    },
                   },
                 ]}
               />

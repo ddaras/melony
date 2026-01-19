@@ -151,6 +151,12 @@ export const ui = {
     const { children, ...rest } = props;
     return { type: "float", props: rest, children };
   },
+  dropdown: (
+    props: UIContract["dropdown"] & { children?: UINode<any>[] }
+  ): UINode<"dropdown"> => {
+    const { children, ...rest } = props;
+    return { type: "dropdown", props: rest, children };
+  },
   actions: {
     navigate: (url: string): Event => ({
       type: "client:navigate",

@@ -8,29 +8,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import type { Event } from "melony";
+import { useMelony } from "@/hooks/use-melony";
+import { Icon } from "./Icon";
+
+export interface DropdownItem {
+  label: string;
+  icon?: string;
+  onClickAction?: Event;
+}
 
 export interface DropdownProps {
-  className?: string;
-  trigger?: React.ReactNode;
-  triggerClassName?: string;
-  items: {
-    label: string;
-    icon: React.ReactNode;
-    onClick: () => void;
-  }[];
+  items?: DropdownItem[];
+  children?: React.ReactNode;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
-  className,
-  trigger,
-  triggerClassName,
-  items,
+  items = [],
+  children,
 }) => {
+  const { sendEvent } = useMelony();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={triggerClassName}
-        render={(props) => (
+        render={(props: any) => (
           <Button
             variant="ghost"
             size="icon-xs"
@@ -40,15 +42,23 @@ export const Dropdown: React.FC<DropdownProps> = ({
               props.onClick?.(e);
             }}
           >
-            {trigger || <IconDotsVertical className="size-3.5" />}
+            {children || <IconDotsVertical className="size-3.5" />}
           </Button>
         )}
       />
-      <DropdownMenuContent align="start" className={cn("w-32", className)}>
-        {items.map((item) => (
-          <DropdownMenuItem key={item.label} onClick={item.onClick}>
-            {item.icon}
-            <span>{item.label}</span>
+      <DropdownMenuContent align="start" className={cn("w-32")}>
+        {items.map((item, i) => (
+          <DropdownMenuItem
+            key={`${item.label}-${i}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (item.onClickAction) {
+                sendEvent(item.onClickAction);
+              }
+            }}
+          >
+            {item.icon && <Icon name={item.icon} size="sm" />}
+            <span className={item.icon ? "ml-2" : ""}>{item.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

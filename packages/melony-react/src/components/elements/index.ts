@@ -34,6 +34,7 @@ export { Button } from "./Button";
 export { Upload } from "./Upload";
 export { Form } from "./Form";
 export { Label } from "./Label";
+export { Dropdown } from "./Dropdown";
 
 // Export types
 export type { UIContract } from "melony";

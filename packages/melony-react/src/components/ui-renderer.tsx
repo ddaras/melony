@@ -43,6 +43,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     chart: Elements.Chart,
     label: Elements.Label,
     upload: Elements.Upload,
+    dropdown: Elements.Dropdown,
   };
 
   const Component = typeMap[type];
