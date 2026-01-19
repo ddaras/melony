@@ -12,6 +12,7 @@ export const Video: React.FC<UIContract["video"]> = ({
   muted = false,
   aspectRatio = "16/9",
   width = "full",
+  height = "auto",
   radius = "lg",
 }) => {
   const aspectRatios = {
@@ -29,6 +30,7 @@ export const Video: React.FC<UIContract["video"]> = ({
         widthMap[width],
         radiusMap[radius],
       )}
+      style={{ height }}
     >
       <video
         src={src}

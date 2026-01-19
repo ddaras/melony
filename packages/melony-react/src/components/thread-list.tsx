@@ -40,6 +40,7 @@ export const ThreadList: React.FC<ThreadListProps> = ({
                 url: `?threadId=${thread.id}`,
               },
             }}
+            background={isActive ? "primary" : "transparent"}
           >
             <Box group width="full">
               <div className="flex-1 min-w-0 pr-4">

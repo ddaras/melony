@@ -138,6 +138,7 @@ export interface UIContract {
     muted?: boolean;
     aspectRatio?: "16/9" | "4/3" | "1/1" | "9/16";
     width?: UIWidth;
+    height?: string | number;
     radius?: UIRadius;
   };
   icon: {
