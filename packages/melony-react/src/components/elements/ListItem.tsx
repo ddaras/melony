@@ -2,14 +2,12 @@ import React from "react";
 import { UIAlign, UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
-import {
-  paddingMap,
-  colorBgMap,
-  radiusMap
-} from "@/lib/theme-utils";
+import { paddingMap, colorBgMap, radiusMap } from "@/lib/theme-utils";
 import { Row } from "./Row";
 
-export const ListItem: React.FC<UIContract["listItem"] & { children?: React.ReactNode, align?: UIAlign }> = ({
+export const ListItem: React.FC<
+  UIContract["listItem"] & { children?: React.ReactNode; align?: UIAlign }
+> = ({
   children,
   onClickAction,
   gap = "sm",
@@ -35,7 +33,7 @@ export const ListItem: React.FC<UIContract["listItem"] & { children?: React.Reac
         paddingMap[padding],
         background ? colorBgMap[background] : isInteractive && "hover:bg-muted",
         radiusMap[radius],
-        isInteractive ? "cursor-pointer" : "cursor-default"
+        isInteractive ? "cursor-pointer" : "cursor-default",
       )}
     >
       <Row align={align} gap={gap}>

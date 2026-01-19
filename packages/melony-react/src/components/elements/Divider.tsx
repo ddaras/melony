@@ -12,10 +12,7 @@ export const Divider: React.FC<UIContract["divider"]> = ({
   return (
     <Separator
       orientation={orientation}
-      className={cn(
-        marginMap[margin],
-        colorBgMap[color]
-      )}
+      className={cn(marginMap[margin], colorBgMap[color])}
     />
   );
 };

@@ -35,7 +35,7 @@ function Sidebar({
       }
       onOpenChange?.(value);
     },
-    [controlledOpen, onOpenChange]
+    [controlledOpen, onOpenChange],
   );
 
   return (
@@ -47,7 +47,7 @@ function Sidebar({
           "bg-sidebar text-sidebar-foreground flex h-screen w-64 flex-col border-r border-sidebar-border transition-all duration-200",
           !open && collapsible === "icon" && "w-16",
           !open && collapsible === "offcanvas" && "-translate-x-full",
-          className
+          className,
         )}
         {...props}
       />
@@ -55,23 +55,20 @@ function Sidebar({
   );
 }
 
-function SidebarHeader({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-header"
-      className={cn("flex h-16 items-center border-b border-sidebar-border px-4", className)}
+      className={cn(
+        "flex h-16 items-center border-b border-sidebar-border px-4",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function SidebarContent({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-content"
@@ -81,10 +78,7 @@ function SidebarContent({
   );
 }
 
-function SidebarFooter({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-footer"
@@ -106,7 +100,7 @@ function SidebarTrigger({
       onClick={() => setOpen(!open)}
       className={cn(
         "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring disabled:pointer-events-none disabled:opacity-50",
-        className
+        className,
       )}
       {...props}
     >
@@ -130,5 +124,10 @@ function SidebarTrigger({
   );
 }
 
-export { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarTrigger };
-
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarTrigger,
+};

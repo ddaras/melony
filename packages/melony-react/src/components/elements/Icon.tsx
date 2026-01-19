@@ -19,14 +19,19 @@ export const Icon: React.FC<UIContract["icon"]> = ({
     lg: 24,
   };
 
-  const resolvedSize = typeof size === "number" ? size : sizeMap[size as keyof typeof sizeMap] || 20;
+  const resolvedSize =
+    typeof size === "number"
+      ? size
+      : sizeMap[size as keyof typeof sizeMap] || 20;
 
   return (
-    <div className={cn("inline-flex items-center justify-center", colorTextMap[color])}>
-      <IconComponent
-        size={resolvedSize}
-        strokeWidth={1.5}
-      />
+    <div
+      className={cn(
+        "inline-flex items-center justify-center",
+        colorTextMap[color],
+      )}
+    >
+      <IconComponent size={resolvedSize} strokeWidth={1.5} />
     </div>
   );
 };

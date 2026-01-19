@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import { useScreenSize } from "@/hooks/use-screen-size";
 
 export interface SidebarContextValue {
@@ -11,7 +18,7 @@ export interface SidebarContextValue {
 }
 
 export const SidebarContext = createContext<SidebarContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 export function useSidebar() {
@@ -80,7 +87,7 @@ export function SidebarProvider({
       leftCollapsible: true,
       rightCollapsible: true,
     }),
-    [leftCollapsed, rightCollapsed, handleLeftToggle, handleRightToggle]
+    [leftCollapsed, rightCollapsed, handleLeftToggle, handleRightToggle],
   );
 
   return (
@@ -89,4 +96,3 @@ export function SidebarProvider({
     </SidebarContext.Provider>
   );
 }
-

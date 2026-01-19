@@ -5,7 +5,9 @@ import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 import { justifyMap } from "@/lib/theme-utils";
 
-export const Button: React.FC<UIContract["button"] & { justify?: UIJustify }> = ({
+export const Button: React.FC<
+  UIContract["button"] & { justify?: UIJustify }
+> = ({
   type = "button",
   label,
   variant = "primary",

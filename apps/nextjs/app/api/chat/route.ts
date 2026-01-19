@@ -18,19 +18,13 @@ export async function POST(request: NextRequest) {
     if (!event) {
       return Response.json(
         { error: "Invalid request: event required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    return createStreamResponse(
-      rootAgent.run(event)
-    );
+    return createStreamResponse(rootAgent.run(event));
   } catch (error) {
     console.error("Error in chat route:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

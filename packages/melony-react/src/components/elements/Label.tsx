@@ -17,7 +17,7 @@ export const Label: React.FC<UIContract["label"]> = ({
       className={cn(
         "flex items-center gap-1",
         textSizeMap[size],
-        colorTextMap[color]
+        colorTextMap[color],
       )}
     >
       {value}

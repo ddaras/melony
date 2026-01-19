@@ -2,7 +2,7 @@ import { ui, plugin } from "melony";
 import { StatelessPendingActionStorage } from "../lib/pending-action-storage";
 
 const actionStorage = new StatelessPendingActionStorage(
-  process.env.ACTION_STORAGE_SECRET
+  process.env.ACTION_STORAGE_SECRET,
 );
 
 /**
@@ -17,7 +17,7 @@ export const requireApprovalPlugin = (options?: {
     onBeforeRun: async function* ({ event }) {
       if (event.type === "action-approved") {
         const pendingAction = await actionStorage.verify(
-          event.data?.pendingActionToken
+          event.data?.pendingActionToken,
         );
 
         if (!pendingAction) {

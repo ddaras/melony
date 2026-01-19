@@ -7,11 +7,14 @@ export const Badge: React.FC<UIContract["badge"]> = ({
   variant = "primary",
   size = "md",
 }) => {
-  const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  const variantMap: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline"
+  > = {
     primary: "default",
     secondary: "secondary",
     danger: "destructive",
-    success: "default", 
+    success: "default",
     warning: "secondary",
     outline: "outline",
   };

@@ -156,7 +156,7 @@ function useDarkMode(): boolean {
   useEffect(() => {
     // Mark as mounted after first render to avoid hydration mismatch
     setMounted(true);
-    
+
     if (typeof window === "undefined") return;
 
     // Check for dark mode on mount
@@ -166,9 +166,12 @@ function useDarkMode(): boolean {
         setIsDark(true);
         return;
       }
-      
+
       // Check for prefers-color-scheme media query
-      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      if (
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
         setIsDark(true);
       }
     };
@@ -218,41 +221,38 @@ export const ThemeProvider: React.FC<{
   theme?: Partial<MelonyTheme>;
 }> = ({ children, theme = {} }) => {
   const isDark = useDarkMode();
-  
-  const mergedTheme = React.useMemo(
-    () => {
-      const baseColors = { ...defaultTheme.colors, ...theme.colors };
-      const baseDarkColors = { ...defaultTheme.darkColors, ...theme.darkColors };
-      
-      // Use dark colors if dark mode is active, otherwise use light colors
-      const activeColors = isDark 
-        ? { ...baseColors, ...baseDarkColors }
-        : baseColors;
-      
-      return {
-        colors: activeColors,
-        darkColors: baseDarkColors,
-        spacing: { ...defaultTheme.spacing, ...theme.spacing },
-        radius: { ...defaultTheme.radius, ...theme.radius },
-        typography: {
-          ...defaultTheme.typography,
-          ...theme.typography,
-          fontSize: {
-            ...defaultTheme.typography?.fontSize,
-            ...theme.typography?.fontSize,
-          },
-          fontWeight: {
-            ...defaultTheme.typography?.fontWeight,
-            ...theme.typography?.fontWeight,
-          },
+
+  const mergedTheme = React.useMemo(() => {
+    const baseColors = { ...defaultTheme.colors, ...theme.colors };
+    const baseDarkColors = { ...defaultTheme.darkColors, ...theme.darkColors };
+
+    // Use dark colors if dark mode is active, otherwise use light colors
+    const activeColors = isDark
+      ? { ...baseColors, ...baseDarkColors }
+      : baseColors;
+
+    return {
+      colors: activeColors,
+      darkColors: baseDarkColors,
+      spacing: { ...defaultTheme.spacing, ...theme.spacing },
+      radius: { ...defaultTheme.radius, ...theme.radius },
+      typography: {
+        ...defaultTheme.typography,
+        ...theme.typography,
+        fontSize: {
+          ...defaultTheme.typography?.fontSize,
+          ...theme.typography?.fontSize,
         },
-        shadows: isDark 
-          ? { ...darkShadows, ...theme.shadows }
-          : { ...defaultTheme.shadows, ...theme.shadows },
-      };
-    },
-    [theme, isDark]
-  );
+        fontWeight: {
+          ...defaultTheme.typography?.fontWeight,
+          ...theme.typography?.fontWeight,
+        },
+      },
+      shadows: isDark
+        ? { ...darkShadows, ...theme.shadows }
+        : { ...defaultTheme.shadows, ...theme.shadows },
+    };
+  }, [theme, isDark]);
 
   // Inject global custom scrollbar styles
   useEffect(() => {

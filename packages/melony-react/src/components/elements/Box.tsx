@@ -1,17 +1,19 @@
 import React from "react";
 import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
-import { 
-  paddingMap, 
-  marginMap, 
-  colorBgMap, 
-  colorBorderMap, 
-  radiusMap, 
-  widthMap, 
-  shadowMap 
+import {
+  paddingMap,
+  marginMap,
+  colorBgMap,
+  colorBorderMap,
+  radiusMap,
+  widthMap,
+  shadowMap,
 } from "@/lib/theme-utils";
 
-export const Box: React.FC<UIContract["box"] & { children?: React.ReactNode | React.ReactNode[] }> = ({
+export const Box: React.FC<
+  UIContract["box"] & { children?: React.ReactNode | React.ReactNode[] }
+> = ({
   children,
   padding = "none",
   margin = "none",
@@ -22,6 +24,7 @@ export const Box: React.FC<UIContract["box"] & { children?: React.ReactNode | Re
   width = "auto",
   height = "auto",
   shadow = "none",
+  group = false,
 }) => {
   return (
     <div
@@ -35,7 +38,8 @@ export const Box: React.FC<UIContract["box"] & { children?: React.ReactNode | Re
         radiusMap[radius],
         widthMap[width],
         height === "full" && "h-full",
-        shadowMap[shadow]
+        shadowMap[shadow],
+        group && "group",
       )}
     >
       {children as React.ReactNode}

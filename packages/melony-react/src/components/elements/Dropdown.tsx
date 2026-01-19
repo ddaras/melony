@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import type { Event } from "melony";
+import type { Event, UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import { Icon } from "./Icon";
 
@@ -18,15 +18,8 @@ export interface DropdownItem {
   onClickAction?: Event;
 }
 
-export interface DropdownProps {
-  items?: DropdownItem[];
-  children?: React.ReactNode;
-}
 
-export const Dropdown: React.FC<DropdownProps> = ({
-  items = [],
-  children,
-}) => {
+export const Dropdown: React.FC<UIContract["dropdown"] & { children?: React.ReactNode | React.ReactNode[] }> = ({ items = [], children }) => {
   const { sendEvent } = useMelony();
 
   return (
@@ -34,8 +27,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
       <DropdownMenuTrigger
         render={(props: any) => (
           <Button
-            variant="ghost"
-            size="icon-xs"
+            variant="outline"
+            size="icon-sm"
             {...props}
             onClick={(e) => {
               e.stopPropagation();

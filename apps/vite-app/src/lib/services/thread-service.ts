@@ -12,7 +12,7 @@ export const createMelonyThreadService = (
     threadsEndpoint?: string;
     eventsEndpoint?: string;
     getToken?: () => string | null;
-  } = {}
+  } = {},
 ): ThreadService => {
   const threadsEndpoint = config.threadsEndpoint || DEFAULT_THREADS_ENDPOINT;
   const eventsEndpoint = config.eventsEndpoint || DEFAULT_EVENTS_ENDPOINT;

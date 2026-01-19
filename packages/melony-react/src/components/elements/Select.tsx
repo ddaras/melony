@@ -39,7 +39,12 @@ export const Select: React.FC<UIContract["select"]> = ({
 
   return (
     <Field className={cn(widthMap[width])}>
-      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
+      {label && (
+        <FieldTitle>
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </FieldTitle>
+      )}
       <SelectRoot
         defaultValue={defaultValue}
         disabled={disabled}

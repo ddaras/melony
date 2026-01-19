@@ -76,7 +76,7 @@ export const Image: React.FC<UIContract["image"]> = ({
         className={cn(
           "flex items-center justify-center bg-muted text-muted-foreground",
           widthMap[width],
-          radiusMap[radius]
+          radiusMap[radius],
         )}
         style={{ height: height || "100px" }}
       >
@@ -93,7 +93,7 @@ export const Image: React.FC<UIContract["image"]> = ({
           className={cn(
             "relative overflow-hidden cursor-pointer",
             widthMap[width],
-            radiusMap[radius]
+            radiusMap[radius],
           )}
           style={{ height }}
         >
@@ -105,8 +105,12 @@ export const Image: React.FC<UIContract["image"]> = ({
             className={cn(
               "block w-full transition-opacity duration-200 hover:opacity-90",
               isLoading ? "opacity-0" : "opacity-100",
-              objectFit === "cover" ? "object-cover" : objectFit === "contain" ? "object-contain" : "object-fill",
-              height ? "h-full" : "h-auto"
+              objectFit === "cover"
+                ? "object-cover"
+                : objectFit === "contain"
+                  ? "object-contain"
+                  : "object-fill",
+              height ? "h-full" : "h-auto",
             )}
           />
           {isLoading && (

@@ -8,4 +8,3 @@ export const useThreads = (): ThreadContextValue => {
   }
   return context;
 };
-

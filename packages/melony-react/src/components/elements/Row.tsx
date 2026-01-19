@@ -1,9 +1,18 @@
 import React from "react";
 import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
-import { alignMap, justifyMap, gapMap, paddingMap, widthMap, wrapMap } from "@/lib/theme-utils";
+import {
+  alignMap,
+  justifyMap,
+  gapMap,
+  paddingMap,
+  widthMap,
+  wrapMap,
+} from "@/lib/theme-utils";
 
-export const Row: React.FC<UIContract["row"] & { children?: React.ReactNode[] }> = ({
+export const Row: React.FC<
+  UIContract["row"] & { children?: React.ReactNode[] }
+> = ({
   children,
   align = "start",
   justify = "start",
@@ -21,7 +30,7 @@ export const Row: React.FC<UIContract["row"] & { children?: React.ReactNode[] }>
         wrapMap[wrap],
         gapMap[gap],
         paddingMap[padding],
-        widthMap[width]
+        widthMap[width],
       )}
     >
       {children as React.ReactNode}

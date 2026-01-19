@@ -36,7 +36,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         updateResolvedTheme();
         mediaQuery.addEventListener("change", updateResolvedTheme);
 
-        return () => mediaQuery.removeEventListener("change", updateResolvedTheme);
+        return () =>
+          mediaQuery.removeEventListener("change", updateResolvedTheme);
       } else {
         setResolvedTheme(theme);
       }
@@ -47,7 +48,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const root = document.documentElement;
-      
+
       if (resolvedTheme === "dark") {
         root.classList.add("dark");
       } else {
@@ -77,4 +78,3 @@ export function useTheme() {
   }
   return context;
 }
-

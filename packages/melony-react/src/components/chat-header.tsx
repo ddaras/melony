@@ -49,7 +49,7 @@ export function ChatHeader({
       <div
         className={cn(
           "px-2 border-b border-border h-14 flex items-center shrink-0",
-          className
+          className,
         )}
       >
         {children}
@@ -61,7 +61,7 @@ export function ChatHeader({
     <div
       className={cn(
         "px-2 border-b border-border h-14 flex items-center justify-between shrink-0",
-        className
+        className,
       )}
     >
       <div className="flex items-center gap-2 flex-1 min-w-0">

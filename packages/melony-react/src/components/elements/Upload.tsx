@@ -22,7 +22,7 @@ export const Upload: React.FC<UIContract["upload"]> = ({
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
   const uploadedFilesEvents = events.filter(
-    (event) => event.type === "uploaded-files"
+    (event) => event.type === "uploaded-files",
   );
 
   const displayEvents =
@@ -119,11 +119,17 @@ export const Upload: React.FC<UIContract["upload"]> = ({
       <div className="flex flex-wrap gap-2 mb-2 items-center">
         {showInitialFiles &&
           initialFiles?.map((file, index) => (
-            <Image key={index} src={file.url} alt={file.name} width="min" radius="md" />
+            <Image
+              key={index}
+              src={file.url}
+              alt={file.name}
+              width="min"
+              radius="md"
+            />
           ))}
 
         {displayEvents.map((event, index) =>
-          event.ui ? <UIRenderer key={index} node={event.ui} /> : null
+          event.ui ? <UIRenderer key={index} node={event.ui} /> : null,
         )}
 
         <Button

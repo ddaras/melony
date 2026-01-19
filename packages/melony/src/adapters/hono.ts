@@ -28,8 +28,6 @@ export const handle = (instance: { run: any; config: any }) => {
       requestHeaders: headers,
     };
 
-    return createStreamResponse(
-      instance.run(event)
-    );
+    return createStreamResponse(instance.run(event));
   };
 };

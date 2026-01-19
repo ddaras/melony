@@ -39,12 +39,15 @@ The scripts are automatically integrated via npm lifecycle hooks in package.json
 ## Alternative Solutions
 
 ### Option 1: pnpm Built-in (Simpler but less control)
+
 pnpm automatically replaces `workspace:*` during `pnpm publish`. However, this may not always work as expected in all scenarios.
 
 ### Option 2: Changesets (Recommended for larger teams)
+
 [Changesets](https://github.com/changesets/changesets) is a versioning tool that handles this automatically along with changelog generation and release management.
 
 ### Option 3: Manual Script
+
 Use a custom script to update versions before publishing (this is what these scripts do, but integrated into the publish workflow).
 
 ## Notes
@@ -52,4 +55,3 @@ Use a custom script to update versions before publishing (this is what these scr
 - Backup files (`*.original`) are automatically created and cleaned up
 - The scripts only run for packages in the `packages/` directory
 - Versions are read from the actual package.json files in the workspace
-

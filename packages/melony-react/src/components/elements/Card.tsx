@@ -8,9 +8,16 @@ import {
   CardContent,
 } from "../ui/card";
 import { cn } from "@/lib/utils";
-import { colorBgMap, paddingMap, radiusMap, shadowMap } from "@/lib/theme-utils";
+import {
+  colorBgMap,
+  paddingMap,
+  radiusMap,
+  shadowMap,
+} from "@/lib/theme-utils";
 
-export const Card: React.FC<UIContract["card"] & { children?: React.ReactNode[] }> = ({
+export const Card: React.FC<
+  UIContract["card"] & { children?: React.ReactNode[] }
+> = ({
   children,
   title,
   subtitle,
@@ -25,7 +32,7 @@ export const Card: React.FC<UIContract["card"] & { children?: React.ReactNode[] 
         "min-w-96 relative",
         background && colorBgMap[background],
         radius && radiusMap[radius],
-        shadow && shadowMap[shadow]
+        shadow && shadowMap[shadow],
       )}
     >
       {(title || subtitle) && (

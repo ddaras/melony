@@ -15,7 +15,7 @@ export interface ScreenSize {
  */
 export function useScreenSize(
   mobileBreakpoint: number = 768,
-  tabletBreakpoint: number = 1024
+  tabletBreakpoint: number = 1024,
 ): ScreenSize {
   const [screenSize, setScreenSize] = useState<ScreenSize>(() => {
     // SSR-safe default
@@ -67,4 +67,3 @@ export function useScreenSize(
 
   return screenSize;
 }
-

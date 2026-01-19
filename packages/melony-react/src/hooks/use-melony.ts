@@ -18,7 +18,7 @@ export const useMelony = (options?: UseMelonyOptions): MelonyContextValue => {
 
   useEffect(() => {
     // If the provided initialEvents is the EXACT SAME array reference as the client's current events,
-    // it means we are already in sync (likely because we are in a 'new thread' state 
+    // it means we are already in sync (likely because we are in a 'new thread' state
     // where ThreadProvider uses client.events as initialData).
     if (initialEvents && initialEvents === client.getState().events) {
       return;

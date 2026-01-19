@@ -29,7 +29,10 @@ export const assistant = melony({
       description: "Search products by keyword",
       paramsSchema: z.object({ query: z.string() }),
       execute: async function* ({ query }) {
-        yield { type: "text", data: { content: `Searching for "${query}"...` } };
+        yield {
+          type: "text",
+          data: { content: `Searching for "${query}"...` },
+        };
 
         // SDUI: stream real UI to the frontend
         yield {
@@ -51,7 +54,10 @@ export const assistant = melony({
   // The brain receives events and returns the next action to run.
   brain: async function* (event) {
     if (event.type === "text") {
-      return { action: "searchProducts", params: { query: event.data?.content } };
+      return {
+        action: "searchProducts",
+        params: { query: event.data?.content },
+      };
     }
   },
 });
@@ -74,7 +80,7 @@ app.post("/api/chat", handle(assistant));
 import { MelonyClient } from "melony/client";
 
 const client = new MelonyClient({
-  url: "/api/chat"
+  url: "/api/chat",
 });
 
 for await (const event of client.sendEvent({

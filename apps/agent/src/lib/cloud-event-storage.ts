@@ -39,10 +39,7 @@ export class CloudEventStorage implements EventStorage {
     this.config = config;
   }
 
-  async store(
-    event: Event,
-    metadata?: Record<string, any>
-  ): Promise<void> {
+  async store(event: Event, metadata?: Record<string, any>): Promise<void> {
     try {
       // Use a timeout to avoid hanging the request
       const controller = new AbortController();
@@ -66,7 +63,9 @@ export class CloudEventStorage implements EventStorage {
 
       if (!response.ok) {
         // Just log a warning for non-2xx responses, don't throw
-        console.warn(`[CloudEventStorage] Warning: Failed to store event (${response.status})`);
+        console.warn(
+          `[CloudEventStorage] Warning: Failed to store event (${response.status})`,
+        );
       }
     } catch (error) {
       // Silently catch errors to avoid crashing the app
@@ -74,9 +73,11 @@ export class CloudEventStorage implements EventStorage {
       if (error instanceof Error && error.name === "AbortError") {
         console.warn("[CloudEventStorage] Request timed out");
       } else {
-        console.warn("[CloudEventStorage] Failed to store event:", error instanceof Error ? error.message : "Unknown error");
+        console.warn(
+          "[CloudEventStorage] Failed to store event:",
+          error instanceof Error ? error.message : "Unknown error",
+        );
       }
     }
   }
 }
-

@@ -43,7 +43,7 @@ export const CreateThreadListItem: React.FC<CreateThreadListItemProps> = ({
     {
       enableOnFormTags: false, // Don't trigger when typing in form inputs
       enableOnContentEditable: false, // Don't trigger in contenteditable elements
-    }
+    },
   );
 
   return (

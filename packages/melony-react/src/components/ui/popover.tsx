@@ -9,7 +9,7 @@ interface PopoverContextValue {
 }
 
 const PopoverContext = React.createContext<PopoverContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 function usePopoverContext() {
@@ -44,7 +44,7 @@ function Popover({
       }
       onOpenChange?.(newOpen);
     },
-    [controlledOpen, onOpenChange]
+    [controlledOpen, onOpenChange],
   );
 
   const value = React.useMemo(
@@ -53,7 +53,7 @@ function Popover({
       setOpen,
       triggerRef,
     }),
-    [open, setOpen]
+    [open, setOpen],
   );
 
   return (
@@ -105,7 +105,7 @@ const PopoverTrigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 PopoverTrigger.displayName = "PopoverTrigger";
@@ -128,7 +128,7 @@ const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const { open, setOpen, triggerRef } = usePopoverContext();
     const [position, setPosition] = React.useState({ top: 0, left: 0 });
@@ -182,7 +182,8 @@ const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentProps>(
                 scrollX +
                 alignOffset;
             } else {
-              top += triggerRect.height / 2 - contentRect.height / 2 + alignOffset;
+              top +=
+                triggerRect.height / 2 - contentRect.height / 2 + alignOffset;
             }
             break;
           case "end":
@@ -259,7 +260,7 @@ const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentProps>(
         }}
         className={cn(
           "bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/5 rounded-2xl shadow-2xl ring-1 z-50 min-w-48 max-h-96 overflow-hidden",
-          className
+          className,
         )}
         style={{
           position: "absolute",
@@ -273,10 +274,9 @@ const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentProps>(
     );
 
     return createPortal(content, document.body);
-  }
+  },
 );
 
 PopoverContent.displayName = "PopoverContent";
 
 export { Popover, PopoverTrigger, PopoverContent };
-

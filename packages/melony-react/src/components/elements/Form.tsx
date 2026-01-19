@@ -4,11 +4,9 @@ import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 import { gapMap } from "@/lib/theme-utils";
 
-export const Form: React.FC<UIContract["form"] & { children?: React.ReactNode[] }> = ({
-  children,
-  onSubmitAction,
-  gap = "md",
-}) => {
+export const Form: React.FC<
+  UIContract["form"] & { children?: React.ReactNode[] }
+> = ({ children, onSubmitAction, gap = "md" }) => {
   const { sendEvent } = useMelony();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -41,16 +39,13 @@ export const Form: React.FC<UIContract["form"] & { children?: React.ReactNode[] 
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full"
-    >
+    <form onSubmit={handleSubmit} className="w-full">
       <fieldset disabled={isSubmitted} className="m-0 border-0 p-0">
         <div
           className={cn(
             "flex flex-col transition-opacity",
             gapMap[gap],
-            isSubmitted && "opacity-60 pointer-events-none"
+            isSubmitted && "opacity-60 pointer-events-none",
           )}
         >
           {children as React.ReactNode}

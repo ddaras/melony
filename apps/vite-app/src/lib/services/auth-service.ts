@@ -9,7 +9,7 @@ export const createMelonyAuthService = (
   config: {
     authBaseUrl?: string;
     getToken?: () => string | null;
-  } = {}
+  } = {},
 ): AuthService => {
   const authBaseUrl = config.authBaseUrl || DEFAULT_AUTH_URL;
 

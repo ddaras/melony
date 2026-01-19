@@ -1,7 +1,12 @@
 import React from "react";
 import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
-import { textSizeMap, textAlignMap, fontWeightMap, colorTextMap } from "@/lib/theme-utils";
+import {
+  textSizeMap,
+  textAlignMap,
+  fontWeightMap,
+  colorTextMap,
+} from "@/lib/theme-utils";
 
 export const Text: React.FC<UIContract["text"]> = ({
   value,
@@ -16,7 +21,7 @@ export const Text: React.FC<UIContract["text"]> = ({
         textSizeMap[size],
         fontWeightMap[weight],
         textAlignMap[align],
-        colorTextMap[color]
+        colorTextMap[color],
       )}
     >
       {value}

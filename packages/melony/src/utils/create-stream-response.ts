@@ -5,7 +5,7 @@ import { Event } from "../types";
  * Exported for backward compatibility and standalone usage
  */
 export function createStreamResponse(
-  generator: AsyncGenerator<Event>
+  generator: AsyncGenerator<Event>,
 ): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({

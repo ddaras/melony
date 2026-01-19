@@ -62,7 +62,7 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
     {
       enableOnFormTags: false, // Don't trigger when typing in form inputs
       enableOnContentEditable: false, // Don't trigger in contenteditable elements
-    }
+    },
   );
 
   return (

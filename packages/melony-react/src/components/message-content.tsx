@@ -30,4 +30,3 @@ export function MessageContent({ events }: MessageContentProps) {
     </>
   );
 }
-

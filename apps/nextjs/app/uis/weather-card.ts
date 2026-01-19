@@ -23,4 +23,3 @@ export const weatherCard = (params: z.infer<typeof checkWeatherParamsSchema>) =>
       }),
     ],
   });
-

@@ -2,7 +2,7 @@
 
 Melony is an **event-streaming AI agent runtime** with **Server‑Driven UI (SDUI)** — build agents that stream **text and real UI** to your frontend, not just strings.
 
-If you’re building *product* (approval flows, forms, dashboards, tool results), Melony’s core idea is simple:
+If you’re building _product_ (approval flows, forms, dashboards, tool results), Melony’s core idea is simple:
 
 - **Your backend “renders” UI** as a typed `UINode` tree
 - Your frontend **renders that UI automatically** (React included)
@@ -33,8 +33,17 @@ const assistant = melony({
       name: "greet",
       paramsSchema: z.object({ name: z.string().optional() }),
       execute: async function* ({ name }) {
-        yield { type: "text", data: { content: `Hey${name ? ` ${name}` : ""}!` } };
-        yield { type: "ui", ui: ui.card({ title: "Next step", children: [ui.text("Ask me anything.")] }) };
+        yield {
+          type: "text",
+          data: { content: `Hey${name ? ` ${name}` : ""}!` },
+        };
+        yield {
+          type: "ui",
+          ui: ui.card({
+            title: "Next step",
+            children: [ui.text("Ask me anything.")],
+          }),
+        };
       },
     }),
   },
@@ -55,7 +64,7 @@ import { MelonyClient } from "melony/client";
 import { MelonyClientProvider, Thread } from "@melony/react";
 
 const client = new MelonyClient({
-  url: "/api/chat"
+  url: "/api/chat",
 });
 
 export default function App() {

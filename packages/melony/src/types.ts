@@ -27,7 +27,16 @@ export type UIColor =
 
 export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
-export type UIWidth = "auto" | "full" | "min" | "max" | "1/2" | "1/3" | "2/3" | "1/4" | "3/4";
+export type UIWidth =
+  | "auto"
+  | "full"
+  | "min"
+  | "max"
+  | "1/2"
+  | "1/3"
+  | "2/3"
+  | "1/4"
+  | "3/4";
 export type UIShadow = "none" | "sm" | "md" | "lg" | "xl";
 export type UIRadius = "none" | "sm" | "md" | "lg" | "full";
 
@@ -102,7 +111,13 @@ export interface UIContract {
   };
   badge: {
     label: string;
-    variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "outline";
+    variant?:
+      | "primary"
+      | "secondary"
+      | "success"
+      | "danger"
+      | "warning"
+      | "outline";
     size?: UISize;
   };
   image: {
@@ -234,20 +249,29 @@ export interface UIContract {
     type?: "button" | "submit" | "reset";
     label: string;
     variant?:
-    | "primary"
-    | "secondary"
-    | "success"
-    | "danger"
-    | "outline"
-    | "ghost"
-    | "link";
+      | "primary"
+      | "secondary"
+      | "success"
+      | "danger"
+      | "outline"
+      | "ghost"
+      | "link";
     size?: UISize;
     disabled?: boolean;
     width?: UIWidth;
     onClickAction?: Event;
   };
   float: {
-    position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+    position?:
+      | "top-left"
+      | "top-right"
+      | "top-center"
+      | "bottom-left"
+      | "bottom-right"
+      | "bottom-center"
+      | "center"
+      | "left-center"
+      | "right-center";
     offsetX?: UISpacing;
     offsetY?: UISpacing;
     showOnHover?: boolean;
@@ -310,7 +334,7 @@ export type ActionExecute<
   TState = any,
 > = (
   params: z.infer<TParams>,
-  context: RuntimeContext<TState>
+  context: RuntimeContext<TState>,
 ) => AsyncGenerator<Event, NextAction | void, unknown>;
 
 export interface Action<
@@ -361,7 +385,7 @@ export interface Hooks<TState = any> {
    */
   onBeforeRun?: (
     input: { event: Event },
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ) => HookGenerator<NextAction>;
 
   /**
@@ -380,7 +404,7 @@ export interface Hooks<TState = any> {
    */
   onBeforeAction?: (
     call: { action: Action<any, TState>; params: any; nextAction: NextAction },
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ) => HookGenerator<NextAction>;
 
   /**
@@ -388,7 +412,7 @@ export interface Hooks<TState = any> {
    */
   onAfterAction?: (
     result: { action: Action<any, TState>; data: NextAction | void },
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ) => HookGenerator<NextAction>;
 }
 
@@ -401,7 +425,7 @@ export interface Plugin<TState = any> extends Hooks<TState> {
 
 export type Brain<TState = any> = (
   event: Event,
-  context: RuntimeContext<TState>
+  context: RuntimeContext<TState>,
 ) => AsyncGenerator<Event, NextAction | void, unknown>;
 
 export interface Config<TState = any> {

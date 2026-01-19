@@ -16,7 +16,7 @@ import { MelonyClient } from "melony/client";
 import { MelonyClientProvider, Thread } from "@melony/react";
 
 const client = new MelonyClient({
-  url: "/api/chat"
+  url: "/api/chat",
 });
 
 export default function App() {

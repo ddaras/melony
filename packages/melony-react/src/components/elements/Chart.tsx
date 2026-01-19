@@ -29,7 +29,7 @@ export const Chart: React.FC<UIContract["chart"]> = ({
 
   const maxValue = Math.max(...data.map((d) => d.value), 1);
   const padding = { top: 40, right: 20, bottom: 40, left: 20 };
-  
+
   // Use container width or default
   const chartHeight = height;
   const chartWidth = 600; // Will be responsive via viewBox
@@ -103,15 +103,21 @@ export const Chart: React.FC<UIContract["chart"]> = ({
 
   const renderBarChart = () => {
     const totalBarSpace = chartWidth - padding.left - padding.right;
-    const barSpacing = data.length > 1 ? (totalBarSpace * 0.1) / data.length : 0;
-    const actualBarWidth = (totalBarSpace - barSpacing * (data.length + 1)) / data.length;
+    const barSpacing =
+      data.length > 1 ? (totalBarSpace * 0.1) / data.length : 0;
+    const actualBarWidth =
+      (totalBarSpace - barSpacing * (data.length + 1)) / data.length;
 
     return (
-      <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`} className="w-full h-auto overflow-visible">
+      <svg
+        viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`}
+        className="w-full h-auto overflow-visible"
+      >
         {renderGrid()}
         {data.map((item, index) => {
           const barHeight = (item.value / maxValue) * chartHeight;
-          const x = padding.left + barSpacing + index * (actualBarWidth + barSpacing);
+          const x =
+            padding.left + barSpacing + index * (actualBarWidth + barSpacing);
           const y = padding.top + chartHeight - barHeight;
 
           return (
@@ -123,8 +129,25 @@ export const Chart: React.FC<UIContract["chart"]> = ({
                 height={barHeight}
                 fill={getColor(index, item.color)}
                 rx={4}
-                onMouseEnter={() => showTooltips && setTooltip({ visible: true, x: x + actualBarWidth / 2, y: y - 5, label: item.label, value: item.value })}
-                onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, label: "", value: 0 })}
+                onMouseEnter={() =>
+                  showTooltips &&
+                  setTooltip({
+                    visible: true,
+                    x: x + actualBarWidth / 2,
+                    y: y - 5,
+                    label: item.label,
+                    value: item.value,
+                  })
+                }
+                onMouseLeave={() =>
+                  setTooltip({
+                    visible: false,
+                    x: 0,
+                    y: 0,
+                    label: "",
+                    value: 0,
+                  })
+                }
                 className="transition-all hover:opacity-80 cursor-pointer"
               />
               <text
@@ -145,17 +168,31 @@ export const Chart: React.FC<UIContract["chart"]> = ({
 
   const renderLineChart = () => {
     const points = data.map((item, index) => ({
-      x: padding.left + (index / Math.max(data.length - 1, 1)) * (chartWidth - padding.left - padding.right),
+      x:
+        padding.left +
+        (index / Math.max(data.length - 1, 1)) *
+          (chartWidth - padding.left - padding.right),
       y: padding.top + chartHeight - (item.value / maxValue) * chartHeight,
-      ...item
+      ...item,
     }));
 
-    const pathData = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+    const pathData = points
+      .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+      .join(" ");
 
     return (
-      <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`} className="w-full h-auto overflow-visible">
+      <svg
+        viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`}
+        className="w-full h-auto overflow-visible"
+      >
         {renderGrid()}
-        <path d={pathData} fill="none" stroke={getColor(0)} strokeWidth={3} className="transition-all" />
+        <path
+          d={pathData}
+          fill="none"
+          stroke={getColor(0)}
+          strokeWidth={3}
+          className="transition-all"
+        />
         {points.map((point, index) => (
           <g key={index}>
             <circle
@@ -165,8 +202,19 @@ export const Chart: React.FC<UIContract["chart"]> = ({
               fill={getColor(index, point.color)}
               stroke="hsl(var(--background))"
               strokeWidth={2}
-              onMouseEnter={() => showTooltips && setTooltip({ visible: true, x: point.x, y: point.y - 5, label: point.label, value: point.value })}
-              onMouseLeave={() => setTooltip({ visible: false, x: 0, y: 0, label: "", value: 0 })}
+              onMouseEnter={() =>
+                showTooltips &&
+                setTooltip({
+                  visible: true,
+                  x: point.x,
+                  y: point.y - 5,
+                  label: point.label,
+                  value: point.value,
+                })
+              }
+              onMouseLeave={() =>
+                setTooltip({ visible: false, x: 0, y: 0, label: "", value: 0 })
+              }
               className="hover:r-6 transition-all cursor-pointer"
             />
             <text
@@ -196,7 +244,9 @@ export const Chart: React.FC<UIContract["chart"]> = ({
 
   return (
     <div className="py-4 w-full">
-      {title && <div className="text-sm font-semibold mb-4 text-center">{title}</div>}
+      {title && (
+        <div className="text-sm font-semibold mb-4 text-center">{title}</div>
+      )}
       {renderChart()}
     </div>
   );

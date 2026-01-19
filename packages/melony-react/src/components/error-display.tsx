@@ -11,4 +11,3 @@ export function ErrorDisplay({ error }: ErrorDisplayProps) {
     </div>
   );
 }
-

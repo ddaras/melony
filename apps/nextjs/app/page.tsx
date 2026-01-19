@@ -18,7 +18,7 @@ import { createMelonyAuthService } from "@/app/lib/services/auth-service";
 
 const CHAT_API_URL = "/api/chat";
 const client = new MelonyClient({
-  url: CHAT_API_URL
+  url: CHAT_API_URL,
 });
 
 const threadService = createMelonyThreadService();

@@ -56,7 +56,7 @@ export function WelcomeScreen({
     <div
       className={cn(
         "flex min-h-[600px] h-full w-full flex-col md:flex-row bg-background overflow-hidden",
-        className
+        className,
       )}
     >
       {/* Left side: Introduction */}

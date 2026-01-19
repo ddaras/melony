@@ -58,7 +58,7 @@ export function Composer({
   const maxFiles = fileAttachments?.maxFiles ?? 10;
   const maxFileSize = fileAttachments?.maxFileSize ?? 10 * 1024 * 1024;
   const [selectedOptions, setSelectedOptions] = React.useState<Set<string>>(
-    () => new Set(defaultSelectedIds)
+    () => new Set(defaultSelectedIds),
   );
   const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]);
   const [previews, setPreviews] = React.useState<
@@ -85,7 +85,7 @@ export function Composer({
   const toggleOption = (
     id: string,
     groupOptions?: ComposerOption[],
-    type: "single" | "multiple" = "multiple"
+    type: "single" | "multiple" = "multiple",
   ) => {
     const next = new Set(selectedOptions);
     if (type === "single") {
@@ -116,7 +116,7 @@ export function Composer({
       if (file.size > maxFileSize) {
         // You might want to show a toast/error here
         console.warn(
-          `File ${file.name} exceeds maximum size of ${maxFileSize} bytes`
+          `File ${file.name} exceeds maximum size of ${maxFileSize} bytes`,
         );
         return false;
       }
@@ -129,7 +129,7 @@ export function Composer({
 
     if (filesToAdd.length < validFiles.length) {
       console.warn(
-        `Only ${filesToAdd.length} files can be added (max: ${maxFiles})`
+        `Only ${filesToAdd.length} files can be added (max: ${maxFiles})`,
       );
     }
 
@@ -151,7 +151,7 @@ export function Composer({
     // Handle grouped options
     options.forEach((group) => {
       const selectedInGroup = group.options.filter((o) =>
-        selectedOptions.has(o.id)
+        selectedOptions.has(o.id),
       );
 
       if (selectedInGroup.length > 0) {
@@ -335,7 +335,7 @@ export function Composer({
             {/* Grouped options dropdowns */}
             {options.map((group) => {
               const selectedInGroup = group.options.filter((o) =>
-                selectedOptions.has(o.id)
+                selectedOptions.has(o.id),
               );
               const label =
                 selectedInGroup.length === 0
@@ -358,7 +358,7 @@ export function Composer({
                           "gap-2",
                           selectedInGroup.length > 0
                             ? "text-foreground bg-muted/50"
-                            : "text-muted-foreground"
+                            : "text-muted-foreground",
                         )}
                       >
                         {label}
@@ -383,7 +383,7 @@ export function Composer({
                             toggleOption(
                               option.id,
                               group.options,
-                              isSingle ? "single" : "multiple"
+                              isSingle ? "single" : "multiple",
                             )
                           }
                           onSelect={(e) => e.preventDefault()}

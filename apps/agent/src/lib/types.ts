@@ -15,9 +15,7 @@ export interface PendingAction {
 }
 
 export interface PendingActionStorage {
-  create(
-    action: Omit<PendingAction, "id" | "token">
-  ): Promise<PendingAction>;
+  create(action: Omit<PendingAction, "id" | "token">): Promise<PendingAction>;
   get(token: string): Promise<PendingAction | null>;
   verify(token: string): Promise<PendingAction | null>;
   delete(token: string): Promise<void>;

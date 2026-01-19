@@ -25,6 +25,7 @@ The app will start on `http://localhost:3000` (or the port specified by Next.js)
 ## Try it out
 
 Ask about the weather! For example:
+
 - "What is the weather?"
 - "Check the weather in San Francisco"
 

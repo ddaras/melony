@@ -32,4 +32,3 @@ export const brain = async function* (event: Event) {
     }
   }
 };
-

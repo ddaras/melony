@@ -33,7 +33,12 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
 
   return (
     <Field className={cn(widthMap[width])}>
-      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
+      {label && (
+        <FieldTitle>
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </FieldTitle>
+      )}
       <TextareaBase
         name={name}
         id={name}

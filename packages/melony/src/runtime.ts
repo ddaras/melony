@@ -51,7 +51,7 @@ export class Runtime<TState = any> {
         if (plugin.onBeforeRun) {
           const result = yield* this.callHook(
             plugin.onBeforeRun({ event }, context),
-            context
+            context,
           );
           if (result) {
             nextAction = result as NextAction;
@@ -63,7 +63,7 @@ export class Runtime<TState = any> {
       if (this.config.hooks?.onBeforeRun) {
         const result = yield* this.callHook(
           this.config.hooks.onBeforeRun({ event }, context),
-          context
+          context,
         );
         if (result) {
           nextAction = result as NextAction;
@@ -88,7 +88,7 @@ export class Runtime<TState = any> {
         if (context.stepCount++ >= (this.config.safetyMaxSteps ?? 10)) {
           yield* this.emit(
             { type: "error", data: { message: "Max steps exceeded" } },
-            context
+            context,
           );
           break;
         }
@@ -105,7 +105,7 @@ export class Runtime<TState = any> {
               type: "error",
               data: { message: "No action name provided in NextAction" },
             },
-            context
+            context,
           );
           break;
         }
@@ -118,7 +118,7 @@ export class Runtime<TState = any> {
               type: "error",
               data: { message: `Action ${actionName} not found` },
             },
-            context
+            context,
           );
           break;
         }
@@ -139,7 +139,7 @@ export class Runtime<TState = any> {
                 result,
               },
             },
-            context
+            context,
           );
         } else {
           // Simple mode: follow the action's own suggestion for the next step.
@@ -184,7 +184,7 @@ export class Runtime<TState = any> {
 
   private async *dispatchToBrain(
     event: Event,
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ): AsyncGenerator<Event, NextAction | void> {
     const generator = this.config.brain!(event, context);
     while (true) {
@@ -197,7 +197,7 @@ export class Runtime<TState = any> {
   private async *executeAction(
     action: Action<any, TState>,
     nextAction: NextAction,
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ): AsyncGenerator<Event, NextAction | void> {
     const params = nextAction.params;
 
@@ -206,7 +206,7 @@ export class Runtime<TState = any> {
       if (plugin.onBeforeAction) {
         const hookResult = yield* this.callHook(
           plugin.onBeforeAction({ action, params, nextAction }, context),
-          context
+          context,
         );
         if (hookResult) {
           nextAction = hookResult as NextAction;
@@ -219,9 +219,9 @@ export class Runtime<TState = any> {
       const hookResult = yield* this.callHook(
         this.config.hooks.onBeforeAction(
           { action, params, nextAction },
-          context
+          context,
         ),
-        context
+        context,
       );
       if (hookResult) {
         nextAction = hookResult as NextAction;
@@ -246,7 +246,7 @@ export class Runtime<TState = any> {
         if (plugin.onAfterAction) {
           const extra = yield* this.callHook(
             plugin.onAfterAction({ action, data: result }, context),
-            context
+            context,
           );
           if (extra) {
             nextAction = extra as NextAction;
@@ -258,7 +258,7 @@ export class Runtime<TState = any> {
       if (this.config.hooks?.onAfterAction) {
         const extra = yield* this.callHook(
           this.config.hooks.onAfterAction({ action, data: result }, context),
-          context
+          context,
         );
         if (extra) {
           nextAction = extra as NextAction;
@@ -285,7 +285,7 @@ export class Runtime<TState = any> {
    */
   private async *callHook<T>(
     generator: HookGenerator<T> | undefined,
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ): AsyncGenerator<Event, T | void> {
     if (!generator) return;
 
@@ -301,7 +301,7 @@ export class Runtime<TState = any> {
    */
   private async *emit(
     event: Event,
-    context: RuntimeContext<TState>
+    context: RuntimeContext<TState>,
   ): AsyncGenerator<Event> {
     const finalEvent = {
       ...event,
@@ -347,7 +347,7 @@ export const melony = <TState = any>(config: Config<TState>) => {
  * Helper to define an action with full type inference.
  */
 export const action = <T extends z.ZodSchema, TState = any>(
-  config: Action<T, TState>
+  config: Action<T, TState>,
 ): Action<T, TState> => config;
 
 /**

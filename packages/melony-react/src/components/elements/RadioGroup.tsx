@@ -33,7 +33,7 @@ export const RadioGroup: React.FC<UIContract["radioGroup"]> = ({
       <div
         className={cn(
           "flex",
-          orientation === "horizontal" ? "flex-row gap-4" : "flex-col gap-2"
+          orientation === "horizontal" ? "flex-row gap-4" : "flex-col gap-2",
         )}
       >
         {options.map((option, index) => {
@@ -41,10 +41,7 @@ export const RadioGroup: React.FC<UIContract["radioGroup"]> = ({
           const isDisabled = disabled || option.disabled;
 
           return (
-            <div
-              key={index}
-              className="flex items-center gap-2"
-            >
+            <div key={index} className="flex items-center gap-2">
               <input
                 type="radio"
                 name={name}

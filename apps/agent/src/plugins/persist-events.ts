@@ -20,7 +20,7 @@ export const persistEventsPlugin = plugin({
     eventStorage.store(event).catch((error) => {
       console.warn(
         "[persistEventsPlugin] Background event storage failed:",
-        error.message || error
+        error.message || error,
       );
     });
   },

@@ -132,7 +132,7 @@ export function PopupChat({
           "h-14 w-14 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95",
           isOpen
             ? "bg-muted text-muted-foreground hover:bg-muted/80"
-            : "bg-primary text-primary-foreground"
+            : "bg-primary text-primary-foreground",
         )}
         onClick={() => setIsOpen(!isOpen)}
       >

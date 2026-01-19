@@ -47,7 +47,7 @@ export function Thread({
       }))
       .filter(
         (msg) =>
-          ["user", "assistant"].includes(msg.role) && msg.content.length > 0
+          ["user", "assistant"].includes(msg.role) && msg.content.length > 0,
       );
   }, [initialMessages]);
 
@@ -78,7 +78,7 @@ export function Thread({
 
   const handleSubmit = async (
     state?: Record<string, any>,
-    overrideInput?: string
+    overrideInput?: string,
   ) => {
     const text = (overrideInput ?? input).trim();
     const hasFiles =
@@ -107,14 +107,12 @@ export function Thread({
     !isLoadingEvents;
 
   return (
-    <div
-      className="relative flex flex-col h-full bg-background flex-1 overflow-hidden"
-    >
+    <div className="relative flex flex-col h-full bg-background flex-1 overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 pb-36">
         <div
           className={cn(
             "max-w-[48rem] mx-auto w-full p-4",
-            showStarterPrompts && "min-h-full flex flex-col"
+            showStarterPrompts && "min-h-full flex flex-col",
           )}
         >
           {isLoadingEvents && messages.length === 0 ? (
@@ -124,9 +122,7 @@ export function Thread({
           ) : (
             <>
               {showStarterPrompts && (
-                <StarterPrompts
-                  prompts={starterPrompts}
-                />
+                <StarterPrompts prompts={starterPrompts} />
               )}
               <MessageList
                 messages={messages}

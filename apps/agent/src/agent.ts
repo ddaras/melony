@@ -25,10 +25,10 @@ const threadManagementPlugin = plugin({
       yield {
         type: "client:navigate",
         data: { url: `?threadId=${newThreadId}` },
-        role: "assistant"
+        role: "assistant",
       };
     }
-  }
+  },
 });
 
 export const rootAgent = melony({

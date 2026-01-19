@@ -25,7 +25,7 @@ export const Heading: React.FC<UIContract["heading"]> = ({
       className={cn(
         levelClasses[Tag] || levelClasses.h2,
         colorTextMap[color],
-        textAlignMap[align]
+        textAlignMap[align],
       )}
     >
       {value}

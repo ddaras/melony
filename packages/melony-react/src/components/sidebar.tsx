@@ -26,12 +26,13 @@ export function Sidebar({ side, children, width = "1/4" }: SidebarProps) {
         "flex-shrink-0 border-border bg-background transition-all duration-300 ease-in-out overflow-hidden flex flex-col",
         side === "left" ? "border-r" : "border-l",
         collapsed ? "w-0 border-r-0 border-l-0 min-w-0" : "",
-        !collapsed && widthClass
+        !collapsed && widthClass,
       )}
       style={!collapsed && !widthClass ? { width } : undefined}
     >
-      <div className="flex-1 overflow-hidden min-h-0 flex flex-col">{children}</div>
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }
-

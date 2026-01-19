@@ -41,7 +41,7 @@ export interface MelonyContextValue extends ClientState {
 }
 
 export const MelonyContext = createContext<MelonyContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 export interface MelonyProviderProps {
@@ -108,7 +108,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
 
   const reset = useCallback(
     (events?: Event[]) => client.reset(events),
-    [client]
+    [client],
   );
 
   const dispatchClientAction = useCallback(
@@ -120,8 +120,8 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
           const url = event.data?.url;
           if (url) {
             // If we are currently streaming/loading, we perform a "silent" URL update
-            // using replaceState. This prevents some routers from performing a full 
-            // page reload, but we still dispatch a popstate event so that URL-state 
+            // using replaceState. This prevents some routers from performing a full
+            // page reload, but we still dispatch a popstate event so that URL-state
             // hooks (like nuqs) can stay in sync.
             const isStreaming = client.getState().isLoading;
             if (isStreaming) {
@@ -170,7 +170,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
           return false;
       }
     },
-    [client, reset, queryClient]
+    [client, reset, queryClient],
   );
 
   const sendEvent = useCallback(
@@ -184,7 +184,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
         await dispatchClientAction(incomingEvent);
       }
     },
-    [client, dispatchClientAction]
+    [client, dispatchClientAction],
   );
 
   const value = useMemo(
@@ -196,7 +196,7 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
       client,
       config: config as Config,
     }),
-    [state, sendEvent, reset, client, config]
+    [state, sendEvent, reset, client, config],
   );
 
   useEffect(() => {

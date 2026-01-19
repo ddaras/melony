@@ -6,9 +6,7 @@ interface StarterPromptsProps {
   prompts: StarterPrompt[];
 }
 
-export function StarterPrompts({
-  prompts,
-}: StarterPromptsProps) {
+export function StarterPrompts({ prompts }: StarterPromptsProps) {
   if (!prompts || prompts.length === 0) {
     return null;
   }

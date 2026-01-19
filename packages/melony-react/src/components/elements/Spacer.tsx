@@ -11,7 +11,7 @@ export const Spacer: React.FC<UIContract["spacer"]> = ({
     <div
       className={cn(
         direction === "vertical" ? "w-full" : "h-full",
-        paddingMap[size]
+        paddingMap[size],
       )}
     />
   );

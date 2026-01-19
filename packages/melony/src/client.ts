@@ -83,9 +83,7 @@ export class MelonyClient {
     this.stateListeners.forEach((l) => l(this.getState()));
   }
 
-  async *sendEvent(
-    event: Event
-  ): AsyncGenerator<Event> {
+  async *sendEvent(event: Event): AsyncGenerator<Event> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
@@ -115,7 +113,8 @@ export class MelonyClient {
         signal: this.abortController.signal,
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
       if (!response.body) throw new Error("No response body");
 
       const reader = response.body.getReader();

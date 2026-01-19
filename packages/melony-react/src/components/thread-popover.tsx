@@ -9,11 +9,9 @@ import { ThreadList } from "./thread-list";
 import { IconHistory } from "@tabler/icons-react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export interface ThreadPopoverProps {
-}
+export interface ThreadPopoverProps {}
 
-export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
-}) => {
+export const ThreadPopover: React.FC<ThreadPopoverProps> = ({}) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   // Hotkey to toggle popover: Press 'H' to open/close
@@ -27,16 +25,13 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
     {
       enableOnFormTags: false, // Don't trigger when typing in form inputs
       enableOnContentEditable: false, // Don't trigger in contenteditable elements
-    }
+    },
   );
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-        >
+        <Button variant="ghost" size="icon">
           <IconHistory className="size-4" />
         </Button>
       </PopoverTrigger>

@@ -1,9 +1,19 @@
 import React from "react";
 import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
-import { alignMap, justifyMap, gapMap, paddingMap, widthMap, colorBgMap, radiusMap } from "@/lib/theme-utils";
+import {
+  alignMap,
+  justifyMap,
+  gapMap,
+  paddingMap,
+  widthMap,
+  colorBgMap,
+  radiusMap,
+} from "@/lib/theme-utils";
 
-export const Col: React.FC<UIContract["col"] & { children?: React.ReactNode | React.ReactNode[] }> = ({
+export const Col: React.FC<
+  UIContract["col"] & { children?: React.ReactNode | React.ReactNode[] }
+> = ({
   children,
   align = "start",
   justify = "start",
@@ -25,7 +35,7 @@ export const Col: React.FC<UIContract["col"] & { children?: React.ReactNode | Re
         widthMap[width],
         height === "full" && "h-full",
         background && colorBgMap[background],
-        radius && radiusMap[radius]
+        radius && radiusMap[radius],
       )}
     >
       {children as React.ReactNode}

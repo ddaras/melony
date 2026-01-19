@@ -33,7 +33,12 @@ export const Input: React.FC<UIContract["input"]> = ({
 
   return (
     <Field className={cn(widthMap[width])}>
-      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
+      {label && (
+        <FieldTitle>
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </FieldTitle>
+      )}
       <InputBase
         type={inputType}
         name={name}

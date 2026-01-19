@@ -27,7 +27,7 @@ export const Video: React.FC<UIContract["video"]> = ({
         "relative overflow-hidden bg-black shadow-sm",
         aspectRatios[aspectRatio] || "aspect-video",
         widthMap[width],
-        radiusMap[radius]
+        radiusMap[radius],
       )}
     >
       <video

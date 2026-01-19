@@ -27,7 +27,7 @@ export interface ThreadContextValue {
 }
 
 export const ThreadContext = createContext<ThreadContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 export interface ThreadProviderProps {
@@ -46,7 +46,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
 
   const [activeThreadId, setActiveThreadId] = useQueryState(
     "threadId",
-    parseAsString
+    parseAsString,
   );
 
   const prevActiveThreadIdRef = useRef<string | null>(activeThreadId);
@@ -71,7 +71,10 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
   } = useQuery({
     queryKey: ["threads"],
     queryFn: () => service.getThreads(),
-    staleTime: prevActiveThreadIdRef.current === null && activeThreadId !== null ? Infinity : 0,
+    staleTime:
+      prevActiveThreadIdRef.current === null && activeThreadId !== null
+        ? Infinity
+        : 0,
   });
 
   const isNewThread = useMemo(() => {
@@ -114,7 +117,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
     (threadId: string) => {
       setActiveThreadId(threadId);
     },
-    [setActiveThreadId]
+    [setActiveThreadId],
   );
 
   const createThread = useCallback(async () => {
@@ -125,7 +128,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
     async (threadId: string) => {
       return deleteMutation.mutateAsync(threadId);
     },
-    [deleteMutation]
+    [deleteMutation],
   );
 
   const value = useMemo(
@@ -154,7 +157,7 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
       refreshThreads,
       threadEvents,
       isLoadingEvents,
-    ]
+    ],
   );
 
   return (

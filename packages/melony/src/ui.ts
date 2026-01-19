@@ -1,4 +1,13 @@
-import { UIColor, UIContract, UINode, UISize, Event, UISpacing, UIWidth, UIRadius } from "./types";
+import {
+  UIColor,
+  UIContract,
+  UINode,
+  UISize,
+  Event,
+  UISpacing,
+  UIWidth,
+  UIRadius,
+} from "./types";
 
 /**
  * UI Builder for SDUI.
@@ -6,25 +15,25 @@ import { UIColor, UIContract, UINode, UISize, Event, UISpacing, UIWidth, UIRadiu
  */
 export const ui = {
   card: (
-    props: UIContract["card"] & { children?: UINode<any>[] }
+    props: UIContract["card"] & { children?: UINode<any>[] },
   ): UINode<"card"> => {
     const { children, ...rest } = props;
     return { type: "card", props: rest, children };
   },
   row: (
-    props: UIContract["row"] & { children?: UINode<any>[] }
+    props: UIContract["row"] & { children?: UINode<any>[] },
   ): UINode<"row"> => {
     const { children, ...rest } = props;
     return { type: "row", props: rest, children };
   },
   col: (
-    props: UIContract["col"] & { children?: UINode<any>[] }
+    props: UIContract["col"] & { children?: UINode<any>[] },
   ): UINode<"col"> => {
     const { children, ...rest } = props;
     return { type: "col", props: rest, children };
   },
   box: (
-    props: UIContract["box"] & { children?: UINode<any>[] }
+    props: UIContract["box"] & { children?: UINode<any>[] },
   ): UINode<"box"> => {
     const { children, ...rest } = props;
     return { type: "box", props: rest, children };
@@ -39,7 +48,7 @@ export const ui = {
   }),
   text: (
     value: string,
-    props?: Omit<UIContract["text"], "value">
+    props?: Omit<UIContract["text"], "value">,
   ): UINode<"text"> => ({
     type: "text",
     props: { ...props, value },
@@ -47,7 +56,7 @@ export const ui = {
   heading: (
     value: string,
     level: UIContract["heading"]["level"] = 1,
-    props?: Omit<UIContract["heading"], "value" | "level">
+    props?: Omit<UIContract["heading"], "value" | "level">,
   ): UINode<"heading"> => ({
     type: "heading",
     props: { ...props, value, level },
@@ -55,21 +64,21 @@ export const ui = {
   badge: (
     label: string,
     variant: UIContract["badge"]["variant"] = "primary",
-    size: UISize = "md"
+    size: UISize = "md",
   ): UINode<"badge"> => ({
     type: "badge",
     props: { label, variant, size },
   }),
   image: (
     src: string,
-    props?: Omit<UIContract["image"], "src">
+    props?: Omit<UIContract["image"], "src">,
   ): UINode<"image"> => ({
     type: "image",
     props: { ...props, src },
   }),
   video: (
     src: string,
-    props?: Omit<UIContract["video"], "src">
+    props?: Omit<UIContract["video"], "src">,
   ): UINode<"video"> => ({
     type: "video",
     props: { ...props, src },
@@ -77,7 +86,7 @@ export const ui = {
   icon: (
     name: string,
     size: UISize | number = "md",
-    color?: UIColor
+    color?: UIColor,
   ): UINode<"icon"> => ({
     type: "icon",
     props: { name, size, color },
@@ -86,18 +95,20 @@ export const ui = {
     type: "chart",
     props,
   }),
-  list: (props: UIContract["list"] & { children: UINode<any>[] }): UINode<"list"> => {
+  list: (
+    props: UIContract["list"] & { children: UINode<any>[] },
+  ): UINode<"list"> => {
     const { children, ...rest } = props;
     return { type: "list", props: rest, children };
   },
   listItem: (
-    props: UIContract["listItem"] & { children: UINode<any>[] }
+    props: UIContract["listItem"] & { children: UINode<any>[] },
   ): UINode<"listItem"> => {
     const { children, ...rest } = props;
     return { type: "listItem", props: rest, children };
   },
   form: (
-    props: UIContract["form"] & { children?: UINode<any>[] }
+    props: UIContract["form"] & { children?: UINode<any>[] },
   ): UINode<"form"> => {
     const { children, ...rest } = props;
     return { type: "form", props: rest, children };
@@ -128,7 +139,7 @@ export const ui = {
   }),
   label: (
     value: string,
-    props?: Omit<UIContract["label"], "value">
+    props?: Omit<UIContract["label"], "value">,
   ): UINode<"label"> => ({
     type: "label",
     props: { ...props, value },
@@ -146,13 +157,13 @@ export const ui = {
     props,
   }),
   float: (
-    props: UIContract["float"] & { children?: UINode<any>[] }
+    props: UIContract["float"] & { children?: UINode<any>[] },
   ): UINode<"float"> => {
     const { children, ...rest } = props;
     return { type: "float", props: rest, children };
   },
   dropdown: (
-    props: UIContract["dropdown"] & { children?: UINode<any>[] }
+    props: UIContract["dropdown"] & { children?: UINode<any>[] },
   ): UINode<"dropdown"> => {
     const { children, ...rest } = props;
     return { type: "dropdown", props: rest, children };

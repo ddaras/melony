@@ -27,7 +27,7 @@ export interface RequireApprovalOptions {
   shouldApprove?: (
     action: Action<any>,
     params: any,
-    context: RuntimeContext
+    context: RuntimeContext,
   ) => boolean | Promise<boolean>;
 }
 
@@ -66,7 +66,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
               title: "Security Error",
               children: [
                 ui.text(
-                  "This approval request is invalid or has already been used."
+                  "This approval request is invalid or has already been used.",
                 ),
               ],
             }),
@@ -81,7 +81,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
           if (options.secret) {
             const expectedToken = await signPayload(
               { action, params, approvalId },
-              options.secret
+              options.secret,
             );
             if (token !== expectedToken) {
               yield {
@@ -95,16 +95,16 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
             }
           }
 
-        // 4. Store approval in ephemeral state for the upcoming action execution
-        context.state.__approved_action = { action, params };
+          // 4. Store approval in ephemeral state for the upcoming action execution
+          context.state.__approved_action = { action, params };
 
-        // No need to return anything here!
-        // The Runtime will automatically pick up `event.nextAction`
-        // which was attached to the "action-approved" event.
-        return;
-      }
+          // No need to return anything here!
+          // The Runtime will automatically pick up `event.nextAction`
+          // which was attached to the "action-approved" event.
+          return;
+        }
 
-      // Handle Rejection
+        // Handle Rejection
         context.suspend({
           type: "error",
           data: {
@@ -127,7 +127,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         const needsApproval = await options.shouldApprove(
           action,
           params,
-          context
+          context,
         );
         if (!needsApproval) return;
       }
@@ -152,7 +152,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
       const token = options.secret
         ? await signPayload(
             { action: action.name, params, approvalId },
-            options.secret
+            options.secret,
           )
         : undefined;
 
@@ -224,7 +224,7 @@ async function signPayload(data: any, secret: string): Promise<string> {
     keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
 
   const signature = await crypto.subtle.sign("HMAC", key, dataToSign);

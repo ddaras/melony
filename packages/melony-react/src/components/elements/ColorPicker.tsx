@@ -63,7 +63,7 @@ export const ColorPicker: React.FC<UIContract["colorPicker"]> = ({
               disabled={disabled}
               className={cn(
                 "w-10 h-10 rounded-lg border border-border shadow-sm transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100",
-                "flex items-center justify-center p-1"
+                "flex items-center justify-center p-1",
               )}
             >
               <div
@@ -81,7 +81,7 @@ export const ColorPicker: React.FC<UIContract["colorPicker"]> = ({
                     type="button"
                     className={cn(
                       "w-6 h-6 rounded-md border border-border transition-transform hover:scale-110 active:scale-90",
-                      color === preset && "ring-2 ring-primary ring-offset-1"
+                      color === preset && "ring-2 ring-primary ring-offset-1",
                     )}
                     style={{ backgroundColor: preset }}
                     onClick={() => handleColorChange(preset)}

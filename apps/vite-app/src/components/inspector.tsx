@@ -18,9 +18,7 @@ export const Inspector = () => {
             <h2 className="text-lg font-semibold border-b pb-2">Inspector</h2>
             <div className="flex flex-col gap-4">
               {events.map((event: Event, index: number) => (
-                <div
-                  key={index}
-                >
+                <div key={index}>
                   {event.ui && <UIRenderer node={event.ui} />}
                   {event.type === "text" && (
                     <div className="text-sm text-foreground">
