@@ -28,7 +28,7 @@ export const ThreadList: React.FC<ThreadListProps> = ({
   }, [threads]);
 
   return (
-    <List padding={padding} gap={gap} flex="1" overflow="scroll">
+    <List padding={padding} gap={gap} flex="1" overflow="auto">
       {sortedThreads.map((thread) => {
         const isActive = thread.id === activeThreadId;
         return (

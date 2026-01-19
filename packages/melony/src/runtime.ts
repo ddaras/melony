@@ -4,12 +4,10 @@ import {
   NextAction,
   RuntimeContext,
   Config,
-  Plugin,
   HookGenerator,
 } from "./types";
 import { ui } from "./ui";
 import { generateId } from "./utils/generate-id";
-import { z } from "zod";
 
 /**
  * Helper to check if a value is a Melony Event.
@@ -334,24 +332,3 @@ export class Runtime<TState = any> {
     }
   }
 }
-
-export const melony = <TState = any>(config: Config<TState>) => {
-  const runtime = new Runtime<TState>(config);
-  return {
-    config,
-    run: runtime.run.bind(runtime),
-  };
-};
-
-/**
- * Helper to define an action with full type inference.
- */
-export const action = <T extends z.ZodSchema, TState = any>(
-  config: Action<T, TState>,
-): Action<T, TState> => config;
-
-/**
- * Helper to define a plugin.
- */
-export const plugin = <TState = any>(config: Plugin<TState>): Plugin<TState> =>
-  config;

@@ -312,6 +312,7 @@ export type Event = {
   timestamp?: number;
   role?: Role;
   state?: any;
+  metadata?: Record<string, any>;
   /**
    * Optional next action to execute immediately.
    * If provided, the runtime will skip the initial brain dispatch.

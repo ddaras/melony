@@ -15,6 +15,7 @@ import {
   List,
   ListItem,
   ThreadList,
+  useSurface,
 } from "@melony/react";
 import { Inspector } from "./components/inspector";
 import { createMelonyThreadService } from "./lib/services/thread-service";
@@ -67,6 +68,9 @@ export default App;
 
 const ChatApp = () => {
   const { user } = useAuth();
+  const { events: canvasEvents } = useSurface({ name: "canvas" });
+
+  const hasArtifacts = canvasEvents.length > 0;
 
   const appUserMetadata =
     user?.apps?.find((app: any) => app.id === "rUtMCDbkn3BVBfYp6BHw")
@@ -75,7 +79,7 @@ const ChatApp = () => {
   const brandKit = appUserMetadata?.brandKit || {};
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultRightCollapsed={!hasArtifacts}>
       <div className="flex h-screen relative bg-background overflow-hidden">
         <Sidebar side="left" width="16rem">
           <List padding="sm">
