@@ -112,12 +112,14 @@ export function PopupChat({
                 placeholder={placeholder}
                 starterPrompts={starterPrompts}
                 options={options}
-                className="h-full"
                 defaultSelectedIds={defaultSelectedIds}
               />
             ) : (
               <ThreadList
-                className="h-full"
+                padding="md"
+                gap="md"
+                background="muted"
+                radius="md"
               />
             )}
           </div>

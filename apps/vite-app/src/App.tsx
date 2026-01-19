@@ -16,6 +16,7 @@ import {
   ListItem,
   ThreadList,
 } from "@melony/react";
+import { Inspector } from "./components/inspector";
 import { createMelonyThreadService } from "./lib/services/thread-service";
 import {
   createMelonyAuthService,
@@ -44,14 +45,14 @@ export function App() {
       <ThemeProvider>
         <AuthProvider
           service={authService}
-          // welcomeScreenProps={{
-          //   title: "Welcome to Craffted",
-          //   description:
-          //     "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
-          //   imageUrl:
-          //     "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
-          //   imageAlt: "Craffted logo",
-          // }}
+        // welcomeScreenProps={{
+        //   title: "Welcome to Craffted",
+        //   description:
+        //     "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
+        //   imageUrl:
+        //     "https://img.freepik.com/free-vector/gradient-mosaic-instagram-posts-with-photo_23-2149064043.jpg?semt=ais_hybrid&w=740&q=80",
+        //   imageAlt: "Craffted logo",
+        // }}
         >
           <ThreadProvider service={threadService}>
             <ChatApp />
@@ -76,18 +77,17 @@ const ChatApp = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen relative bg-background overflow-hidden">
-        <Sidebar side="left" className="2xl:w-[18rem] w-[16rem]">
-          <List className="p-2">
+        <Sidebar side="left" width="16rem">
+          <List padding="sm">
             <ListItem
               onClickAction={ui.actions.navigate("/")}
-              className="font-bold tracking-wider text-foreground"
             >
               <IconDeviceHeartMonitor className="size-4" />
               Craffted
             </ListItem>
           </List>
 
-          <List className="p-2">
+          <List padding="sm">
             <CreateThreadListItem />
             <ListItem
               onClickAction={{
@@ -103,10 +103,9 @@ const ChatApp = () => {
             </ListItem>
           </List>
 
-          <ThreadList className="p-2 flex-1 overflow-y-auto" />
+          <ThreadList padding="sm" />
         </Sidebar>
         <FullChat
-          className="flex-1 overflow-hidden"
           headerProps={{
             leftContent: (
               <>
@@ -117,10 +116,15 @@ const ChatApp = () => {
               <div className="flex gap-2">
                 <ThemeToggle />
                 <AccountButton />
+                <SidebarToggle side="right" />
               </div>
             ),
           }}
         />
+
+        <Sidebar side="right" width="46vw">
+          <Inspector />
+        </Sidebar>
 
         <PopupChat />
       </div>

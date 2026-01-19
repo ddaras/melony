@@ -33,6 +33,7 @@ export function UIRenderer({ node }: UIRendererProps) {
     spacer: Elements.Spacer,
     divider: Elements.Divider,
     box: Elements.Box,
+    float: Elements.Float,
     image: Elements.Image,
     video: Elements.Video,
     icon: Elements.Icon,
@@ -60,7 +61,5 @@ export function UIRenderer({ node }: UIRendererProps) {
     <UIRenderer key={i} node={child} />
   ));
 
-  const componentProps = { ...props };
-
-  return <Component {...componentProps}>{renderedChildren}</Component>;
+  return <Component {...props}>{renderedChildren}</Component>;
 }

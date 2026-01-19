@@ -1,29 +1,18 @@
 import React from "react";
-import { SpacerProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
+import { paddingMap } from "@/lib/theme-utils";
 
-export const Spacer: React.FC<SpacerProps> = ({
+export const Spacer: React.FC<UIContract["spacer"]> = ({
   size = "md",
   direction = "vertical",
-  className,
-  style,
 }) => {
-  const sizeClasses: Record<string, string> = {
-    xs: "p-0.5",
-    sm: "p-1",
-    md: "p-2",
-    lg: "p-4",
-    xl: "p-8",
-  };
-
   return (
     <div
       className={cn(
         direction === "vertical" ? "w-full" : "h-full",
-        sizeClasses[size as keyof typeof sizeClasses] || "p-2",
-        className
+        paddingMap[size]
       )}
-      style={style}
     />
   );
 };

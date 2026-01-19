@@ -9,6 +9,7 @@ export * from "./providers/theme-provider";
 export * from "./hooks/use-melony";
 export * from "./hooks/use-auth";
 export * from "./hooks/use-threads";
+export * from "./hooks/use-surface";
 export * from "./hooks/use-screen-size";
 
 // Components
@@ -18,6 +19,7 @@ export * from "./components/chat-header";
 export * from "./components/popup-chat";
 export * from "./components/sidebar";
 export * from "./components/full-chat";
+export * from "./components/surface";
 export * from "./components/welcome-screen";
 export * from "./components/sidebar-toggle";
 export * from "./providers/sidebar-provider";
@@ -27,7 +29,6 @@ export * from "./components/create-thread-button";
 export * from "./components/account-button";
 export * from "./components/theme-toggle";
 export * from "./components/ui-renderer";
-export * from "./components/elements/Dropdown";
 export * from "./components/create-thread-list-item";
 
 // Elements
@@ -42,11 +43,13 @@ export * from "./components/elements/Upload";
 export * from "./components/elements/Heading";
 export * from "./components/elements/Image";
 export * from "./components/elements/Label";
+export * from "./components/elements/Dropdown";
 export * from "./components/elements/List";
 export * from "./components/elements/ListItem";
 export * from "./components/elements/Spacer";
 export * from "./components/elements/Divider";
 export * from "./components/elements/Box";
+export * from "./components/elements/Float";
 export * from "./components/elements/Chart";
 export * from "./components/elements/Card";
 export * from "./components/elements/Row";

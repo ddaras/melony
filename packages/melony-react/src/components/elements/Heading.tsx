@@ -1,12 +1,13 @@
 import React from "react";
-import { HeadingProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
+import { textAlignMap, colorTextMap } from "@/lib/theme-utils";
 
-export const Heading: React.FC<HeadingProps> = ({
+export const Heading: React.FC<UIContract["heading"]> = ({
   value,
   level = 2,
-  className,
-  style,
+  color = "foreground",
+  align = "start",
 }) => {
   const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
@@ -23,10 +24,9 @@ export const Heading: React.FC<HeadingProps> = ({
     <Tag
       className={cn(
         levelClasses[Tag] || levelClasses.h2,
-        "text-foreground",
-        className
+        colorTextMap[color],
+        textAlignMap[align]
       )}
-      style={style}
     >
       {value}
     </Tag>

@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { ChartProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
 
-export const Chart: React.FC<ChartProps> = ({
+export const Chart: React.FC<UIContract["chart"]> = ({
   data,
   chartType = "bar",
-  size = "md",
+  title,
+  height = 250,
   showValues = false,
   showGrid = false,
   showTooltips = true,
-  className,
-  style,
 }) => {
   const [tooltip, setTooltip] = useState<{
     visible: boolean;
@@ -20,23 +19,20 @@ export const Chart: React.FC<ChartProps> = ({
     value: number;
   } | null>(null);
 
-  // Ensure data is an array
   if (!Array.isArray(data)) {
     return (
-      <div className="p-4 text-destructive border border-destructive/20 rounded-md bg-destructive/5">
+      <div className="p-4 text-destructive border border-destructive/20 rounded-md bg-destructive/5 text-sm">
         Error: Chart data must be an array
       </div>
     );
   }
 
-  // Calculate max value for scaling
   const maxValue = Math.max(...data.map((d) => d.value), 1);
   const padding = { top: 40, right: 20, bottom: 40, left: 20 };
   
-  const chartWidth =
-    size === "sm" ? 300 : size === "md" ? 450 : size === "lg" ? 600 : 800;
-  const chartHeight =
-    size === "sm" ? 150 : size === "md" ? 250 : size === "lg" ? 350 : 450;
+  // Use container width or default
+  const chartHeight = height;
+  const chartWidth = 600; // Will be responsive via viewBox
 
   const defaultColors = [
     "hsl(var(--primary))",
@@ -111,7 +107,7 @@ export const Chart: React.FC<ChartProps> = ({
     const actualBarWidth = (totalBarSpace - barSpacing * (data.length + 1)) / data.length;
 
     return (
-      <svg width={chartWidth} height={chartHeight + padding.bottom} className="overflow-visible">
+      <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`} className="w-full h-auto overflow-visible">
         {renderGrid()}
         {data.map((item, index) => {
           const barHeight = (item.value / maxValue) * chartHeight;
@@ -157,7 +153,7 @@ export const Chart: React.FC<ChartProps> = ({
     const pathData = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
 
     return (
-      <svg width={chartWidth} height={chartHeight + padding.bottom} className="overflow-visible">
+      <svg viewBox={`0 0 ${chartWidth} ${chartHeight + padding.bottom}`} className="w-full h-auto overflow-visible">
         {renderGrid()}
         <path d={pathData} fill="none" stroke={getColor(0)} strokeWidth={3} className="transition-all" />
         {points.map((point, index) => (
@@ -199,7 +195,8 @@ export const Chart: React.FC<ChartProps> = ({
   };
 
   return (
-    <div className={cn("py-4 overflow-x-auto", className)} style={style}>
+    <div className="py-4 w-full">
+      {title && <div className="text-sm font-semibold mb-4 text-center">{title}</div>}
       {renderChart()}
     </div>
   );

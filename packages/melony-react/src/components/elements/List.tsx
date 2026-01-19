@@ -1,15 +1,17 @@
 import React from "react";
-import { ListProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
+import { paddingMap, gapMap } from "@/lib/theme-utils";
 
-export const List: React.FC<ListProps> = ({ children, width, className, style }) => {
+export const List: React.FC<UIContract["list"] & { children?: React.ReactNode, flex?: string, overflow?: string }> = ({ children, padding = "none", gap = "none", flex, overflow }) => {
   return (
     <div
-      className={cn("flex flex-col list-none p-0 m-0", className)}
-      style={{
-        width: width,
-        ...style,
-      }}
+      className={cn(
+        "flex flex-col list-none m-0",
+        paddingMap[padding],
+        gapMap[gap],
+      )}
+      style={{ flex, overflow }}
     >
       {children as React.ReactNode}
     </div>

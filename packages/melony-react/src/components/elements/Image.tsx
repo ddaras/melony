@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ImageProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -8,13 +8,15 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
+import { widthMap, radiusMap } from "@/lib/theme-utils";
 
-export const Image: React.FC<ImageProps> = ({
+export const Image: React.FC<UIContract["image"]> = ({
   src,
   alt,
-  size = "sm",
-  className,
-  style,
+  width = "auto",
+  height,
+  radius = "md",
+  objectFit = "cover",
 }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,12 +27,8 @@ export const Image: React.FC<ImageProps> = ({
   const [gallery, setGallery] = useState<{ src: string; alt: string }[]>([]);
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  // Scan siblings only when the dialog opens
   useEffect(() => {
     if (open && triggerRef.current) {
-      // 1. Find the parent container (the Row or Col)
-      // We climb up until we find a parent that has more than one child
-      // (this is our 'group')
       let parent = triggerRef.current.parentElement;
       while (
         parent &&
@@ -42,18 +40,14 @@ export const Image: React.FC<ImageProps> = ({
       const container = parent?.parentElement;
 
       if (container) {
-        // 2. Find all images in that same container
         const foundImgs = Array.from(container.querySelectorAll("img"))
           .map((img) => ({
             src: img.getAttribute("src") || "",
             alt: img.getAttribute("alt") || "",
           }))
-          // Deduplicate based on src
           .filter((v, i, a) => a.findIndex((t) => t.src === v.src) === i);
 
         setGallery(foundImgs);
-
-        // 3. Set the starting index to this image
         const idx = foundImgs.findIndex((img) => img.src === src);
         setCurrentIndex(idx >= 0 ? idx : 0);
       }
@@ -66,12 +60,6 @@ export const Image: React.FC<ImageProps> = ({
 
   const currentImage = gallery[currentIndex] || { src, alt };
   const hasMultiple = gallery.length > 1;
-
-  const sizes = {
-    sm: "h-11",
-    md: "h-22",
-    lg: "h-44",
-  };
 
   const handleError = () => {
     setHasError(true);
@@ -86,11 +74,11 @@ export const Image: React.FC<ImageProps> = ({
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-md border bg-muted text-muted-foreground",
-          sizes[size as keyof typeof sizes] || "h-11 w-11",
-          className
+          "flex items-center justify-center bg-muted text-muted-foreground",
+          widthMap[width],
+          radiusMap[radius]
         )}
-        style={style}
+        style={{ height: height || "100px" }}
       >
         <span className="text-[10px]">Error</span>
       </div>
@@ -103,10 +91,11 @@ export const Image: React.FC<ImageProps> = ({
         <div
           ref={triggerRef}
           className={cn(
-            "relative overflow-hidden rounded-md border cursor-pointer",
-            className
+            "relative overflow-hidden cursor-pointer",
+            widthMap[width],
+            radiusMap[radius]
           )}
-          style={style}
+          style={{ height }}
         >
           <img
             src={src}
@@ -114,9 +103,10 @@ export const Image: React.FC<ImageProps> = ({
             onError={handleError}
             onLoad={handleLoad}
             className={cn(
-              "block h-auto w-full transition-opacity duration-200 hover:opacity-90",
+              "block w-full transition-opacity duration-200 hover:opacity-90",
               isLoading ? "opacity-0" : "opacity-100",
-              sizes[size as keyof typeof sizes]
+              objectFit === "cover" ? "object-cover" : objectFit === "contain" ? "object-contain" : "object-fill",
+              height ? "h-full" : "h-auto"
             )}
           />
           {isLoading && (
@@ -133,7 +123,6 @@ export const Image: React.FC<ImageProps> = ({
             <IconX size={20} />
           </DialogClose>
 
-          {/* Navigation Arrows */}
           {hasMultiple && (
             <>
               <button

@@ -5,6 +5,7 @@ export { Card } from "./Card";
 export { Row } from "./Row";
 export { Col } from "./Col";
 export { Box } from "./Box";
+export { Float } from "./Float";
 export { Spacer } from "./Spacer";
 export { Divider } from "./Divider";
 export { List } from "./List";
@@ -35,4 +36,4 @@ export { Form } from "./Form";
 export { Label } from "./Label";
 
 // Export types
-export * from "./component-types";
+export type { UIContract } from "melony";

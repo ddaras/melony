@@ -1,21 +1,21 @@
 import React from "react";
+import { UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import { Input as InputBase } from "../ui/input";
 import { Field, FieldTitle } from "../ui/field";
-import { InputProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { widthMap } from "@/lib/theme-utils";
 
-export const Input: React.FC<InputProps> = ({
+export const Input: React.FC<UIContract["input"]> = ({
   inputType = "text",
   placeholder,
   defaultValue,
-  value,
   label,
   name,
   disabled,
+  required,
+  width = "full",
   onChangeAction,
-  className,
-  style,
 }) => {
   const { sendEvent } = useMelony();
 
@@ -32,17 +32,17 @@ export const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <Field className={cn("w-full", className)} style={style}>
-      {label && <FieldTitle>{label}</FieldTitle>}
+    <Field className={cn(widthMap[width])}>
+      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
       <InputBase
         type={inputType}
         name={name}
         id={name}
         placeholder={placeholder}
         defaultValue={defaultValue}
-        value={value}
         disabled={disabled}
         onChange={handleChange}
+        required={required}
       />
     </Field>
   );

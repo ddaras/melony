@@ -7,37 +7,12 @@ import {
 } from "@/components/ui/popover";
 import { ThreadList } from "./thread-list";
 import { IconHistory } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export interface ThreadPopoverProps {
-  className?: string;
-  buttonClassName?: string;
-  buttonVariant?:
-    | "default"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "destructive"
-    | "link";
-  buttonSize?:
-    | "default"
-    | "xs"
-    | "sm"
-    | "lg"
-    | "icon"
-    | "icon-xs"
-    | "icon-sm"
-    | "icon-lg";
-  emptyState?: React.ReactNode;
 }
 
 export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
-  className,
-  buttonClassName,
-  buttonVariant = "ghost",
-  buttonSize = "icon",
-  emptyState,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -59,21 +34,20 @@ export const ThreadPopover: React.FC<ThreadPopoverProps> = ({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant={buttonVariant}
-          size={buttonSize}
-          className={cn(buttonClassName)}
+          variant="ghost"
+          size="icon"
         >
           <IconHistory className="size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={cn("w-80 p-0", className)}
+        className="w-80 p-0"
         side="bottom"
         align="start"
         sideOffset={8}
       >
         <div className="flex flex-col h-[400px]">
-          <ThreadList emptyState={emptyState} className="h-full" />
+          <ThreadList />
         </div>
       </PopoverContent>
     </Popover>

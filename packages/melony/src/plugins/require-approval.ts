@@ -1,5 +1,5 @@
 import { plugin } from "../runtime";
-import { ui } from "../types";
+import { ui } from "../ui";
 import type { Action, RuntimeContext } from "../types";
 
 export interface RequireApprovalOptions {

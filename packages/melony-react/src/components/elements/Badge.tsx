@@ -1,27 +1,31 @@
 import React from "react";
+import { UIContract } from "melony";
 import { Badge as BadgeBase } from "../ui/badge";
-import { BadgeProps } from "./component-types";
-import { cn } from "@/lib/utils";
 
-export const Badge: React.FC<BadgeProps> = ({
+export const Badge: React.FC<UIContract["badge"]> = ({
   label,
   variant = "primary",
-  className,
-  style,
+  size = "md",
 }) => {
   const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
     primary: "default",
     secondary: "secondary",
     danger: "destructive",
-    success: "default", // Mapping success to default/primary
-    warning: "secondary", // Mapping warning to secondary
+    success: "default", 
+    warning: "secondary",
+    outline: "outline",
+  };
+
+  const sizeClasses = {
+    sm: "text-[10px] px-1.5 py-0",
+    md: "text-xs px-2.5 py-0.5",
+    lg: "text-sm px-3 py-1",
   };
 
   return (
     <BadgeBase
-      variant={variantMap[variant as keyof typeof variantMap] || "default"}
-      className={className}
-      style={style}
+      variant={variantMap[variant] || "default"}
+      className={sizeClasses[size]}
     >
       {label}
     </BadgeBase>

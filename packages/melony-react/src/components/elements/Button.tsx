@@ -1,19 +1,19 @@
 import React from "react";
+import { UIContract, UIJustify } from "melony";
 import { Button as ButtonBase } from "../ui/button";
-import { ButtonProps } from "./component-types";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
+import { justifyMap } from "@/lib/theme-utils";
 
-export const Button: React.FC<ButtonProps> = ({
-  type,
+export const Button: React.FC<UIContract["button"] & { justify?: UIJustify }> = ({
+  type = "button",
   label,
   variant = "primary",
-  size = "default",
+  size = "md",
   disabled = false,
-  fullWidth = false,
+  width,
   onClickAction,
-  className,
-  style,
+  justify = "center",
 }) => {
   const { sendEvent } = useMelony();
 
@@ -24,20 +24,29 @@ export const Button: React.FC<ButtonProps> = ({
     primary: "default",
     secondary: "secondary",
     danger: "destructive",
+    success: "default", // We might want a custom success style later
     outline: "outline",
     ghost: "ghost",
     link: "link",
-    success: "default", // Success doesn't have a direct shadcn mapping in base variant, default is usually primary
+  };
+
+  const widthMap: Record<string, string> = {
+    full: "w-full",
+    auto: "w-auto",
+    "1/2": "w-1/2",
+    "1/3": "w-1/3",
+    "2/3": "w-2/3",
+    "1/4": "w-1/4",
+    "3/4": "w-3/4",
   };
 
   return (
     <ButtonBase
       type={type}
-      variant={variantMap[variant as keyof typeof variantMap] || "default"}
+      variant={variantMap[variant] || "default"}
       size={size === "md" ? "default" : (size as any)}
       disabled={disabled}
-      className={cn(fullWidth ? "w-full" : undefined, className)}
-      style={style}
+      className={cn(width && widthMap[width], justifyMap[justify])}
       onClick={() => {
         if (onClickAction) {
           sendEvent(onClickAction as any);

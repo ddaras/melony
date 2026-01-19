@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { UploadProps } from "./component-types";
+import { UIContract } from "melony";
 import { Button } from "../ui/button";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
@@ -7,15 +7,14 @@ import { IconUpload, IconLoader2, IconCheck, IconX } from "@tabler/icons-react";
 import { UIRenderer } from "../ui-renderer";
 import { Image } from "../elements/Image";
 
-export const Upload: React.FC<UploadProps> = ({
+export const Upload: React.FC<UIContract["upload"]> = ({
   label = "Upload",
   multiple = false,
   accept,
   onUploadAction,
-  className,
-  style,
   initialFiles,
   mode = "append",
+  disabled,
 }) => {
   const { sendEvent, events } = useMelony();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +46,7 @@ export const Upload: React.FC<UploadProps> = ({
           name: string;
           type: string;
           size: number;
-          data: string; // base64 string
+          data: string;
         }>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => {
@@ -106,7 +105,7 @@ export const Upload: React.FC<UploadProps> = ({
   };
 
   return (
-    <div className={cn("relative inline-block", className)} style={style}>
+    <div className="relative inline-block">
       <input
         type="file"
         ref={fileInputRef}
@@ -114,13 +113,13 @@ export const Upload: React.FC<UploadProps> = ({
         multiple={multiple}
         accept={accept}
         className="hidden"
-        disabled={isUploading}
+        disabled={isUploading || disabled}
       />
 
       <div className="flex flex-wrap gap-2 mb-2 items-center">
         {showInitialFiles &&
           initialFiles?.map((file, index) => (
-            <Image key={index} src={file.url} alt={file.name} size="md" />
+            <Image key={index} src={file.url} alt={file.name} width="min" radius="md" />
           ))}
 
         {displayEvents.map((event, index) =>
@@ -129,25 +128,18 @@ export const Upload: React.FC<UploadProps> = ({
 
         <Button
           type="button"
-          disabled={isUploading}
+          disabled={isUploading || disabled}
           onClick={() => fileInputRef.current?.click()}
-          className="gap-2"
-          variant={
-            status === "error"
-              ? "destructive"
-              : status === "success"
-                ? "outline"
-                : "default"
-          }
+          variant="default"
         >
           {isUploading ? (
-            <IconLoader2 className="h-4 w-4 animate-spin" />
+            <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
           ) : status === "success" ? (
-            <IconCheck className="h-4 w-4 text-green-500" />
+            <IconCheck className="h-4 w-4 text-green-500 mr-2" />
           ) : status === "error" ? (
-            <IconX className="h-4 w-4" />
+            <IconX className="h-4 w-4 mr-2" />
           ) : (
-            <IconUpload className="h-4 w-4" />
+            <IconUpload className="h-4 w-4 mr-2" />
           )}
           {status === "success"
             ? "Uploaded"

@@ -1,21 +1,21 @@
 import React from "react";
+import { UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import { Textarea as TextareaBase } from "../ui/textarea";
 import { Field, FieldTitle } from "../ui/field";
-import { TextareaProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { widthMap } from "@/lib/theme-utils";
 
-export const Textarea: React.FC<TextareaProps> = ({
+export const Textarea: React.FC<UIContract["textarea"]> = ({
   placeholder,
   defaultValue,
-  value,
   label,
   name,
   disabled,
   rows,
+  required,
+  width = "full",
   onChangeAction,
-  className,
-  style,
 }) => {
   const { sendEvent } = useMelony();
 
@@ -32,17 +32,17 @@ export const Textarea: React.FC<TextareaProps> = ({
   };
 
   return (
-    <Field className={cn("w-full", className)} style={style}>
-      {label && <FieldTitle>{label}</FieldTitle>}
+    <Field className={cn(widthMap[width])}>
+      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
       <TextareaBase
         name={name}
         id={name}
         placeholder={placeholder}
         defaultValue={defaultValue}
-        value={value}
         disabled={disabled}
         rows={rows}
         onChange={handleChange}
+        required={required}
       />
     </Field>
   );

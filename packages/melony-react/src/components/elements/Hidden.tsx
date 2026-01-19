@@ -1,7 +1,7 @@
 import React from "react";
-import { HiddenProps } from "./component-types";
+import { UIContract } from "melony";
 
-export const Hidden: React.FC<HiddenProps> = ({ name, value }) => {
+export const Hidden: React.FC<UIContract["hidden"]> = ({ name, value }) => {
   return <input type="hidden" name={name} value={value} />;
 };
 

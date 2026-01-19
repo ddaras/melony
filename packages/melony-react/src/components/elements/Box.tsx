@@ -1,51 +1,42 @@
 import React from "react";
-import { BoxProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
+import { 
+  paddingMap, 
+  marginMap, 
+  colorBgMap, 
+  colorBorderMap, 
+  radiusMap, 
+  widthMap, 
+  shadowMap 
+} from "@/lib/theme-utils";
 
-export const Box: React.FC<BoxProps> = ({
+export const Box: React.FC<UIContract["box"] & { children?: React.ReactNode | React.ReactNode[] }> = ({
   children,
-  padding = "md",
-  margin,
+  padding = "none",
+  margin = "none",
   background,
   border = false,
-  borderRadius,
-  width,
-  height,
-  overflow = "visible",
-  className,
-  style,
+  borderColor = "border",
+  radius = "none",
+  width = "auto",
+  height = "auto",
+  shadow = "none",
 }) => {
-  const paddingClasses: Record<string, string> = {
-    xs: "p-1",
-    sm: "p-2",
-    md: "p-4",
-    lg: "p-6",
-    xl: "p-8",
-  };
-
-  const overflowClasses = {
-    auto: "overflow-auto",
-    hidden: "overflow-hidden",
-    scroll: "overflow-scroll",
-    visible: "overflow-visible",
-  };
-
   return (
     <div
       className={cn(
-        paddingClasses[padding as keyof typeof paddingClasses] || "p-4",
-        border && "border rounded-md",
-        overflowClasses[overflow as keyof typeof overflowClasses],
-        className
+        "relative",
+        paddingMap[padding],
+        marginMap[margin],
+        background && colorBgMap[background],
+        border && "border",
+        border && colorBorderMap[borderColor],
+        radiusMap[radius],
+        widthMap[width],
+        height === "full" && "h-full",
+        shadowMap[shadow]
       )}
-      style={{
-        margin: margin,
-        background: background ?? undefined,
-        borderRadius: borderRadius,
-        width: width,
-        height: height,
-        ...style,
-      }}
     >
       {children as React.ReactNode}
     </div>

@@ -4,13 +4,18 @@ import { useThreads } from "@/hooks/use-threads";
 import { cn } from "@/lib/utils";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ListItem } from "./elements";
+import { UIColor, UIRadius, UISpacing } from "melony";
 
 export interface CreateThreadListItemProps {
-  className?: string;
+  padding?: UISpacing;
+  background?: UIColor;
+  radius?: UIRadius;
 }
 
 export const CreateThreadListItem: React.FC<CreateThreadListItemProps> = ({
-  className,
+  padding = "sm",
+  background,
+  radius = "md",
 }) => {
   const { createThread } = useThreads();
   const [isCreating, setIsCreating] = React.useState(false);
@@ -49,7 +54,9 @@ export const CreateThreadListItem: React.FC<CreateThreadListItemProps> = ({
           url: "?",
         },
       }}
-      className={cn(className)}
+      padding={padding}
+      background={background}
+      radius={radius}
     >
       <IconPlus className="size-4" />
       New chat

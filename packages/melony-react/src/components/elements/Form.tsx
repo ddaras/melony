@@ -1,13 +1,13 @@
 import React, { useState } from "react";
+import { UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
-import { FormProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { gapMap } from "@/lib/theme-utils";
 
-export const Form: React.FC<FormProps> = ({
+export const Form: React.FC<UIContract["form"] & { children?: React.ReactNode[] }> = ({
   children,
   onSubmitAction,
-  className,
-  style,
+  gap = "md",
 }) => {
   const { sendEvent } = useMelony();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -15,7 +15,6 @@ export const Form: React.FC<FormProps> = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Prevent double submission
     if (isSubmitted) return;
 
     const formData = new FormData(e.currentTarget);
@@ -27,7 +26,7 @@ export const Form: React.FC<FormProps> = ({
     if (onSubmitAction) {
       setIsSubmitted(true);
 
-      if ("type" in onSubmitAction) {
+      if (typeof onSubmitAction === "object" && "type" in onSubmitAction) {
         sendEvent({
           ...onSubmitAction,
           data: {
@@ -35,7 +34,7 @@ export const Form: React.FC<FormProps> = ({
             ...data,
           },
         } as any);
-      } else {
+      } else if (typeof onSubmitAction === "function") {
         sendEvent(onSubmitAction(data));
       }
     }
@@ -44,13 +43,13 @@ export const Form: React.FC<FormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn("w-full", className)}
-      style={style}
+      className="w-full"
     >
       <fieldset disabled={isSubmitted} className="m-0 border-0 p-0">
         <div
           className={cn(
-            "flex flex-col gap-4 transition-opacity",
+            "flex flex-col transition-opacity",
+            gapMap[gap],
             isSubmitted && "opacity-60 pointer-events-none"
           )}
         >

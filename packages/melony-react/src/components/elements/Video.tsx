@@ -1,8 +1,9 @@
 import React from "react";
-import { VideoProps } from "./component-types";
+import { UIContract } from "melony";
 import { cn } from "@/lib/utils";
+import { widthMap, radiusMap } from "@/lib/theme-utils";
 
-export const Video: React.FC<VideoProps> = ({
+export const Video: React.FC<UIContract["video"]> = ({
   src,
   poster,
   autoPlay = false,
@@ -10,9 +11,8 @@ export const Video: React.FC<VideoProps> = ({
   loop = false,
   muted = false,
   aspectRatio = "16/9",
-  width = "100%",
-  className,
-  style,
+  width = "full",
+  radius = "lg",
 }) => {
   const aspectRatios = {
     "16/9": "aspect-video",
@@ -24,14 +24,11 @@ export const Video: React.FC<VideoProps> = ({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg bg-black shadow-sm",
-        aspectRatios[aspectRatio as keyof typeof aspectRatios] || "aspect-video",
-        className
+        "relative overflow-hidden bg-black shadow-sm",
+        aspectRatios[aspectRatio] || "aspect-video",
+        widthMap[width],
+        radiusMap[radius]
       )}
-      style={{
-        width: typeof width === "number" ? `${width}px` : width,
-        ...style,
-      }}
     >
       <video
         src={src}

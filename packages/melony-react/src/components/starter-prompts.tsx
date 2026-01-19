@@ -4,12 +4,10 @@ import { Button } from "./elements";
 
 interface StarterPromptsProps {
   prompts: StarterPrompt[];
-  onPromptClick: (prompt: string) => void;
 }
 
 export function StarterPrompts({
   prompts,
-  onPromptClick,
 }: StarterPromptsProps) {
   if (!prompts || prompts.length === 0) {
     return null;
@@ -34,7 +32,7 @@ export function StarterPrompts({
               role: "user",
               data: { content: item.prompt },
             }}
-            className="w-full justify-start"
+            justify="start"
           />
         ))}
       </div>

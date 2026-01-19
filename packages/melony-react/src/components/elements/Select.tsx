@@ -1,4 +1,5 @@
 import React from "react";
+import { UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import {
   Select as SelectRoot,
@@ -8,20 +9,19 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Field, FieldTitle } from "../ui/field";
-import { SelectProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { widthMap } from "@/lib/theme-utils";
 
-export const Select: React.FC<SelectProps> = ({
+export const Select: React.FC<UIContract["select"]> = ({
   options,
   defaultValue,
-  value,
   label,
   name,
   disabled,
+  required,
+  width = "full",
   placeholder,
   onChangeAction,
-  className,
-  style,
 }) => {
   const { sendEvent } = useMelony();
 
@@ -38,13 +38,13 @@ export const Select: React.FC<SelectProps> = ({
   };
 
   return (
-    <Field className={cn("w-full", className)} style={style}>
-      {label && <FieldTitle>{label}</FieldTitle>}
+    <Field className={cn(widthMap[width])}>
+      {label && <FieldTitle>{label}{required && <span className="text-destructive ml-1">*</span>}</FieldTitle>}
       <SelectRoot
         defaultValue={defaultValue}
-        value={value}
         disabled={disabled}
         onValueChange={(value) => handleValueChange(value || "")}
+        required={required}
       >
         <SelectTrigger className="w-full">
           <SelectValue />

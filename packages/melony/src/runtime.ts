@@ -5,9 +5,9 @@ import {
   RuntimeContext,
   Config,
   Plugin,
-  ui,
   HookGenerator,
 } from "./types";
+import { ui } from "./ui";
 import { generateId } from "./utils/generate-id";
 import { z } from "zod";
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { UIContract } from "melony";
 import {
   Card as CardBase,
   CardHeader,
@@ -6,20 +7,26 @@ import {
   CardDescription,
   CardContent,
 } from "../ui/card";
-import { CardProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { colorBgMap, paddingMap, radiusMap, shadowMap } from "@/lib/theme-utils";
 
-export const Card: React.FC<CardProps> = ({
+export const Card: React.FC<UIContract["card"] & { children?: React.ReactNode[] }> = ({
   children,
   title,
   subtitle,
-  className,
-  style,
+  background,
+  padding = "md",
+  radius = "md",
+  shadow = "md",
 }) => {
   return (
     <CardBase
-      className={cn("min-w-96", className)}
-      style={style}
+      className={cn(
+        "min-w-96 relative",
+        background && colorBgMap[background],
+        radius && radiusMap[radius],
+        shadow && shadowMap[shadow]
+      )}
     >
       {(title || subtitle) && (
         <CardHeader className="pb-3">
@@ -27,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
           {subtitle && <CardDescription>{subtitle}</CardDescription>}
         </CardHeader>
       )}
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className={cn("flex flex-col gap-4", paddingMap[padding])}>
         {children as React.ReactNode}
       </CardContent>
     </CardBase>

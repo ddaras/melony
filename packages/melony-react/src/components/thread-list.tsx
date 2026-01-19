@@ -3,13 +3,16 @@ import { IconTrash } from "@tabler/icons-react";
 import { useThreads } from "@/hooks/use-threads";
 import { Dropdown } from "./elements/Dropdown";
 import { List, ListItem } from "./elements";
+import { UIColor, UISpacing, UIRadius } from "melony";
 
 export interface ThreadListProps {
-  className?: string;
-  emptyState?: React.ReactNode;
+  padding?: UISpacing;
+  gap?: UISpacing;
+  background?: UIColor;
+  radius?: UIRadius;
 }
 
-export const ThreadList: React.FC<ThreadListProps> = ({ className }) => {
+export const ThreadList: React.FC<ThreadListProps> = ({ padding, background, gap, radius = "md" }) => {
   const { threads, activeThreadId, deleteThread } = useThreads();
 
   const sortedThreads = React.useMemo(() => {
@@ -29,7 +32,7 @@ export const ThreadList: React.FC<ThreadListProps> = ({ className }) => {
   };
 
   return (
-    <List className={className}>
+    <List padding={padding} gap={gap} flex="1" overflow="scroll">
       {sortedThreads.map((thread) => {
         const isActive = thread.id === activeThreadId;
         return (
@@ -41,11 +44,10 @@ export const ThreadList: React.FC<ThreadListProps> = ({ className }) => {
                 url: `?threadId=${thread.id}`,
               },
             }}
-            className={
-              isActive
-                ? "bg-muted text-foreground group"
-                : "hover:bg-muted/50 text-muted-foreground hover:text-foreground group"
-            }
+            background={background}
+            radius={radius}
+            padding={padding}
+            gap={gap}
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">

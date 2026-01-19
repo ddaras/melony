@@ -1,4 +1,5 @@
 import z from "zod";
+import { ui } from "./ui";
 
 // ============================================
 // UI Protocol & Contracts
@@ -21,9 +22,14 @@ export type UIColor =
   | "foreground"
   | "muted"
   | "mutedForeground"
-  | "border";
+  | "border"
+  | "transparent";
 
-export type UISpacing = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+
+export type UIWidth = "auto" | "full" | "min" | "max" | "1/2" | "1/3" | "2/3" | "1/4" | "3/4";
+export type UIShadow = "none" | "sm" | "md" | "lg" | "xl";
+export type UIRadius = "none" | "sm" | "md" | "lg" | "full";
 
 /**
  * UI Component Contracts
@@ -33,31 +39,44 @@ export interface UIContract {
   card: {
     title?: string;
     subtitle?: string;
-    background?: string;
+    background?: UIColor;
+    padding?: UISpacing;
+    radius?: UIRadius;
+    shadow?: UIShadow;
     isLoading?: boolean;
+    group?: boolean;
   };
   row: {
     align?: UIAlign;
     justify?: UIJustify;
     wrap?: UIWrap;
     gap?: UISpacing;
+    padding?: UISpacing;
+    width?: UIWidth;
+    group?: boolean;
   };
   col: {
     align?: UIAlign;
     justify?: UIJustify;
     gap?: UISpacing;
-    width?: string | number;
-    height?: string | number;
+    width?: UIWidth;
+    height?: "auto" | "full";
     padding?: UISpacing;
+    background?: UIColor;
+    radius?: UIRadius;
+    group?: boolean;
   };
   box: {
     padding?: UISpacing;
-    margin?: string | number;
-    background?: string;
+    margin?: UISpacing;
+    background?: UIColor;
     border?: boolean;
-    borderRadius?: UISpacing;
-    width?: string | number;
-    height?: string | number;
+    borderColor?: UIColor;
+    radius?: UIRadius;
+    width?: UIWidth;
+    height?: "auto" | "full";
+    shadow?: UIShadow;
+    group?: boolean;
   };
   spacer: {
     size?: UISpacing;
@@ -66,6 +85,7 @@ export interface UIContract {
   divider: {
     orientation?: UIOrientation;
     color?: UIColor;
+    margin?: UISpacing;
   };
   text: {
     value: string;
@@ -77,16 +97,21 @@ export interface UIContract {
   heading: {
     value: string;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
+    color?: UIColor;
+    align?: UIAlign;
   };
   badge: {
     label: string;
-    variant?: "primary" | "secondary" | "success" | "danger" | "warning";
+    variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "outline";
     size?: UISize;
   };
   image: {
     src: string;
     alt?: string;
-    size?: UISize;
+    width?: UIWidth;
+    height?: string | number;
+    radius?: UIRadius;
+    objectFit?: "cover" | "contain" | "fill";
     groupId?: string;
   };
   video: {
@@ -97,33 +122,48 @@ export interface UIContract {
     loop?: boolean;
     muted?: boolean;
     aspectRatio?: "16/9" | "4/3" | "1/1" | "9/16";
-    width?: string | number;
+    width?: UIWidth;
+    radius?: UIRadius;
   };
   icon: {
     name: string;
-    size?: UISize;
+    size?: UISize | number;
     color?: UIColor;
   };
   chart: {
     data: Array<{ label: string; value: number; color?: string }>;
     chartType?: "bar" | "line" | "area" | "pie";
     title?: string;
+    height?: number;
+    showValues?: boolean;
+    showGrid?: boolean;
+    showTooltips?: boolean;
   };
-  list: {};
+  list: {
+    padding?: UISpacing;
+    gap?: UISpacing;
+  };
   listItem: {
     onClickAction?: Event;
     gap?: UISpacing;
+    padding?: UISpacing;
+    background?: UIColor;
+    radius?: UIRadius;
   };
   form: {
     onSubmitAction?: Event | ((data: any) => Event);
+    gap?: UISpacing;
   };
   input: {
     name: string;
     label?: string;
     placeholder?: string;
     defaultValue?: string;
-    inputType?: string;
+    inputType?: "text" | "password" | "email" | "number" | "tel" | "url";
     onChangeAction?: Event;
+    disabled?: boolean;
+    required?: boolean;
+    width?: UIWidth;
   };
   textarea: {
     name: string;
@@ -132,6 +172,9 @@ export interface UIContract {
     defaultValue?: string;
     rows?: number;
     onChangeAction?: Event;
+    disabled?: boolean;
+    required?: boolean;
+    width?: UIWidth;
   };
   select: {
     name: string;
@@ -140,12 +183,16 @@ export interface UIContract {
     defaultValue?: string;
     placeholder?: string;
     onChangeAction?: Event;
+    disabled?: boolean;
+    required?: boolean;
+    width?: UIWidth;
   };
   checkbox: {
     name: string;
     label?: string;
     checked?: boolean;
     onChangeAction?: Event;
+    disabled?: boolean;
   };
   hidden: {
     name: string;
@@ -158,17 +205,21 @@ export interface UIContract {
     defaultValue?: string;
     orientation?: UIOrientation;
     onChangeAction?: Event;
+    disabled?: boolean;
   };
   label: {
     value: string;
     htmlFor?: string;
     required?: boolean;
+    size?: UISpacing;
+    color?: UIColor;
   };
   colorPicker: {
     name: string;
     label?: string;
     defaultValue?: string;
     onChangeAction?: Event;
+    disabled?: boolean;
   };
   upload: {
     label?: string;
@@ -177,21 +228,29 @@ export interface UIContract {
     initialFiles?: { name: string; url: string }[];
     onUploadAction?: Event | ((data: any) => Event);
     mode?: "append" | "replace";
+    disabled?: boolean;
   };
   button: {
-    type?: string;
+    type?: "button" | "submit" | "reset";
     label: string;
     variant?:
-      | "primary"
-      | "secondary"
-      | "success"
-      | "danger"
-      | "outline"
-      | "ghost"
-      | "link";
+    | "primary"
+    | "secondary"
+    | "success"
+    | "danger"
+    | "outline"
+    | "ghost"
+    | "link";
     size?: UISize;
     disabled?: boolean;
+    width?: UIWidth;
     onClickAction?: Event;
+  };
+  float: {
+    position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+    offsetX?: UISpacing;
+    offsetY?: UISpacing;
+    showOnHover?: boolean;
   };
 }
 
@@ -199,170 +258,6 @@ export type UINode<T extends keyof UIContract = keyof UIContract> = {
   type: T;
   props?: UIContract[T];
   children?: UINode<any>[];
-};
-
-/**
- * UI Builder for SDUI.
- * Typed using the UIContract source of truth.
- */
-export const ui = {
-  card: (
-    props: UIContract["card"] & { children?: UINode<any>[] }
-  ): UINode<"card"> => {
-    const { children, ...rest } = props;
-    return { type: "card", props: rest, children };
-  },
-  row: (
-    props: UIContract["row"] & { children?: UINode<any>[] }
-  ): UINode<"row"> => {
-    const { children, ...rest } = props;
-    return { type: "row", props: rest, children };
-  },
-  col: (
-    props: UIContract["col"] & { children?: UINode<any>[] }
-  ): UINode<"col"> => {
-    const { children, ...rest } = props;
-    return { type: "col", props: rest, children };
-  },
-  box: (
-    props: UIContract["box"] & { children?: UINode<any>[] }
-  ): UINode<"box"> => {
-    const { children, ...rest } = props;
-    return { type: "box", props: rest, children };
-  },
-  spacer: (props: UIContract["spacer"]): UINode<"spacer"> => ({
-    type: "spacer",
-    props,
-  }),
-  divider: (props: UIContract["divider"]): UINode<"divider"> => ({
-    type: "divider",
-    props,
-  }),
-  text: (
-    value: string,
-    props?: Omit<UIContract["text"], "value">
-  ): UINode<"text"> => ({
-    type: "text",
-    props: { ...props, value },
-  }),
-  heading: (
-    value: string,
-    level: UIContract["heading"]["level"] = 1
-  ): UINode<"heading"> => ({
-    type: "heading",
-    props: { value, level },
-  }),
-  badge: (
-    label: string,
-    variant: UIContract["badge"]["variant"] = "primary",
-    size: UISize = "md"
-  ): UINode<"badge"> => ({
-    type: "badge",
-    props: { label, variant, size },
-  }),
-  image: (
-    src: string,
-    alt?: string,
-    size: UISize = "md",
-    groupId?: string
-  ): UINode<"image"> => ({
-    type: "image",
-    props: { src, alt, size, groupId },
-  }),
-  video: (
-    src: string,
-    props?: Omit<UIContract["video"], "src">
-  ): UINode<"video"> => ({
-    type: "video",
-    props: { ...props, src },
-  }),
-  icon: (
-    name: string,
-    size: UISize = "md",
-    color?: UIColor
-  ): UINode<"icon"> => ({
-    type: "icon",
-    props: { name, size, color },
-  }),
-  chart: (props: UIContract["chart"]): UINode<"chart"> => ({
-    type: "chart",
-    props,
-  }),
-  list: (children: UINode<any>[]): UINode<"list"> => ({
-    type: "list",
-    children,
-  }),
-  listItem: (
-    props: UIContract["listItem"] & { children: UINode<any>[] }
-  ): UINode<"listItem"> => {
-    const { children, ...rest } = props;
-    return { type: "listItem", props: rest, children };
-  },
-  form: (
-    props: UIContract["form"] & { children?: UINode<any>[] }
-  ): UINode<"form"> => {
-    const { children, ...rest } = props;
-    return { type: "form", props: rest, children };
-  },
-  input: (props: UIContract["input"]): UINode<"input"> => ({
-    type: "input",
-    props,
-  }),
-  textarea: (props: UIContract["textarea"]): UINode<"textarea"> => ({
-    type: "textarea",
-    props,
-  }),
-  select: (props: UIContract["select"]): UINode<"select"> => ({
-    type: "select",
-    props,
-  }),
-  checkbox: (props: UIContract["checkbox"]): UINode<"checkbox"> => ({
-    type: "checkbox",
-    props,
-  }),
-  hidden: (props: UIContract["hidden"]): UINode<"hidden"> => ({
-    type: "hidden",
-    props,
-  }),
-  radioGroup: (props: UIContract["radioGroup"]): UINode<"radioGroup"> => ({
-    type: "radioGroup",
-    props,
-  }),
-  label: (
-    value: string,
-    props?: Omit<UIContract["label"], "value">
-  ): UINode<"label"> => ({
-    type: "label",
-    props: { ...props, value },
-  }),
-  colorPicker: (props: UIContract["colorPicker"]): UINode<"colorPicker"> => ({
-    type: "colorPicker",
-    props,
-  }),
-  upload: (props: UIContract["upload"]): UINode<"upload"> => ({
-    type: "upload",
-    props,
-  }),
-  button: (props: UIContract["button"]): UINode<"button"> => ({
-    type: "button",
-    props,
-  }),
-  actions: {
-    navigate: (url: string): Event => ({
-      type: "client:navigate",
-      data: { url },
-    }),
-    openUrl: (url: string, target = "_blank"): Event => ({
-      type: "client:open-url",
-      data: { url, target },
-    }),
-    copy: (text: string): Event => ({ type: "client:copy", data: { text } }),
-    reset: (): Event => ({ type: "client:reset" }),
-    invalidateQuery: (queryKey: any[]): Event => ({
-      type: "client:invalidate-query",
-      data: { queryKey },
-    }),
-  },
 };
 
 // ============================================
@@ -375,6 +270,7 @@ export type Event = {
   type: string;
   data?: any;
   ui?: UINode;
+  surface?: string; // might be anything like, header, inline chat, canvas, etc.
   slot?: string;
   runId?: string;
   threadId?: string;

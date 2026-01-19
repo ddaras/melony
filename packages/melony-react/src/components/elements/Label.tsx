@@ -1,20 +1,24 @@
 import React from "react";
+import { UIContract } from "melony";
 import { Label as LabelBase } from "../ui/label";
-import { LabelProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { textSizeMap, colorTextMap } from "@/lib/theme-utils";
 
-export const Label: React.FC<LabelProps> = ({
+export const Label: React.FC<UIContract["label"]> = ({
   value,
   htmlFor,
   required,
-  className,
-  style,
+  size = "md",
+  color = "foreground",
 }) => {
   return (
     <LabelBase
       htmlFor={htmlFor}
-      className={cn("flex items-center gap-1", className)}
-      style={style}
+      className={cn(
+        "flex items-center gap-1",
+        textSizeMap[size],
+        colorTextMap[color]
+      )}
     >
       {value}
       {required && <span className="text-destructive">*</span>}

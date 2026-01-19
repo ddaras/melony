@@ -1,20 +1,17 @@
 import React from "react";
-import { RadioGroupProps } from "./component-types";
+import { UIContract } from "melony";
 import { Label } from "./Label";
 import { useMelony } from "@/hooks/use-melony";
 import { cn } from "@/lib/utils";
 
-export const RadioGroup: React.FC<RadioGroupProps> = ({
+export const RadioGroup: React.FC<UIContract["radioGroup"]> = ({
   name,
   options,
   defaultValue,
-  value,
   label,
   disabled,
   orientation = "vertical",
   onChangeAction,
-  className,
-  style,
 }) => {
   const { sendEvent } = useMelony();
 
@@ -31,8 +28,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col gap-3", className)} style={style}>
-      {label && <Label value={label} className="text-sm font-semibold" />}
+    <div className="flex flex-col gap-3">
+      {label && <Label value={label} />}
       <div
         className={cn(
           "flex",
@@ -53,10 +50,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
                 name={name}
                 id={radioId}
                 value={option.value}
-                defaultChecked={
-                  defaultValue === option.value ? true : undefined
-                }
-                checked={value === option.value}
+                defaultChecked={defaultValue === option.value}
                 disabled={isDisabled}
                 onChange={handleChange}
                 className="h-4 w-4 border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
@@ -64,10 +58,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               <Label
                 htmlFor={radioId}
                 value={option.label}
-                className={cn(
-                  "cursor-pointer select-none text-sm font-medium leading-none",
-                  isDisabled && "cursor-not-allowed opacity-50"
-                )}
+                size="sm"
+                color={isDisabled ? "muted" : "foreground"}
               />
             </div>
           );

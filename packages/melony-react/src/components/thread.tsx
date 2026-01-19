@@ -9,20 +9,16 @@ import { useThreads } from "@/hooks/use-threads";
 import { LoadingIndicator } from "./loading-indicator";
 
 interface ThreadProps {
-  className?: string;
   placeholder?: string;
   starterPrompts?: StarterPrompt[];
-  onStarterPromptClick?: (prompt: string) => void;
   options?: ComposerOptionGroup[];
   autoFocus?: boolean;
   defaultSelectedIds?: string[];
 }
 
 export function Thread({
-  className,
   placeholder = "Type a message...",
   starterPrompts: localStarterPrompts,
-  onStarterPromptClick,
   options: localOptions,
   autoFocus = false,
   defaultSelectedIds,
@@ -40,10 +36,20 @@ export function Thread({
     initialEvents: threadEvents,
   });
 
-  // filter only user and assistant role messages in Thread
-  const messages = initialMessages.filter((x) =>
-    ["user", "assistant"].includes(x.role)
-  );
+  // Filter messages for the main thread:
+  // 1. Only include user and assistant roles
+  // 2. Exclude events that are targeted to a specific surface (like 'canvas')
+  const messages = useMemo(() => {
+    return initialMessages
+      .map((msg) => ({
+        ...msg,
+        content: msg.content.filter((event) => !event.surface),
+      }))
+      .filter(
+        (msg) =>
+          ["user", "assistant"].includes(msg.role) && msg.content.length > 0
+      );
+  }, [initialMessages]);
 
   const starterPrompts = localStarterPrompts ?? config?.starterPrompts;
   const options = localOptions ?? config?.options;
@@ -94,14 +100,6 @@ export function Thread({
     });
   };
 
-  const handleStarterPromptClick = (prompt: string) => {
-    if (onStarterPromptClick) {
-      onStarterPromptClick(prompt);
-    } else {
-      handleSubmit(undefined, prompt);
-    }
-  };
-
   const showStarterPrompts =
     messages.length === 0 &&
     starterPrompts &&
@@ -110,7 +108,7 @@ export function Thread({
 
   return (
     <div
-      className={cn("relative flex flex-col h-full bg-background", className)}
+      className="relative flex flex-col h-full bg-background flex-1 overflow-hidden"
     >
       <div className="flex-1 overflow-y-auto p-4 pb-36">
         <div
@@ -128,7 +126,6 @@ export function Thread({
               {showStarterPrompts && (
                 <StarterPrompts
                   prompts={starterPrompts}
-                  onPromptClick={handleStarterPromptClick}
                 />
               )}
               <MessageList

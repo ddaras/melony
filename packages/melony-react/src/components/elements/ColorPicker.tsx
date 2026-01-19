@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ColorPickerProps } from "./component-types";
+import { UIContract } from "melony";
 import { useMelony } from "@/hooks/use-melony";
 import { Field, FieldTitle } from "../ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -29,24 +29,15 @@ const PRESET_COLORS = [
   "#607d8b",
 ];
 
-export const ColorPicker: React.FC<ColorPickerProps> = ({
+export const ColorPicker: React.FC<UIContract["colorPicker"]> = ({
   name,
   label,
   defaultValue = "#000000",
-  value: controlledValue,
   onChangeAction,
   disabled,
-  className,
-  style,
 }) => {
   const { sendEvent } = useMelony();
-  const [color, setColor] = useState(controlledValue || defaultValue);
-
-  useEffect(() => {
-    if (controlledValue !== undefined) {
-      setColor(controlledValue);
-    }
-  }, [controlledValue]);
+  const [color, setColor] = useState(defaultValue);
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
@@ -62,7 +53,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   };
 
   return (
-    <Field className={cn("w-full", className)} style={style}>
+    <Field className="w-full">
       {label && <FieldTitle>{label}</FieldTitle>}
       <div className="flex items-center gap-2">
         <Popover>
@@ -122,4 +113,3 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     </Field>
   );
 };
-

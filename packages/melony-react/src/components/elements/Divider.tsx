@@ -1,18 +1,21 @@
 import React from "react";
+import { UIContract } from "melony";
 import { Separator } from "../ui/separator";
-import { DividerProps } from "./component-types";
 import { cn } from "@/lib/utils";
+import { marginMap, colorBgMap } from "@/lib/theme-utils";
 
-export const Divider: React.FC<DividerProps> = ({
+export const Divider: React.FC<UIContract["divider"]> = ({
   orientation = "horizontal",
-  className,
-  style,
+  color = "border",
+  margin = "md",
 }) => {
   return (
     <Separator
-      orientation={orientation as "horizontal" | "vertical"}
-      className={cn("my-4", className)}
-      style={style}
+      orientation={orientation}
+      className={cn(
+        marginMap[margin],
+        colorBgMap[color]
+      )}
     />
   );
 };
