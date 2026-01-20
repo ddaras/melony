@@ -10,7 +10,7 @@ If you’re building _product_ (approval flows, forms, dashboards, tool results)
 
 ## What you get
 
-- **SDUI out of the box**: `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc. — emitted from actions/brains.
+- **SDUI out of the box**: `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc. — emitted from actions.
 - **Event-first runtime**: a tiny orchestration loop: `Event → Brain → Action → Events`.
 - **HITL-friendly architecture**: approvals and guardrails belong in **plugins** / hooks.
 - **Frontend-ready**: `@melony/react` renders chat + SDUI and `melony/client` streams events over HTTP.
@@ -47,8 +47,11 @@ const assistant = melony({
       },
     }),
   },
-  brain: async function* (event) {
-    if (event.type === "text") return { action: "greet", params: {} };
+  // Use hooks for orchestration:
+  hooks: {
+    onBeforeRun: async function* ({ event }) {
+      if (event.type === "text") return { action: "greet", params: {} };
+    },
   },
 });
 

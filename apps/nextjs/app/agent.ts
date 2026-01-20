@@ -1,11 +1,40 @@
 import { melony } from "melony";
 
 import { checkWeather } from "./actions/check-weather";
-import { brain } from "./brains/brain";
 
 export const rootAgent = melony({
-  brain,
   actions: { checkWeather },
+  hooks: {
+    onBeforeRun: async function* ({ event }) {
+      if (event.role === "user" && event.type === "text") {
+        const text = event.data?.content;
+
+        if (text?.toLowerCase().includes("weather")) {
+          return {
+            action: "checkWeather",
+            params: { location: "San Francisco" },
+          };
+        }
+
+        yield {
+          type: "text-delta",
+          data: {
+            delta: "Hello! I am your Melony assistant. Ask me about the weather!",
+          },
+        };
+      }
+    },
+    onAfterAction: async function* ({ action, data }) {
+      if (action.name === "checkWeather") {
+        yield {
+          type: "text-delta",
+          data: {
+            delta: `Weather check complete: ${data?.description}`,
+          },
+        };
+      }
+    },
+  },
   starterPrompts: [
     {
       label: "What is the weather in San Francisco?",

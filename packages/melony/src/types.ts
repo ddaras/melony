@@ -315,7 +315,7 @@ export type Event = {
   metadata?: Record<string, any>;
   /**
    * Optional next action to execute immediately.
-   * If provided, the runtime will skip the initial brain dispatch.
+   * If provided, the runtime will skip the initial hook dispatch.
    */
   nextAction?: NextAction;
 };
@@ -425,17 +425,8 @@ export interface Plugin<TState = any> extends Hooks<TState> {
   name: string;
 }
 
-export type Brain<TState = any> = (
-  event: Event,
-  context: RuntimeContext<TState>,
-) => AsyncGenerator<Event, NextAction | void, unknown>;
-
 export interface Config<TState = any> {
   actions: Record<string, Action<any, TState>>;
-  /**
-   * The central brain for handling incoming events.
-   */
-  brain?: Brain<TState>;
   hooks?: Hooks<TState>;
   plugins?: Plugin<TState>[];
   safetyMaxSteps?: number;

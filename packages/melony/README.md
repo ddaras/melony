@@ -2,7 +2,7 @@
 
 Melony Core is a small **event-streaming runtime** for AI agents with first-class **Server‑Driven UI (SDUI)**.
 
-You write a `brain` (decides what to do) and `actions` (do work and stream events). Actions/brains can stream:
+You define `actions` (do work and stream events) and use `hooks` to orchestrate them. Actions/hooks can stream:
 
 - **Text** (`{ type: "text" }` / `{ type: "text-delta" }`)
 - **UI trees** (`event.ui = ui.card(...)`) that React (and other renderers) can display
@@ -51,14 +51,16 @@ export const assistant = melony({
     }),
   },
 
-  // The brain receives events and returns the next action to run.
-  brain: async function* (event) {
-    if (event.type === "text") {
-      return {
-        action: "searchProducts",
-        params: { query: event.data?.content },
-      };
-    }
+  // Orchestrate with hooks:
+  hooks: {
+    onBeforeRun: async function* (input) {
+      if (input.event.type === "text") {
+        return {
+          action: "searchProducts",
+          params: { query: input.event.data?.content },
+        };
+      }
+    },
   },
 });
 ```
@@ -96,8 +98,7 @@ for await (const event of client.sendEvent({
 
 - **Event**: the universal unit of streaming.
 - **Action**: an async generator that yields events and (optionally) returns a `NextAction`.
-- **Brain**: an async generator that decides the next action to run based on incoming events/results.
-- **Plugins/Hooks**: intercept runs, actions, and events (great place for HITL, logging, persistence).
+- **Plugins/Hooks**: intercept runs, actions, and events (great place for orchestration, HITL, logging, persistence).
 
 ## SDUI (Server‑Driven UI)
 

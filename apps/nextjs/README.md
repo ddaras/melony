@@ -19,7 +19,7 @@ The app will start on `http://localhost:3000` (or the port specified by Next.js)
 ## How it works
 
 1. **Backend**: The API route at `/app/api/chat/route.ts` handles chat requests using the Melony runtime
-2. **Agent**: Defined in `/src/agent.ts` with a weather action and brain
+2. **Agent**: Defined in `/src/agent.ts` with a weather action and orchestrator logic.
 3. **Frontend**: The main page uses `@melony/react` components to render the chat interface
 
 ## Try it out

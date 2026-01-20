@@ -16,7 +16,7 @@ export interface WelcomeScreenProps {
 
 export function WelcomeScreen({
   title = "Welcome to Melony",
-  description = "The most powerful AI agent framework for building modern applications. Connect your tools, build your brain, and ship faster.",
+  description = "The most powerful AI agent framework for building modern applications. Connect your tools, define your actions, and ship faster.",
   features = [
     {
       title: "Context Aware",

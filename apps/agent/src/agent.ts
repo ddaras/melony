@@ -3,7 +3,6 @@ import { requireApproval } from "melony/plugins/require-approval";
 
 import { checkWeather } from "./actions/check-weather";
 import { persistEventsPlugin } from "./plugins/persist-events";
-import { brain } from "./brains/brain";
 
 /**
  * Ensures every conversation has a threadId and updates the client URL.
@@ -32,8 +31,38 @@ const threadManagementPlugin = plugin({
 });
 
 export const rootAgent = melony({
-  brain,
   actions: { checkWeather },
+  hooks: {
+    onBeforeRun: async function* ({ event }) {
+      if (event.role === "user" && event.type === "text") {
+        const text = event.data?.content;
+
+        if (text?.toLowerCase().includes("weather")) {
+          return {
+            action: "checkWeather",
+            params: { location: "San Francisco" },
+          };
+        }
+
+        yield {
+          type: "text-delta",
+          data: {
+            delta: "Hello! I am your Melony assistant. Ask me about the weather!",
+          },
+        };
+      }
+    },
+    onAfterAction: async function* ({ action, data }) {
+      if (action.name === "checkWeather") {
+        yield {
+          type: "text-delta",
+          data: {
+            delta: `Weather check complete: ${data?.description}`,
+          },
+        };
+      }
+    },
+  },
   plugins: [
     threadManagementPlugin,
     persistEventsPlugin,

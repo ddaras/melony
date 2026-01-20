@@ -68,17 +68,12 @@ export class Runtime<TState = any> {
         }
       }
 
-      // Initial dispatch of the incoming event to the agent's brain
+      // Initial dispatch logic
       // Priority:
       // 1. nextAction already set by onBeforeRun hooks
       // 2. nextAction provided in the event itself
-      // 3. Dispatch to brain to decide nextAction
       if (!nextAction && event.nextAction) {
         nextAction = event.nextAction;
-      }
-
-      if (!nextAction && this.config.brain) {
-        nextAction = yield* this.dispatchToBrain(event, context);
       }
 
       // Agentic loop
@@ -122,27 +117,7 @@ export class Runtime<TState = any> {
         }
 
         // 2. Execute Action
-        const result = yield* this.executeAction(action, current, context);
-
-        // 3. Decide Next Step
-        if (this.config.brain) {
-          // If we have a brain, feed the result back to it to decide what to do next.
-          // This keeps the brain in the loop for multi-step reasoning.
-          nextAction = yield* this.dispatchToBrain(
-            {
-              type: "action-result",
-              data: {
-                ...current, // Preserve all metadata (like toolCallId)
-                action: actionName,
-                result,
-              },
-            },
-            context,
-          );
-        } else {
-          // Simple mode: follow the action's own suggestion for the next step.
-          nextAction = result;
-        }
+        nextAction = yield* this.executeAction(action, current, context);
       }
 
       // 1. Trigger Plugins: onAfterRun
@@ -177,18 +152,6 @@ export class Runtime<TState = any> {
       }
 
       return; // Gracefully stop the runtime
-    }
-  }
-
-  private async *dispatchToBrain(
-    event: Event,
-    context: RuntimeContext<TState>,
-  ): AsyncGenerator<Event, NextAction | void> {
-    const generator = this.config.brain!(event, context);
-    while (true) {
-      const { value, done } = await generator.next();
-      if (done) return value as NextAction | void;
-      yield* this.emit(value as Event, context);
     }
   }
 
