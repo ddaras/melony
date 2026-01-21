@@ -1,16 +1,14 @@
 # Server-Driven UI (SDUI)
 
-Melony's standout feature is its built-in support for Server-Driven UI. This allows your agent to decide not just *what* to say, but *how* it should look.
+While Melony is a minimalist framework, its event-based nature makes it an excellent foundation for building Server-Driven UI (SDUI). This allows your agent to decide not just *what* to say, but *how* it should look by emitting specific UI events.
 
-## Why SDUI?
+## The SDUI Pattern
 
-- **Real-time Updates**: Change the UI as the agent works (e.g., showing a progress bar, then a result card).
-- **Interactive**: Send buttons, forms, and lists that can trigger further actions on the server.
-- **Consistency**: Centralize your UI logic on the server while keeping the frontend thin.
+The idea is simple: instead of just yielding text, your agent yields events that describe UI components.
 
 ## SDUI Structure
 
-SDUI in Melony uses typed JSON structures that follow the UI contract defined in `@melony/react`.
+You can define your own UI contract. A common approach is to use typed JSON structures:
 
 ```typescript
 const card = {

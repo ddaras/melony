@@ -1,6 +1,6 @@
 # @melony/react
 
-React UI + providers/hooks for building chat experiences on top of **Melony’s event stream**, including automatic rendering for **Server‑Driven UI (SDUI)** (`event.ui`).
+React UI + providers/hooks for building chat experiences on top of **Melony’s event stream**.
 
 ## Installation
 
@@ -51,26 +51,23 @@ function Controls() {
   - Connects to a Melony runtime endpoint.
   - Exposes `events`, `messages`, `isLoading`, `error`, and `sendEvent()`.
 
-## SDUI (Server‑Driven UI)
+## Event Stream & UI
 
-If the backend yields events with `type: "ui"`, Melony React renders them automatically inside assistant messages.
+Melony React provides the foundation for building interactive agent UIs. You can listen to the event stream via `useMelony()` and render your own components based on the event types.
 
-Backend example:
+```tsx
+const { events } = useMelony();
 
-```ts
-yield {
-  type: "ui",
-  data: {
-    type: "card",
-    title: "Weather",
-    children: [
-      { type: "text", value: "72°F and sunny" }
-    ],
-  },
-};
+return (
+  <div>
+    {events.map(event => {
+      if (event.type === "text") return <Text key={event.id} content={event.data.content} />;
+      if (event.type === "custom-ui") return <MyCustomUI key={event.id} {...event.data} />;
+      return null;
+    })}
+  </div>
+);
 ```
-
-Frontend: no extra work — it shows up in the message stream.
 
 ## Development
 

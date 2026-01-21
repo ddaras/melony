@@ -13,29 +13,16 @@ const agent = melony()
   .action(placeOrder)
   .on("action:before", async function* (event, context) {
     if (event.data.action === "placeOrder" && !event.meta?.approved) {
-      // Suspend the execution and yield an approval UI
+      // Suspend the execution and yield an approval request
       context.suspend({
-        type: "ui",
+        type: "approval-required",
         data: {
-          type: "card",
-          title: "Approval Required",
-          children: [
-            { type: "text", value: "Do you want to place this order?" },
-            { 
-              type: "button", 
-              label: "Approve", 
-              onClickAction: { 
-                type: "call-action", 
-                data: { action: "placeOrder", params: event.data.params },
-                meta: { approved: true } 
-              } 
-            }
-          ]
+          action: "placeOrder",
+          params: event.data.params
         }
       });
     }
-  })
-  .build();
+  });
 ```
 
 When an action requires approval:
@@ -56,25 +43,21 @@ const agent = melony()
       ...event.data, 
       runId: context.runId 
     });
-  })
-  .build();
+  });
 ```
 
-## Custom UI Elements
+## Custom UI Events
 
-While Melony ships with standard elements like `card` and `button`, you can define your own data structures for UI components and render them on the frontend.
+Since Melony is unopinionated, you can define your own event types to trigger specific UI components on your frontend.
 
 ### Server-side
 
 ```typescript
 yield {
-  type: "ui",
+  type: "show-chart",
   data: {
-    type: "my-custom-chart",
-    props: {
-      data: [10, 20, 30],
-      labels: ["A", "B", "C"],
-    },
+    chartType: "bar",
+    points: [10, 20, 30],
   },
 };
 ```
@@ -82,15 +65,18 @@ yield {
 ### Client-side (React)
 
 ```tsx
-<MelonyProvider
-  components={{
-    "my-custom-chart": ({ data, labels }) => (
-      <MyChartLib data={data} labels={labels} />
-    ),
-  }}
->
-  ...
-</MelonyProvider>
+const { events } = useMelony();
+
+return (
+  <div>
+    {events.map(event => {
+      if (event.type === "show-chart") {
+        return <MyChart key={event.id} type={event.data.chartType} points={event.data.points} />;
+      }
+      // ...
+    })}
+  </div>
+);
 ```
 
 ## Multi-step Orchestration
@@ -121,6 +107,5 @@ const agent = melony()
         yield* runtime.execute(toolCall.name, toolCall.params);
       }
     }
-  })
-  .build();
+  });
 ```

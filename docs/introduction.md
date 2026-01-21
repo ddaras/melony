@@ -1,6 +1,6 @@
 # Introduction
 
-Melony is a **fast, unopinionated, minimalist event-based framework** for building AI agents with first-class **Server-Driven UI (SDUI)**.
+Melony is a **fast, unopinionated, minimalist event-based framework** for building AI agents.
 
 Melony is designed to be the "Express.js" of the agent world. It doesn't force a specific LLM, orchestration pattern, or UI library on you. Instead, it provides a tiny, high-performance core for routing events and executing actions.
 
@@ -8,10 +8,10 @@ Melony is designed to be the "Express.js" of the agent world. It doesn't force a
 
 - **Fast & Lightweight**: Zero dependencies at its core. A tiny footprint for any JS environment.
 - **Unopinionated**: No rigid orchestration loops. You define how events flow through handlers.
-- **First-class SDUI**: Define your UI on the server as simple JSON events and let Melony handle the streaming.
-- **Event-Driven**: Everything in Melony is an event. Text, UI, tool results, and custom data all flow through a unified stream.
+- **Event-Driven**: Everything in Melony is an event. Text, tool results, and custom data all flow through a unified stream.
 - **Highly Extensible**: Use event handlers to intercept runs, manage state, add logging, or implement Human-in-the-Loop (HITL) workflows.
 - **Platform Agnostic**: Run your Melony agents anywhere—Edge functions, Node.js, or directly in the browser.
+- **UI-Ready**: While unopinionated about UI, Melony's event stream is perfect for building Server-Driven UI (SDUI) experiences.
 
 ## Core Philosophy
 

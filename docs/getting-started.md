@@ -23,15 +23,13 @@ export const getWeatherAction = action({
     // Yield a text event
     yield { type: "text", data: { content: `Checking weather for ${city}...` } };
 
-    // Yield a SDUI card as JSON
+    // Yield custom data or UI events
     yield {
-      type: "ui",
+      type: "weather-data",
       data: {
-        type: "card",
-        title: `Weather in ${city}`,
-        children: [
-          { type: "text", value: "Sunny, 24°C" },
-        ],
+        city,
+        temp: 24,
+        condition: "Sunny"
       },
     };
   },
@@ -59,16 +57,15 @@ export const agent = melony()
 
 ## 3. Serve your Agent
 
-Use the `createStreamResponse` utility to stream events back to the client.
+Use the `.stream()` method to stream events back to the client as an HTTP response.
 
 ```typescript
 // app/api/chat/route.ts (Next.js example)
-import { createStreamResponse } from "melony";
 import { agent } from "./agent";
 
 export async function POST(req: Request) {
   const { event } = await req.json();
-  return createStreamResponse(agent.run(event));
+  return agent.stream(event);
 }
 ```
 

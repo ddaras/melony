@@ -4,7 +4,7 @@ Understanding the building blocks of a Melony agent.
 
 ## Events: The Universal Currency
 
-In Melony, everything is an **Event**. Whether it's a piece of text, a UI component, or a tool result, it's represented as a standard event object.
+In Melony, everything is an **Event**. Whether it's a piece of text, a tool result, or custom data, it's represented as a standard event object.
 
 ```typescript
 interface Event {
@@ -80,6 +80,5 @@ const agent = melony()
     if (event.data.content === "hi") {
       yield { type: "greet", data: {} }; // This will trigger the 'greet' handler
     }
-  })
-  .build();
+  });
 ```

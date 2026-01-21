@@ -8,33 +8,23 @@ Fast, unopinionated, minimalist event-based framework for AI agents.
 npm install melony
 ```
 
-## Quick Start
-
 ### 🔥 New: Fluent Builder API (Recommended)
 
 ```ts
-import { melony, createStreamResponse } from "melony";
+import { melony } from "melony";
 
 const agent = melony()
   .action("getWeather", async function* ({ city }: { city: string }) {
-    yield {
-      type: "ui",
-      data: {
-        type: "card",
-        title: `Weather in ${city}`,
-        children: [{ type: "text", value: "Sunny, 24°C" }]
-      }
-    };
+    yield { type: "text", data: { content: `Weather in ${city} is 24°C` } };
   })
   .on("text", async function* (event, { runtime }) {
     if (event.data.content.includes("weather")) {
       yield* runtime.execute("getWeather", { city: "London" });
     }
-  })
-  .build();
+  });
 
-// Run it
-for await (const event of agent.run({ type: "text", data: { content: "How's the weather?" } })) {
+// Run it (or use agent.stream(event) for HTTP)
+for await (const event of agent.build().run({ type: "text", data: { content: "How's the weather?" } })) {
   console.log(event);
 }
 ```
@@ -42,7 +32,7 @@ for await (const event of agent.run({ type: "text", data: { content: "How's the 
 ### Legacy: Runtime Class API (Still Supported)
 
 ```ts
-import { MelonyRuntime, createStreamResponse } from "melony";
+import { MelonyRuntime } from "melony";
 
 // 1. Create the runtime
 const agent = new MelonyRuntime({
@@ -109,7 +99,6 @@ const agent = melony()
 - **Event**: The universal unit of streaming (`{ type, data, meta }`).
 - **Action**: An async generator that yields events.
 - **Event Handlers**: Reactive functions that listen to and emit events.
-- **SDUI**: Stream typed UI structures as JSON events to your frontend.
 
 ## License
 

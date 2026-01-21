@@ -1,6 +1,6 @@
 # Melony Documentation
 
-Fast, unopinionated, minimalist event-based framework for AI agents with built-in Server-Driven UI (SDUI).
+Fast, unopinionated, minimalist event-based framework for AI agents.
 
 ## Table of Contents
 
