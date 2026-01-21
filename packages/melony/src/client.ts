@@ -1,4 +1,4 @@
-import { Config, Event } from "./types";
+import { Event } from "./types";
 import { generateId } from "./utils/generate-id";
 
 export type { Event };
@@ -18,8 +18,8 @@ export interface MelonyClientOptions<TEvent extends Event = Event> {
   url: string;
   initialEvents?: TEvent[];
   headers?:
-    | Record<string, string>
-    | (() => Record<string, string> | Promise<Record<string, string>>);
+  | Record<string, string>
+  | (() => Record<string, string> | Promise<Record<string, string>>);
 }
 
 export class MelonyClient<TEvent extends Event = Event> {
@@ -67,17 +67,6 @@ export class MelonyClient<TEvent extends Event = Event> {
     return headers;
   }
 
-  async getConfig(): Promise<Config> {
-    const headers = await this.getRequestHeaders();
-    const response = await fetch(this.url, {
-      method: "GET",
-      headers,
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return response.json();
-  }
-
   private setState(updates: Partial<ClientState<TEvent>>) {
     this.state = { ...this.state, ...updates };
     this.stateListeners.forEach((l) => l(this.getState()));
@@ -104,7 +93,6 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.setState({
       isLoading: true,
       error: null,
-      loadingStatus: undefined,
       events: [...this.state.events, optimisticEvent],
     });
 
@@ -144,14 +132,14 @@ export class MelonyClient<TEvent extends Event = Event> {
           }
         }
       }
-      this.setState({ isLoading: false, loadingStatus: undefined });
+      this.setState({ isLoading: false });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
-        this.setState({ isLoading: false, loadingStatus: undefined });
+        this.setState({ isLoading: false });
         return;
       }
       const error = err instanceof Error ? err : new Error(String(err));
-      this.setState({ error, isLoading: false, loadingStatus: undefined });
+      this.setState({ error, isLoading: false });
       throw error;
     }
   }
@@ -160,46 +148,10 @@ export class MelonyClient<TEvent extends Event = Event> {
     if (event.meta?.state) {
       this.lastServerState = event.meta.state;
     }
+
     const events = [...this.state.events];
 
-    if (event.type === "loading-status") {
-      const currentStatus = this.state.loadingStatus;
-      const newMessage =
-        event.data?.message ?? currentStatus?.message ?? "Processing...";
-      const newDelta = event.data?.delta;
-
-      let newDetails = currentStatus?.details ?? "";
-      if (newDelta !== undefined) {
-        newDetails += newDelta;
-      } else if (event.data?.details !== undefined) {
-        newDetails = event.data.details;
-      }
-
-      this.setState({
-        loadingStatus: {
-          message: newMessage,
-          details: newDetails || undefined,
-        },
-      });
-    }
-
-    const lastEvent = events[events.length - 1];
-    if (
-      event.type === "text-delta" &&
-      lastEvent?.type === "text-delta" &&
-      event.meta?.runId === lastEvent.meta?.runId &&
-      event.data?.delta
-    ) {
-      events[events.length - 1] = {
-        ...lastEvent,
-        data: {
-          ...lastEvent.data,
-          delta: (lastEvent.data?.delta || "") + event.data.delta,
-        },
-      };
-    } else {
-      events.push(event);
-    }
+    events.push(event);
 
     this.setState({ events });
   }
@@ -210,7 +162,6 @@ export class MelonyClient<TEvent extends Event = Event> {
       events,
       error: null,
       isLoading: false,
-      loadingStatus: undefined,
     });
   }
 }

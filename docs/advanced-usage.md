@@ -33,16 +33,19 @@ When an action requires approval:
 
 ## Persistence
 
-By default, Melony runtimes are stateless. To build long-running agents, use the `onEvent` hook to persist events.
+By default, Melony runtimes are stateless. To build long-running agents, use the `onEvent` plugin hook to persist events.
 
 ```typescript
 const agent = new MelonyRuntime({
   actions: { ... },
-  hooks: {
-    onEvent: async function* (event, context) {
-      await db.events.create({ ...event, threadId: context.state.threadId });
-    },
-  },
+  plugins: [
+    plugin({
+      name: "persistence",
+      onEvent: async function* (event, context) {
+        await db.events.create({ ...event, threadId: context.state.threadId });
+      },
+    }),
+  ],
 });
 ```
 

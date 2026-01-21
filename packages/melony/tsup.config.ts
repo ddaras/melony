@@ -4,8 +4,6 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     client: "src/client.ts",
-    "adapters/hono": "src/adapters/hono.ts",
-    "plugins/require-approval": "src/plugins/require-approval.ts",
   },
   format: ["esm"],
   dts: true,

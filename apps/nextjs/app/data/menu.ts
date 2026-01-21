@@ -1,4 +1,13 @@
-import type { MenuItem } from "../agents/food-agent";
+/**
+ * Menu item type
+ */
+export type MenuItem = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+};
+
 
 /**
  * Restaurant menu data

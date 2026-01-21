@@ -1,5 +1,3 @@
-import { ui } from "melony";
-
 export type OrderResult = {
   success: boolean;
   orderId: string;
@@ -12,24 +10,28 @@ export type OrderResult = {
  * Renders the order confirmation card UI
  */
 export function renderOrderConfirmation(result: OrderResult) {
-  return ui.card({
+  return {
+    type: "card",
     children: [
-      ui.col({
+      {
+        type: "col",
         align: "center",
         gap: "sm",
         children: [
-          ui.text("Order Confirmed!", {
+          {
+            type: "text",
+            value: "Order Confirmed!",
             size: "lg",
             weight: "bold",
             color: "success",
-          }),
-          ui.text(`Order ID: ${result.orderId}`),
-          ui.text(`${result.quantity}x ${result.item}`),
-          ui.text(`Total Paid: $${result.total}`, { weight: "bold" }),
+          },
+          { type: "text", value: `Order ID: ${result.orderId}` },
+          { type: "text", value: `${result.quantity}x ${result.item}` },
+          { type: "text", value: `Total Paid: $${result.total}`, weight: "bold" },
         ],
-      }),
+      },
     ],
-  });
+  };
 }
 
 /**

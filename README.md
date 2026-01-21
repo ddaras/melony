@@ -10,9 +10,9 @@ If you're building _product_ (approval flows, forms, dashboards, tool results), 
 
 ## What you get
 
-- **SDUI out of the box**: `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc. — emitted from actions.
 - **Event-first runtime**: a tiny orchestration loop: `Event → Hook → Action → Events`.
 - **HITL-friendly architecture**: approvals and guardrails belong in **plugins** / hooks.
+- **SDUI protocol**: Stream typed UI structures as JSON events to your frontend.
 - **Frontend-ready**: `@melony/react` renders chat + SDUI and `melony/client` streams events over HTTP.
 
 ## Quick start (full stack)
@@ -21,7 +21,7 @@ If you're building _product_ (approval flows, forms, dashboards, tool results), 
 
 ```ts
 // app/api/chat/route.ts
-import { MelonyRuntime, action, ui, createStreamResponse } from "melony";
+import { MelonyRuntime, action, plugin, createStreamResponse } from "melony";
 import { z } from "zod";
 
 const agent = new MelonyRuntime({
@@ -31,15 +31,25 @@ const agent = new MelonyRuntime({
       paramsSchema: z.object({ name: z.string().optional() }),
       execute: async function* ({ name }) {
         yield { type: "text", data: { content: `Hey${name ? ` ${name}` : ""}!` } };
-        yield { type: "ui", data: ui.card({ title: "Next step", children: [ui.text("Ask me anything.")] }) };
+        yield {
+          type: "ui",
+          data: {
+            type: "card",
+            title: "Next step",
+            children: [{ type: "text", value: "Ask me anything." }]
+          }
+        };
       },
     }),
   },
-  hooks: {
-    onBeforeRun: async function* ({ event }) {
-      if (event.type === "text") return { action: "greet", params: {} };
-    },
-  },
+  plugins: [
+    plugin({
+      name: "router",
+      onBeforeRun: async function* ({ event }) {
+        if (event.type === "text") return { action: "greet", params: {} };
+      },
+    }),
+  ],
 });
 
 export async function POST(req: Request) {
@@ -64,7 +74,7 @@ export default function App() {
 
 ## Packages
 
-- **`melony`**: runtime (`MelonyRuntime`), SDUI contract (`ui`), plugins/hooks, streaming helpers.
+- **`melony`**: runtime (`MelonyRuntime`), plugins/hooks, streaming helpers.
 - **`@melony/react`**: chat UI + providers/hooks + SDUI renderer for React.
 
 ## Examples in this repo

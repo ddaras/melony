@@ -10,12 +10,19 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.13",
+    "@base-ui/react": "^1.0.0",
     "@melony/react": "workspace:*",
+    "@tabler/icons-react": "^3.36.0",
+    "@tanstack/react-query": "^5.90.19",
     "ai": "^6.0.42",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "melony": "workspace:*",
     "next": "16.1.4",
+    "nuqs": "^2.8.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "tailwind-merge": "^3.4.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {

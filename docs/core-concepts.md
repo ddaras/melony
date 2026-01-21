@@ -49,11 +49,11 @@ execute: async function* ({ query }) {
 }
 ```
 
-## Hooks: Pluggable Orchestration
+## Plugins: Extensible Orchestration
 
-Hooks allow you to intercept the execution flow. They are the "middleware" of Melony.
+Plugins allow you to intercept the execution flow. They are the "middleware" of Melony and provide lifecycle hooks for custom behavior.
 
-### Available Hooks
+### Available Plugin Hooks
 
 - **`onBeforeRun`**: Called when a run starts. Use it to route incoming events to specific actions.
 - **`onAfterRun`**: Called after a run completes. Use it for cleanup or logging.
@@ -66,20 +66,23 @@ Hooks allow you to intercept the execution flow. They are the "middleware" of Me
 ```typescript
 const agent = new MelonyRuntime({
   actions: { getWeather, placeOrder },
-  hooks: {
-    onBeforeRun: async function* ({ event }) {
-      // Route text messages to an action
-      if (event.type === "text" && event.data.content.includes("weather")) {
-        return { action: "getWeather", params: { city: "NYC" } };
-      }
-    },
-  },
+  plugins: [
+    plugin({
+      name: "router",
+      onBeforeRun: async function* ({ event }) {
+        // Route text messages to an action
+        if (event.type === "text" && event.data.content.includes("weather")) {
+          return { action: "getWeather", params: { city: "NYC" } };
+        }
+      },
+    }),
+  ],
 });
 ```
 
-## Plugins: Packaging Logic
+## Building Plugins
 
-Plugins are simply a named collection of hooks. This allows you to package and reuse complex logic.
+Plugins are named collections of lifecycle hooks that can be reused across agents.
 
 ```typescript
 import { plugin } from "melony";

@@ -41,15 +41,7 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@base-ui/react": "^1.0.0",
-    "@tabler/icons-react": "^3.36.0",
-    "@tanstack/react-query": "^5.90.12",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "melony": "workspace:*",
-    "nuqs": "^2.8.6",
-    "react-hotkeys-hook": "^4.6.1",
-    "tailwind-merge": "^3.4.0"
+    "melony": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",

@@ -1,38 +1,40 @@
 "use client";
 
-import { MelonyClientProvider, FullChat, ThreadProvider, ThemeProvider, ThemeToggle } from "@melony/react";
-import { MelonyClient } from "melony/client";
-
-const client = new MelonyClient({
-  url: "/api/chat",
-})
+import { FullChat } from "@/components/full-chat";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { ThreadProvider } from "@/providers/thread-provider";
+import { useMelony } from "@melony/react";
+import { useMemo } from "react";
+import { convertEventsToAggregatedMessages } from "@/lib/message-converter";
 
 export default function Home() {
+  const { events } = useMelony();
+  const messages = useMemo(() => convertEventsToAggregatedMessages(events), [events]);
+
+  console.log(messages);
+  console.log(events);
 
   return (
     <div className="flex h-screen w-full bg-zinc-50 dark:bg-black">
-      <MelonyClientProvider client={client}>
-        <ThemeProvider>
-          <ThreadProvider service={{
-            getThreads: async () => [],
-            getEvents: async () => [],
-            deleteThread: async () => { },
-          }}>
-            <FullChat
-              headerProps={{
-                rightContent: (
-                  <div className="flex gap-2">
-                    <ThemeToggle />
-                  </div>
-                )
-              }}
-              title="Melony Food"
-              placeholder="I'm hungry..."
-            />
-          </ThreadProvider>
-        </ThemeProvider>
-      </MelonyClientProvider>
-    </div>
+      <ThreadProvider service={{
+        getThreads: async () => [],
+        getEvents: async () => [],
+        deleteThread: async () => { },
+      }}>
+        <FullChat
+          headerProps={{
+            rightContent: (
+              <div className="flex gap-2">
+                <ThemeToggle />
+              </div>
+            )
+          }}
+          title="Melony Food"
+          placeholder="I'm hungry..."
+          messages={messages}
+        />
+      </ThreadProvider>
+    </div >
   );
 }
 

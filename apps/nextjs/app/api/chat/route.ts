@@ -1,5 +1,4 @@
 import { foodAgent } from "../../agents/food-agent";
-import { createStreamResponse } from "melony";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -13,22 +12,22 @@ export async function POST(req: Request) {
   }
 
   // Merge headers into event state if needed
-  if (!event.meta) {
-    event.meta = {};
-  }
+  // if (!event.meta) {
+  //   event.meta = {};
+  // }
 
   // We don't really need headers for this demo, but following the pattern
-  event.meta.state = {
-    ...(event.meta.state || {}),
-  };
+  // event.meta.state = {
+  //   ...(event.meta.state || {}),
+  // };
 
-  return createStreamResponse(foodAgent.run(event));
+  return foodAgent.stream(event);
 }
 
 export async function GET() {
   return new Response(JSON.stringify({
-    starterPrompts: foodAgent.config.starterPrompts || [],
-    options: foodAgent.config.options || [],
+    starterPrompts: [],
+    options: [],
   }), {
     headers: { "Content-Type": "application/json" },
   });

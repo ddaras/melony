@@ -1,27 +1,35 @@
-import { ui } from "melony";
-import type { MenuItem } from "../agents/food-agent";
+import { UINode } from "@/ui-contract";
+import type { MenuItem } from "../data/menu";
 
 /**
  * Renders the menu card UI with order buttons
  */
-export function renderMenuCard(menuItems: MenuItem[]) {
-  return ui.card({
+export function renderMenuCard(menuItems: MenuItem[]): UINode {
+  return {
+    type: "card",
     children: [
-      ui.col({
-        gap: "md",
-        children: menuItems.map((item) =>
-          ui.row({
+      {
+        type: "col",
+        props: {
+          gap: "md",
+        },
+        children: menuItems.map((item) => ({
+          type: "row",
+          props: {
             justify: "between",
-            align: "center",
-            children: [
-              ui.col({
-                children: [
-                  ui.text(item.name, { weight: "bold" }),
-                  ui.text(item.description, { size: "sm", color: "muted" }),
-                  ui.text(`$${item.price.toFixed(2)}`, { size: "sm" }),
-                ],
-              }),
-              ui.button({
+          },
+          children: [
+            {
+              type: "col",
+              children: [
+                { type: "text", props: { value: item.name, weight: "bold" } },
+                { type: "text", props: { value: item.description, size: "sm", color: "muted" } },
+                { type: "text", props: { value: `$${item.price.toFixed(2)}`, size: "sm" } },
+              ],
+            },
+            {
+              type: "button",
+              props: {
                 label: "Order",
                 onClickAction: {
                   type: "order-food",
@@ -31,11 +39,11 @@ export function renderMenuCard(menuItems: MenuItem[]) {
                     params: { itemId: item.id, quantity: 1 },
                   },
                 },
-              }),
-            ],
-          })
-        ),
-      }),
+              },
+            },
+          ],
+        })),
+      },
     ],
-  });
+  };
 }

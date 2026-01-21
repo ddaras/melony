@@ -8,28 +8,38 @@ Melony's standout feature is its built-in support for Server-Driven UI. This all
 - **Interactive**: Send buttons, forms, and lists that can trigger further actions on the server.
 - **Consistency**: Centralize your UI logic on the server while keeping the frontend thin.
 
-## The `ui` Builder
+## SDUI Structure
 
-Melony provides a typed `ui` builder to create UI trees easily.
+SDUI in Melony uses typed JSON structures that follow the UI contract defined in `@melony/react`.
 
 ```typescript
-import { ui } from "melony";
-
-const card = ui.card({
+const card = {
+  type: "card",
   title: "Order Details",
   children: [
-    ui.text("1x Espresso - $4.00"),
-    ui.text("1x Croissant - $3.50"),
-    ui.divider(),
-    ui.row({
+    { type: "text", value: "1x Espresso - $4.00" },
+    { type: "text", value: "1x Croissant - $3.50" },
+    { type: "divider" },
+    {
+      type: "row",
       gap: "md",
       children: [
-        ui.button({ label: "Cancel", variant: "outline", onClickAction: { type: "cancel-order", data: {} } }),
-        ui.button({ label: "Confirm", variant: "success", onClickAction: { type: "confirm-order", data: {} } }),
+        {
+          type: "button",
+          label: "Cancel",
+          variant: "outline",
+          onClickAction: { type: "cancel-order", data: {} }
+        },
+        {
+          type: "button",
+          label: "Confirm",
+          variant: "success",
+          onClickAction: { type: "confirm-order", data: {} }
+        },
       ],
-    }),
+    },
   ],
-});
+};
 ```
 
 To send UI to the client, yield an event with the UI node in `data`:
@@ -82,7 +92,7 @@ You can override the default SDUI components or add your own by providing a `com
 
 ## Available UI Elements
 
-The standard `ui` builder includes:
+The SDUI protocol supports these component types:
 
 **Layout**: `card`, `row`, `col`, `box`, `list`, `listItem`, `spacer`, `divider`
 
@@ -91,3 +101,5 @@ The standard `ui` builder includes:
 **Interaction**: `button`, `form`, `input`, `select`, `checkbox`, `textarea`, `radioGroup`, `colorPicker`, `upload`
 
 **Utility**: `float`, `dropdown`, `hidden`, `label`
+
+See `@melony/react` for the complete UI contract and supported properties.

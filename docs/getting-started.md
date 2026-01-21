@@ -15,7 +15,7 @@ npm install melony zod
 An **Action** is an async generator that performs a task and yields events.
 
 ```typescript
-import { action, ui } from "melony";
+import { action } from "melony";
 import { z } from "zod";
 
 export const getWeatherAction = action({
@@ -26,16 +26,21 @@ export const getWeatherAction = action({
     // Yield a text event
     yield { type: "text", data: { content: `Checking weather for ${city}...` } };
 
-    // Yield a SDUI card
+    // Yield a SDUI card as JSON
     yield {
       type: "ui",
-      data: ui.card({
+      data: {
+        type: "card",
         title: `Weather in ${city}`,
         children: [
-          ui.text("Sunny, 24°C"),
-          ui.button({ label: "Refresh", onClickAction: { type: "refresh", data: { city } } }),
+          { type: "text", value: "Sunny, 24°C" },
+          {
+            type: "button",
+            label: "Refresh",
+            onClickAction: { type: "refresh", data: { city } }
+          },
         ],
-      }),
+      },
     };
   },
 });
@@ -98,4 +103,4 @@ chat("London");
 ## Next Steps
 
 - Learn about [Core Concepts](./core-concepts.md) to understand how actions and hooks work together.
-- Explore the [SDUI Builder](./server-driven-ui.md) to create rich interactive interfaces.
+- Explore [Server-Driven UI](./server-driven-ui.md) to create rich interactive interfaces.

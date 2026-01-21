@@ -15,13 +15,13 @@
   "keywords": [
     "ai",
     "agents",
-    "framework",
+    "runtime",
     "typescript",
-    "sdui"
+    "events"
   ],
   "author": "",
   "license": "MIT",
-  "description": "The universal AI agent framework with built-in SDUI and HITL.",
+  "description": "A minimal, unopinionated runtime for building AI agents.",
   "publishConfig": {
     "access": "public"
   },
@@ -36,16 +36,6 @@
       "import": "./dist/client.js",
       "default": "./dist/client.js"
     },
-    "./adapters/*": {
-      "types": "./dist/adapters/*.d.ts",
-      "import": "./dist/adapters/*.js",
-      "default": "./dist/adapters/*.js"
-    },
-    "./plugins/*": {
-      "types": "./dist/plugins/*.d.ts",
-      "import": "./dist/plugins/*.js",
-      "default": "./dist/plugins/*.js"
-    },
     "./package.json": "./package.json"
   },
   "module": "dist/index.js",
@@ -58,9 +48,5 @@
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "zod": "^4.1.11",
-    "node-html-parser": "^7.0.1"
   }
 }
