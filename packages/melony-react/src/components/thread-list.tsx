@@ -56,7 +56,6 @@ export const ThreadList: React.FC<ThreadListProps> = ({
                       label: "Delete",
                       icon: "trash",
                       onClickAction: {
-                        role: "system",
                         type: "delete-thread",
                         data: {
                           threadId: thread.id,

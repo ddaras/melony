@@ -91,6 +91,20 @@ export const ThreadProvider: React.FC<ThreadProviderProps> = ({
     staleTime: isNewThread ? Infinity : 0,
   });
 
+  // Sync thread events with Melony client
+  useEffect(() => {
+    if (!melonyContext || !activeThreadId) return;
+
+    const currentClientEvents = melonyContext.client.getState().events;
+    if (threadEvents === currentClientEvents) return;
+
+    // Use a stringified comparison to be safe against reference changes that don't change content
+    if (JSON.stringify(threadEvents) === JSON.stringify(currentClientEvents))
+      return;
+
+    melonyContext.reset(threadEvents);
+  }, [threadEvents, melonyContext, activeThreadId]);
+
   const createMutation = useMutation({
     mutationFn: async () => {
       return null;

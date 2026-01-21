@@ -1,6 +1,6 @@
 import { plugin } from "../plugin";
 import { ui } from "../ui";
-import type { Action, RuntimeContext } from "../types";
+import type { Action, RuntimeContext, Event } from "../types";
 
 export interface RequireApprovalOptions {
   /**
@@ -56,21 +56,23 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
         const pending = context.state.__pending_approvals?.[approvalId];
         if (!pending) {
           context.suspend({
-            role: "assistant",
             type: "error",
             data: {
               message:
                 "Security Error: This approval request is invalid or has already been used.",
+              ui: ui.card({
+                title: "Security Error",
+                children: [
+                  ui.text(
+                    "This approval request is invalid or has already been used.",
+                  ),
+                ],
+              }),
             },
-            ui: ui.card({
-              title: "Security Error",
-              children: [
-                ui.text(
-                  "This approval request is invalid or has already been used.",
-                ),
-              ],
-            }),
-          });
+            meta: {
+              role: "assistant",
+            },
+          } as any);
         }
 
         // 2. Consume the token immediately (Destroy after usage)
@@ -90,7 +92,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
                   message:
                     "Security Warning: Approval token mismatch. Execution blocked.",
                 },
-              };
+              } as any;
               return;
             }
           }
@@ -110,7 +112,7 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
           data: {
             message: `Action '${action}' was rejected by the user.`,
           },
-        });
+        } as any);
       }
     },
 
@@ -165,47 +167,53 @@ export const requireApproval = (options: RequireApprovalOptions = {}) => {
       context.suspend({
         type: "hitl-required",
         nextAction,
-        data: { token, approvalId },
-        slot: "approval",
-        ui: ui.card({
-          title: "Approval Required",
-          children: [
-            ui.text(message),
-            ui.box({
-              padding: "md",
-              background: "muted",
-              children: [
-                ui.text(JSON.stringify(params, null, 2), { size: "xs" }),
-              ],
-            }),
-            ui.row({
-              gap: "md",
-              children: [
-                ui.button({
-                  label: "Approve",
-                  variant: "success",
-                  onClickAction: {
-                    role: "user",
-                    type: "action-approved",
-                    nextAction,
-                    data: { token, approvalId },
-                    ui: ui.text("Approval granted"),
-                  },
-                }),
-                ui.button({
-                  label: "Cancel",
-                  variant: "outline",
-                  onClickAction: {
-                    type: "action-rejected",
-                    nextAction,
-                    data: { approvalId },
-                  },
-                }),
-              ],
-            }),
-          ],
-        }),
-      });
+        data: {
+          token,
+          approvalId,
+          ui: ui.card({
+            title: "Approval Required",
+            children: [
+              ui.text(message),
+              ui.box({
+                padding: "md",
+                background: "muted",
+                children: [
+                  ui.text(JSON.stringify(params, null, 2), { size: "xs" }),
+                ],
+              }),
+              ui.row({
+                gap: "md",
+                children: [
+                  ui.button({
+                    label: "Approve",
+                    variant: "success",
+                    onClickAction: {
+                      type: "action-approved",
+                      nextAction,
+                      data: { token, approvalId },
+                      meta: {
+                        role: "user",
+                      },
+                    } as any,
+                  }),
+                  ui.button({
+                    label: "Cancel",
+                    variant: "outline",
+                    onClickAction: {
+                      type: "action-rejected",
+                      nextAction,
+                      data: { approvalId },
+                    } as any,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        },
+        meta: {
+          slot: "approval",
+        },
+      } as any);
     },
   });
 };

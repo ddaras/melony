@@ -9,15 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.13",
     "@melony/react": "workspace:*",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
+    "ai": "^6.0.42",
     "melony": "workspace:*",
-    "next": "16.1.0",
+    "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0",
-    "zod": "^3.23.8"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -25,7 +24,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.0",
+    "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -178,7 +178,7 @@ export const ui = {
       data: { url, target },
     }),
     copy: (text: string): Event => ({ type: "client:copy", data: { text } }),
-    reset: (): Event => ({ type: "client:reset" }),
+    reset: (): Event => ({ type: "client:reset", data: {} }),
     invalidateQuery: (queryKey: any[]): Event => ({
       type: "client:invalidate-query",
       data: { queryKey },

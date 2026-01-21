@@ -32,9 +32,7 @@ export function Thread({
     sendEvent,
     loadingStatus,
     config,
-  } = useMelony({
-    initialEvents: threadEvents,
-  });
+  } = useMelony();
 
   // Filter messages for the main thread:
   // 1. Only include user and assistant roles
@@ -43,7 +41,7 @@ export function Thread({
     return initialMessages
       .map((msg) => ({
         ...msg,
-        content: msg.content.filter((event) => !event.surface),
+        content: msg.content.filter((event) => !event.meta?.surface),
       }))
       .filter(
         (msg) =>
@@ -91,12 +89,14 @@ export function Thread({
 
     await sendEvent({
       type: "text",
-      role: "user",
       data: { content: text || "" },
-      state: {
-        ...state,
-        threadId: activeThreadId ?? undefined,
-      },
+      meta: {
+        role: "user",
+        state: {
+          ...state,
+          threadId: activeThreadId ?? undefined,
+        },
+      } as any,
     });
   };
 

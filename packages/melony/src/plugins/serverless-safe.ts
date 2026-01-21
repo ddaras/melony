@@ -1,5 +1,5 @@
-import { plugin } from "../runtime";
-import type { NextAction, RuntimeContext } from "../types";
+import { plugin } from "../plugin";
+import type { Event, NextAction, RuntimeContext } from "../types";
 
 export interface ServerlessSafeOptions {
   /**
@@ -36,7 +36,6 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
         delete context.state.__run_start_time;
 
         // Suspend the runtime and yield a special event that the client can use to resume.
-        // We now put nextAction at the top level of the event.
         context.suspend({
           type: "run-suspended",
           nextAction,
@@ -44,8 +43,10 @@ export const serverlessSafe = (options: ServerlessSafeOptions = {}) => {
             elapsed,
             maxDuration,
           },
-          role: "system",
-        });
+          meta: {
+            role: "system",
+          },
+        } as any);
       }
     },
 

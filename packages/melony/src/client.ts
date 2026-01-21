@@ -4,8 +4,8 @@ import { generateId } from "./utils/generate-id";
 export type { Event };
 export { generateId };
 
-export interface ClientState {
-  events: Event[];
+export interface ClientState<TEvent extends Event = Event> {
+  events: TEvent[];
   isLoading: boolean;
   error: Error | null;
   loadingStatus?: {
@@ -14,23 +14,23 @@ export interface ClientState {
   };
 }
 
-export interface MelonyClientOptions {
+export interface MelonyClientOptions<TEvent extends Event = Event> {
   url: string;
-  initialEvents?: Event[];
+  initialEvents?: TEvent[];
   headers?:
     | Record<string, string>
     | (() => Record<string, string> | Promise<Record<string, string>>);
 }
 
-export class MelonyClient {
-  private state: ClientState;
+export class MelonyClient<TEvent extends Event = Event> {
+  private state: ClientState<TEvent>;
   public readonly url: string;
-  private headers?: MelonyClientOptions["headers"];
+  private headers?: MelonyClientOptions<TEvent>["headers"];
   private lastServerState: any = null;
   private abortController: AbortController | null = null;
-  private stateListeners: Set<(state: ClientState) => void> = new Set();
+  private stateListeners: Set<(state: ClientState<TEvent>) => void> = new Set();
 
-  constructor(options: MelonyClientOptions) {
+  constructor(options: MelonyClientOptions<TEvent>) {
     this.url = options.url;
     this.headers = options.headers;
     this.state = {
@@ -41,7 +41,7 @@ export class MelonyClient {
     };
   }
 
-  subscribe(listener: (state: ClientState) => void) {
+  subscribe(listener: (state: ClientState<TEvent>) => void) {
     this.stateListeners.add(listener);
     return () => {
       this.stateListeners.delete(listener);
@@ -78,24 +78,28 @@ export class MelonyClient {
     return response.json();
   }
 
-  private setState(updates: Partial<ClientState>) {
+  private setState(updates: Partial<ClientState<TEvent>>) {
     this.state = { ...this.state, ...updates };
     this.stateListeners.forEach((l) => l(this.getState()));
   }
 
-  async *sendEvent(event: Event): AsyncGenerator<Event> {
+  async *sendEvent(event: TEvent): AsyncGenerator<TEvent> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    const runId = event.runId ?? generateId();
-    const state = event.state ?? this.lastServerState;
-    const optimisticEvent: Event = {
+    const runId = event.meta?.runId ?? generateId();
+    const state = event.meta?.state ?? this.lastServerState;
+    const optimisticEvent: TEvent = {
       ...event,
-      runId,
-      state,
-      role: event.role ?? "user",
-      timestamp: event.timestamp ?? Date.now(),
-    };
+      meta: {
+        ...event.meta,
+        id: event.meta?.id ?? generateId(),
+        runId,
+        state,
+        role: event.meta?.role ?? "user",
+        timestamp: event.meta?.timestamp ?? Date.now(),
+      },
+    } as TEvent;
 
     this.setState({
       isLoading: true,
@@ -132,7 +136,7 @@ export class MelonyClient {
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           try {
-            const incomingEvent: Event = JSON.parse(line.slice(6));
+            const incomingEvent: TEvent = JSON.parse(line.slice(6));
             this.handleIncomingEvent(incomingEvent);
             yield incomingEvent;
           } catch (e) {
@@ -152,9 +156,9 @@ export class MelonyClient {
     }
   }
 
-  private handleIncomingEvent(event: Event) {
-    if (event.state) {
-      this.lastServerState = event.state;
+  private handleIncomingEvent(event: TEvent) {
+    if (event.meta?.state) {
+      this.lastServerState = event.meta.state;
     }
     const events = [...this.state.events];
 
@@ -183,7 +187,7 @@ export class MelonyClient {
     if (
       event.type === "text-delta" &&
       lastEvent?.type === "text-delta" &&
-      event.runId === lastEvent.runId &&
+      event.meta?.runId === lastEvent.meta?.runId &&
       event.data?.delta
     ) {
       events[events.length - 1] = {
@@ -200,7 +204,7 @@ export class MelonyClient {
     this.setState({ events });
   }
 
-  reset(events: Event[] = []) {
+  reset(events: TEvent[] = []) {
     if (this.abortController) this.abortController.abort();
     this.setState({
       events,

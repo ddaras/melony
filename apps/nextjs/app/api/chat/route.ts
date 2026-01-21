@@ -1,30 +1,35 @@
-import { Event, createStreamResponse } from "melony";
-import { rootAgent } from "@/app/agent";
-import { NextRequest } from "next/server";
+import { foodAgent } from "../../agents/food-agent";
+import { createStreamResponse } from "melony";
 
-export async function GET() {
-  return Response.json({
-    starterPrompts: rootAgent.config.starterPrompts || [],
-    options: rootAgent.config.options || [],
-    fileAttachments: rootAgent.config.fileAttachments,
-  });
+export async function POST(req: Request) {
+  const body = await req.json();
+  const event = body.event;
+
+  if (!event) {
+    return new Response(JSON.stringify({ error: "Invalid request: event required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Merge headers into event state if needed
+  if (!event.meta) {
+    event.meta = {};
+  }
+
+  // We don't really need headers for this demo, but following the pattern
+  event.meta.state = {
+    ...(event.meta.state || {}),
+  };
+
+  return createStreamResponse(foodAgent.run(event));
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const event = body.event as Event;
-
-    if (!event) {
-      return Response.json(
-        { error: "Invalid request: event required" },
-        { status: 400 },
-      );
-    }
-
-    return createStreamResponse(rootAgent.run(event));
-  } catch (error) {
-    console.error("Error in chat route:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
-  }
+export async function GET() {
+  return new Response(JSON.stringify({
+    starterPrompts: foodAgent.config.starterPrompts || [],
+    options: foodAgent.config.options || [],
+  }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }

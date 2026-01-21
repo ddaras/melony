@@ -12,7 +12,7 @@ export const useSurface = (options: UseSurfaceOptions) => {
 
   const surfaceEvents = useMemo(() => {
     // 1. Filter by surface name
-    const filtered = events.filter((event) => event.surface === options.name);
+    const filtered = events.filter((event) => event.meta?.surface === options.name);
     // 2. Apply slot logic: replace events with the same slot
     return filterEventsBySlots(filtered);
   }, [events, options.name]);

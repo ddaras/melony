@@ -23,8 +23,11 @@ export const handle = (instance: { run: any; config: any }) => {
     }
 
     // Merge headers into event state
-    event.state = {
-      ...event.state,
+    if (!event.meta) {
+      event.meta = {} as any;
+    }
+    event.meta!.state = {
+      ...(event.meta?.state || {}),
       requestHeaders: headers,
     };
 

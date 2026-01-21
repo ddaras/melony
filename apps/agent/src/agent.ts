@@ -11,8 +11,6 @@ const threadManagementPlugin = plugin({
   name: "thread-management",
   onBeforeRun: async function* ({ event }, context) {
     if (!context.state?.threadId) {
-      // If your service generates the ID, you can get it here.
-      // For now, we generate a fresh one if missing.
       const newThreadId = generateId();
 
       if (!context.state) {
@@ -24,7 +22,6 @@ const threadManagementPlugin = plugin({
       yield {
         type: "client:navigate",
         data: { url: `?threadId=${newThreadId}` },
-        role: "assistant",
       };
     }
   },
@@ -34,7 +31,7 @@ export const rootAgent = melony({
   actions: { checkWeather },
   hooks: {
     onBeforeRun: async function* ({ event }) {
-      if (event.role === "user" && event.type === "text") {
+      if (event.meta?.role === "user" && event.type === "text") {
         const text = event.data?.content;
 
         if (text?.toLowerCase().includes("weather")) {

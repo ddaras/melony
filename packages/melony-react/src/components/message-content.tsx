@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Event, filterEventsBySlots } from "melony";
 import { UIRenderer } from "@/components/ui-renderer";
 
@@ -22,8 +22,8 @@ export function MessageContent({ events }: MessageContentProps) {
             </p>
           );
         }
-        if (displayEvent.ui) {
-          return <UIRenderer key={index} node={displayEvent.ui} />;
+        if (displayEvent.type === "ui") {
+          return <UIRenderer key={index} node={displayEvent.data} />;
         }
         return null;
       })}

@@ -3,7 +3,7 @@ import {
   AccountButton,
   AuthProvider,
   PopupChat,
-  MelonyProvider,
+  MelonyClientProvider,
   ThreadProvider,
   FullChat,
   ThemeProvider,
@@ -42,7 +42,7 @@ const authService = createMelonyAuthService();
 
 export function App() {
   return (
-    <MelonyProvider client={client}>
+    <MelonyClientProvider client={client}>
       <ThemeProvider>
         <AuthProvider
           service={authService}
@@ -60,7 +60,7 @@ export function App() {
           </ThreadProvider>
         </AuthProvider>
       </ThemeProvider>
-    </MelonyProvider>
+    </MelonyClientProvider>
   );
 }
 

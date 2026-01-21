@@ -5,25 +5,29 @@ import { Event } from "../types";
  * If multiple events have the same slot, only the latest one is kept,
  * but its position in the returned array corresponds to the first time that slot appeared.
  */
-export function filterEventsBySlots(events: Event[]): Event[] {
+export function filterEventsBySlots<TEvent extends Event = Event>(
+  events: TEvent[],
+): TEvent[] {
   const firstSlotIndexes = new Map<string, number>();
   const latestSlotIndexes = new Map<string, number>();
 
   events.forEach((event, index) => {
-    if (event.slot) {
-      if (!firstSlotIndexes.has(event.slot)) {
-        firstSlotIndexes.set(event.slot, index);
+    const slot = event.meta?.slot;
+    if (slot) {
+      if (!firstSlotIndexes.has(slot)) {
+        firstSlotIndexes.set(slot, index);
       }
-      latestSlotIndexes.set(event.slot, index);
+      latestSlotIndexes.set(slot, index);
     }
   });
 
-  const result: Event[] = [];
+  const result: TEvent[] = [];
 
   events.forEach((event, index) => {
-    if (event.slot) {
-      if (firstSlotIndexes.get(event.slot) === index) {
-        const latestIndex = latestSlotIndexes.get(event.slot)!;
+    const slot = event.meta?.slot;
+    if (slot) {
+      if (firstSlotIndexes.get(slot) === index) {
+        const latestIndex = latestSlotIndexes.get(slot)!;
         result.push(events[latestIndex]);
       }
     } else {

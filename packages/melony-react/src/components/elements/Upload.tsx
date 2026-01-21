@@ -129,7 +129,7 @@ export const Upload: React.FC<UIContract["upload"]> = ({
           ))}
 
         {displayEvents.map((event, index) =>
-          event.ui ? <UIRenderer key={index} node={event.ui} /> : null,
+          event.data ? <UIRenderer key={index} node={event.data} /> : null,
         )}
 
         <Button

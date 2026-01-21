@@ -44,7 +44,7 @@ export const MelonyContext = createContext<MelonyContextValue | undefined>(
   undefined,
 );
 
-export interface MelonyProviderProps {
+export interface MelonyClientProviderProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
@@ -64,14 +64,12 @@ interface MelonyContextProviderInnerProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
-  setContextValue: (value: MelonyContextValue) => void;
 }
 
 const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
   children,
   client,
   initialEvents,
-  setContextValue,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
   const queryClient = useQueryClient();
@@ -199,61 +197,54 @@ const MelonyContextProviderInner: React.FC<MelonyContextProviderInnerProps> = ({
     [state, sendEvent, reset, client, config],
   );
 
-  useEffect(() => {
-    setContextValue(value);
-  }, [value, setContextValue]);
-
   return (
-    <NuqsAdapter>
-      {children}
+    <MelonyContext.Provider value={value}>
+      <NuqsAdapter>
+        {children}
 
-      <Dialog
-        open={!!dialog}
-        onOpenChange={(open) => {
-          !open && setDialog(null);
-        }}
-      >
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{dialog?.title}</DialogTitle>
-            {dialog?.description && (
-              <DialogDescription>{dialog?.description}</DialogDescription>
-            )}
-          </DialogHeader>
-          <DialogClose>
-            <IconX className="size-4" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
-          <div className="flex flex-col gap-3">
-            {dialog?.ui && <UIRenderer node={dialog.ui} />}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </NuqsAdapter>
+        <Dialog
+          open={!!dialog}
+          onOpenChange={(open) => {
+            !open && setDialog(null);
+          }}
+        >
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{dialog?.title}</DialogTitle>
+              {dialog?.description && (
+                <DialogDescription>{dialog?.description}</DialogDescription>
+              )}
+            </DialogHeader>
+            <DialogClose>
+              <IconX className="size-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+            <div className="flex flex-col gap-3">
+              {dialog?.ui && <UIRenderer node={dialog.ui} />}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </NuqsAdapter>
+    </MelonyContext.Provider>
   );
 };
 
-export const MelonyProvider: React.FC<MelonyProviderProps> = ({
+export const MelonyClientProvider: React.FC<MelonyClientProviderProps> = ({
   children,
   client,
   initialEvents,
   queryClient = defaultQueryClient,
 }) => {
-  const [contextValue, setContextValue] = useState<
-    MelonyContextValue | undefined
-  >(undefined);
-
   return (
-    <MelonyContext.Provider value={contextValue}>
-      <QueryClientProvider client={queryClient}>
-        <MelonyContextProviderInner
-          client={client}
-          initialEvents={initialEvents}
-          setContextValue={setContextValue}
-        >
-          {children}
-        </MelonyContextProviderInner>
-      </QueryClientProvider>
-    </MelonyContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <MelonyContextProviderInner
+        client={client}
+        initialEvents={initialEvents}
+      >
+        {children}
+      </MelonyContextProviderInner>
+    </QueryClientProvider>
   );
 };
+
+export const MelonyProvider = MelonyClientProvider;

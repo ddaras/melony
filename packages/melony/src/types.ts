@@ -295,34 +295,41 @@ export type UINode<T extends keyof UIContract = keyof UIContract> = {
 };
 
 // ============================================
-// Events
+// Events (Generic & Headless)
 // ============================================
 
 export type Role = "user" | "assistant" | "system";
 
-export type Event = {
-  type: string;
-  data?: any;
-  ui?: UINode;
-  surface?: string; // might be anything like, header, inline chat, canvas, etc.
+/**
+ * System-managed metadata for an event.
+ */
+export interface EventMeta<TState = any> {
+  id: string;
+  runId: string;
+  timestamp: number;
+  role: Role;
+  state: TState;
+  surface?: string;
   slot?: string;
-  runId?: string;
   threadId?: string;
   threadTitle?: string;
-  timestamp?: number;
-  role?: Role;
-  state?: any;
-  metadata?: Record<string, any>;
-  /**
-   * Optional next action to execute immediately.
-   * If provided, the runtime will skip the initial hook dispatch.
-   */
+  [key: string]: any;
+}
+
+/**
+ * The core Event structure.
+ * TEvent can be a union of your application's business events.
+ */
+export type Event<TData = any> = {
+  type: string;
+  data: TData;
+  meta?: EventMeta;
   nextAction?: NextAction;
 };
 
-export interface Message {
+export interface Message<TEvent extends Event = Event> {
   role: Role;
-  content: Event[];
+  content: TEvent[];
   runId?: string;
   threadId?: string;
 }
@@ -334,19 +341,21 @@ export interface Message {
 export type ActionExecute<
   TParams extends z.ZodSchema = z.ZodSchema,
   TState = any,
+  TEvent extends Event = Event,
 > = (
   params: z.infer<TParams>,
-  context: RuntimeContext<TState>,
-) => AsyncGenerator<Event, NextAction | void, unknown>;
+  context: RuntimeContext<TState, TEvent>,
+) => AsyncGenerator<TEvent, NextAction | void, unknown>;
 
 export interface Action<
   TParams extends z.ZodSchema = z.ZodObject<any>,
   TState = any,
+  TEvent extends Event = Event,
 > {
   name: string;
   description?: string;
   paramsSchema: TParams;
-  execute: ActionExecute<TParams, TState>;
+  execute: ActionExecute<TParams, TState, TEvent>;
 }
 
 export interface NextAction {
@@ -356,79 +365,76 @@ export interface NextAction {
   [key: string]: any; // Allow metadata like toolCallId
 }
 
-export interface RuntimeContext<TState = any> {
+export interface RuntimeContext<TState = any, TEvent extends Event = Event> {
   state: TState;
   runId: string;
   stepCount: number;
-  actions: Record<string, Action<any, TState>>;
+  actions: Record<string, Action<any, TState, TEvent>>;
   ui: typeof ui;
 
   /**
    * Immediately interrupts the runtime execution.
    * If an event is provided, it will be emitted before the runtime stops.
    */
-  suspend: (event?: Event) => never;
+  suspend: (event?: TEvent) => never;
 }
 
 /**
  * Standardized Hook Result.
- * Now a generator to allow yielding multiple events and returning a result.
  */
-export type HookGenerator<TReturn = void> = AsyncGenerator<
-  Event,
+export type HookGenerator<TEvent extends Event = Event, TReturn = void> = AsyncGenerator<
+  TEvent,
   TReturn | void,
   unknown
 >;
 
-export interface Hooks<TState = any> {
+export interface Hooks<TState = any, TEvent extends Event = Event> {
   /**
    * Called when a run session begins.
-   * Can yield Events to be emitted, and return a NextAction to jump-start the loop.
    */
   onBeforeRun?: (
-    input: { event: Event },
-    context: RuntimeContext<TState>,
-  ) => HookGenerator<NextAction>;
+    input: { event: TEvent },
+    context: RuntimeContext<TState, TEvent>,
+  ) => HookGenerator<TEvent, NextAction>;
 
   /**
    * Called when a run session completes.
    */
-  onAfterRun?: (context: RuntimeContext<TState>) => HookGenerator;
+  onAfterRun?: (context: RuntimeContext<TState, TEvent>) => HookGenerator<TEvent>;
 
   /**
    * Called whenever an event is yielded by the runtime.
    */
-  onEvent?: (event: Event, context: RuntimeContext<TState>) => HookGenerator;
+  onEvent?: (event: TEvent, context: RuntimeContext<TState, TEvent>) => HookGenerator<TEvent>;
 
   /**
    * Called before an action is executed.
-   * Yield events to intercept, and return a NextAction to redirect/suspend.
    */
   onBeforeAction?: (
-    call: { action: Action<any, TState>; params: any; nextAction: NextAction },
-    context: RuntimeContext<TState>,
-  ) => HookGenerator<NextAction>;
+    call: { action: Action<any, TState, TEvent>; params: any; nextAction: NextAction },
+    context: RuntimeContext<TState, TEvent>,
+  ) => HookGenerator<TEvent, NextAction>;
 
   /**
    * Called after an action completes.
    */
   onAfterAction?: (
-    result: { action: Action<any, TState>; data: NextAction | void },
-    context: RuntimeContext<TState>,
-  ) => HookGenerator<NextAction>;
+    result: { action: Action<any, TState, TEvent>; data: NextAction | void },
+    context: RuntimeContext<TState, TEvent>,
+  ) => HookGenerator<TEvent, NextAction>;
 }
 
 /**
  * A plugin is just a named set of hooks.
  */
-export interface Plugin<TState = any> extends Hooks<TState> {
+export interface Plugin<TState = any, TEvent extends Event = Event> extends Hooks<TState, TEvent> {
   name: string;
 }
 
-export interface Config<TState = any> {
-  actions: Record<string, Action<any, TState>>;
-  hooks?: Hooks<TState>;
-  plugins?: Plugin<TState>[];
+export interface Config<TState = any, TEvent extends Event = Event> {
+  actions: Record<string, Action<any, TState, TEvent>>;
+  hooks?: Hooks<TState, TEvent>;
+  plugins?: Plugin<TState, TEvent>[];
   safetyMaxSteps?: number;
   starterPrompts?: Array<{
     label: string;
@@ -444,8 +450,8 @@ export interface Config<TState = any> {
   }>;
   fileAttachments?: {
     enabled?: boolean;
-    accept?: string; // e.g., "image/*,.pdf" for file input accept attribute
-    maxFiles?: number; // Maximum number of files allowed
-    maxFileSize?: number; // Maximum file size in bytes
+    accept?: string;
+    maxFiles?: number;
+    maxFileSize?: number;
   };
 }

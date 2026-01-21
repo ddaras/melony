@@ -1,14 +1,16 @@
 import { Event, Message } from "../types";
 
-export function convertEventsToMessages(events: Event[]): Message[] {
+export function convertEventsToMessages<TEvent extends Event = Event>(
+  events: TEvent[],
+): Message<TEvent>[] {
   if (events.length === 0) return [];
 
-  const messages: Message[] = [];
-  let currentMessage: Message | null = null;
+  const messages: Message<TEvent>[] = [];
+  let currentMessage: Message<TEvent> | null = null;
 
   for (const event of events) {
-    const role = event.role || "assistant";
-    const runId = event.runId;
+    const role = event.meta?.role || "assistant";
+    const runId = event.meta?.runId;
 
     // Start a new message if:
     // 1. No current message
