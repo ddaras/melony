@@ -1,6 +1,6 @@
 # melony
 
-A small **event-streaming runtime** for AI agents with first-class **Server-Driven UI (SDUI)**.
+Fast, unopinionated, minimalist event-based framework for AI agents.
 
 ## Installation
 
@@ -16,7 +16,7 @@ npm install melony
 import { melony, createStreamResponse } from "melony";
 
 const agent = melony()
-  .action("getWeather", "Get weather for a city", async function* ({ city }: { city: string }) {
+  .action("getWeather", async function* ({ city }: { city: string }) {
     yield {
       type: "ui",
       data: {
@@ -26,16 +26,15 @@ const agent = melony()
       }
     };
   })
-  .action("getMenu", {
-    description: "Get the current food menu",
-    execute: async function* () {
-      yield { type: "text", data: { content: "Here's our menu..." } };
+  .on("text", async function* (event, { runtime }) {
+    if (event.data.content.includes("weather")) {
+      yield* runtime.execute("getWeather", { city: "London" });
     }
   })
   .build();
 
 // Run it
-for await (const event of agent.run({ type: "text", data: { content: "London" } })) {
+for await (const event of agent.run({ type: "text", data: { content: "How's the weather?" } })) {
   console.log(event);
 }
 ```
@@ -43,33 +42,24 @@ for await (const event of agent.run({ type: "text", data: { content: "London" } 
 ### Legacy: Runtime Class API (Still Supported)
 
 ```ts
-import { MelonyRuntime, action, createStreamResponse } from "melony";
+import { MelonyRuntime, createStreamResponse } from "melony";
 
-// 1. Define actions
-const getWeather = action({
-  name: "getWeather",
-  description: "Get weather for a city",
-  execute: async function* ({ city }: { city: string }) {
-    yield {
-      type: "ui",
-      data: {
-        type: "card",
-        title: `Weather in ${city}`,
-        children: [{ type: "text", value: "Sunny, 24°C" }]
-      }
-    };
-  },
-});
-
-// 2. Create the runtime
+// 1. Create the runtime
 const agent = new MelonyRuntime({
-  actions: { getWeather },
+  actions: { 
+    getWeather: {
+      name: "getWeather",
+      execute: async function* ({ city }: { city: string }) {
+        yield { type: "text", data: { content: `Weather in ${city} is sunny!` } };
+      }
+    }
+  },
+  eventHandlers: new Map([
+    ["text", [async function* (event, { runtime }) {
+      yield* runtime.execute("getWeather", { city: "London" });
+    }]]
+  ])
 });
-
-// 3. Run it
-for await (const event of agent.run({ type: "text", data: { content: "London" } })) {
-  console.log(event);
-}
 ```
 
 ## Fluent Builder API
@@ -84,32 +74,27 @@ const agent = melony()
     yield { type: "text", data: { content: `Weather in ${city} is sunny!` } };
   })
 
-  // Action with description
-  .action("placeOrder", "Place a food order", async function* ({ itemId, quantity }) {
-    yield { type: "text", data: { content: `Ordered ${quantity} items!` } };
-  })
-
   // Action with full config object
-  .action("getMenu", {
-    description: "Get the current menu",
-    execute: async function* () {
-      yield { type: "text", data: { content: "Here's our menu..." } };
+  .action({
+    name: "placeOrder",
+    execute: async function* ({ itemId, quantity }) {
+      yield { type: "text", data: { content: `Ordered ${quantity} items!` } };
     }
-  })
-
-  // Add pre-defined actions from separate files
-  .action(getWeatherAction)
-  .action(placeOrderAction);
+  });
 ```
 
-### Plugin Integration
+### Event Handlers
 ```ts
 const agent = melony()
-  .action("getWeather", async function* ({ city }) {
-    // action logic
+  .on("text", async function* (event, { runtime }) {
+    // Intercept and handle events
+    if (event.data.content.includes("help")) {
+      yield { type: "text", data: { content: "How can I help you?" } };
+    }
   })
-  .use(llmRouterPlugin())
-  .use(actionUiRendererPlugin())
+  .on("action:before", async function* (event) {
+    console.log(`Executing action: ${event.data.action}`);
+  })
   .build();
 ```
 
@@ -117,13 +102,13 @@ const agent = melony()
 - **Full type inference** through the entire chain
 - **IntelliSense** for all methods and parameters
 - **Generic propagation** maintains type safety
-- **Backward compatible** with existing code
+- **Minimalist core** with zero required dependencies (except optional Zod)
 
 ## Core Concepts
 
 - **Event**: The universal unit of streaming (`{ type, data, meta }`).
-- **Action**: An async generator that yields events. Defined with the `action()` helper.
-- **Plugins**: Intercept runs, actions, and events for orchestration, HITL, logging, etc.
+- **Action**: An async generator that yields events.
+- **Event Handlers**: Reactive functions that listen to and emit events.
 - **SDUI**: Stream typed UI structures as JSON events to your frontend.
 
 ## License

@@ -1,6 +1,8 @@
 # Melony
 
-Melony is an **event-streaming AI agent runtime** with **Server-Driven UI (SDUI)** — build agents that stream **text and real UI** to your frontend, not just strings.
+Fast, unopinionated, minimalist event-based framework for building AI agents with **Server-Driven UI (SDUI)**.
+
+Melony is to AI agents what Express is to web servers — a tiny, flexible orchestration loop: `Event → Handler → Actions → Events`.
 
 If you're building _product_ (approval flows, forms, dashboards, tool results), Melony's core idea is simple:
 
@@ -10,10 +12,10 @@ If you're building _product_ (approval flows, forms, dashboards, tool results), 
 
 ## What you get
 
-- **Event-first runtime**: a tiny orchestration loop: `Event → Hook → Action → Events`.
-- **HITL-friendly architecture**: approvals and guardrails belong in **plugins** / hooks.
+- **Event-first runtime**: a tiny orchestration loop: `Event → Handler → Actions → Events`.
+- **HITL-friendly**: approvals and guardrails belong in **event handlers**.
 - **SDUI protocol**: Stream typed UI structures as JSON events to your frontend.
-- **Frontend-ready**: `@melony/react` renders chat + SDUI and `melony/client` streams events over HTTP.
+- **Frontend-ready**: `@melony/react` provides the glue (providers/hooks) to connect your React app to the Melony stream.
 
 ## Quick start (full stack)
 
@@ -21,36 +23,26 @@ If you're building _product_ (approval flows, forms, dashboards, tool results), 
 
 ```ts
 // app/api/chat/route.ts
-import { MelonyRuntime, action, plugin, createStreamResponse } from "melony";
+import { melony, createStreamResponse } from "melony";
 import { z } from "zod";
 
-const agent = new MelonyRuntime({
-  actions: {
-    greet: action({
-      name: "greet",
-      paramsSchema: z.object({ name: z.string().optional() }),
-      execute: async function* ({ name }) {
-        yield { type: "text", data: { content: `Hey${name ? ` ${name}` : ""}!` } };
-        yield {
-          type: "ui",
-          data: {
-            type: "card",
-            title: "Next step",
-            children: [{ type: "text", value: "Ask me anything." }]
-          }
-        };
-      },
-    }),
-  },
-  plugins: [
-    plugin({
-      name: "router",
-      onBeforeRun: async function* ({ event }) {
-        if (event.type === "text") return { action: "greet", params: {} };
-      },
-    }),
-  ],
-});
+const agent = melony()
+  .action("greet", async function* ({ name }: { name?: string }) {
+    yield { type: "text", data: { content: `Hey${name ? ` ${name}` : ""}!` } };
+    yield {
+      type: "ui",
+      data: {
+        type: "card",
+        title: "Next step",
+        children: [{ type: "text", value: "Ask me anything." }]
+      }
+    };
+  })
+  .on("text", async function* (event, { runtime }) {
+    // Simple router: call greet action for any text event
+    yield* runtime.execute("greet", { name: "User" });
+  })
+  .build();
 
 export async function POST(req: Request) {
   const { event } = await req.json();
@@ -61,12 +53,21 @@ export async function POST(req: Request) {
 ### Frontend (React)
 
 ```tsx
-import { MelonyProvider, Thread } from "@melony/react";
+import { MelonyClient } from "melony/client";
+import { MelonyProvider, useMelony } from "@melony/react";
+
+const client = new MelonyClient({ url: "/api/chat" });
+
+function Chat() {
+  const { messages, sendEvent } = useMelony();
+  // Render your chat UI here
+  return <div>...</div>;
+}
 
 export default function App() {
   return (
-    <MelonyProvider url="/api/chat">
-      <Thread />
+    <MelonyProvider client={client}>
+      <Chat />
     </MelonyProvider>
   );
 }

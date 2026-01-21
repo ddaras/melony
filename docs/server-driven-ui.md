@@ -57,12 +57,15 @@ npm install @melony/react
 ```
 
 ```tsx
-import { MelonyProvider, Thread } from "@melony/react";
+import { MelonyClient } from "melony/client";
+import { MelonyProvider } from "@melony/react";
+
+const client = new MelonyClient({ url: "/api/chat" });
 
 function App() {
   return (
-    <MelonyProvider url="/api/chat">
-      <Thread />
+    <MelonyProvider client={client}>
+      {/* ... */}
     </MelonyProvider>
   );
 }
@@ -72,21 +75,11 @@ The `Thread` component automatically renders Text and SDUI events.
 
 ### Customizing Components
 
-You can override the default SDUI components or add your own by providing a `components` map.
+You can override the default SDUI components or add your own by providing a `components` map to your UI renderer.
 
 ```tsx
-<MelonyProvider
-  url="/api/chat"
-  components={{
-    card: ({ title, children }) => (
-      <div className="my-custom-card">
-        <h1>{title}</h1>
-        {children}
-      </div>
-    ),
-  }}
->
-  ...
+<MelonyProvider client={client}>
+  {/* Your chat components */}
 </MelonyProvider>
 ```
 

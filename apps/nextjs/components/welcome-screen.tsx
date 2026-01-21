@@ -24,7 +24,7 @@ export function WelcomeScreen({
     },
     {
       title: "Extensible",
-      description: "Plugin architecture for easy integrations.",
+      description: "Event-driven architecture for easy integrations.",
     },
     {
       title: "Real-time",

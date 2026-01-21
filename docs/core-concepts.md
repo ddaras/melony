@@ -11,94 +11,75 @@ interface Event {
   type: string;
   data: any;
   meta?: EventMeta; // id, runId, timestamp, role, state, etc.
-  nextAction?: NextAction;
 }
 ```
 
-The `MelonyRuntime` manages the flow of these events from the server to the client.
+The `MelonyRuntime` (created via the `melony()` builder) manages the flow of these events from the server to the client.
 
 ## Actions: Where the Work Happens
 
 An **Action** is an asynchronous generator function that performs a specific task. It can yield any number of events.
 
-Define actions using the `action()` helper for full type inference:
+Define actions inline with the builder or separately using the `action()` helper:
 
 ```typescript
 import { action } from "melony";
-import { z } from "zod";
 
 const myAction = action({
   name: "doSomething",
-  description: "A helpful description for LLM tool-calling",
-  paramsSchema: z.object({ name: z.string() }),
   execute: async function* ({ name }, context) {
     yield { type: "text", data: { content: `Hello ${name}` } };
   },
 });
 ```
 
-### The `NextAction` Return
+### Action Context
 
-An action can optionally `return` a `NextAction` object. This tells the runtime to execute another action next.
+Actions receive a `context` object which provides:
+- `state`: The current run state.
+- `runtime`: Access to the runtime instance (to execute other actions).
+- `runId`: Unique ID for the current execution.
+- `suspend`: A function to immediately halt execution (useful for HITL).
 
-```typescript
-execute: async function* ({ query }) {
-  const data = await search(query);
-  // Chain to another action
-  return { action: "summarize", params: { data } };
-}
-```
+## Event Handlers: Reactive Logic
 
-## Plugins: Extensible Orchestration
+Event handlers are the "brain" of your agent. They listen for specific event types and can yield new events or trigger actions. This replaces the traditional "plugin" or "middleware" system with a more flexible, event-driven approach.
 
-Plugins allow you to intercept the execution flow. They are the "middleware" of Melony and provide lifecycle hooks for custom behavior.
-
-### Available Plugin Hooks
-
-- **`onBeforeRun`**: Called when a run starts. Use it to route incoming events to specific actions.
-- **`onAfterRun`**: Called after a run completes. Use it for cleanup or logging.
-- **`onBeforeAction`**: Called before an action executes. Use it for validation or HITL approval.
-- **`onAfterAction`**: Called after an action completes. Use it to log results or override the next action.
-- **`onEvent`**: Called for every event yielded. Use it for persistence or logging.
-
-### Example: Routing with `onBeforeRun`
+### Example: Routing with Event Handlers
 
 ```typescript
-const agent = new MelonyRuntime({
-  actions: { getWeather, placeOrder },
-  plugins: [
-    plugin({
-      name: "router",
-      onBeforeRun: async function* ({ event }) {
-        // Route text messages to an action
-        if (event.type === "text" && event.data.content.includes("weather")) {
-          return { action: "getWeather", params: { city: "NYC" } };
-        }
-      },
-    }),
-  ],
-});
+const agent = melony()
+  .action(getWeather)
+  .on("text", async function* (event, { runtime }) {
+    // Route text messages to an action based on content
+    if (event.data.content.includes("weather")) {
+      yield* runtime.execute("getWeather", { city: "NYC" });
+    }
+  })
+  .build();
 ```
 
-## Building Plugins
+### Built-in Events
 
-Plugins are named collections of lifecycle hooks that can be reused across agents.
+Melony emits several built-in events that you can hook into:
+- **`action:before`**: Emitted before an action starts.
+- **`action:after`**: Emitted after an action completes.
+- **`call-action`**: Used to trigger an action execution (handled automatically by the builder).
+- **`error`**: Emitted when something goes wrong.
+
+### Chaining & Recursion
+
+When a handler yields an event, that event is automatically passed back through the runtime's handlers. This allows for powerful, recursive behaviors.
 
 ```typescript
-import { plugin } from "melony";
-
-const loggingPlugin = plugin({
-  name: "logging",
-  onEvent: async function* (event) {
-    console.log("Event:", event.type);
-  },
-});
-
-const agent = new MelonyRuntime({
-  actions: { ... },
-  plugins: [loggingPlugin],
-});
+const agent = melony()
+  .on("greet", async function* () {
+    yield { type: "text", data: { content: "Hello!" } };
+  })
+  .on("text", async function* (event) {
+    if (event.data.content === "hi") {
+      yield { type: "greet", data: {} }; // This will trigger the 'greet' handler
+    }
+  })
+  .build();
 ```
-
-Built-in plugins:
-- **`requireApproval`**: Adds Human-in-the-Loop approval for sensitive actions.

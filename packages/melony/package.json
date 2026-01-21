@@ -1,6 +1,6 @@
 {
   "name": "melony",
-  "version": "0.1.55",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -21,7 +21,7 @@
   ],
   "author": "",
   "license": "MIT",
-  "description": "A minimal, unopinionated runtime for building AI agents.",
+  "description": "Fast, unopinionated, minimalist event-based framework for AI agents.",
   "publishConfig": {
     "access": "public"
   },

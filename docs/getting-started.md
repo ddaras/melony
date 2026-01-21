@@ -16,12 +16,9 @@ An **Action** is an async generator that performs a task and yields events.
 
 ```typescript
 import { action } from "melony";
-import { z } from "zod";
 
 export const getWeatherAction = action({
   name: "getWeather",
-  description: "Get the current weather for a city",
-  paramsSchema: z.object({ city: z.string() }),
   execute: async function* ({ city }) {
     // Yield a text event
     yield { type: "text", data: { content: `Checking weather for ${city}...` } };
@@ -34,11 +31,6 @@ export const getWeatherAction = action({
         title: `Weather in ${city}`,
         children: [
           { type: "text", value: "Sunny, 24°C" },
-          {
-            type: "button",
-            label: "Refresh",
-            onClickAction: { type: "refresh", data: { city } }
-          },
         ],
       },
     };
@@ -48,17 +40,21 @@ export const getWeatherAction = action({
 
 ## 2. Create the Runtime
 
-Use `MelonyRuntime` to create an instance of your agent with all your actions.
+Use the `melony()` builder to create an instance of your agent.
 
 ```typescript
-import { MelonyRuntime } from "melony";
+import { melony } from "melony";
 import { getWeatherAction } from "./actions/get-weather";
 
-export const agent = new MelonyRuntime({
-  actions: {
-    getWeather: getWeatherAction,
-  },
-});
+export const agent = melony()
+  .action(getWeatherAction)
+  .on("text", async function* (event, { runtime }) {
+    // Simple router
+    if (event.data.content.includes("weather")) {
+      yield* runtime.execute("getWeather", { city: "London" });
+    }
+  })
+  .build();
 ```
 
 ## 3. Serve your Agent
@@ -89,7 +85,6 @@ async function chat(city: string) {
   const stream = client.sendEvent({
     type: "text",
     data: { content: city },
-    nextAction: { action: "getWeather", params: { city } },
   });
 
   for await (const event of stream) {
