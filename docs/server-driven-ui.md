@@ -22,27 +22,29 @@ const card = ui.card({
     ui.text("1x Croissant - $3.50"),
     ui.divider(),
     ui.row({
+      gap: "md",
       children: [
-        ui.button({ label: "Cancel", action: "cancelOrder", variant: "outline" }),
-        ui.button({ label: "Confirm", action: "confirmOrder" }),
-      ]
-    })
-  ]
+        ui.button({ label: "Cancel", variant: "outline", onClickAction: { type: "cancel-order", data: {} } }),
+        ui.button({ label: "Confirm", variant: "success", onClickAction: { type: "confirm-order", data: {} } }),
+      ],
+    }),
+  ],
 });
 ```
 
-When you yield an event with this UI, Melony sends a JSON representation to the client.
+To send UI to the client, yield an event with the UI node in `data`:
 
 ```typescript
-yield {
-  type: "ui",
-  ui: card
-};
+yield { type: "ui", data: card };
 ```
 
 ## Rendering with `@melony/react`
 
 Rendering SDUI on the client is seamless with our React package.
+
+```bash
+npm install @melony/react
+```
 
 ```tsx
 import { MelonyProvider, Thread } from "@melony/react";
@@ -50,21 +52,20 @@ import { MelonyProvider, Thread } from "@melony/react";
 function App() {
   return (
     <MelonyProvider url="/api/chat">
-      <div className="h-screen w-full">
-        {/* The Thread component automatically renders Text and SDUI events */}
-        <Thread />
-      </div>
+      <Thread />
     </MelonyProvider>
   );
 }
 ```
 
+The `Thread` component automatically renders Text and SDUI events.
+
 ### Customizing Components
 
-You can override the default SDUI components or add your own by providing a `components` map to the provider.
+You can override the default SDUI components or add your own by providing a `components` map.
 
 ```tsx
-<MelonyProvider 
+<MelonyProvider
   url="/api/chat"
   components={{
     card: ({ title, children }) => (
@@ -72,7 +73,7 @@ You can override the default SDUI components or add your own by providing a `com
         <h1>{title}</h1>
         {children}
       </div>
-    )
+    ),
   }}
 >
   ...
@@ -82,7 +83,11 @@ You can override the default SDUI components or add your own by providing a `com
 ## Available UI Elements
 
 The standard `ui` builder includes:
-- **Layout**: `card`, `row`, `col`, `list`, `listItem`, `spacer`, `divider`.
-- **Display**: `text`, `heading`, `badge`, `icon`, `image`.
-- **Interaction**: `button`, `form`, `input`, `select`, `checkbox`, `textarea`.
-- **Feedback**: `loading`, `error`.
+
+**Layout**: `card`, `row`, `col`, `box`, `list`, `listItem`, `spacer`, `divider`
+
+**Display**: `text`, `heading`, `badge`, `icon`, `image`, `video`, `chart`
+
+**Interaction**: `button`, `form`, `input`, `select`, `checkbox`, `textarea`, `radioGroup`, `colorPicker`, `upload`
+
+**Utility**: `float`, `dropdown`, `hidden`, `label`

@@ -1,37 +1,70 @@
-# Adapters & Client
+# Serving & Client
 
-Melony is designed to be flexible. It provides a core runtime that can be adapted to various server environments and consumed by different clients.
+Melony is designed to be flexible. It provides a core runtime that can be served in various environments and consumed by different clients.
 
-## Server Adapters
+## Serving with `createStreamResponse`
 
-Adapters bridge the Melony runtime with your web framework's request/response lifecycle.
+The simplest way to serve a Melony agent is using the built-in `createStreamResponse` utility. It converts the async generator from `runtime.run()` into a streaming `Response`.
 
-### Hono Adapter
+### Next.js Example
 
-Hono is the recommended way to serve Melony agents due to its speed and support for edge environments (Cloudflare Workers, Deno, etc.).
+```typescript
+// app/api/chat/route.ts
+import { createStreamResponse } from "melony";
+import { agent } from "./agent";
+
+export async function POST(req: Request) {
+  const { event } = await req.json();
+  return createStreamResponse(agent.run(event));
+}
+
+export async function GET() {
+  // Optionally expose config like starter prompts
+  return Response.json({
+    starterPrompts: agent.config.starterPrompts || [],
+  });
+}
+```
+
+### Hono Example
+
+Using the built-in Hono adapter:
 
 ```typescript
 import { Hono } from "hono";
 import { handle } from "melony/adapters/hono";
-import { assistant } from "./assistant";
+import { agent } from "./agent";
 
 const app = new Hono();
-app.post("/api/chat", handle(assistant));
+
+// The handle adapter manages GET (config) and POST (run) for you
+app.all("/api/chat", handle(agent));
 ```
 
-### Custom Adapters
-
-If you are using a framework without a built-in adapter (like Express or Fastify), you can use the `runtime.run()` method directly and stream the results using standard Server-Sent Events (SSE) or simple JSON streaming.
+Or manually with `createStreamResponse`:
 
 ```typescript
-// Conceptual example for a custom handler
-import { assistant } from "./assistant";
+import { Hono } from "hono";
+import { createStreamResponse } from "melony";
+import { agent } from "./agent";
 
+const app = new Hono();
+
+app.post("/api/chat", async (c) => {
+  const { event } = await c.req.json();
+  return createStreamResponse(agent.run(event));
+});
+```
+
+### Custom Streaming
+
+If you need more control, you can iterate over the generator manually:
+
+```typescript
 async function handleRequest(req, res) {
-  const event = await req.json();
-  const stream = assistant.run(event);
-
-  for await (const chunk of stream) {
+  const { event } = await req.json();
+  
+  for await (const chunk of agent.run(event)) {
     res.write(`data: ${JSON.stringify(chunk)}\n\n`);
   }
   res.end();
@@ -49,24 +82,25 @@ const client = new MelonyClient({
   url: "/api/chat",
   // Optional: custom headers for auth
   headers: () => ({
-    "Authorization": `Bearer ${getToken()}`
-  })
+    Authorization: `Bearer ${getToken()}`,
+  }),
 });
 ```
 
-### `sendEvent(event: MelonyEvent)`
+### `sendEvent(event: Event)`
 
 Sends an event to the server and returns an `AsyncGenerator` of events.
 
 ```typescript
 const stream = client.sendEvent({
   type: "text",
-  role: "user",
-  data: { content: "Hello!" }
+  data: { content: "Hello!" },
+  nextAction: { action: "greet", params: {} },
 });
 
 for await (const event of stream) {
   // Handle events as they arrive
+  console.log(event);
 }
 ```
 
@@ -74,4 +108,3 @@ for await (const event of stream) {
 
 - `url`: The endpoint of your Melony server.
 - `headers`: A static object or a function that returns headers (useful for dynamic tokens).
-- `onEvent`: A callback triggered for every event in the stream (useful for global logging).

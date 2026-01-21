@@ -1,12 +1,6 @@
 # melony
 
-Melony Core is a small **event-streaming runtime** for AI agents with first-class **Server‑Driven UI (SDUI)**.
-
-You define `actions` (do work and stream events) and use `hooks` to orchestrate them. Actions/hooks can stream:
-
-- **Text** (`{ type: "text" }` / `{ type: "text-delta" }`)
-- **UI trees** (`event.ui = ui.card(...)`) that React (and other renderers) can display
-- Any custom events you want (`{ type: "tool-result", data: ... }`)
+A small **event-streaming runtime** for AI agents with first-class **Server-Driven UI (SDUI)**.
 
 ## Installation
 
@@ -14,99 +8,39 @@ You define `actions` (do work and stream events) and use `hooks` to orchestrate 
 npm install melony zod
 ```
 
-## 60-second usage
-
-### 1) Define an agent runtime
+## Quick Start
 
 ```ts
-import { melony, action, ui } from "melony";
+import { MelonyRuntime, action, ui, createStreamResponse } from "melony";
 import { z } from "zod";
 
-export const assistant = melony({
-  actions: {
-    searchProducts: action({
-      name: "searchProducts",
-      description: "Search products by keyword",
-      paramsSchema: z.object({ query: z.string() }),
-      execute: async function* ({ query }) {
-        yield {
-          type: "text",
-          data: { content: `Searching for "${query}"...` },
-        };
-
-        // SDUI: stream real UI to the frontend
-        yield {
-          type: "ui",
-          ui: ui.card({
-            title: "Results",
-            children: [
-              ui.list([
-                ui.listItem({ children: [ui.text("Product A — $10")] }),
-                ui.listItem({ children: [ui.text("Product B — $12")] }),
-              ]),
-            ],
-          }),
-        };
-      },
-    }),
-  },
-
-  // Orchestrate with hooks:
-  hooks: {
-    onBeforeRun: async function* (input) {
-      if (input.event.type === "text") {
-        return {
-          action: "searchProducts",
-          params: { query: input.event.data?.content },
-        };
-      }
-    },
+// 1. Define actions
+const getWeather = action({
+  name: "getWeather",
+  description: "Get weather for a city",
+  paramsSchema: z.object({ city: z.string() }),
+  execute: async function* ({ city }) {
+    yield { type: "ui", data: ui.card({ title: `Weather in ${city}`, children: [ui.text("Sunny, 24°C")] }) };
   },
 });
-```
 
-### 2) Serve it (Hono adapter)
-
-```ts
-import { Hono } from "hono";
-import { handle } from "melony/adapters/hono";
-import { assistant } from "./assistant";
-
-const app = new Hono();
-app.post("/api/chat", handle(assistant));
-```
-
-### 3) Stream from the client
-
-```ts
-import { MelonyClient } from "melony/client";
-
-const client = new MelonyClient({
-  url: "/api/chat",
+// 2. Create the runtime
+const agent = new MelonyRuntime({
+  actions: { getWeather },
 });
 
-for await (const event of client.sendEvent({
-  type: "text",
-  role: "user",
-  data: { content: "running shoes" },
-})) {
-  console.log("event:", event);
+// 3. Run it
+for await (const event of agent.run({ type: "text", data: { content: "London" }, nextAction: { action: "getWeather", params: { city: "London" } } })) {
+  console.log(event);
 }
 ```
 
-## Core concepts
+## Core Concepts
 
-- **Event**: the universal unit of streaming.
-- **Action**: an async generator that yields events and (optionally) returns a `NextAction`.
-- **Plugins/Hooks**: intercept runs, actions, and events (great place for orchestration, HITL, logging, persistence).
-
-## SDUI (Server‑Driven UI)
-
-Melony ships a typed UI contract and builder:
-
-- `ui.card(...)`, `ui.form(...)`, `ui.button(...)`, etc.
-- Put the resulting `UINode` into `event.ui`
-- `@melony/react` renders it automatically
+- **Event**: The universal unit of streaming (`{ type, data, meta }`).
+- **Action**: An async generator that yields events. Defined with the `action()` helper.
+- **Hooks/Plugins**: Intercept runs, actions, and events for orchestration, HITL, logging, etc.
+- **SDUI**: Stream typed UI to the frontend using the `ui` builder.
 
 ## License
 

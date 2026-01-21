@@ -10,70 +10,68 @@ Melony requires `zod` for schema validation.
 npm install melony zod
 ```
 
-## 1. Define your Agent
+## 1. Define Actions
 
-A Melony agent is defined by its **actions** and **hooks**. 
+An **Action** is an async generator that performs a task and yields events.
 
 ```typescript
-import { melony, action, ui } from "melony";
+import { action, ui } from "melony";
 import { z } from "zod";
 
-export const assistant = melony({
-  actions: {
-    getWeather: action({
-      name: "getWeather",
-      description: "Get the current weather",
-      paramsSchema: z.object({ city: z.string() }),
-      execute: async function* ({ city }) {
-        yield { type: "text", data: { content: `Checking weather for ${city}...` } };
-        
-        // SDUI: Stream a UI card to the frontend
-        yield {
-          type: "ui",
-          ui: ui.card({
-            title: `Weather in ${city}`,
-            children: [
-              ui.text("Sunny, 24°C"),
-              ui.button({ label: "Refresh", action: "getWeather", params: { city } })
-            ],
-          }),
-        };
-      },
-    }),
-  },
-  
-  // Orchestration: Route user messages to actions
-  hooks: {
-    onBeforeRun: async function* (input) {
-      if (input.event.type === "text") {
-        return {
-          action: "getWeather",
-          params: { city: input.event.data?.content },
-        };
-      }
-    },
+export const getWeatherAction = action({
+  name: "getWeather",
+  description: "Get the current weather for a city",
+  paramsSchema: z.object({ city: z.string() }),
+  execute: async function* ({ city }) {
+    // Yield a text event
+    yield { type: "text", data: { content: `Checking weather for ${city}...` } };
+
+    // Yield a SDUI card
+    yield {
+      type: "ui",
+      data: ui.card({
+        title: `Weather in ${city}`,
+        children: [
+          ui.text("Sunny, 24°C"),
+          ui.button({ label: "Refresh", onClickAction: { type: "refresh", data: { city } } }),
+        ],
+      }),
+    };
   },
 });
 ```
 
-## 2. Serve your Agent
+## 2. Create the Runtime
 
-Melony provides adapters for common frameworks. Here is how to serve it using **Hono**.
+Use `MelonyRuntime` to create an instance of your agent with all your actions.
 
 ```typescript
-import { Hono } from "hono";
-import { handle } from "melony/adapters/hono";
-import { assistant } from "./assistant";
+import { MelonyRuntime } from "melony";
+import { getWeatherAction } from "./actions/get-weather";
 
-const app = new Hono();
-
-// This endpoint will stream events to the client
-app.post("/api/chat", handle(assistant));
-
-export default app;
+export const agent = new MelonyRuntime({
+  actions: {
+    getWeather: getWeatherAction,
+  },
+});
 ```
 
-## 3. Consume the Stream (Client Side)
+## 3. Serve your Agent
+
+Use the `createStreamResponse` utility to stream events back to the client.
+
+```typescript
+// app/api/chat/route.ts (Next.js example)
+import { createStreamResponse } from "melony";
+import { agent } from "./agent";
+
+export async function POST(req: Request) {
+  const { event } = await req.json();
+  return createStreamResponse(agent.run(event));
+}
+```
+
+## 4. Consume the Stream (Client Side)
 
 Use the `MelonyClient` to send events and consume the stream.
 
@@ -82,11 +80,11 @@ import { MelonyClient } from "melony/client";
 
 const client = new MelonyClient({ url: "/api/chat" });
 
-async function chat(message: string) {
+async function chat(city: string) {
   const stream = client.sendEvent({
     type: "text",
-    role: "user",
-    data: { content: message },
+    data: { content: city },
+    nextAction: { action: "getWeather", params: { city } },
   });
 
   for await (const event of stream) {

@@ -7,74 +7,95 @@ Understanding the building blocks of a Melony agent.
 In Melony, everything is an **Event**. Whether it's a piece of text, a UI component, or a tool result, it's represented as a standard event object.
 
 ```typescript
-interface MelonyEvent {
+interface Event {
   type: string;
-  role?: "user" | "assistant" | "system";
-  data?: any;
-  ui?: UINode; // SDUI payload
+  data: any;
+  meta?: EventMeta; // id, runId, timestamp, role, state, etc.
+  nextAction?: NextAction;
 }
 ```
 
-The Melony runtime manages the flow of these events from the server to the client.
+The `MelonyRuntime` manages the flow of these events from the server to the client.
 
 ## Actions: Where the Work Happens
 
 An **Action** is an asynchronous generator function that performs a specific task. It can yield any number of events.
 
-- **`name`**: Unique identifier for the action.
-- **`description`**: Used for orchestration or LLM tool calling.
-- **`paramsSchema`**: A Zod schema defining the input.
-- **`execute`**: The function logic.
+Define actions using the `action()` helper for full type inference:
 
 ```typescript
+import { action } from "melony";
+import { z } from "zod";
+
 const myAction = action({
-  name: "do_something",
+  name: "doSomething",
+  description: "A helpful description for LLM tool-calling",
   paramsSchema: z.object({ name: z.string() }),
-  execute: async function* ({ name }) {
+  execute: async function* ({ name }, context) {
     yield { type: "text", data: { content: `Hello ${name}` } };
-  }
+  },
 });
 ```
 
 ### The `NextAction` Return
 
-An action can optionally `return` a `NextAction` object. This tells the runtime what to do next (e.g., call another action or wait for user input).
+An action can optionally `return` a `NextAction` object. This tells the runtime to execute another action next.
 
 ```typescript
-return {
-  action: "next_step",
-  params: { id: 123 }
-};
+execute: async function* ({ query }) {
+  const data = await search(query);
+  // Chain to another action
+  return { action: "summarize", params: { data } };
+}
 ```
 
 ## Hooks: Pluggable Orchestration
 
 Hooks allow you to intercept the execution flow. They are the "middleware" of Melony.
 
-### `onBeforeRun`
-Triggered before any action is executed. Use this to:
-- Route incoming user messages to specific actions.
-- Add context to the run.
-- Implement security checks.
+### Available Hooks
 
-### `onAfterAction`
-Triggered after an action completes. Use this to:
-- Log results.
-- Trigger side effects.
-- Override the next action.
+- **`onBeforeRun`**: Called when a run starts. Use it to route incoming events to specific actions.
+- **`onAfterRun`**: Called after a run completes. Use it for cleanup or logging.
+- **`onBeforeAction`**: Called before an action executes. Use it for validation or HITL approval.
+- **`onAfterAction`**: Called after an action completes. Use it to log results or override the next action.
+- **`onEvent`**: Called for every event yielded. Use it for persistence or logging.
+
+### Example: Routing with `onBeforeRun`
+
+```typescript
+const agent = new MelonyRuntime({
+  actions: { getWeather, placeOrder },
+  hooks: {
+    onBeforeRun: async function* ({ event }) {
+      // Route text messages to an action
+      if (event.type === "text" && event.data.content.includes("weather")) {
+        return { action: "getWeather", params: { city: "NYC" } };
+      }
+    },
+  },
+});
+```
 
 ## Plugins: Packaging Logic
 
-Plugins are simply a collection of hooks. This allows you to package and reuse complex logic like:
-- **Persistence**: Saving event history to a database.
-- **HITL (Human-in-the-Loop)**: Pausing execution for human approval.
-- **LLM Routing**: Using an LLM to decide which action to call.
+Plugins are simply a named collection of hooks. This allows you to package and reuse complex logic.
 
 ```typescript
-import { persistPlugin } from "./plugins/persist";
+import { plugin } from "melony";
 
-const assistant = melony({
+const loggingPlugin = plugin({
+  name: "logging",
+  onEvent: async function* (event) {
+    console.log("Event:", event.type);
+  },
+});
+
+const agent = new MelonyRuntime({
   actions: { ... },
-  plugins: [persistPlugin({ dbUrl: "..." })]
+  plugins: [loggingPlugin],
 });
 ```
+
+Built-in plugins:
+- **`requireApproval`**: Adds Human-in-the-Loop approval for sensitive actions.
