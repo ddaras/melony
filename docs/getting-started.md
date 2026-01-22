@@ -4,63 +4,60 @@ Get up and running with Melony in less than 5 minutes.
 
 ## Installation
 
-Melony requires `zod` for schema validation.
+Install the core Melony package.
 
 ```bash
-npm install melony zod
+npm install melony
 ```
 
 ## 1. Define Actions
 
-An **Action** is an async generator that performs a task and yields events.
+An **Action** is an async generator that performs a task and yields events. You can define them as standalone async generator functions.
 
 ```typescript
-import { action } from "melony";
+export const getWeatherAction = async function* ({ city }: { city: string }) {
+  // Yield a text event
+  yield { type: "text", data: { content: `Checking weather for ${city}...` } };
 
-export const getWeatherAction = action({
-  name: "getWeather",
-  execute: async function* ({ city }) {
-    // Yield a text event
-    yield { type: "text", data: { content: `Checking weather for ${city}...` } };
+  // Yield custom data or UI events
+  yield {
+    type: "weather-data",
+    data: {
+      city,
+      temp: 24,
+      condition: "Sunny"
+    },
+  };
 
-    // Yield custom data or UI events
-    yield {
-      type: "weather-data",
-      data: {
-        city,
-        temp: 24,
-        condition: "Sunny"
-      },
-    };
-  },
-});
+  // Optional: return a value that will be included in the 'action:after' event
+  return { success: true };
+};
 ```
 
 ## 2. Create the Runtime
 
-Use the `melony()` builder to create an instance of your agent.
+Use the `melony()` builder to create an instance of your agent. Register your actions by providing a name and the generator function.
 
 ```typescript
 import { melony } from "melony";
 import { getWeatherAction } from "./actions/get-weather";
 
 export const agent = melony()
-  .action(getWeatherAction)
+  .action("getWeather", getWeatherAction)
   .on("text", async function* (event, { runtime }) {
-    // Simple router
-    if (event.data.content.includes("weather")) {
+    // Simple router: if the message contains "weather", call the action
+    if (event.data.content.toLowerCase().includes("weather")) {
       yield* runtime.execute("getWeather", { city: "London" });
     }
-  })
-  .build();
+  });
 ```
 
 ## 3. Serve your Agent
 
-Use the `.stream()` method to stream events back to the client as an HTTP response.
+In a Next.js API route, use the `.stream()` method to stream events back to the client as an SSE-compatible response.
 
 ```typescript
-// app/api/chat/route.ts (Next.js example)
+// app/api/chat/route.ts
 import { agent } from "./agent";
 
 export async function POST(req: Request) {
@@ -69,27 +66,45 @@ export async function POST(req: Request) {
 }
 ```
 
-## 4. Consume the Stream (Client Side)
+## 4. Consume the Stream (React)
 
-Use the `MelonyClient` to send events and consume the stream.
+For React apps, use `@melony/react` which provides a provider and hooks to handle the stream and state automatically.
 
-```typescript
+```bash
+npm install @melony/react
+```
+
+```tsx
 import { MelonyClient } from "melony/client";
+import { MelonyProvider, useMelony } from "@melony/react";
 
 const client = new MelonyClient({ url: "/api/chat" });
 
-async function chat(city: string) {
-  const stream = client.sendEvent({
-    type: "text",
-    data: { content: city },
-  });
+function Chat() {
+  const { events, sendEvent, isLoading } = useMelony();
 
-  for await (const event of stream) {
-    console.log("Received event:", event);
-  }
+  return (
+    <div>
+      <div className="messages">
+        {events.map(e => e.type === "text" && <p key={e.meta?.id}>{e.data.content}</p>)}
+      </div>
+      <button 
+        disabled={isLoading}
+        onClick={() => sendEvent({ type: "text", data: { content: "How is the weather?" } })}
+      >
+        Ask Weather
+      </button>
+    </div>
+  );
 }
 
-chat("London");
+export default function App() {
+  return (
+    <MelonyProvider client={client}>
+      <Chat />
+    </MelonyProvider>
+  );
+}
 ```
 
 ## Next Steps

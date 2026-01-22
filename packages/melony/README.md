@@ -59,17 +59,9 @@ The fluent builder provides an excellent developer experience with method chaini
 ### Action Definition
 ```ts
 const agent = melony()
-  // Simple action with name and handler
+  // Register an async generator with a name
   .action("getWeather", async function* ({ city }) {
     yield { type: "text", data: { content: `Weather in ${city} is sunny!` } };
-  })
-
-  // Action with full config object
-  .action({
-    name: "placeOrder",
-    execute: async function* ({ itemId, quantity }) {
-      yield { type: "text", data: { content: `Ordered ${quantity} items!` } };
-    }
   });
 ```
 

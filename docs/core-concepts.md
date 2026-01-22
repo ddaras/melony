@@ -18,19 +18,22 @@ The `MelonyRuntime` (created via the `melony()` builder) manages the flow of the
 
 ## Actions: Where the Work Happens
 
-An **Action** is an asynchronous generator function that performs a specific task. It can yield any number of events.
+An **Action** is a simple asynchronous generator function that performs a specific task. It can yield any number of events.
 
-Define actions inline with the builder or separately using the `action()` helper:
+Define actions as pure async generators:
 
 ```typescript
-import { action } from "melony";
+export const myAction = async function* ({ name }: { name: string }, context) {
+  yield { type: "text", data: { content: `Hello ${name}` } };
+  return { status: "success" };
+};
+```
 
-const myAction = action({
-  name: "doSomething",
-  execute: async function* ({ name }, context) {
-    yield { type: "text", data: { content: `Hello ${name}` } };
-  },
-});
+Register them with the agent:
+
+```typescript
+const agent = melony()
+  .action("doSomething", myAction);
 ```
 
 ### Action Context
@@ -55,8 +58,7 @@ const agent = melony()
     if (event.data.content.includes("weather")) {
       yield* runtime.execute("getWeather", { city: "NYC" });
     }
-  })
-  .build();
+  });
 ```
 
 ## Plugin System: Modular Agent Logic

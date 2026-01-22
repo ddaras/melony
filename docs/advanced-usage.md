@@ -10,7 +10,7 @@ You can implement this by adding an event handler for `action:before`.
 
 ```typescript
 const agent = melony()
-  .action(placeOrder)
+  .action("placeOrder", placeOrderAction)
   .on("action:before", async function* (event, context) {
     if (event.data.action === "placeOrder" && !event.meta?.approved) {
       // Suspend the execution and yield an approval request
@@ -71,7 +71,7 @@ return (
   <div>
     {events.map(event => {
       if (event.type === "show-chart") {
-        return <MyChart key={event.id} type={event.data.chartType} points={event.data.points} />;
+        return <MyChart key={event.meta?.id} type={event.data.chartType} points={event.data.points} />;
       }
       // ...
     })}
@@ -84,14 +84,14 @@ return (
 Since actions are generators, you can yield events and then chain to other actions using `context.runtime.execute()`.
 
 ```typescript
-execute: async function* ({ query }, { runtime }) {
+export const researchAction = async function* ({ query }, { runtime }) {
   yield { type: "text", data: { content: "Researching..." } };
   const data = await myInternalSearch(query);
 
   yield { type: "text", data: { content: "Synthesizing results..." } };
 
   yield* runtime.execute("summarize", { data });
-}
+};
 ```
 
 ## LLM Routing
@@ -101,7 +101,7 @@ A common pattern is to use an LLM to decide which action to call. Implement this
 ```typescript
 const agent = melony()
   .on("text", async function* (event, { runtime, actions }) {
-    if (event.role === "user") {
+    if (event.meta?.role === "user") {
       const toolCall = await callLLM(event.data.content, Object.keys(actions));
       if (toolCall) {
         yield* runtime.execute(toolCall.name, toolCall.params);
