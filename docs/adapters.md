@@ -2,58 +2,42 @@
 
 Melony is designed to be flexible. It provides a core runtime that can be served in various environments and consumed by different clients.
 
-## Serving with `createStreamResponse`
+## Serving with `.stream()`
 
-The simplest way to serve a Melony agent is using the built-in `createStreamResponse` utility. It converts the async generator from `runtime.run()` into a streaming `Response`.
+The simplest way to serve a Melony agent is using the `.stream()` method on the builder. It automatically executes the runtime and returns a streaming `Response`.
 
 ### Next.js Example
 
 ```typescript
 // app/api/chat/route.ts
-import { createStreamResponse } from "melony";
 import { agent } from "./agent";
 
 export async function POST(req: Request) {
   const { event } = await req.json();
-  return createStreamResponse(agent.run(event));
+  return agent.stream(event);
 }
 
 export async function GET() {
   // Optionally expose config like starter prompts
   return Response.json({
-    starterPrompts: agent.config.starterPrompts || [],
+    starterPrompts: [],
   });
 }
 ```
 
-### Hono Example
+### Manual Streaming with `createStreamResponse`
 
-Using the built-in Hono adapter:
-
-```typescript
-import { Hono } from "hono";
-import { handle } from "melony/adapters/hono";
-import { agent } from "./agent";
-
-const app = new Hono();
-
-// The handle adapter manages GET (config) and POST (run) for you
-app.all("/api/chat", handle(agent));
-```
-
-Or manually with `createStreamResponse`:
+If you need more control (e.g., using a custom runtime instance), you can use the built-in `createStreamResponse` utility. It converts an async generator into a streaming `Response`.
 
 ```typescript
-import { Hono } from "hono";
 import { createStreamResponse } from "melony";
 import { agent } from "./agent";
 
-const app = new Hono();
-
-app.post("/api/chat", async (c) => {
-  const { event } = await c.req.json();
-  return createStreamResponse(agent.run(event));
-});
+export async function POST(req: Request) {
+  const { event } = await req.json();
+  const runtime = agent.build();
+  return createStreamResponse(runtime.run(event));
+}
 ```
 
 ### Custom Streaming

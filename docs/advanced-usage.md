@@ -65,18 +65,22 @@ yield {
 ### Client-side (React)
 
 ```tsx
-const { events } = useMelony();
+import { useMelony } from "@melony/react";
 
-return (
-  <div>
-    {events.map(event => {
-      if (event.type === "show-chart") {
-        return <MyChart key={event.meta?.id} type={event.data.chartType} points={event.data.points} />;
-      }
-      // ...
-    })}
-  </div>
-);
+function Chat() {
+  const { events } = useMelony();
+
+  return (
+    <div>
+      {events.map(event => {
+        if (event.type === "show-chart") {
+          return <MyChart key={event.meta?.id} type={event.data.chartType} points={event.data.points} />;
+        }
+        // ...
+      })}
+    </div>
+  );
+}
 ```
 
 ## Multi-step Orchestration

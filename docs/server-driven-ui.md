@@ -56,34 +56,64 @@ npm install @melony/react
 
 ```tsx
 import { MelonyClient } from "melony/client";
-import { MelonyProvider } from "@melony/react";
+import { MelonyProvider, useMelony } from "@melony/react";
 
 const client = new MelonyClient({ url: "/api/chat" });
 
 function App() {
   return (
     <MelonyProvider client={client}>
-      {/* ... */}
+      <Chat />
     </MelonyProvider>
+  );
+}
+
+function Chat() {
+  const { events } = useMelony();
+  
+  return (
+    <div>
+      {events.map((event, i) => {
+        if (event.type === "ui") {
+          return <UIRenderer key={i} node={event.data} />;
+        }
+        // ...
+      })}
+    </div>
   );
 }
 ```
 
-The `Thread` component automatically renders Text and SDUI events.
+### Building a UI Renderer
 
-### Customizing Components
-
-You can override the default SDUI components or add your own by providing a `components` map to your UI renderer.
+Since Melony is unopinionated, you should build a renderer that maps your SDUI contract to your own components. Here's a simple example:
 
 ```tsx
-<MelonyProvider client={client}>
-  {/* Your chat components */}
-</MelonyProvider>
+function UIRenderer({ node }) {
+  const { type, props, children } = node;
+  
+  const components = {
+    card: MyCard,
+    button: MyButton,
+    text: MyText,
+    // ...
+  };
+  
+  const Component = components[type] || 'div';
+  
+  return (
+    <Component {...props}>
+      {children?.map((child, i) => (
+        <UIRenderer key={i} node={child} />
+      ))}
+    </Component>
+  );
+}
 ```
 
 ## Available UI Elements
 
-The SDUI protocol supports these component types:
+While you can define any contract, the pattern used in our demo applications includes these component types:
 
 **Layout**: `card`, `row`, `col`, `box`, `list`, `listItem`, `spacer`, `divider`
 
