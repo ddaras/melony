@@ -4,12 +4,13 @@ import * as ICONS from "@tabler/icons-react";
 import { colorTextMap } from "@/lib/theme-utils";
 import { cn } from "@/lib/utils";
 
-export const Icon: React.FC<UIContract["icon"]> = ({
+export const Icon: React.FC<UIContract["icon"] & { className?: string }> = ({
   name,
   size = "md",
-  color = "foreground",
+  color,
+  className,
 }) => {
-  const IconComponent = ICONS[name as keyof typeof ICONS];
+  const IconComponent = ICONS[name as keyof typeof ICONS] as React.ElementType;
 
   if (!IconComponent) return null;
 
@@ -28,7 +29,8 @@ export const Icon: React.FC<UIContract["icon"]> = ({
     <div
       className={cn(
         "inline-flex items-center justify-center",
-        colorTextMap[color],
+        color && colorTextMap[color],
+        className
       )}
     >
       <IconComponent size={resolvedSize} strokeWidth={1.5} />

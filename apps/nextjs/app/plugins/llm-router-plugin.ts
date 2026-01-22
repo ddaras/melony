@@ -1,7 +1,7 @@
+import { MelonyPlugin } from "melony";
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { ActionAfterEvent, FoodEvent, FoodState, TextEvent } from "../agents/food-agent";
-import { RuntimeContext } from "melony";
+import { FoodEvent, FoodState } from "../agents/types";
 import { z } from "zod";
 
 const tools = {
@@ -53,29 +53,29 @@ async function* routeToLLM(messages: any[]): AsyncGenerator<FoodEvent, void, unk
 }
 
 /**
- * Handles user text events - routes to LLM for initial processing
+ * LLM Router Plugin
+ * Handles user text input and action results by routing them through an LLM.
  */
-export const llmRouter = async function* (event: TextEvent, context: RuntimeContext<FoodState, FoodEvent>) {
-  if (event.meta?.role === "user") {
-    const text = event.data?.content || "";
+export const llmRouterPlugin: MelonyPlugin<FoodState, FoodEvent> = (builder) => {
+  // Handle user text events
+  builder.on("text", async function* (event) {
+    if (event.meta?.role === "user") {
+      const text = event.data?.content || "";
+      yield* routeToLLM([{ role: "user", content: text }]);
+    }
+  });
 
-    yield* routeToLLM([{ role: "user", content: text }]);
-  }
-};
+  // Handle action results to decide next steps
+  builder.on("action:after", async function* (event) {
+    const { action, result } = event.data;
 
-/**
- * Handles action:after events - routes action results to LLM to decide next steps
- */
-export const llmRouterAfterAction = async function* (event: ActionAfterEvent, context: RuntimeContext<FoodState, FoodEvent>) {
-  const { action, result } = event.data;
+    const messages = [
+      {
+        role: "user" as const,
+        content: `[System: The "${action}" action was executed. Result: ${JSON.stringify(result)}]\n\nBased on this result, decide if you need to take any follow-up actions or respond to the user.`,
+      },
+    ];
 
-  // Send action result as context for LLM to decide next steps
-  const messages = [
-    {
-      role: "user" as const,
-      content: `[System: The "${action}" action was executed. Result: ${JSON.stringify(result)}]\n\nBased on this result, decide if you need to take any follow-up actions or respond to the user.`,
-    },
-  ];
-
-  yield* routeToLLM(messages);
+    yield* routeToLLM(messages);
+  });
 };

@@ -10,6 +10,14 @@ import { Runtime } from "./runtime";
 import { createStreamResponse } from "./utils/create-stream-response";
 
 /**
+ * A Melony plugin is a function that receives the builder and extends it.
+ * This allows for modularizing common actions and handlers.
+ */
+export type MelonyPlugin<TState = any, TEvent extends Event = Event> = (
+  builder: MelonyBuilder<TState, TEvent>
+) => void;
+
+/**
  * Fluent builder for creating Melony agents with excellent developer experience.
  * Provides method chaining for actions and plugins with full TypeScript support.
  */
@@ -98,6 +106,15 @@ export class MelonyBuilder<
     }
     // Cast is safe because runtime only calls this handler for matching event types
     this.config.eventHandlers.get(eventType)!.push(handler as EventHandler<TState, TEvent>);
+    return this;
+  }
+
+  /**
+   * Use a plugin to extend the builder.
+   * This is ideal for modularizing common actions and handlers.
+   */
+  use(plugin: MelonyPlugin<TState, TEvent>): this {
+    plugin(this);
     return this;
   }
 

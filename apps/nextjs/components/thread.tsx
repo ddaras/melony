@@ -112,7 +112,7 @@ export function Thread({
       <div className="flex-1 overflow-y-auto p-4 pb-36">
         <div
           className={cn(
-            "max-w-3xl mx-auto w-full p-4",
+            "max-w-3xl mx-auto w-full p-8",
             showStarterPrompts && "min-h-full flex flex-col",
           )}
         >

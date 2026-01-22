@@ -6,6 +6,7 @@ import { ThreadProvider } from "@/providers/thread-provider";
 import { useMelony } from "@melony/react";
 import { useMemo } from "react";
 import { convertEventsToAggregatedMessages } from "@/lib/message-converter";
+import { FloatingLayout } from "@/components/floating-layout";
 
 export default function Home() {
   const { events } = useMelony();
@@ -15,12 +16,12 @@ export default function Home() {
   console.log(events);
 
   return (
-    <div className="flex h-screen w-full bg-zinc-50 dark:bg-black">
-      <ThreadProvider service={{
-        getThreads: async () => [],
-        getEvents: async () => [],
-        deleteThread: async () => { },
-      }}>
+    <ThreadProvider service={{
+      getThreads: async () => [],
+      getEvents: async () => [],
+      deleteThread: async () => { },
+    }}>
+      <FloatingLayout navPosition="top">
         <FullChat
           headerProps={{
             rightContent: (
@@ -29,12 +30,12 @@ export default function Home() {
               </div>
             )
           }}
-          title="Melony Food"
+          title=""
           placeholder="I'm hungry..."
           messages={messages}
         />
-      </ThreadProvider>
-    </div >
+      </FloatingLayout>
+    </ThreadProvider>
   );
 }
 

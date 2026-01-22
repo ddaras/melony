@@ -1,9 +1,7 @@
 import { RuntimeContext } from "melony";
-import { FoodEvent, FoodState } from "../agents/food-agent";
-
+import { FoodEvent, FoodState } from "../agents/types";
 
 export const orderFoodHandler = async function* (event: FoodEvent, context: RuntimeContext<FoodState, FoodEvent>) {
-
   yield {
     type: "text-delta",
     data: { delta: `Ordering food for ${event.data.itemId}...` },
