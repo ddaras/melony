@@ -43,7 +43,7 @@ Actions receive a `context` object which provides:
 
 ## Event Handlers: Reactive Logic
 
-Event handlers are the "brain" of your agent. They listen for specific event types and can yield new events or trigger actions. This replaces the traditional "plugin" or "middleware" system with a more flexible, event-driven approach.
+Event handlers are the "brain" of your agent. They listen for specific event types and can yield new events or trigger actions. This event-driven approach allows for highly decoupled and reactive logic.
 
 ### Example: Routing with Event Handlers
 
@@ -59,13 +59,25 @@ const agent = melony()
   .build();
 ```
 
-### Built-in Events
+## Plugin System: Modular Agent Logic
 
-Melony emits several built-in events that you can hook into:
-- **`action:before`**: Emitted before an action starts.
-- **`action:after`**: Emitted after an action completes.
-- **`call-action`**: Used to trigger an action execution (handled automatically by the builder).
-- **`error`**: Emitted when something goes wrong.
+Melony features a lightweight plugin system that allows you to modularize and reuse actions and handlers across different agents. A plugin is simply a function that receives the `MelonyBuilder`.
+
+```typescript
+import { melony, MelonyPlugin } from "melony";
+
+const loggingPlugin: MelonyPlugin = (builder) => {
+  builder.on("action:before", async function* (event) {
+    console.log(`[Plugin] Executing: ${event.data.action}`);
+  });
+};
+
+const agent = melony()
+  .use(loggingPlugin)
+  .action("greet", async function* () {
+    yield { type: "text", data: { content: "Hello!" } };
+  });
+```
 
 ### Chaining & Recursion
 

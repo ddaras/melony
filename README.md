@@ -7,6 +7,8 @@ Melony is to AI agents what Express is to web servers — a tiny, flexible orche
 ## What you get
 
 - **Event-first runtime**: a tiny orchestration loop: `Event → Handler → Actions → Events`.
+- **Fluent Builder API**: build agents with a simple, type-safe API.
+- **Plugin system**: easily modularize and reuse actions and handlers across agents.
 - **HITL-friendly**: approvals and guardrails belong in **event handlers**.
 - **Frontend-ready**: `@melony/react` provides the glue (providers/hooks) to connect your React app to the Melony stream.
 
@@ -42,7 +44,7 @@ import { MelonyProvider, useMelony } from "@melony/react";
 const client = new MelonyClient({ url: "/api/chat" });
 
 function Chat() {
-  const { messages, sendEvent } = useMelony();
+  const { events, sendEvent } = useMelony();
   // Render your chat UI here
   return <div>...</div>;
 }

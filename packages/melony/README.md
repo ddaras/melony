@@ -88,6 +88,25 @@ const agent = melony()
   .build();
 ```
 
+### Plugin System
+Plugins allow you to modularize and reuse actions and handlers across different agents. A plugin is simply a function that receives the `MelonyBuilder`.
+
+```ts
+import { melony, MelonyPlugin } from "melony";
+
+const loggingPlugin: MelonyPlugin = (builder) => {
+  builder.on("action:before", async function* (event) {
+    console.log(`[Plugin] Executing: ${event.data.action}`);
+  });
+};
+
+const agent = melony()
+  .use(loggingPlugin)
+  .action("greet", async function* () {
+    yield { type: "text", data: { content: "Hello!" } };
+  });
+```
+
 ### TypeScript Benefits
 - **Full type inference** through the entire chain
 - **IntelliSense** for all methods and parameters

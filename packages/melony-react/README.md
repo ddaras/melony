@@ -49,7 +49,7 @@ function Controls() {
 
 - **`MelonyProvider`** + **`useMelony()`**
   - Connects to a Melony runtime endpoint.
-  - Exposes `events`, `messages`, `isLoading`, `error`, and `sendEvent()`.
+  - Exposes `events`, `isLoading`, `error`, and `sendEvent()`.
 
 ## Event Stream & UI
 
