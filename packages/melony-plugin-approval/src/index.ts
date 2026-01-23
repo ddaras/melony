@@ -22,8 +22,8 @@ export const approvalPlugin = (): MelonyPlugin<any, any> => (builder) => {
     const { approved, action, params } = event.data as ApprovalResponseData;
     
     if (approved) {
-      // If approved, execute the original action
-      yield* runtime.execute(action, params);
+      // If approved, trigger the original event
+      yield { type: action, data: params } as any;
     } else {
       // If denied, yield a text event informing the user
       yield {

@@ -1,0 +1,40 @@
+---
+description: Conventions for writing Melony Event Handlers (async generators).
+globs: **/handlers/*.ts
+alwaysApply: false
+---
+
+# Melony Handler Patterns
+
+Handlers are the building blocks of Melony agents. They respond to events and can yield new events.
+
+## Defining a Handler
+
+```typescript
+import { EventHandler } from "melony";
+
+export const myHandler: EventHandler<State, Events> = async function* (
+  event,
+  { state, runtime }
+) {
+  // 1. Check event type if needed (or let the builder handle it)
+  if (event.type !== "my-event") return;
+
+  // 2. Yield initial feedback
+  yield { type: "text-delta", data: { delta: "Processing..." } };
+
+  // 3. Perform logic
+  const result = await someApi(event.data);
+
+  // 4. Yield data or UI events
+  yield { type: "my-result", data: result };
+};
+```
+
+## Key Principles
+
+- **Yield Early and Often**: Provide immediate feedback to the user via `text-delta` events.
+- **Type Safety**: Use the `EventHandler` type with your state and event types.
+- **Reactivity**: To trigger other logic, yield a new event. The runtime will process it recursively.
+- **Clean Events**: Ensure every yielded object matches the `Event` structure.
+- **SDUI**: Use descriptive event types (e.g., `menu-card`, `confirmation`) for UI components.

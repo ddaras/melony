@@ -25,14 +25,10 @@ export function renderMenuCard(menuItems: MenuItem[]): UINode {
               ui.button({
                 label: "Order",
                 onClickAction: {
-                  type: "order-food",
-                  data: { itemId: item.id },
-                  nextAction: {
-                    action: "placeOrder",
-                    params: { itemId: item.id, quantity: 1 },
-                  },
-                } as any,
-              }),
+                  type: "action:placeOrder",
+                  data: { itemId: item.id }
+                }
+              })
             ]
           )
         )

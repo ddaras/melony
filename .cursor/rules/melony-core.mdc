@@ -15,16 +15,16 @@ import { melony } from "melony";
 
 export const agent = melony<State, Events>()
   .use(plugin)             // Load plugins
-  .action("name", action)  // Register actions
   .on("event", handler)    // Handle events
   .build();                // Finalize the agent
 ```
 
 ## Core Concepts
 
-- **Events**: Objects with `{ type, data, meta }`. Meta includes `id`, `runId`, `role`.
-- **Actions**: Async generators `async function* (params)`. They yield events and optionally return a value.
-- **Handlers**: Functions `async function* (event, { runtime, state })`. They can yield events and execute actions via `runtime.execute("actionName", params)`.
+- **Events**: Objects with `{ type, data }`.
+- **Handlers**: Functions `async function* (event, context)`. They are registered with `.on("type", handler)`.
+- **Reactivity**: Yielding an event from a handler will cause the runtime to recursively process it through other handlers.
+- **Plugins**: Functions that receive the `MelonyBuilder` and register handlers.
 
 ## Streaming in Next.js
 
@@ -32,11 +32,11 @@ export const agent = melony<State, Events>()
 // app/api/chat/route.ts
 export async function POST(req: Request) {
   const { event } = await req.json();
-  return agent.stream(event); // Returns a streaming Response
+  return agent.streamResponse(event); // Returns a streaming Response
 }
 ```
 
 ## Best Practices
 - Keep agents modular by using **Plugins** (`MelonyPlugin`).
 - Use **Server-Driven UI (SDUI)** by yielding custom event types that the frontend renders.
-- Always use `yield* runtime.execute(...)` inside handlers to propagate streams correctly.
+- To trigger another workflow, simply yield a new event: `yield { type: "other-event", data: { ... } }`.

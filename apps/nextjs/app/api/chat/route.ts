@@ -11,17 +11,7 @@ export async function POST(req: Request) {
     });
   }
 
-  // Merge headers into event state if needed
-  // if (!event.meta) {
-  //   event.meta = {};
-  // }
-
-  // We don't really need headers for this demo, but following the pattern
-  // event.meta.state = {
-  //   ...(event.meta.state || {}),
-  // };
-
-  return foodAgent.stream(event);
+  return foodAgent.streamResponse(event);
 }
 
 export async function GET() {

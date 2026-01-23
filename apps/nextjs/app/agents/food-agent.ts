@@ -5,14 +5,13 @@ import { observabilityPlugin } from "@melony/plugin-observability";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 
-import { getMenuAction } from "../actions/get-menu";
-import { placeOrderAction } from "../actions/place-order";
-import { orderFoodHandler } from "../handlers/order-food";
+import { getMenuHandler } from "../handlers/get-menu";
+import { placeOrderHandler } from "../handlers/place-order";
 import { FoodState, FoodEvent } from "./types";
 
 export * from "./types";
 
-const systemPrompt = "You are a helpful food ordering assistant. Use the tools provided to help the user with the menu and placing orders. After an action completes, analyze the result and decide if you need to take additional actions or respond to the user.";
+const systemPrompt = "You are a helpful food ordering assistant. Use the tools provided to help the user with the menu and placing orders. When you call a tool, the corresponding event will be triggered and processed.";
 
 /**
  * Food ordering agent
@@ -36,14 +35,14 @@ export const foodAgent = melony<FoodState, FoodEvent>()
   .use(aiSDKPlugin({
     model: openai("gpt-4o-mini"),
     system: systemPrompt,
-    tools: {
-      getMenu: {
-        description: "Get the current food menu",
-        schema: z.object({}),
+    toolDefinitions: {
+      'getMenu': {
+        description: "Get the current food food menu",
+        inputSchema: z.object({}),
       },
-      placeOrder: {
+      'placeOrder': {
         description: "Place a food order",
-        schema: z.object({
+        inputSchema: z.object({
           itemId: z.string().describe("The ID of the item to order"),
           quantity: z
             .number()
@@ -53,6 +52,5 @@ export const foodAgent = melony<FoodState, FoodEvent>()
       },
     },
   }))
-  .action("getMenu", getMenuAction)
-  .action("placeOrder", placeOrderAction)
-  .on("order-food", orderFoodHandler);
+  .on("action:getMenu", getMenuHandler)
+  .on("action:placeOrder", placeOrderHandler);

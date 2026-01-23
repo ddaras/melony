@@ -12,7 +12,7 @@ export function filterEventsBySlots<TEvent extends Event = Event>(
     const latestSlotIndexes = new Map<string, number>();
 
     events.forEach((event, index) => {
-        const slot = event.meta?.slot;
+        const slot = event.data.slot;
         if (slot) {
             if (!firstSlotIndexes.has(slot)) {
                 firstSlotIndexes.set(slot, index);
@@ -24,7 +24,7 @@ export function filterEventsBySlots<TEvent extends Event = Event>(
     const result: TEvent[] = [];
 
     events.forEach((event, index) => {
-        const slot = event.meta?.slot;
+        const slot = event.data.slot;
         if (slot) {
             if (firstSlotIndexes.get(slot) === index) {
                 const latestIndex = latestSlotIndexes.get(slot)!;

@@ -13,15 +13,15 @@ export type FoodState = {
  */
 export type TextEvent = MelonyEvent & { type: "text"; data: { content: string } };
 export type TextDeltaEvent = MelonyEvent & { type: "text-delta"; data: { delta: string } };
+export type AssistantTextDeltaEvent = MelonyEvent & { type: "assistant:text-delta"; data: { delta: string } };
 export type UINodeEvent = UIEvent;
-export type OrderFoodEvent = MelonyEvent & { type: "order-food"; data: { itemId: string } };
-export type ActionBeforeEvent = MelonyEvent & { type: "action:before"; data: { action: string; params: any } };
-export type ActionAfterEvent = MelonyEvent & { type: "action:after"; data: { action: string; result: any } };
+export type GetMenuEvent = MelonyEvent & { type: "action:getMenu"; data: Record<string, never> };
+export type PlaceOrderEvent = MelonyEvent & { type: "action:placeOrder"; data: { itemId: string; quantity: number } };
 
-export type FoodEvent = 
-  | TextEvent 
-  | TextDeltaEvent 
-  | UINodeEvent 
-  | OrderFoodEvent 
-  | ActionBeforeEvent 
-  | ActionAfterEvent;
+export type FoodEvent =
+  | TextEvent
+  | TextDeltaEvent
+  | AssistantTextDeltaEvent
+  | UINodeEvent
+  | GetMenuEvent
+  | PlaceOrderEvent;

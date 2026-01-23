@@ -29,8 +29,8 @@ export const persistencePlugin = (options: PersistencePluginOptions): MelonyPlug
   const { adapter, filter = () => true } = options;
 
   // Listen to all events using the "*" wildcard
-  builder.on("*", async function* (event) {
-    const runId = event.meta?.runId;
+  builder.on("*", async function* (event, context) {
+    const runId = context.runId;
     
     if (runId && filter(event)) {
       try {

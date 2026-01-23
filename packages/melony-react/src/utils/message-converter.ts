@@ -1,11 +1,11 @@
-import { Event, Role } from "melony";
+import { Event, RuntimeContext } from "melony";
 
 /**
  * A message aggregated from multiple events.
  */
 export interface AggregatedMessage {
   /** The role of the sender (user, assistant, or system) */
-  role: Role;
+  role: string;
   /** The text content of the message, aggregated from text events */
   content: string;
   /** The unique ID for the run that produced this message */
@@ -24,7 +24,7 @@ export interface AggregateOptions<TEvent extends Event = Event> {
    * Custom logic to extract the role from an event.
    * Defaults to event.meta.role or 'assistant'.
    */
-  getRole?: (event: TEvent) => Role;
+  getRole?: (event: TEvent) => string;
 
   /**
    * Custom logic to extract the runId from an event.
@@ -48,7 +48,7 @@ export interface AggregateOptions<TEvent extends Event = Event> {
   shouldStartNewMessage?: (
     event: TEvent,
     currentMessage: AggregatedMessage | null,
-    options: { getRole: (e: TEvent) => Role; getRunId: (e: TEvent) => string | undefined }
+    options: { getRole: (e: TEvent) => string; getRunId: (e: TEvent) => string | undefined }
   ) => boolean;
 
   /**
@@ -67,17 +67,19 @@ export interface AggregateOptions<TEvent extends Event = Event> {
 /**
  * Default implementation for extracting role from an event.
  */
-export const defaultGetRole = <T extends Event>(e: T): Role => e.meta?.role || "assistant";
+export const defaultGetRole = <T extends Event>(e: T): string => e.type === "user:text" ? "user" : "assistant";
 
 /**
  * Default implementation for extracting runId from an event.
  */
-export const defaultGetRunId = <T extends Event>(e: T): string | undefined => e.meta?.runId;
+export const defaultGetRunId = <T extends Event>(e: T, context?: RuntimeContext<any, T>): string | undefined => {
+  return context?.runId;
+};
 
 /**
  * Default implementation for extracting threadId from an event.
  */
-export const defaultGetThreadId = <T extends Event>(e: T): string | undefined => e.meta?.threadId || e.meta?.state?.threadId;
+export const defaultGetThreadId = <T extends Event>(e: T): string | undefined => e.data?.threadId;
 
 /**
  * Default logic for determining if a new message should start.
@@ -85,7 +87,7 @@ export const defaultGetThreadId = <T extends Event>(e: T): string | undefined =>
 export const defaultShouldStartNewMessage = <T extends Event>(
   event: T,
   current: AggregatedMessage | null,
-  utils: { getRole: (e: T) => Role; getRunId: (e: T) => string | undefined; getThreadId: (e: T) => string | undefined }
+  utils: { getRole: (e: T) => string; getRunId: (e: T) => string | undefined; getThreadId: (e: T) => string | undefined }
 ): boolean => {
   if (!current) return true;
   const role = utils.getRole(event);
@@ -104,9 +106,9 @@ export const defaultShouldStartNewMessage = <T extends Event>(
  * Default logic for processing an event into a message.
  */
 export const defaultProcessEvent = <T extends Event>(event: T, current: AggregatedMessage): void => {
-  if (event.type === "text-delta" && (event.data as any)?.delta) {
+  if (event.type === "assistant:text-delta" && (event.data as any)?.delta) {
     current.content += (event.data as any).delta;
-  } else if (event.type === "text") {
+  } else if (event.type === "user:text") {
     current.content += (event.data as any)?.content || (event.data as any)?.text || "";
   } else {
     current.uiEvents.push(event);

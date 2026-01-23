@@ -87,15 +87,8 @@ export function Thread({
     if (!overrideInput) setInput("");
 
     await send({
-      type: "text",
+      type: "user:text",
       data: { content: text || "" },
-      meta: {
-        role: "user",
-        state: {
-          ...state,
-          threadId: activeThreadId ?? undefined,
-        },
-      } as any,
     });
   };
 

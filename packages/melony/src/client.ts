@@ -71,21 +71,8 @@ export class MelonyClient<TEvent extends Event = Event> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    const runId = event.meta?.runId ?? generateId();
-
-    // if the state comes from the client, no last server state is preserved
-    const state = event.meta?.state ?? this.lastServerState;
-
     const optimisticEvent: TEvent = {
-      ...event,
-      meta: {
-        ...event.meta,
-        id: event.meta?.id ?? generateId(),
-        runId,
-        state,
-        role: event.meta?.role ?? "user",
-        timestamp: event.meta?.timestamp ?? Date.now(),
-      },
+      ...event
     } as TEvent;
 
     this.setState({
@@ -143,10 +130,6 @@ export class MelonyClient<TEvent extends Event = Event> {
   }
 
   private handleIncomingEvent(event: TEvent) {
-    if (event.meta?.state) {
-      this.lastServerState = event.meta.state;
-    }
-
     const events = [...this.state.events];
 
     events.push(event);

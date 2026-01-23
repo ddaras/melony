@@ -4,17 +4,14 @@ import {
   renderOrderConfirmation,
   OrderResult,
 } from "../uis/order-confirmation";
-import { FoodEvent } from "../agents/types";
+import { FoodEvent, FoodState } from "../agents/types";
+import { EventHandler } from "melony";
 
-type PlaceOrderParams = {
-  itemId: string;
-  quantity: number;
-};
+export const placeOrderHandler: EventHandler<FoodState, FoodEvent> = async function* (event) {
+  if (event.type !== "action:placeOrder") return;
 
-export const placeOrderAction = async function* ({
-  itemId,
-  quantity,
-}: PlaceOrderParams) {
+  const { itemId, quantity } = event.data as { itemId: string; quantity: number };
+  
   const item = MENU.find((m) => m.id === itemId);
   if (!item) throw new Error("Item not found");
 
@@ -37,6 +34,4 @@ export const placeOrderAction = async function* ({
     type: "ui",
     data: renderOrderConfirmation(result),
   } as FoodEvent;
-
-  return result;
 };
