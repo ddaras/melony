@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import {
   Select as SelectRoot,

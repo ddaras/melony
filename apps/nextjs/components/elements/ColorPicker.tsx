@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import { Field, FieldTitle } from "../ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";

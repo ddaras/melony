@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { Badge as BadgeBase } from "../ui/badge";
 
 export const Badge: React.FC<UIContract["badge"]> = ({

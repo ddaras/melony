@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { gapMap } from "@/lib/theme-utils";

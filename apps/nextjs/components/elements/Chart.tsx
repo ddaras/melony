@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { cn } from "@/lib/utils";
 
 export const Chart: React.FC<UIContract["chart"]> = ({

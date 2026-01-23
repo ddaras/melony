@@ -6,8 +6,7 @@ import { StarterPrompts } from "./starter-prompts";
 import { MessageList } from "./message-list";
 import { useThreads } from "@/hooks/use-threads";
 import { LoadingIndicator } from "./loading-indicator";
-import { AggregatedMessage } from "@/lib/message-converter";
-import { useMelony } from "@melony/react";
+import { useMelony, AggregatedMessage } from "@melony/react";
 
 interface ThreadProps {
   placeholder?: string;
@@ -38,17 +37,18 @@ export function Thread({
   const {
     isLoading,
     error,
-    sendEvent
+    sendEvent,
+    messages: melonyMessages,
   } = useMelony();
 
-  // Use prop messages or empty array, filter for main thread
+  // Use prop messages or aggregated messages from melony context, filter for main thread
   // 1. Only include user and assistant roles
   // 2. UI events are already separated in aggregated messages
   const messages = useMemo(() => {
-    return (propMessages || []).filter((msg) =>
+    return (propMessages || melonyMessages || []).filter((msg) =>
       ["user", "assistant"].includes(msg.role)
     );
-  }, [propMessages]);
+  }, [propMessages, melonyMessages]);
 
   const starterPrompts = localStarterPrompts;
   const options = localOptions;

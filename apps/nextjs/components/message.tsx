@@ -1,4 +1,4 @@
-import { AggregatedMessage } from "@/lib/message-converter";
+import { AggregatedMessage } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "./message-content";
 

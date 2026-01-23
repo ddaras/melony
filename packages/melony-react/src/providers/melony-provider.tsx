@@ -10,12 +10,18 @@ import {
   Config,
   Event,
 } from "melony";
+import { 
+  AggregatedMessage, 
+  AggregateOptions, 
+  convertEventsToAggregatedMessages 
+} from "../utils/message-converter";
 
 export interface MelonyContextValue extends ClientState {
   sendEvent: (event: Event) => Promise<void>;
   reset: (events?: Event[]) => void;
   client: MelonyClient;
   config?: Config;
+  messages: AggregatedMessage[];
 }
 
 export const MelonyContext = createContext<MelonyContextValue | undefined>(
@@ -26,12 +32,14 @@ export interface MelonyProviderProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
+  aggregationOptions?: AggregateOptions;
 }
 
 export const MelonyProvider: React.FC<MelonyProviderProps> = ({
   children,
   client,
   initialEvents,
+  aggregationOptions,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
 
@@ -48,9 +56,15 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     return unsubscribe;
   }, [client]);
 
+  const messages = useMemo(
+    () => convertEventsToAggregatedMessages(state.events, aggregationOptions),
+    [state.events, aggregationOptions]
+  );
+
   const contextValue = useMemo(
     () => ({
       ...state,
+      messages,
       sendEvent: async (event: Event) => {
         const generator = client.sendEvent(event);
         // Consume the generator to ensure event processing completes
@@ -61,7 +75,7 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
       reset: client.reset.bind(client),
       client,
     }),
-    [state, client],
+    [state, messages, client],
   );
 
   return (

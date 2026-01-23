@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { Button } from "../ui/button";
 import { useMelony } from "@melony/react";
 import { IconUpload, IconLoader2, IconCheck, IconX } from "@tabler/icons-react";

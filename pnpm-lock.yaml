@@ -19,13 +19,34 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: ^3.0.13
-        version: 3.0.13(zod@4.2.1)
+        version: 3.0.13(zod@4.3.6)
       '@base-ui/react':
         specifier: ^1.0.0
         version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@melony/plugin-ai-sdk':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-ai-sdk
+      '@melony/plugin-approval':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-approval
+      '@melony/plugin-auth':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-auth
+      '@melony/plugin-guardrails':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-guardrails
+      '@melony/plugin-observability':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-observability
+      '@melony/plugin-persistence':
+        specifier: workspace:*
+        version: link:../../packages/melony-plugin-persistence
       '@melony/react':
         specifier: workspace:*
         version: link:../../packages/melony-react
+      '@melony/ui-kit':
+        specifier: workspace:*
+        version: link:../../packages/melony-ui-kit
       '@tabler/icons-react':
         specifier: ^3.36.0
         version: 3.36.0(react@19.2.3)
@@ -34,7 +55,7 @@ importers:
         version: 5.90.19(react@19.2.3)
       ai:
         specifier: ^6.0.42
-        version: 6.0.42(zod@4.2.1)
+        version: 6.0.42(zod@4.3.6)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -63,8 +84,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       zod:
-        specifier: ^4.1.11
-        version: 4.2.1
+        specifier: ^4.3.5
+        version: 4.3.6
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -106,6 +127,121 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
+  packages/melony-plugin-ai-sdk:
+    dependencies:
+      ai:
+        specifier: ^6.0.42
+        version: 6.0.42(zod@4.3.6)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+      zod:
+        specifier: ^4.3.5
+        version: 4.3.6
+
+  packages/melony-plugin-approval:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
+  packages/melony-plugin-auth:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
+  packages/melony-plugin-guardrails:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
+  packages/melony-plugin-observability:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
+  packages/melony-plugin-persistence:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
   packages/melony-react:
     dependencies:
       melony:
@@ -129,6 +265,36 @@ importers:
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.2
+        version: 5.9.3
+
+  packages/melony-ui-kit:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.7)
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      react:
+        specifier: ^19.0.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.3(react@19.2.3)
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
         version: 5.9.3
 
 packages:
@@ -2710,30 +2876,30 @@ packages:
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  zod@4.2.1:
-    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.17(zod@4.2.1)':
+  '@ai-sdk/gateway@3.0.17(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.4
-      '@ai-sdk/provider-utils': 4.0.8(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.8(zod@4.3.6)
       '@vercel/oidc': 3.1.0
-      zod: 4.2.1
+      zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.13(zod@4.2.1)':
+  '@ai-sdk/openai@3.0.13(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.4
-      '@ai-sdk/provider-utils': 4.0.8(zod@4.2.1)
-      zod: 4.2.1
+      '@ai-sdk/provider-utils': 4.0.8(zod@4.3.6)
+      zod: 4.3.6
 
-  '@ai-sdk/provider-utils@4.0.8(zod@4.2.1)':
+  '@ai-sdk/provider-utils@4.0.8(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.4
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 4.2.1
+      zod: 4.3.6
 
   '@ai-sdk/provider@3.0.4':
     dependencies:
@@ -3561,13 +3727,13 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ai@6.0.42(zod@4.2.1):
+  ai@6.0.42(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.17(zod@4.2.1)
+      '@ai-sdk/gateway': 3.0.17(zod@4.3.6)
       '@ai-sdk/provider': 3.0.4
-      '@ai-sdk/provider-utils': 4.0.8(zod@4.2.1)
+      '@ai-sdk/provider-utils': 4.0.8(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
-      zod: 4.2.1
+      zod: 4.3.6
 
   ajv@6.12.6:
     dependencies:
@@ -4074,8 +4240,8 @@ snapshots:
       '@babel/parser': 7.28.5
       eslint: 9.39.2(jiti@2.6.1)
       hermes-parser: 0.25.1
-      zod: 4.2.1
-      zod-validation-error: 4.0.2(zod@4.2.1)
+      zod: 4.3.6
+      zod-validation-error: 4.0.2(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -5415,8 +5581,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@4.0.2(zod@4.2.1):
+  zod-validation-error@4.0.2(zod@4.3.6):
     dependencies:
-      zod: 4.2.1
+      zod: 4.3.6
 
-  zod@4.2.1: {}
+  zod@4.3.6: {}

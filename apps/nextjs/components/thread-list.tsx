@@ -2,7 +2,7 @@ import * as React from "react";
 import { useThreads } from "@/hooks/use-threads";
 import { Dropdown } from "./elements/Dropdown";
 import { Box, Float, List, ListItem } from "./elements";
-import { UIColor, UISpacing, UIRadius } from "../ui-contract";
+import { UIColor, UISpacing, UIRadius } from "@melony/ui-kit";
 
 export interface ThreadListProps {
   padding?: UISpacing;

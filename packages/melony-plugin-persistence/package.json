@@ -1,0 +1,37 @@
+{
+  "name": "@melony/plugin-persistence",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "melony": "workspace:*"
+  },
+  "devDependencies": {
+    "melony": "workspace:*",
+    "tsup": "^8.3.0",
+    "typescript": "^5.5.4",
+    "rimraf": "^5.0.10",
+    "@types/node": "^20.14.10"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

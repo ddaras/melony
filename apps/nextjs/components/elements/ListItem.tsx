@@ -1,5 +1,5 @@
 import React from "react";
-import { UIAlign, UIContract } from "../../ui-contract";
+import { UIAlign, UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { paddingMap, colorBgMap, radiusMap } from "@/lib/theme-utils";

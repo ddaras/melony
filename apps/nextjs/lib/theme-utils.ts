@@ -1,4 +1,4 @@
-import { UIColor, UISpacing, UIWidth, UIShadow, UIRadius } from "../ui-contract";
+import { UIColor, UISpacing, UIWidth, UIShadow, UIRadius } from "@melony/ui-kit";
 
 export const spacingMap: Record<UISpacing, string> = {
   none: "0",

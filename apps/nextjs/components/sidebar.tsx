@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "../providers/sidebar-provider";
-import { UIWidth } from "../ui-contract";
+import { UIWidth } from "@melony/ui-kit";
 import { widthMap } from "@/lib/theme-utils";
 
 export interface SidebarProps {

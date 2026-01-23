@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract, UIJustify } from "../../ui-contract";
+import { UIContract, UIJustify } from "@melony/ui-kit";
 import { Button as ButtonBase } from "../ui/button";
 import { useMelony } from "@melony/react";
 import { cn } from "@/lib/utils";

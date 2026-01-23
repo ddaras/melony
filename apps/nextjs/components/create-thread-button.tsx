@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { IconPlus } from "@tabler/icons-react";
 import { useThreads } from "@/hooks/use-threads";
 import { cn } from "@/lib/utils";
-import { useHotkeys } from "react-hotkeys-hook";
 
 export interface CreateThreadButtonProps {
   className?: string;
@@ -50,20 +49,6 @@ export const CreateThreadButton: React.FC<CreateThreadButtonProps> = ({
       setIsCreating(false);
     }
   };
-
-  // Hotkey to create new thread: Press 'N' to create
-  // Scopes ensure it doesn't trigger when typing in inputs/textareas
-  useHotkeys(
-    "n",
-    (e: KeyboardEvent) => {
-      e.preventDefault();
-      handleCreateThread();
-    },
-    {
-      enableOnFormTags: false, // Don't trigger when typing in form inputs
-      enableOnContentEditable: false, // Don't trigger in contenteditable elements
-    },
-  );
 
   return (
     <Button

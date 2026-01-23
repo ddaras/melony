@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { filterEventsBySlots } from "melony";
-import { useMelony } from "./use-melony";
+import { filterEventsBySlots } from "@/lib/filter-slots";
+import { useMelony } from "@melony/react";
 
 export interface UseSurfaceOptions {
   name: string;

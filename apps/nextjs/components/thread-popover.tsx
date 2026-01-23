@@ -7,26 +7,11 @@ import {
 } from "@/components/ui/popover";
 import { ThreadList } from "./thread-list";
 import { IconHistory } from "@tabler/icons-react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 export interface ThreadPopoverProps {}
 
 export const ThreadPopover: React.FC<ThreadPopoverProps> = ({}) => {
   const [isOpen, setIsOpen] = React.useState(false);
-
-  // Hotkey to toggle popover: Press 'H' to open/close
-  // Scopes ensure it doesn't trigger when typing in inputs/textareas
-  useHotkeys(
-    "h",
-    (e: KeyboardEvent) => {
-      e.preventDefault();
-      setIsOpen((prev) => !prev);
-    },
-    {
-      enableOnFormTags: false, // Don't trigger when typing in form inputs
-      enableOnContentEditable: false, // Don't trigger in contenteditable elements
-    },
-  );
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

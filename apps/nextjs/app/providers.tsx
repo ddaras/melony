@@ -2,6 +2,8 @@
 
 import { ThemeProvider } from "@/providers/theme-provider";
 import { MelonyProvider } from "@melony/react";
+import { MelonyUIProvider } from "@melony/ui-kit/client";
+import { melonyUIImplementation } from "@/components/melony-ui-impl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MelonyClient } from "melony/client";
 import { NuqsAdapter } from "nuqs/adapters/react";
@@ -29,13 +31,15 @@ const melonyClient = new MelonyClient<FoodEvent>({
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <MelonyProvider client={melonyClient}>
-      <ThemeProvider>
-        <QueryClientProvider client={defaultQueryClient}>
-          <NuqsAdapter>
-            {children}
-          </NuqsAdapter>
-        </QueryClientProvider>
-      </ThemeProvider>
+      <MelonyUIProvider components={melonyUIImplementation}>
+        <ThemeProvider>
+          <QueryClientProvider client={defaultQueryClient}>
+            <NuqsAdapter>
+              {children}
+            </NuqsAdapter>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </MelonyUIProvider>
     </MelonyProvider>
   );
 };

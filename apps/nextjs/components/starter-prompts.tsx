@@ -27,7 +27,7 @@ export function StarterPrompts({ prompts }: StarterPromptsProps) {
             size="lg"
             onClickAction={{
               type: "text",
-              role: "user",
+              meta: { role: "user" } as any,
               data: { content: item.prompt },
             }}
             justify="start"

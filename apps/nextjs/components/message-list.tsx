@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { AggregatedMessage } from "@/lib/message-converter";
+import { AggregatedMessage } from "@melony/react";
 import { MessageBubble } from "./message";
 import { LoadingIndicator } from "./loading-indicator";
 import { ErrorDisplay } from "./error-display";

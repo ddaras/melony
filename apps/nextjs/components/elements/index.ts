@@ -37,4 +37,4 @@ export { Label } from "./Label";
 export { Dropdown } from "./Dropdown";
 
 // Export types
-export type { UIContract } from "../../ui-contract";
+export type { UIContract } from "@melony/ui-kit";

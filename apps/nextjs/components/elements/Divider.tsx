@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { marginMap, colorBgMap } from "@/lib/theme-utils";

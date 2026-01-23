@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract } from "../../ui-contract";
+import { UIContract } from "@melony/ui-kit";
 import * as ICONS from "@tabler/icons-react";
 import { colorTextMap } from "@/lib/theme-utils";
 import { cn } from "@/lib/utils";

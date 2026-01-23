@@ -1,35 +1,28 @@
-import { UINode } from "@/ui-contract";
+import { ui, UINode } from "@melony/ui-kit/server";
 import type { MenuItem } from "../data/menu";
 
 /**
  * Renders the menu card UI with order buttons
  */
 export function renderMenuCard(menuItems: MenuItem[]): UINode {
-  return {
-    type: "card",
-    children: [
-      {
-        type: "col",
-        props: {
-          gap: "md",
-        },
-        children: menuItems.map((item) => ({
-          type: "row",
-          props: {
-            justify: "between",
-          },
-          children: [
-            {
-              type: "col",
-              children: [
-                { type: "text", props: { value: item.name, weight: "bold" } },
-                { type: "text", props: { value: item.description, size: "sm", color: "muted" } },
-                { type: "text", props: { value: `$${item.price.toFixed(2)}`, size: "sm" } },
-              ],
-            },
-            {
-              type: "button",
-              props: {
+  return ui.card(
+    {},
+    [
+      ui.col(
+        { gap: "md" },
+        menuItems.map((item) =>
+          ui.row(
+            { justify: "between" },
+            [
+              ui.col(
+                {},
+                [
+                  ui.text(item.name, { weight: "bold" }),
+                  ui.text(item.description, { size: "sm", color: "muted" }),
+                  ui.text(`$${item.price.toFixed(2)}`, { size: "sm" }),
+                ]
+              ),
+              ui.button({
                 label: "Order",
                 onClickAction: {
                   type: "order-food",
@@ -38,12 +31,12 @@ export function renderMenuCard(menuItems: MenuItem[]): UINode {
                     action: "placeOrder",
                     params: { itemId: item.id, quantity: 1 },
                   },
-                },
-              },
-            },
-          ],
-        })),
-      },
-    ],
-  };
+                } as any,
+              }),
+            ]
+          )
+        )
+      )
+    ]
+  );
 }

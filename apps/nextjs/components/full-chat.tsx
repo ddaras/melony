@@ -2,7 +2,7 @@ import { Thread } from "./thread";
 import { cn } from "@/lib/utils";
 import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { ChatHeader, ChatHeaderProps } from "./chat-header";
-import { AggregatedMessage } from "@/lib/message-converter";
+import { AggregatedMessage } from "@melony/react";
 
 export interface FullChatProps {
   title?: string;
