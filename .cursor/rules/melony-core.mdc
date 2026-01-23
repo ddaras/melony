@@ -1,0 +1,42 @@
+---
+description: Standards and patterns for building Melony AI agents using the fluent builder API.
+globs: **/agents/*.ts, **/plugins/*.ts, **/api/chat/*.ts
+alwaysApply: false
+---
+
+# Melony Core Patterns
+
+Melony is an event-based framework for AI agents. Use the `melony()` builder to define agents.
+
+## Basic Agent Structure
+
+```typescript
+import { melony } from "melony";
+
+export const agent = melony<State, Events>()
+  .use(plugin)             // Load plugins
+  .action("name", action)  // Register actions
+  .on("event", handler)    // Handle events
+  .build();                // Finalize the agent
+```
+
+## Core Concepts
+
+- **Events**: Objects with `{ type, data, meta }`. Meta includes `id`, `runId`, `role`.
+- **Actions**: Async generators `async function* (params)`. They yield events and optionally return a value.
+- **Handlers**: Functions `async function* (event, { runtime, state })`. They can yield events and execute actions via `runtime.execute("actionName", params)`.
+
+## Streaming in Next.js
+
+```typescript
+// app/api/chat/route.ts
+export async function POST(req: Request) {
+  const { event } = await req.json();
+  return agent.stream(event); // Returns a streaming Response
+}
+```
+
+## Best Practices
+- Keep agents modular by using **Plugins** (`MelonyPlugin`).
+- Use **Server-Driven UI (SDUI)** by yielding custom event types that the frontend renders.
+- Always use `yield* runtime.execute(...)` inside handlers to propagate streams correctly.

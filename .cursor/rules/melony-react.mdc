@@ -1,0 +1,61 @@
+---
+description: Patterns for integrating Melony agents into React applications using @melony/react.
+globs: **/*.tsx, **/hooks/*.ts
+alwaysApply: false
+---
+
+# Melony React Integration
+
+Use `@melony/react` to connect your frontend to a Melony agent stream.
+
+## Setup
+
+```tsx
+import { MelonyClient } from "melony/client";
+import { MelonyProvider } from "@melony/react";
+
+const client = new MelonyClient({ url: "/api/chat" });
+
+export function App() {
+  return (
+    <MelonyProvider client={client}>
+      <Chat />
+    </MelonyProvider>
+  );
+}
+```
+
+## Consuming the Stream
+
+Use the `useMelony` hook to access the agent's state and methods.
+
+```tsx
+const { events, sendEvent, isLoading, error } = useMelony();
+
+// Sending a message
+const handleSend = (text: string) => {
+  sendEvent({ type: "text", data: { content: text } });
+};
+```
+
+## Rendering Events (SDUI)
+
+Iterate through `events` and render based on `event.type`.
+
+```tsx
+{events.map((event) => {
+  switch (event.type) {
+    case "text":
+      return <Text key={event.meta.id} content={event.data.content} />;
+    case "weather-card":
+      return <WeatherCard key={event.meta.id} {...event.data} />;
+    default:
+      return null;
+  }
+})}
+```
+
+## Best Practices
+- **Key by ID**: Always use `event.meta.id` as the React `key`.
+- **Loading States**: Use `isLoading` to disable inputs or show spinners.
+- **Optimistic UI**: MelonyClient handles optimistic updates for the initial `sendEvent`.

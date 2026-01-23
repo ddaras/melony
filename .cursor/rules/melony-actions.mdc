@@ -1,0 +1,40 @@
+---
+description: Conventions for writing Melony Actions (async generators).
+globs: **/actions/*.ts, **/handlers/*.ts
+alwaysApply: false
+---
+
+# Melony Action Patterns
+
+Actions are the building blocks of Melony agents. They must be async generators that yield events.
+
+## Defining an Action
+
+```typescript
+import { Action } from "melony";
+
+export const myAction: Action<Params, State, Events> = async function* (
+  params,
+  { state, runtime }
+) {
+  // 1. Yield initial feedback
+  yield { type: "text", data: { content: "Processing..." } };
+
+  // 2. Perform logic
+  const result = await someApi(params);
+
+  // 3. Yield data or UI events
+  yield { type: "my-result", data: result };
+
+  // 4. Optionally return a value (captured by action:after event)
+  return result;
+};
+```
+
+## Key Principles
+
+- **Yield Early and Often**: Provide immediate feedback to the user via `text` events.
+- **Type Safety**: Define your `Params` and `Events` types clearly.
+- **Composition**: Use `yield* runtime.execute("otherAction", params)` to compose actions.
+- **Clean Events**: Ensure every yielded object matches the `Event` structure.
+- **SDUI**: Use descriptive event types (e.g., `menu-card`, `confirmation`) for UI components.

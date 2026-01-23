@@ -1,36 +1,13 @@
 import { MelonyPlugin } from "melony";
-import { renderMenuCard } from "../uis/menu-card";
-import { MenuItem } from "../data/menu";
 import { FoodEvent, FoodState } from "../agents/types";
-import { OrderResult, getOrderConfirmationMessage, renderOrderConfirmation } from "../uis/order-confirmation";
 
 /**
  * UI Plugin
  * Automatically renders UI components based on action results.
+ * 
+ * Note: Most rendering logic has been moved directly into actions
+ * to provide more immediate feedback.
  */
 export const uiPlugin: MelonyPlugin<FoodState, FoodEvent> = (builder) => {
-  builder.on("action:after", async function* (event) {
-    if (event.data.action === "getMenu") {
-      const { menu: menuItems } = event.data.result as { menu: MenuItem[] };
-
-      yield {
-        type: "ui",
-        data: renderMenuCard(menuItems),
-      } as FoodEvent;
-    }
-
-    if (event.data.action === "placeOrder") {
-      const result = event.data.result as OrderResult;
-
-      yield {
-        type: "text-delta",
-        data: { delta: getOrderConfirmationMessage(result) },
-      } as FoodEvent;
-
-      yield {
-        type: "ui",
-        data: renderOrderConfirmation(result),
-      } as FoodEvent;
-    }
-  });
+  // Add any global UI event handlers here if needed
 };

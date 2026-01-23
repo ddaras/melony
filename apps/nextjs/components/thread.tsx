@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useMelony } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { StarterPrompt, ComposerOptionGroup } from "@/types";
 import { Composer } from "./composer";
@@ -8,6 +7,7 @@ import { MessageList } from "./message-list";
 import { useThreads } from "@/hooks/use-threads";
 import { LoadingIndicator } from "./loading-indicator";
 import { AggregatedMessage } from "@/lib/message-converter";
+import { useMelony } from "@melony/react";
 
 interface ThreadProps {
   placeholder?: string;
@@ -38,9 +38,7 @@ export function Thread({
   const {
     isLoading,
     error,
-    sendEvent,
-    loadingStatus,
-    config,
+    sendEvent
   } = useMelony();
 
   // Use prop messages or empty array, filter for main thread
@@ -129,7 +127,9 @@ export function Thread({
                 messages={messages}
                 isLoading={isLoading}
                 error={error}
-                loadingStatus={loadingStatus}
+                loadingStatus={{
+                  message: "Processing..."
+                }}
               />
             </>
           )}

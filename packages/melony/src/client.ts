@@ -8,10 +8,6 @@ export interface ClientState<TEvent extends Event = Event> {
   events: TEvent[];
   isLoading: boolean;
   error: Error | null;
-  loadingStatus?: {
-    message: string;
-    details?: string;
-  };
 }
 
 export interface MelonyClientOptions<TEvent extends Event = Event> {
@@ -37,7 +33,6 @@ export class MelonyClient<TEvent extends Event = Event> {
       events: options.initialEvents ?? [],
       isLoading: false,
       error: null,
-      loadingStatus: undefined,
     };
   }
 
@@ -77,7 +72,10 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.abortController = new AbortController();
 
     const runId = event.meta?.runId ?? generateId();
+
+    // if the state comes from the client, no last server state is preserved
     const state = event.meta?.state ?? this.lastServerState;
+
     const optimisticEvent: TEvent = {
       ...event,
       meta: {

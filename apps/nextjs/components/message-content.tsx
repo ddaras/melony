@@ -12,7 +12,7 @@ export function MessageContent({ text, uiEvents }: MessageContentProps) {
   const displayUIEvents = useMemo(() => filterEventsBySlots(uiEvents), [uiEvents]);
 
   return (
-    <>
+    <div className="flex flex-col space-y-4">
       {displayUIEvents.map((displayEvent, index) => {
         if (displayEvent.type === "ui") {
           return <UIRenderer key={index} node={displayEvent.data} />;
@@ -20,6 +20,6 @@ export function MessageContent({ text, uiEvents }: MessageContentProps) {
         return null;
       })}
       {text && <p>{text}</p>}
-    </>
+    </div>
   );
 }
