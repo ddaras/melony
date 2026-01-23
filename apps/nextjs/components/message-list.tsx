@@ -6,7 +6,7 @@ import { ErrorDisplay } from "./error-display";
 
 interface MessageListProps {
   messages: AggregatedMessage[];
-  isLoading?: boolean;
+  streaming?: boolean;
   error?: Error | null;
   loadingStatus?: {
     message: string;
@@ -16,7 +16,7 @@ interface MessageListProps {
 
 export function MessageList({
   messages,
-  isLoading,
+  streaming,
   error,
   loadingStatus,
 }: MessageListProps) {
@@ -26,17 +26,17 @@ export function MessageList({
 
   // Check if text is streaming (last message is from assistant and we're loading)
   const isTextStreaming = useMemo(() => {
-    if (messages.length === 0 || !isLoading) return false;
+    if (messages.length === 0 || !streaming) return false;
     const lastMessage = messages[messages.length - 1];
     return lastMessage.role === "assistant";
-  }, [messages, isLoading]);
+  }, [messages, streaming]);
 
   return (
     <div className="space-y-6">
       {messages.map((message, index) => (
         <MessageBubble key={index} message={message} />
       ))}
-      {isLoading && !isTextStreaming && (
+      {streaming && !isTextStreaming && (
         <LoadingIndicator status={loadingStatus} />
       )}
       {error && <ErrorDisplay error={error} />}

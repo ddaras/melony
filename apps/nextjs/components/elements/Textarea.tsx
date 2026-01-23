@@ -17,11 +17,11 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
   width = "full",
   onChangeAction,
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onChangeAction) {
-      sendEvent({
+      send({
         ...onChangeAction,
         data: {
           name: name || "",

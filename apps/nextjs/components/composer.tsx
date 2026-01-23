@@ -28,7 +28,7 @@ interface ComposerProps {
   onChange: (value: string) => void;
   onSubmit: (state?: Record<string, any>) => void;
   placeholder?: string;
-  isLoading?: boolean;
+  streaming?: boolean;
   className?: string;
   options?: ComposerOptionGroup[];
   autoFocus?: boolean;
@@ -46,7 +46,7 @@ export function Composer({
   onChange,
   onSubmit,
   placeholder = "Type a message...",
-  isLoading,
+  streaming,
   className,
   options = [],
   autoFocus = false,
@@ -310,7 +310,7 @@ export function Composer({
                   accept={accept}
                   onChange={handleFileSelect}
                   className="hidden"
-                  disabled={isLoading || attachedFiles.length >= maxFiles}
+                  disabled={streaming || attachedFiles.length >= maxFiles}
                 />
 
                 <Button
@@ -318,7 +318,7 @@ export function Composer({
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading || attachedFiles.length >= maxFiles}
+                  disabled={streaming || attachedFiles.length >= maxFiles}
                   className="text-muted-foreground"
                   title="Attach file"
                 >
@@ -403,13 +403,13 @@ export function Composer({
               (!value.trim() &&
                 attachedFiles.length === 0 &&
                 selectedOptions.size === 0 &&
-                !isLoading) ||
-              isLoading
+                !streaming) ||
+              streaming
             }
             size="icon-lg"
             onClick={() => handleInternalSubmit().catch(console.error)}
           >
-            {isLoading ? (
+            {streaming ? (
               <IconLoader2 className="h-5 w-5 animate-spin" />
             ) : (
               <IconArrowUp className="h-5 w-5" />

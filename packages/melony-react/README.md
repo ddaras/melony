@@ -31,12 +31,12 @@ export default function App() {
 import { useMelony } from "@melony/react";
 
 function Controls() {
-  const { sendEvent, isLoading } = useMelony();
+  const { send, streaming } = useMelony();
   return (
     <button
-      disabled={isLoading}
+      disabled={streaming}
       onClick={() =>
-        sendEvent({ type: "text", data: { content: "Hello!" } })
+        send({ type: "text", data: { content: "Hello!" } })
       }
     >
       Send
@@ -49,7 +49,7 @@ function Controls() {
 
 - **`MelonyProvider`** + **`useMelony()`**
   - Connects to a Melony runtime endpoint.
-  - Exposes `events`, `isLoading`, `error`, and `sendEvent()`.
+  - Exposes `events`, `streaming`, `error`, and `send()`.
 
 ## Event Stream & UI
 

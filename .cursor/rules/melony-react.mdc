@@ -30,11 +30,11 @@ export function App() {
 Use the `useMelony` hook to access the agent's state and methods.
 
 ```tsx
-const { events, sendEvent, isLoading, error } = useMelony();
+const { events, send, streaming, error } = useMelony();
 
 // Sending a message
 const handleSend = (text: string) => {
-  sendEvent({ type: "text", data: { content: text } });
+  send({ type: "text", data: { content: text } });
 };
 ```
 
@@ -57,5 +57,5 @@ Iterate through `events` and render based on `event.type`.
 
 ## Best Practices
 - **Key by ID**: Always use `event.meta.id` as the React `key`.
-- **Loading States**: Use `isLoading` to disable inputs or show spinners.
-- **Optimistic UI**: MelonyClient handles optimistic updates for the initial `sendEvent`.
+- **Loading States**: Use `streaming` to disable inputs or show spinners.
+- **Optimistic UI**: MelonyClient handles optimistic updates for the initial `send`.

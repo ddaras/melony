@@ -11,11 +11,11 @@ export const Checkbox: React.FC<UIContract["checkbox"]> = ({
   disabled,
   onChangeAction,
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChangeAction) {
-      sendEvent({
+      send({
         ...onChangeAction,
         data: {
           name: name || "",

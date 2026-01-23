@@ -23,11 +23,11 @@ export const Select: React.FC<UIContract["select"]> = ({
   placeholder,
   onChangeAction,
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   const handleValueChange = (val: string) => {
     if (onChangeAction) {
-      sendEvent({
+      send({
         ...onChangeAction,
         data: {
           name: name || "",

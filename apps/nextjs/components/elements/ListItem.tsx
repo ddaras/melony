@@ -16,12 +16,12 @@ export const ListItem: React.FC<
   radius = "md",
   align = "center",
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
   const isInteractive = !!onClickAction;
 
   const handleClick = () => {
     if (onClickAction) {
-      sendEvent(onClickAction as any);
+      send(onClickAction as any);
     }
   };
 

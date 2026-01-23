@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MelonyContext, MelonyContextValue } from "@/providers/melony-provider";
+import { MelonyContext, MelonyContextValue } from "../providers/melony-provider";
 
 export const useMelony = (): MelonyContextValue => {
   const context = useContext(MelonyContext);

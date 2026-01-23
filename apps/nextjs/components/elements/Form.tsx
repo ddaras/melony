@@ -7,7 +7,7 @@ import { gapMap } from "@/lib/theme-utils";
 export const Form: React.FC<
   UIContract["form"] & { children?: React.ReactNode[] }
 > = ({ children, onSubmitAction, gap = "md" }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +25,7 @@ export const Form: React.FC<
       setIsSubmitted(true);
 
       if (typeof onSubmitAction === "object" && "type" in onSubmitAction) {
-        sendEvent({
+        send({
           ...onSubmitAction,
           data: {
             ...(onSubmitAction?.data || {}),
@@ -33,7 +33,7 @@ export const Form: React.FC<
           },
         } as any);
       } else if (typeof onSubmitAction === "function") {
-        sendEvent(onSubmitAction(data));
+        send(onSubmitAction(data));
       }
     }
   };

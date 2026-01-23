@@ -17,7 +17,7 @@ import {
 } from "../utils/message-converter";
 
 export interface MelonyContextValue extends ClientState {
-  sendEvent: (event: Event) => Promise<void>;
+  send: (event: Event) => Promise<void>;
   reset: (events?: Event[]) => void;
   client: MelonyClient;
   config?: Config;
@@ -65,8 +65,8 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     () => ({
       ...state,
       messages,
-      sendEvent: async (event: Event) => {
-        const generator = client.sendEvent(event);
+      send: async (event: Event) => {
+        const generator = client.send(event);
         // Consume the generator to ensure event processing completes
         for await (const _ of generator) {
           // Events are handled by the client subscription

@@ -17,7 +17,7 @@ export const Button: React.FC<
   onClickAction,
   justify = "center",
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   const variantMap: Record<
     string,
@@ -51,7 +51,7 @@ export const Button: React.FC<
       className={cn(width && widthMap[width], justifyMap[justify])}
       onClick={() => {
         if (onClickAction) {
-          sendEvent(onClickAction as any);
+          send(onClickAction as any);
         }
       }}
     >

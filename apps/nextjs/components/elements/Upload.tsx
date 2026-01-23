@@ -15,7 +15,7 @@ export const Upload: React.FC<UIContract["upload"]> = ({
   mode = "append",
   disabled,
 }) => {
-  const { sendEvent, events } = useMelony();
+  const { send, events } = useMelony();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -77,9 +77,9 @@ export const Upload: React.FC<UIContract["upload"]> = ({
 
       if (onUploadAction) {
         if (typeof onUploadAction === "function") {
-          await sendEvent(onUploadAction({ files: convertedFiles }));
+          await send(onUploadAction({ files: convertedFiles }));
         } else {
-          await sendEvent({
+          await send({
             ...onUploadAction,
             data: {
               ...onUploadAction.data,

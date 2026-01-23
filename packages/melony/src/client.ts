@@ -6,7 +6,7 @@ export { generateId };
 
 export interface ClientState<TEvent extends Event = Event> {
   events: TEvent[];
-  isLoading: boolean;
+  streaming: boolean;
   error: Error | null;
 }
 
@@ -31,7 +31,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.headers = options.headers;
     this.state = {
       events: options.initialEvents ?? [],
-      isLoading: false,
+      streaming: false,
       error: null,
     };
   }
@@ -67,7 +67,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.stateListeners.forEach((l) => l(this.getState()));
   }
 
-  async *sendEvent(event: TEvent): AsyncGenerator<TEvent> {
+  async *send(event: TEvent): AsyncGenerator<TEvent> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
@@ -89,7 +89,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     } as TEvent;
 
     this.setState({
-      isLoading: true,
+      streaming: true,
       error: null,
       events: [...this.state.events, optimisticEvent],
     });
@@ -130,14 +130,14 @@ export class MelonyClient<TEvent extends Event = Event> {
           }
         }
       }
-      this.setState({ isLoading: false });
+      this.setState({ streaming: false });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
-        this.setState({ isLoading: false });
+        this.setState({ streaming: false });
         return;
       }
       const error = err instanceof Error ? err : new Error(String(err));
-      this.setState({ error, isLoading: false });
+      this.setState({ error, streaming: false });
       throw error;
     }
   }
@@ -159,7 +159,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.setState({
       events,
       error: null,
-      isLoading: false,
+      streaming: false,
     });
   }
 }

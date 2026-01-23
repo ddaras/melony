@@ -32,12 +32,12 @@ export function Thread({
   defaultSelectedIds,
   fileAttachments,
 }: ThreadProps) {
-  const { activeThreadId, threadEvents, isLoadingEvents } = useThreads();
+  const { activeThreadId, isLoadingEvents } = useThreads();
 
   const {
-    isLoading,
+    streaming,
     error,
-    sendEvent,
+    send,
     messages: melonyMessages,
   } = useMelony();
 
@@ -82,11 +82,11 @@ export function Thread({
       state?.files && Array.isArray(state.files) && state.files.length > 0;
 
     // Allow submission if there's text OR files OR options
-    if ((!text && !hasFiles) || isLoading) return;
+    if ((!text && !hasFiles) || streaming) return;
 
     if (!overrideInput) setInput("");
 
-    await sendEvent({
+    await send({
       type: "text",
       data: { content: text || "" },
       meta: {
@@ -125,7 +125,7 @@ export function Thread({
               )}
               <MessageList
                 messages={messages}
-                isLoading={isLoading}
+                streaming={streaming}
                 error={error}
                 loadingStatus={{
                   message: "Processing..."
@@ -144,7 +144,7 @@ export function Thread({
             onChange={setInput}
             onSubmit={handleSubmit}
             placeholder={placeholder}
-            isLoading={isLoading}
+            streaming={streaming}
             options={options}
             autoFocus={autoFocus}
             defaultSelectedIds={allDefaultSelectedIds}

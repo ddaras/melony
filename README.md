@@ -44,7 +44,7 @@ import { MelonyProvider, useMelony } from "@melony/react";
 const client = new MelonyClient({ url: "/api/chat" });
 
 function Chat() {
-  const { events, sendEvent } = useMelony();
+  const { events, send } = useMelony();
   // Render your chat UI here
   return <div>...</div>;
 }

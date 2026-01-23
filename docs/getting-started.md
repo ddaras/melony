@@ -81,7 +81,7 @@ import { MelonyProvider, useMelony } from "@melony/react";
 const client = new MelonyClient({ url: "/api/chat" });
 
 function Chat() {
-  const { events, sendEvent, isLoading } = useMelony();
+  const { events, send, streaming } = useMelony();
 
   return (
     <div>
@@ -89,8 +89,8 @@ function Chat() {
         {events.map(e => e.type === "text" && <p key={e.meta?.id}>{e.data.content}</p>)}
       </div>
       <button 
-        disabled={isLoading}
-        onClick={() => sendEvent({ type: "text", data: { content: "How is the weather?" } })}
+        disabled={streaming}
+        onClick={() => send({ type: "text", data: { content: "How is the weather?" } })}
       >
         Ask Weather
       </button>

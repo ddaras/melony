@@ -71,12 +71,12 @@ const client = new MelonyClient({
 });
 ```
 
-### `sendEvent(event: Event)`
+### `send(event: Event)`
 
 Sends an event to the server and returns an `AsyncGenerator` of events.
 
 ```typescript
-const stream = client.sendEvent({
+const stream = client.send({
   type: "text",
   data: { content: "Hello!" },
   nextAction: { action: "greet", params: {} },

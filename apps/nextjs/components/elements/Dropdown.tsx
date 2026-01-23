@@ -21,7 +21,7 @@ export interface DropdownItem {
 
 
 export const Dropdown: React.FC<UIContract["dropdown"] & { children?: React.ReactNode | React.ReactNode[] }> = ({ items = [], children }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   return (
     <DropdownMenu>
@@ -47,7 +47,7 @@ export const Dropdown: React.FC<UIContract["dropdown"] & { children?: React.Reac
             onClick={(e) => {
               e.stopPropagation();
               if (item.onClickAction) {
-                sendEvent(item.onClickAction);
+                send(item.onClickAction);
               }
             }}
           >

@@ -47,7 +47,7 @@ export interface UIContract {
     padding?: UISpacing;
     radius?: UIRadius;
     shadow?: UIShadow;
-    isLoading?: boolean;
+    streaming?: boolean;
     group?: boolean;
   };
   row: {

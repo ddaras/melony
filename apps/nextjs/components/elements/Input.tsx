@@ -17,11 +17,11 @@ export const Input: React.FC<UIContract["input"]> = ({
   width = "full",
   onChangeAction,
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChangeAction) {
-      sendEvent({
+      send({
         ...onChangeAction,
         data: {
           name: name || "",

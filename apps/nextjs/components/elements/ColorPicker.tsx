@@ -36,13 +36,13 @@ export const ColorPicker: React.FC<UIContract["colorPicker"]> = ({
   onChangeAction,
   disabled,
 }) => {
-  const { sendEvent } = useMelony();
+  const { send } = useMelony();
   const [color, setColor] = useState(defaultValue);
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
     if (onChangeAction) {
-      sendEvent({
+      send({
         ...onChangeAction,
         data: {
           name: name || "",
