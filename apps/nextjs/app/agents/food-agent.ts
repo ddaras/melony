@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { getMenuHandler } from "../handlers/get-menu";
 import { placeOrderHandler } from "../handlers/place-order";
+import { initAppHandler } from "../handlers/init";
 import { FoodState, FoodEvent } from "./types";
 
 export * from "./types";
@@ -53,4 +54,5 @@ export const foodAgent = melony<FoodState, FoodEvent>()
     },
   }))
   .on("action:getMenu", getMenuHandler)
-  .on("action:placeOrder", placeOrderHandler);
+  .on("action:placeOrder", placeOrderHandler)
+  .on("init", initAppHandler);

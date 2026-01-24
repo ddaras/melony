@@ -2,6 +2,8 @@
 
 Fast, unopinionated, minimalist event-based framework for building AI agents.
 
+[![Discord](https://img.shields.io/discord/1331776510344400977?color=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/j2uF5n8vJK)
+
 Melony is to AI agents what Express is to web servers — a tiny, flexible orchestration loop: `Event → Handler → Events`.
 
 ## What you get
@@ -80,3 +82,7 @@ export default function App() {
 Most "agent frameworks" are heavy and opinionated about how you should build your agent's brain. Melony is different:
 
 **It focuses on the communication protocol.** By treating everything as an event stream, Melony makes it easy to bridge the gap between LLM thoughts and the actual product UX your users need—whether that's text, structured data, or complex interactive flows.
+
+## Community
+
+Join our Discord to connect with the team and other developers: [https://discord.gg/j2uF5n8vJK](https://discord.gg/j2uF5n8vJK)

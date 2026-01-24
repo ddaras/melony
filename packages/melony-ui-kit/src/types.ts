@@ -107,12 +107,12 @@ export interface UIContract {
   badge: {
     label: string;
     variant?:
-      | "primary"
-      | "secondary"
-      | "success"
-      | "danger"
-      | "warning"
-      | "outline";
+    | "primary"
+    | "secondary"
+    | "success"
+    | "danger"
+    | "warning"
+    | "outline";
     size?: UISize;
   };
   image: {
@@ -245,13 +245,13 @@ export interface UIContract {
     type?: "button" | "submit" | "reset";
     label: string;
     variant?:
-      | "primary"
-      | "secondary"
-      | "success"
-      | "danger"
-      | "outline"
-      | "ghost"
-      | "link";
+    | "primary"
+    | "secondary"
+    | "success"
+    | "danger"
+    | "outline"
+    | "ghost"
+    | "link";
     size?: UISize;
     disabled?: boolean;
     width?: UIWidth;
@@ -259,15 +259,15 @@ export interface UIContract {
   };
   float: {
     position?:
-      | "top-left"
-      | "top-right"
-      | "top-center"
-      | "bottom-left"
-      | "bottom-right"
-      | "bottom-center"
-      | "center"
-      | "left-center"
-      | "right-center";
+    | "top-left"
+    | "top-right"
+    | "top-center"
+    | "bottom-left"
+    | "bottom-right"
+    | "bottom-center"
+    | "center"
+    | "left-center"
+    | "right-center";
     offsetX?: UISpacing;
     offsetY?: UISpacing;
     showOnHover?: boolean;
@@ -280,6 +280,11 @@ export interface UIContract {
     }>;
     className?: string;
     triggerClassName?: string;
+  };
+  thread: {
+    placeholder?: string;
+    messages?: any[];
+    autoFocus?: boolean;
   };
 }
 

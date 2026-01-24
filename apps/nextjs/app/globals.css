@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@source "../node_modules/@melony/react/dist/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@melony/ui-shadcn/dist/**/*.{js,ts,jsx,tsx}";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -1,31 +1,38 @@
 "use client";
 
-import { FullChat } from "@/components/full-chat";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { ThreadProvider } from "@/providers/thread-provider";
-import { FloatingLayout } from "@/components/floating-layout";
+import { useEffect, useState } from "react";
+import { MelonyRenderer, UINode } from "@melony/ui-kit/client";
 
 export default function Home() {
+  const [uiTree, setUiTree] = useState<UINode | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function initApp() {
+      try {
+        const response = await fetch("/api/chat?platform=web");
+        const data = await response.json();
+        setUiTree(data);
+      } catch (error) {
+        console.error("Failed to initialize SDUI:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initApp();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!uiTree) {
+    return <div>Failed to load UI</div>;
+  }
+
   return (
-    <ThreadProvider service={{
-      getThreads: async () => [],
-      getEvents: async () => [],
-      deleteThread: async () => { },
-    }}>
-      <FloatingLayout navPosition="top">
-        <FullChat
-          headerProps={{
-            rightContent: (
-              <div className="flex gap-2">
-                <ThemeToggle />
-              </div>
-            )
-          }}
-          title=""
-          placeholder="I'm hungry..."
-        />
-      </FloatingLayout>
-    </ThreadProvider>
+    <MelonyRenderer node={uiTree} />
   );
 }
 

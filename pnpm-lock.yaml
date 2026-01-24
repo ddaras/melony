@@ -47,6 +47,9 @@ importers:
       '@melony/ui-kit':
         specifier: workspace:*
         version: link:../../packages/melony-ui-kit
+      '@melony/ui-shadcn':
+        specifier: workspace:*
+        version: link:../../packages/melony-ui-shadcn
       '@tabler/icons-react':
         specifier: ^3.36.0
         version: 3.36.0(react@19.2.3)
@@ -269,6 +272,61 @@ importers:
 
   packages/melony-ui-kit:
     devDependencies:
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.27
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.7)
+      melony:
+        specifier: workspace:*
+        version: link:../melony
+      react:
+        specifier: ^19.0.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.3(react@19.2.3)
+      rimraf:
+        specifier: ^5.0.10
+        version: 5.0.10
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
+  packages/melony-ui-shadcn:
+    dependencies:
+      '@base-ui/react':
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tabler/icons-react':
+        specifier: ^3.36.0
+        version: 3.36.0(react@19.2.3)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.454.0
+        version: 0.454.0(react@19.2.3)
+      tailwind-merge:
+        specifier: ^3.0.1
+        version: 3.4.0
+    devDependencies:
+      '@melony/react':
+        specifier: workspace:*
+        version: link:../melony-react
+      '@melony/ui-kit':
+        specifier: workspace:*
+        version: link:../melony-ui-kit
       '@types/node':
         specifier: ^20.14.10
         version: 20.19.27
@@ -2198,6 +2256,11 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  lucide-react@0.454.0:
+    resolution: {integrity: sha512-hw7zMDwykCLnEzgncEEjHeA6+45aeEzRYuKHuyRSOPkhko+J3ySGjGIzu+mmMfDFG1vazHepMaYFYHbTFAZAAQ==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -4777,6 +4840,10 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lucide-react@0.454.0(react@19.2.3):
+    dependencies:
+      react: 19.2.3
 
   magic-string@0.30.21:
     dependencies:

@@ -1,0 +1,49 @@
+{
+  "name": "@melony/ui-shadcn",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.1",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.454.0",
+    "@base-ui/react": "^1.0.0-alpha.3",
+    "@tabler/icons-react": "^3.36.0"
+  },
+  "peerDependencies": {
+    "@melony/react": "workspace:*",
+    "@melony/ui-kit": "workspace:*",
+    "melony": "workspace:*",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.3.0",
+    "typescript": "^5.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@melony/react": "workspace:*",
+    "@melony/ui-kit": "workspace:*",
+    "melony": "workspace:*",
+    "lucide-react": "^0.454.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

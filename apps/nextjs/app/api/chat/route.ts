@@ -14,11 +14,25 @@ export async function POST(req: Request) {
   return foodAgent.streamResponse(event);
 }
 
-export async function GET() {
-  return new Response(JSON.stringify({
-    starterPrompts: [],
-    options: [],
-  }), {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const platform = searchParams.get("platform") || "web";
+
+  const event = {
+    type: "init",
+    data: { platform }
+  } as any;
+
+  const runtime = foodAgent.build();
+  let uiData = null;
+
+  for await (const e of runtime.run(event)) {
+    if (e.type === "ui") {
+      uiData = e.data;
+    }
+  }
+
+  return new Response(JSON.stringify(uiData), {
     headers: { "Content-Type": "application/json" },
   });
 }

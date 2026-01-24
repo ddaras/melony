@@ -1,4 +1,4 @@
-import { Event, Role } from "melony";
+import { Event } from "melony";
 
 export interface User {
   id?: string;

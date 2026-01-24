@@ -1,0 +1,35 @@
+import * as elements from "./elements";
+import { MelonyComponents } from "@melony/ui-kit";
+
+// The elements object matches UIContract keys for use with MelonyUIProvider
+export const shadcnElements: Partial<MelonyComponents> = {
+  card: elements.Card,
+  button: elements.Button,
+  row: elements.Row,
+  col: elements.Col,
+  text: elements.Text,
+  heading: elements.Heading,
+  badge: elements.Badge,
+  input: elements.Input,
+  hidden: elements.Hidden,
+  textarea: elements.Textarea,
+  select: elements.Select,
+  checkbox: elements.Checkbox,
+  radioGroup: elements.RadioGroup,
+  colorPicker: elements.ColorPicker,
+  spacer: elements.Spacer,
+  divider: elements.Divider,
+  box: elements.Box,
+  float: elements.Float,
+  image: elements.Image,
+  video: elements.Video,
+  icon: elements.Icon,
+  list: elements.List,
+  listItem: elements.ListItem,
+  form: elements.Form,
+  chart: elements.Chart,
+  label: elements.Label,
+  upload: elements.Upload,
+  dropdown: elements.Dropdown,
+  thread: elements.Thread,
+};

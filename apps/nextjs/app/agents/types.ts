@@ -18,6 +18,15 @@ export type UINodeEvent = MelonyEvent & { type: "ui"; data: UINode };
 export type GetMenuEvent = MelonyEvent & { type: "action:getMenu"; data: Record<string, never> };
 export type PlaceOrderEvent = MelonyEvent & { type: "action:placeOrder"; data: { itemId: string; quantity?: number } };
 export type ActionAfterEvent = MelonyEvent & { type: "action:after"; data: { action: string; result: any } };
+export type InitEvent = MelonyEvent & { 
+  type: "init"; 
+  data: { 
+    platform: string; 
+    version?: string; 
+    path?: string; 
+    theme?: string; 
+  } 
+};
 
 
 export type FoodEvent =
@@ -27,4 +36,5 @@ export type FoodEvent =
   | UINodeEvent
   | GetMenuEvent
   | PlaceOrderEvent
-  | ActionAfterEvent;
+  | ActionAfterEvent
+  | InitEvent;

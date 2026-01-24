@@ -15,6 +15,7 @@
     "@melony/plugin-ai-sdk": "workspace:*",
     "@melony/plugin-persistence": "workspace:*",
     "@melony/ui-kit": "workspace:*",
+    "@melony/ui-shadcn": "workspace:*",
     "@melony/plugin-approval": "workspace:*",
     "@melony/plugin-auth": "workspace:*",
     "@melony/plugin-guardrails": "workspace:*",
