@@ -14,6 +14,17 @@ Melony is to AI agents what Express is to web servers — a tiny, flexible orche
 - **HITL-friendly**: approvals and guardrails belong in **event handlers**.
 - **Frontend-ready**: `@melony/react` provides the glue (providers/hooks) to connect your React app to the Melony stream.
 
+## Getting Started
+
+The recommended way to start building a Melony app is by cloning our [Next.js Starter](https://github.com/ddaras/melony-nextjs-starter). It comes pre-configured with the core framework, React hooks, and an example agent.
+
+```bash
+git clone https://github.com/ddaras/melony-nextjs-starter
+cd melony-nextjs-starter
+pnpm install
+pnpm dev
+```
+
 ## Quick start (full stack)
 
 ### Backend (Next.js)
