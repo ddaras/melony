@@ -4,43 +4,46 @@ Go beyond the basics with persistence, human-in-the-loop workflows, and complex 
 
 ## Human-in-the-Loop (HITL)
 
-Melony makes it easy to pause agent execution and wait for human approval before proceeding with sensitive actions (like making a payment or sending an email).
+Melony makes it easy to pause agent execution and wait for human approval before proceeding with sensitive operations (like making a payment or sending an email).
 
-You can implement this by adding an event handler for `action:before`.
+You can implement this by intercepting an event and calling `context.suspend()`.
 
 ```typescript
 const agent = melony()
-  .action("placeOrder", placeOrderAction)
-  .on("action:before", async function* (event, context) {
-    if (event.data.action === "placeOrder" && !event.meta?.approved) {
+  .on("place-order", async function* (event, context) {
+    if (!event.meta?.approved) {
       // Suspend the execution and yield an approval request
       context.suspend({
         type: "approval-required",
         data: {
-          action: "placeOrder",
-          params: event.data.params
+          operation: "place-order",
+          params: event.data
         }
       });
+      return;
     }
+
+    // Logic for placing the order goes here...
+    yield { type: "assistant:text", data: { content: "Order placed successfully!" } };
   });
 ```
 
-When an action requires approval:
+When an operation requires approval:
 1. The handler calls `context.suspend()`.
 2. Melony **stops** the execution and yields the provided event.
 3. The runtime waits for a new event from the client (e.g., the user clicking "Approve").
-4. Once approved (detected by `meta.approved` in this example), the action can proceed.
+4. Once approved (detected by `meta.approved` in this example), the handler can proceed.
 
 ## Persistence
 
-By default, Melony runtimes are stateless. To build long-running agents, use an event handler to persist events.
+By default, Melony runtimes are stateless. To build long-running agents, use an event handler to persist events to your database.
 
 ```typescript
 const agent = melony()
-  .on("text", async function* (event, context) {
-    // Log user messages to a database
-    await db.messages.create({ 
-      ...event.data, 
+  .on("*", async function* (event, context) {
+    // Log all events to a database
+    await db.events.create({ 
+      ...event, 
       runId: context.runId 
     });
   });
@@ -68,48 +71,40 @@ yield {
 import { useMelony } from "@melony/react";
 
 function Chat() {
-  const { events } = useMelony();
+  const { messages } = useMelony();
 
   return (
     <div>
-      {events.map(event => {
-        if (event.type === "show-chart") {
-          return <MyChart key={event.meta?.id} type={event.data.chartType} points={event.data.points} />;
-        }
-        // ...
-      })}
+      {messages.map(message => (
+        <div key={message.runId}>
+          {message.content}
+          {message.uiEvents.map(event => {
+            if (event.type === "show-chart") {
+              return <MyChart key={event.id} type={event.data.chartType} points={event.data.points} />;
+            }
+          })}
+        </div>
+      ))}
     </div>
   );
 }
 ```
 
-## Multi-step Orchestration
+## Recursive Orchestration
 
-Since actions are generators, you can yield events and then chain to other actions using `context.runtime.execute()`.
-
-```typescript
-export const researchAction = async function* ({ query }, { runtime }) {
-  yield { type: "text", data: { content: "Researching..." } };
-  const data = await myInternalSearch(query);
-
-  yield { type: "text", data: { content: "Synthesizing results..." } };
-
-  yield* runtime.execute("summarize", { data });
-};
-```
-
-## LLM Routing
-
-A common pattern is to use an LLM to decide which action to call. Implement this as an event handler:
+When a handler yields an event, it is automatically passed back through the runtime's handlers. This allows for powerful, recursive behaviors.
 
 ```typescript
 const agent = melony()
-  .on("text", async function* (event, { runtime, actions }) {
-    if (event.meta?.role === "user") {
-      const toolCall = await callLLM(event.data.content, Object.keys(actions));
-      if (toolCall) {
-        yield* runtime.execute(toolCall.name, toolCall.params);
-      }
-    }
+  .on("research", async function* (event, { runtime }) {
+    yield { type: "assistant:text", data: { content: "Researching..." } };
+    const data = await myInternalSearch(event.data.query);
+
+    yield { type: "assistant:text", data: { content: "Synthesizing results..." } };
+    yield { type: "summarize", data: { text: data } };
+  })
+  .on("summarize", async function* (event) {
+    const summary = await summarize(event.data.text);
+    yield { type: "assistant:text", data: { content: summary } };
   });
 ```

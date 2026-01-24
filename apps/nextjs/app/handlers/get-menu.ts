@@ -7,7 +7,7 @@ export const getMenuHandler: EventHandler<FoodState, FoodEvent> = async function
   yield {
     type: "ui",
     data: renderMenuCard(MENU),
-  } as FoodEvent;
+  };
 
   yield {
     type: "action:after",
@@ -18,5 +18,5 @@ export const getMenuHandler: EventHandler<FoodState, FoodEvent> = async function
         message: "Menu fetched successfully",
       },
     },
-  } as FoodEvent;
+  };
 };

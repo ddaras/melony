@@ -69,16 +69,21 @@ function App() {
 }
 
 function Chat() {
-  const { events } = useMelony();
+  const { messages } = useMelony();
   
   return (
     <div>
-      {events.map((event, i) => {
-        if (event.type === "ui") {
-          return <UIRenderer key={i} node={event.data} />;
-        }
-        // ...
-      })}
+      {messages.map((message) => (
+        <div key={message.runId}>
+          {message.content}
+          {message.uiEvents.map((event, i) => {
+            if (event.type === "ui") {
+              return <UIRenderer key={i} node={event.data} />;
+            }
+            return null;
+          })}
+        </div>
+      ))}
     </div>
   );
 }

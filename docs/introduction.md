@@ -2,7 +2,7 @@
 
 Melony is a **fast, unopinionated, minimalist event-based framework** for building AI agents.
 
-Melony is designed to be the "Express.js" of the agent world. It doesn't force a specific LLM, orchestration pattern, or UI library on you. Instead, it provides a tiny, high-performance core for routing events and executing actions.
+Melony is designed to be the "Express.js" of the agent world. It doesn't force a specific LLM, orchestration pattern, or UI library on you. Instead, it provides a tiny, high-performance core for routing and handling events.
 
 ## Why Melony?
 
@@ -17,7 +17,7 @@ Melony is designed to be the "Express.js" of the agent world. It doesn't force a
 
 Melony treats the interaction between a user and an agent as a continuous, reactive stream of events. 
 
-Instead of a rigid Request/Response model or a fixed "Plan -> Execute -> Observe" loop, Melony provides a **fluent builder** to wire up actions and event handlers. Your logic can yield events that trigger other handlers, creating complex behaviors from simple, decoupled pieces.
+Instead of a rigid Request/Response model or a fixed "Plan -> Execute -> Observe" loop, Melony provides a **fluent builder** to wire up event handlers. Your logic can yield events that trigger other handlers, creating complex behaviors from simple, decoupled pieces.
 
 ## What's Included?
 

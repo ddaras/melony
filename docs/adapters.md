@@ -2,9 +2,9 @@
 
 Melony is designed to be flexible. It provides a core runtime that can be served in various environments and consumed by different clients.
 
-## Serving with `.stream()`
+## Serving with `.streamResponse()`
 
-The simplest way to serve a Melony agent is using the `.stream()` method on the builder. It automatically executes the runtime and returns a streaming `Response`.
+The simplest way to serve a Melony agent is using the `.streamResponse()` method on the builder. It automatically executes the runtime and returns a streaming `Response`.
 
 ### Next.js Example
 
@@ -14,7 +14,7 @@ import { agent } from "./agent";
 
 export async function POST(req: Request) {
   const { event } = await req.json();
-  return agent.stream(event);
+  return agent.streamResponse(event);
 }
 
 export async function GET() {
@@ -77,9 +77,8 @@ Sends an event to the server and returns an `AsyncGenerator` of events.
 
 ```typescript
 const stream = client.send({
-  type: "text",
+  type: "user:text",
   data: { content: "Hello!" },
-  nextAction: { action: "greet", params: {} },
 });
 
 for await (const event of stream) {

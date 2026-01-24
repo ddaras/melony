@@ -10,8 +10,8 @@ import { EventHandler } from "melony";
 export const placeOrderHandler: EventHandler<FoodState, FoodEvent> = async function* (event) {
   if (event.type !== "action:placeOrder") return;
 
-  const { itemId, quantity } = event.data as { itemId: string; quantity: number };
-  
+  const { itemId, quantity = 1 } = event.data as { itemId: string; quantity?: number };
+
   const item = MENU.find((m) => m.id === itemId);
   if (!item) throw new Error("Item not found");
 
@@ -28,17 +28,18 @@ export const placeOrderHandler: EventHandler<FoodState, FoodEvent> = async funct
   yield {
     type: "text-delta",
     data: { delta: getOrderConfirmationMessage(result) },
-  } as FoodEvent;
+  };
 
   yield {
     type: "ui",
     data: renderOrderConfirmation(result),
-  } as FoodEvent;
+  };
 
   yield {
     type: "action:after",
     data: {
+      action: "placeOrder",
       result: result,
     },
-  } as FoodEvent;
+  };
 };

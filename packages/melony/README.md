@@ -14,17 +14,14 @@ npm install melony
 import { melony } from "melony";
 
 const agent = melony()
-  .action("getWeather", async function* ({ city }: { city: string }) {
-    yield { type: "text", data: { content: `Weather in ${city} is 24°C` } };
-  })
-  .on("text", async function* (event, { runtime }) {
+  .on("user:text", async function* (event, { runtime }) {
     if (event.data.content.includes("weather")) {
-      yield* runtime.execute("getWeather", { city: "London" });
+      yield { type: "assistant:text", data: { content: "Weather in London is 24°C" } };
     }
   });
 
-// Run it (or use agent.stream(event) for HTTP)
-for await (const event of agent.build().run({ type: "text", data: { content: "How's the weather?" } })) {
+// Run it (or use agent.streamResponse(event) for HTTP)
+for await (const event of agent.build().run({ type: "user:text", data: { content: "How's the weather?" } })) {
   console.log(event);
 }
 ```
@@ -32,21 +29,15 @@ for await (const event of agent.build().run({ type: "text", data: { content: "Ho
 ### Legacy: Runtime Class API (Still Supported)
 
 ```ts
-import { MelonyRuntime } from "melony";
+import { Runtime } from "melony";
 
 // 1. Create the runtime
-const agent = new MelonyRuntime({
-  actions: { 
-    getWeather: {
-      name: "getWeather",
-      execute: async function* ({ city }: { city: string }) {
-        yield { type: "text", data: { content: `Weather in ${city} is sunny!` } };
-      }
-    }
-  },
+const agent = new Runtime({
   eventHandlers: new Map([
-    ["text", [async function* (event, { runtime }) {
-      yield* runtime.execute("getWeather", { city: "London" });
+    ["user:text", [async function* (event, { runtime }) {
+      if (event.data.content.includes("weather")) {
+        yield { type: "assistant:text", data: { content: "Weather in London is sunny!" } };
+      }
     }]]
   ])
 });
@@ -56,46 +47,37 @@ const agent = new MelonyRuntime({
 
 The fluent builder provides an excellent developer experience with method chaining:
 
-### Action Definition
-```ts
-const agent = melony()
-  // Register an async generator with a name
-  .action("getWeather", async function* ({ city }) {
-    yield { type: "text", data: { content: `Weather in ${city} is sunny!` } };
-  });
-```
-
 ### Event Handlers
 ```ts
 const agent = melony()
-  .on("text", async function* (event, { runtime }) {
+  .on("user:text", async function* (event, { runtime }) {
     // Intercept and handle events
     if (event.data.content.includes("help")) {
-      yield { type: "text", data: { content: "How can I help you?" } };
+      yield { type: "assistant:text", data: { content: "How can I help you?" } };
     }
   })
-  .on("action:before", async function* (event) {
-    console.log(`Executing action: ${event.data.action}`);
+  .on("assistant:text", async function* (event) {
+    console.log(`Agent said: ${event.data.content}`);
   })
   .build();
 ```
 
 ### Plugin System
-Plugins allow you to modularize and reuse actions and handlers across different agents. A plugin is simply a function that receives the `MelonyBuilder`.
+Plugins allow you to modularize and reuse handlers across different agents. A plugin is simply a function that receives the `MelonyBuilder`.
 
 ```ts
 import { melony, MelonyPlugin } from "melony";
 
 const loggingPlugin: MelonyPlugin = (builder) => {
-  builder.on("action:before", async function* (event) {
-    console.log(`[Plugin] Executing: ${event.data.action}`);
+  builder.on("*", async function* (event) {
+    console.log(`[Plugin] Event: ${event.type}`);
   });
 };
 
 const agent = melony()
   .use(loggingPlugin)
-  .action("greet", async function* () {
-    yield { type: "text", data: { content: "Hello!" } };
+  .on("user:text", async function* () {
+    yield { type: "assistant:text", data: { content: "Hello!" } };
   });
 ```
 
@@ -103,12 +85,11 @@ const agent = melony()
 - **Full type inference** through the entire chain
 - **IntelliSense** for all methods and parameters
 - **Generic propagation** maintains type safety
-- **Minimalist core** with zero required dependencies (except optional Zod)
+- **Minimalist core** with zero required dependencies
 
 ## Core Concepts
 
 - **Event**: The universal unit of streaming (`{ type, data, meta }`).
-- **Action**: An async generator that yields events.
 - **Event Handlers**: Reactive functions that listen to and emit events.
 
 ## License

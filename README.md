@@ -2,13 +2,13 @@
 
 Fast, unopinionated, minimalist event-based framework for building AI agents.
 
-Melony is to AI agents what Express is to web servers — a tiny, flexible orchestration loop: `Event → Handler → Actions → Events`.
+Melony is to AI agents what Express is to web servers — a tiny, flexible orchestration loop: `Event → Handler → Events`.
 
 ## What you get
 
-- **Event-first runtime**: a tiny orchestration loop: `Event → Handler → Actions → Events`.
+- **Event-first runtime**: a tiny orchestration loop: `Event → Handler → Events`.
 - **Fluent Builder API**: build agents with a simple, type-safe API.
-- **Plugin system**: easily modularize and reuse actions and handlers across agents.
+- **Plugin system**: easily modularize and reuse handlers across agents.
 - **HITL-friendly**: approvals and guardrails belong in **event handlers**.
 - **Frontend-ready**: `@melony/react` provides the glue (providers/hooks) to connect your React app to the Melony stream.
 
@@ -21,17 +21,14 @@ Melony is to AI agents what Express is to web servers — a tiny, flexible orche
 import { melony } from "melony";
 
 const agent = melony()
-  .action("greet", async function* ({ name }: { name?: string }) {
-    yield { type: "text", data: { content: `Hey${name ? ` ${name}` : ""}!` } };
-  })
-  .on("text", async function* (event, { runtime }) {
-    // Simple router: call greet action for any text event
-    yield* runtime.execute("greet", { name: "User" });
+  .on("user:text", async function* (event, { runtime }) {
+    // Simple router: respond with a greeting
+    yield { type: "assistant:text", data: { content: "Hey there!" } };
   });
 
 export async function POST(req: Request) {
   const { event } = await req.json();
-  return agent.stream(event);
+  return agent.streamResponse(event);
 }
 ```
 
@@ -44,9 +41,20 @@ import { MelonyProvider, useMelony } from "@melony/react";
 const client = new MelonyClient({ url: "/api/chat" });
 
 function Chat() {
-  const { events, send } = useMelony();
-  // Render your chat UI here
-  return <div>...</div>;
+  const { messages, send } = useMelony();
+  
+  return (
+    <div>
+      {messages.map(m => (
+        <div key={m.runId}>
+          <strong>{m.role}:</strong> {m.content}
+        </div>
+      ))}
+      <button onClick={() => send({ type: "user:text", data: { content: "Hello!" } })}>
+        Send
+      </button>
+    </div>
+  );
 }
 
 export default function App() {
@@ -61,12 +69,11 @@ export default function App() {
 ## Packages
 
 - **`melony`**: The core framework: builder, runtime, and streaming utilities.
-- **`@melony/react`**: React hooks and providers to connect your app to a Melony stream.
+- **`melony-react`**: React hooks and providers to connect your app to a Melony stream.
 
 ## Examples in this repo
 
 - **`apps/nextjs`**: A full-stack example with a food ordering agent.
-- **`apps/vite-app`**: A minimalist React frontend example.
 
 ## Why Melony
 

@@ -49,25 +49,30 @@ function Controls() {
 
 - **`MelonyProvider`** + **`useMelony()`**
   - Connects to a Melony runtime endpoint.
-  - Exposes `events`, `streaming`, `error`, and `send()`.
+  - Exposes `messages`, `events`, `streaming`, `error`, and `send()`.
 
 ## Event Stream & UI
 
-Melony React provides the foundation for building interactive agent UIs. You can listen to the event stream via `useMelony()` and render your own components based on the event types.
+Melony React provides the foundation for building interactive agent UIs. It automatically aggregates raw events into `messages` for easy rendering of chat interfaces.
 
 ```tsx
-const { events } = useMelony();
+const { messages } = useMelony();
 
 return (
   <div>
-    {events.map(event => {
-      if (event.type === "text") return <Text key={event.id} content={event.data.content} />;
-      if (event.type === "custom-ui") return <MyCustomUI key={event.id} {...event.data} />;
-      return null;
-    })}
+    {messages.map(message => (
+      <div key={message.runId} className={message.role}>
+        <p>{message.content}</p>
+        {message.uiEvents.map(event => (
+          <MyCustomUI key={event.id} {...event.data} />
+        ))}
+      </div>
+    ))}
   </div>
 );
 ```
+
+You can still access raw `events` if you need lower-level control.
 
 ## Development
 
