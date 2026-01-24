@@ -59,4 +59,10 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     const content = event.data.content;
     yield* routeToLLM([{ role: "user", content }], context);
   });
+
+  // feed action results back to the LLM
+  builder.on("action:after", async function* (event, context) {
+    const { action, result } = event.data as any;
+    yield* routeToLLM([{ role: "user", content: `[System: Action "${action}" completed with result: ${JSON.stringify(result)}]` }], context);
+  });
 };

@@ -34,4 +34,11 @@ export const placeOrderHandler: EventHandler<FoodState, FoodEvent> = async funct
     type: "ui",
     data: renderOrderConfirmation(result),
   } as FoodEvent;
+
+  yield {
+    type: "action:after",
+    data: {
+      result: result,
+    },
+  } as FoodEvent;
 };
