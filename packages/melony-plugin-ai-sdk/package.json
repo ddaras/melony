@@ -19,7 +19,9 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "clean": "rimraf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "dependencies": {
     "ai": "^6.0.42"
