@@ -285,6 +285,9 @@ export interface UIContract {
     placeholder?: string;
     messages?: any[];
     autoFocus?: boolean;
+    welcomeTitle?: string;
+    welcomeMessage?: string;
+    suggestions?: string[];
   };
 }
 

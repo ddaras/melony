@@ -9,7 +9,11 @@ import { Runtime } from "./runtime";
  * Fully unopinionated - just type, data, and optional metadata.
  */
 export type Event<TData = any> = {
+  /** Unique identifier for the event */
+  id?: string;
+  /** The type of the event */
   type: string;
+  /** The data associated with the event */
   data: TData;
 };
 

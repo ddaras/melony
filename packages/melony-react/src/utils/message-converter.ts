@@ -6,14 +6,12 @@ import { Event, RuntimeContext } from "melony";
 export interface AggregatedMessage {
   /** The role of the sender (user, assistant, or system) */
   role: string;
-  /** The text content of the message, aggregated from text events */
-  content: string;
+  /** The content of the message, containing the events */
+  content: Event[];
   /** The unique ID for the run that produced this message */
   runId?: string;
   /** The ID of the thread this message belongs to */
   threadId?: string;
-  /** UI events (e.g. SDUI components) associated with this message */
-  uiEvents: Event[];
 }
 
 /**
@@ -53,10 +51,7 @@ export interface AggregateOptions<TEvent extends Event = Event> {
 
   /**
    * Custom logic to process an event and update the current message.
-   * By default:
-   * - 'text-delta' events append their delta to the message content.
-   * - 'text' events append their content or text to the message content.
-   * - All other events are added to the message's uiEvents array.
+   * By default, events are simply added to the message's content array.
    */
   processEvent?: (
     event: TEvent,
@@ -106,13 +101,7 @@ export const defaultShouldStartNewMessage = <T extends Event>(
  * Default logic for processing an event into a message.
  */
 export const defaultProcessEvent = <T extends Event>(event: T, current: AggregatedMessage): void => {
-  if (event.type === "assistant:text-delta" && (event.data as any)?.delta) {
-    current.content += (event.data as any).delta;
-  } else if (event.type === "user:text") {
-    current.content += (event.data as any)?.content || (event.data as any)?.text || "";
-  } else {
-    current.uiEvents.push(event);
-  }
+  current.content.push(event);
 };
 
 /**
@@ -142,10 +131,9 @@ export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
     if (shouldStartNewMessage(event, currentMessage, { getRole, getRunId, getThreadId })) {
       currentMessage = {
         role: getRole(event),
-        content: "",
+        content: [],
         runId: getRunId(event),
         threadId: getThreadId(event),
-        uiEvents: [],
       };
       messages.push(currentMessage);
     }

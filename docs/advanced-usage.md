@@ -77,10 +77,12 @@ function Chat() {
     <div>
       {messages.map(message => (
         <div key={message.runId}>
-          {message.content}
-          {message.uiEvents.map(event => {
+          {message.content.map(event => {
             if (event.type === "show-chart") {
               return <MyChart key={event.id} type={event.data.chartType} points={event.data.points} />;
+            }
+            if (event.type === "assistant:text-delta") {
+              return <span key={event.id}>{event.data.delta}</span>;
             }
           })}
         </div>

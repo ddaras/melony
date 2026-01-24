@@ -3,17 +3,24 @@ import { useMelony, AggregatedMessage } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessagesList";
+import { IconSparkles } from "@tabler/icons-react";
 
 interface ThreadProps {
   placeholder?: string;
   messages?: AggregatedMessage[];
   autoFocus?: boolean;
+  welcomeTitle?: string;
+  welcomeMessage?: string;
+  suggestions?: string[];
 }
 
 export function Thread({
   placeholder = "Type a message...",
   messages: propMessages,
-  autoFocus = false
+  autoFocus = false,
+  welcomeTitle,
+  welcomeMessage,
+  suggestions,
 }: ThreadProps) {
   const {
     streaming,
@@ -65,7 +72,34 @@ export function Thread({
             "max-w-3xl mx-auto w-full p-8",
           )}
         >
-          <>
+          {messages.length === 0 && !streaming && (welcomeTitle || welcomeMessage || suggestions) ? (
+            <div className="flex flex-col items-start justify-center min-h-[50vh] space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              {welcomeTitle && (
+                <h1 className="text-4xl md:text-5xl font-bold pb-2">
+                  {welcomeTitle}
+                </h1>
+              )}
+              {welcomeMessage && (
+                <p className="text-xl text-muted-foreground max-w-lg">
+                  {welcomeMessage}
+                </p>
+              )}
+              {suggestions && suggestions.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mt-8">
+                  {suggestions.map((suggestion, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSubmit({}, suggestion)}
+                      className="flex items-center justify-between p-4 rounded-2xl border bg-card hover:bg-accent hover:border-accent-foreground/20 transition-all text-left group"
+                    >
+                      <span className="text-sm font-medium">{suggestion}</span>
+                      <IconSparkles className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
             <MessageList
               messages={messages}
               streaming={streaming}
@@ -74,7 +108,7 @@ export function Thread({
                 message: "Processing..."
               }}
             />
-          </>
+          )}
         </div>
         <div ref={messagesEndRef} />
       </div>

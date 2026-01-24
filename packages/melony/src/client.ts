@@ -72,6 +72,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.abortController = new AbortController();
 
     const optimisticEvent: TEvent = {
+      id: generateId(),
       ...event
     } as TEvent;
 
@@ -132,7 +133,13 @@ export class MelonyClient<TEvent extends Event = Event> {
   private handleIncomingEvent(event: TEvent) {
     const events = [...this.state.events];
 
-    events.push(event);
+    // Replace optimistic event if IDs match, otherwise push
+    const index = event.id ? events.findIndex((e) => e.id === event.id) : -1;
+    if (index !== -1) {
+      events[index] = event;
+    } else {
+      events.push(event);
+    }
 
     this.setState({ events });
   }

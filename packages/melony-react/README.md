@@ -62,10 +62,15 @@ return (
   <div>
     {messages.map(message => (
       <div key={message.runId} className={message.role}>
-        <p>{message.content}</p>
-        {message.uiEvents.map(event => (
-          <MyCustomUI key={event.id} {...event.data} />
-        ))}
+        {message.content.map(event => {
+          if (event.type === "assistant:text-delta") {
+             return <span key={event.id}>{event.data.delta}</span>;
+          }
+          if (event.type === "ui") {
+             return <MyCustomUI key={event.id} {...event.data} />;
+          }
+          return null;
+        })}
       </div>
     ))}
   </div>

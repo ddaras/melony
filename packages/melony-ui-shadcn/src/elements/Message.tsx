@@ -19,7 +19,7 @@ export function MessageBubble({ message }: MessageProps) {
             : "px-0 py-0 text-foreground",
         )}
       >
-        <MessageContent text={message.content} uiEvents={message.uiEvents} />
+        <MessageContent content={message.content} />
       </div>
     </div>
   );

@@ -75,10 +75,12 @@ function Chat() {
     <div>
       {messages.map((message) => (
         <div key={message.runId}>
-          {message.content}
-          {message.uiEvents.map((event, i) => {
+          {message.content.map((event, i) => {
             if (event.type === "ui") {
               return <UIRenderer key={i} node={event.data} />;
+            }
+            if (event.type === "assistant:text-delta") {
+              return <span key={i}>{event.data.delta}</span>;
             }
             return null;
           })}
