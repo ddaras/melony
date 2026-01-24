@@ -14,29 +14,62 @@ Melony is an event-based framework for AI agents. Use the `melony()` builder to 
 import { melony } from "melony";
 
 export const agent = melony<State, Events>()
-  .use(plugin)             // Load plugins
+  .use(plugin)             // Load plugins (e.g., aiSDKPlugin, persistencePlugin)
   .on("event", handler)    // Handle events
   .build();                // Finalize the agent
+```
+
+## AI Integration (Vercel AI SDK)
+
+Use `@melony/plugin-ai-sdk` to integrate LLMs and tools.
+
+```typescript
+import { aiSDKPlugin } from "@melony/plugin-ai-sdk";
+import { openai } from "@ai-sdk/openai";
+
+builder.use(aiSDKPlugin({
+  model: openai("gpt-4o"),
+  system: "You are a helpful assistant.",
+  toolDefinitions: {
+    getWeather: {
+      description: "Get weather",
+      inputSchema: z.object({ city: z.string() }),
+    }
+  }
+}));
+
+// Tool calls trigger events named "action:TOOL_NAME"
+builder.on("action:getWeather", weatherHandler);
+```
+
+## Next.js API Routes (Streaming & Init)
+
+Melony supports both streaming (chat) and JSON (initialization) responses.
+
+```typescript
+// app/api/chat/route.ts
+import { agent } from "../../agents/my-agent";
+
+// POST for streaming agent responses
+export async function POST(req: Request) {
+  const { event } = await req.json();
+  return agent.streamResponse(event); 
+}
+
+// GET for initial UI state (non-streaming)
+export async function GET(req: Request) {
+  return agent.jsonResponse({ type: "init", data: {} });
+}
 ```
 
 ## Core Concepts
 
 - **Events**: Objects with `{ type, data }`.
-- **Handlers**: Functions `async function* (event, context)`. They are registered with `.on("type", handler)`.
-- **Reactivity**: Yielding an event from a handler will cause the runtime to recursively process it through other handlers.
-- **Plugins**: Functions that receive the `MelonyBuilder` and register handlers.
-
-## Streaming in Next.js
-
-```typescript
-// app/api/chat/route.ts
-export async function POST(req: Request) {
-  const { event } = await req.json();
-  return agent.streamResponse(event); // Returns a streaming Response
-}
-```
+- **Handlers**: Functions `async function* (event, context)`. Registered with `.on("type", handler)`.
+- **Reactivity**: Yielding an event from a handler triggers other handlers recursively.
+- **Plugins**: Use `.use()` to add capabilities (observability, persistence, AI).
 
 ## Best Practices
-- Keep agents modular by using **Plugins** (`MelonyPlugin`).
-- Use **Server-Driven UI (SDUI)** by yielding custom event types that the frontend renders.
-- To trigger another workflow, simply yield a new event: `yield { type: "other-event", data: { ... } }`.
+- **Plugins**: Modularize logic using `MelonyPlugin`.
+- **Naming**: Use `action:name` for tool handlers.
+- **Initialization**: Use `jsonResponse` for the first load to get the full UI state without streaming.

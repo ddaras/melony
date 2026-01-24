@@ -6,41 +6,49 @@ alwaysApply: false
 
 # Melony React Integration
 
-Use `@melony/react` to connect your frontend to a Melony agent stream.
+Use `@melony/react` to connect your frontend to a Melony agent stream and handle initialization.
 
-## Setup
+## Initialization
+
+Use `useMelonyInit` to fetch the initial UI state (typically via a `GET` request to your chat API).
 
 ```tsx
-import { MelonyClient } from "melony/client";
-import { MelonyProvider } from "@melony/react";
+import { useMelonyInit } from "@melony/react";
 
-const client = new MelonyClient({ url: "/api/chat" });
+function App() {
+  const { data, loading, error } = useMelonyInit("/api/chat");
 
-export function App() {
-  return (
-    <MelonyProvider client={client}>
-      <Chat />
-    </MelonyProvider>
-  );
+  if (loading) return <Spinner />;
+  if (error) return <ErrorView error={error} />;
+
+  return <MelonyProvider initialEvents={data?.events}>
+    <Chat />
+  </MelonyProvider>;
 }
 ```
 
 ## Consuming the Stream
 
-Use the `useMelony` hook to access the agent's state and methods.
+Use the `useMelony` hook to access messages and send events.
 
 ```tsx
-const { events, send, streaming, error } = useMelony();
+const { messages, events, send, streaming, error } = useMelony();
 
-// Sending a message
+// messages are aggregated events (text-deltas combined into single messages)
+// events are the raw event stream
+```
+
+## Sending Events
+
+```tsx
 const handleSend = (text: string) => {
-  send({ type: "text", data: { content: text } });
+  send({ type: "user-message", data: { content: text } });
 };
 ```
 
 ## Rendering Events (SDUI)
 
-Iterate through `events` and render based on `event.type`.
+Iterate through `events` or `messages` and render components.
 
 ```tsx
 {events.map((event) => {
@@ -56,6 +64,7 @@ Iterate through `events` and render based on `event.type`.
 ```
 
 ## Best Practices
-- **Key by ID**: Always use `event.meta.id` as the React `key`.
-- **Loading States**: Use `streaming` to disable inputs or show spinners.
-- **Optimistic UI**: MelonyClient handles optimistic updates for the initial `send`.
+- **Aggregated Messages**: Use `messages` for chat bubbles (it merges `text-delta` events automatically).
+- **Key by ID**: Always use `event.meta.id` (or `message.id`) as the React `key`.
+- **Initialization**: Always provide `initialEvents` to `MelonyProvider` if you use `useMelonyInit`.
+- **Optimistic UI**: The `send` method handles local state updates immediately.

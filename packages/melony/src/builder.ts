@@ -81,6 +81,33 @@ export class MelonyBuilder<
   }
 
   /**
+   * Execute the agent and return the data from the last event of a specific type as a JSON response.
+   * Ideal for initialization or non-streaming requests where you only need the final UI state.
+   */
+  async jsonResponse(
+    event: TEvent,
+    options?: {
+      state?: TState;
+      runId?: string;
+      targetType?: string; // Default to "ui"
+    }
+  ): Promise<Response> {
+    const targetType = options?.targetType ?? "ui";
+    const runtime = this.build();
+    let result = null;
+
+    for await (const e of runtime.run(event, options)) {
+      if (e.type === targetType) {
+        result = e.data;
+      }
+    }
+
+    return new Response(JSON.stringify(result), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  /**
    * Get the current configuration (useful for debugging or serialization).
    */
   getConfig(): Config<TState, TEvent> {
