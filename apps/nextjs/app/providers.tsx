@@ -18,7 +18,14 @@ const melonyClient = new MelonyClient<FoodEvent>({
 
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
-    <MelonyProvider client={melonyClient}>
+    <MelonyProvider client={melonyClient} eventHandlers={{
+      "client:navigate": (event, context) => {
+        console.log("Navigating to:", event.data.path);
+        // push without reloading the page
+        window.history.pushState({}, "", event.data.path);
+        return;
+      }
+    }}>
       <MelonyUIProvider components={melonyUIImplementation}>
         <ThemeProvider>
           {children}

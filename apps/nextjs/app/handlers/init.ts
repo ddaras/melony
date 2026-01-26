@@ -1,5 +1,5 @@
 import { InitEvent } from "../agents/types";
-import { UINode } from "@melony/ui-kit";
+import { UIContract, UINode } from "@melony/ui-kit";
 
 /**
  * Initial application layout handler
@@ -7,7 +7,7 @@ import { UINode } from "@melony/ui-kit";
 export async function* initAppHandler(event: InitEvent) {
   console.log(`[InitHandler] Initializing app for platform: ${event.data.platform}`);
 
-  const layout: UINode<"thread"> = {
+  const thredUI: UINode<"thread"> = {
     type: "thread",
     props: {
       placeholder: "I'm hungry...",
@@ -22,8 +22,78 @@ export async function* initAppHandler(event: InitEvent) {
     },
   };
 
+  const navigationUI: UINode<"list"> = {
+    type: "list",
+    props: {
+      gap: "sm",
+      padding: "sm",
+    },
+    children: [
+      {
+        type: "listItem",
+        props: {
+          onClickAction: {
+            type: "client:navigate",
+            data: {
+              path: "/some-url",
+            }
+          },
+        },
+        children: [
+          {
+            type: "icon",
+            props: {
+              name: "IconHome"
+            }
+          } as UINode<"icon">
+        ]
+      },
+      {
+        type: "listItem",
+        props: {
+          onClickAction: {
+            type: "client:navigate",
+            data: {
+              path: "/some-other-url",
+            }
+          },
+        },
+        children: [
+          {
+            type: "icon",
+            props: {
+              name: "IconSettings"
+            }
+          } as UINode<"icon">
+        ]
+      }
+    ]
+  };
+
+  const layoutUI: UINode<"box"> = {
+    type: "box",
+    props: {
+      padding: "md",
+      radius: "md",
+      shadow: "sm",
+      height: "full",
+    },
+    children: [
+      thredUI,
+      {
+        type: "float",
+        props: {
+          position: "top-left"
+        } as UIContract["float"],
+        children: [
+          navigationUI
+        ]
+      }
+    ]
+  };
+
   yield {
     type: "ui",
-    data: layout
+    data: layoutUI
   } as any;
 }

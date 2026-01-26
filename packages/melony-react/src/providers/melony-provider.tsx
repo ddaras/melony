@@ -28,11 +28,17 @@ export const MelonyContext = createContext<MelonyContextValue | undefined>(
   undefined,
 );
 
+export type ClientHandler<TEvent extends Event = Event> = (
+  event: TEvent,
+  context: { client: MelonyClient<TEvent> }
+) => void | Promise<void>;
+
 export interface MelonyProviderProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
   aggregationOptions?: AggregateOptions;
+  eventHandlers?: Record<string, ClientHandler>;
 }
 
 export const MelonyProvider: React.FC<MelonyProviderProps> = ({
@@ -40,6 +46,7 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
   client,
   initialEvents,
   aggregationOptions,
+  eventHandlers,
 }) => {
   const [state, setState] = useState<ClientState>(client.getState());
 
@@ -66,6 +73,12 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
       ...state,
       messages,
       send: async (event: Event) => {
+        const handler = eventHandlers?.[event.type];
+        if (handler) {
+          await handler(event, { client });
+          return;
+        }
+
         const generator = client.send(event);
         // Consume the generator to ensure event processing completes
         for await (const _ of generator) {
