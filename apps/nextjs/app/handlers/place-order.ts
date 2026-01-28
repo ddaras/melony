@@ -36,7 +36,7 @@ export const placeOrderHandler: EventHandler<FoodState, FoodEvent> = async funct
   };
 
   yield {
-    type: "action:after",
+    type: "action:result",
     data: {
       action: "placeOrder",
       result: result,

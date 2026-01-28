@@ -17,7 +17,7 @@ export type AssistantTextDeltaEvent = MelonyEvent & { type: "assistant:text-delt
 export type UINodeEvent = MelonyEvent & { type: "ui"; data: UINode };
 export type GetMenuEvent = MelonyEvent & { type: "action:getMenu"; data: Record<string, never> };
 export type PlaceOrderEvent = MelonyEvent & { type: "action:placeOrder"; data: { itemId: string; quantity?: number } };
-export type ActionAfterEvent = MelonyEvent & { type: "action:after"; data: { action: string; result: any } };
+export type ActionResultEvent = MelonyEvent & { type: "action:result"; data: { action: string; result: any } };
 export type InitEvent = MelonyEvent & { 
   type: "init"; 
   data: { 
@@ -36,5 +36,5 @@ export type FoodEvent =
   | UINodeEvent
   | GetMenuEvent
   | PlaceOrderEvent
-  | ActionAfterEvent
+  | ActionResultEvent
   | InitEvent;

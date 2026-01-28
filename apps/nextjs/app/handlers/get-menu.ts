@@ -10,7 +10,7 @@ export const getMenuHandler: EventHandler<FoodState, FoodEvent> = async function
   };
 
   yield {
-    type: "action:after",
+    type: "action:result",
     data: {
       action: "getMenu",
       result: {

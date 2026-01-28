@@ -14,6 +14,8 @@ export interface AISDKPluginOptions {
     inputSchema: z.ZodType<any>;
   }>;
   actionEventPrefix?: string;
+  promptInputType?: string,
+  actionResultInputType?: string,
 }
 
 /**
@@ -22,7 +24,7 @@ export interface AISDKPluginOptions {
  * It can also automatically trigger events based on tool calls.
  */
 export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any> => (builder) => {
-  const { model, system, toolDefinitions = {}, actionEventPrefix = "action:" } = options;
+  const { model, system, toolDefinitions = {}, actionEventPrefix = "action:", promptInputType = "user:text", actionResultInputType = "action:result" } = options;
 
   async function* routeToLLM(
     messages: any[],
@@ -55,13 +57,13 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
   }
 
   // Handle user text input
-  builder.on("user:text", async function* (event, context) {
+  builder.on(promptInputType, async function* (event, context) {
     const content = event.data.content;
     yield* routeToLLM([{ role: "user", content }], context);
   });
 
   // feed action results back to the LLM
-  builder.on("action:after", async function* (event, context) {
+  builder.on(actionResultInputType, async function* (event, context) {
     const { action, result } = event.data as any;
     yield* routeToLLM([{ role: "user", content: `[System: Action "${action}" completed with result: ${JSON.stringify(result)}]` }], context);
   });
