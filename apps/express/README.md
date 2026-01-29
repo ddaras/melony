@@ -1,44 +1,32 @@
-# Melony Express Demo
+# 👋 Meet OpenBot
 
-This simple Express server shows how to host a Melony agent with Server-Sent Events (SSE) so any client can stream events in real time.
+OpenBot is your personal AI assistant that's always ready to help! Built with **Melony**, it can chat, browse the web, and manage files—giving you a powerful, real-time sidekick right in your terminal.
 
-## Getting started
+## Get Started in Seconds
+
+Installing your new assistant is easy:
 
 ```bash
-cd apps/express
-pnpm install
-pnpm --filter melony-express dev
+npm i -g openbot
 ```
 
-## Available scripts
+To start your assistant's server, just run:
 
-- `pnpm --filter melony-express dev` — run the server with `tsx` in watch mode.
-- `pnpm --filter melony-express build` — compile TypeScript into `dist/`.
-- `pnpm --filter melony-express start` — run the compiled server with Node.
-
-## Endpoints
-
-- `GET /` — health metadata (JSON with server info).
-- `POST /api/chat` — stream Melony events. Send JSON like:
-
-```json
-{
-  "event": {
-    "type": "user:text",
-    "data": {
-      "content": "Hello"
-    }
-  }
-}
+```bash
+openbot-server
 ```
 
-Use `curl` (with `-N` to keep the stream open) to try it:
+OpenBot will start listening for you at `http://localhost:4001`.
+
+## Say Hello
+
+You can talk to OpenBot using a simple POST request:
 
 ```bash
 curl -N \
   -H "Content-Type: application/json" \
-  -d '{"event":{"type":"user:text","data":{"content":"Hello from curl"}}}' \
+  -d '{"event":{"type":"user:text","data":{"content":"Hello!"}}}' \
   http://localhost:4001/api/chat
 ```
 
-Endpoints stream SSE-formatted events (`data: {...}`), so you can hook them up to any UI client that supports SSE or the official `@melony/react` client.
+That's it! OpenBot will stream its response right back to you. 🚀
