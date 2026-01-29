@@ -47,67 +47,67 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
   };
 
   builder.on("action:readFile", async function* (event) {
-    const { path: filePath } = event.data;
+    const { path: filePath, toolCallId } = event.data;
     try {
       const content = await fs.readFile(resolvePath(filePath), "utf-8");
       yield {
         type: "action:result",
-        data: { action: "readFile", result: { content } },
+        data: { action: "readFile", result: { content }, toolCallId },
       };
     } catch (error: any) {
       yield {
         type: "action:result",
-        data: { action: "readFile", result: { error: error.message } },
+        data: { action: "readFile", result: { error: error.message }, toolCallId },
       };
     }
   });
 
   builder.on("action:writeFile", async function* (event) {
-    const { path: filePath, content } = event.data;
+    const { path: filePath, content, toolCallId } = event.data;
     try {
       const fullPath = resolvePath(filePath);
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.writeFile(fullPath, content, "utf-8");
       yield {
         type: "action:result",
-        data: { action: "writeFile", result: { success: true } },
+        data: { action: "writeFile", result: { success: true }, toolCallId },
       };
     } catch (error: any) {
       yield {
         type: "action:result",
-        data: { action: "writeFile", result: { error: error.message } },
+        data: { action: "writeFile", result: { error: error.message }, toolCallId },
       };
     }
   });
 
   builder.on("action:listFiles", async function* (event) {
-    const { path: dirPath } = event.data;
+    const { path: dirPath, toolCallId } = event.data;
     try {
       const files = await fs.readdir(resolvePath(dirPath));
       yield {
         type: "action:result",
-        data: { action: "listFiles", result: { files } },
+        data: { action: "listFiles", result: { files }, toolCallId },
       };
     } catch (error: any) {
       yield {
         type: "action:result",
-        data: { action: "listFiles", result: { error: error.message } },
+        data: { action: "listFiles", result: { error: error.message }, toolCallId },
       };
     }
   });
 
   builder.on("action:deleteFile", async function* (event) {
-    const { path: filePath } = event.data;
+    const { path: filePath, toolCallId } = event.data;
     try {
       await fs.unlink(resolvePath(filePath));
       yield {
         type: "action:result",
-        data: { action: "deleteFile", result: { success: true } },
+        data: { action: "deleteFile", result: { success: true }, toolCallId },
       };
     } catch (error: any) {
       yield {
         type: "action:result",
-        data: { action: "deleteFile", result: { error: error.message } },
+        data: { action: "deleteFile", result: { error: error.message }, toolCallId },
       };
     }
   });

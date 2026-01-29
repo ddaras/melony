@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Button } from "../ui/button";
-import { IconDotsVertical } from "@tabler/icons-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +35,7 @@ export const Dropdown: React.FC<UIContract["dropdown"] & { children?: React.Reac
               props.onClick?.(e);
             }}
           >
-            {children || <IconDotsVertical className="size-3.5" />}
+            {children || <Icon name="⋮" size="sm" />}
           </Button>
         )}
       />

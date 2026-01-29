@@ -4,12 +4,7 @@ import * as React from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 
 import { cn } from "../lib/utils";
-import {
-  IconSelector,
-  IconCheck,
-  IconChevronUp,
-  IconChevronDown,
-} from "@tabler/icons-react";
+import { Icon } from "../elements/Icon";
 
 const Select = SelectPrimitive.Root;
 
@@ -54,7 +49,7 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <IconSelector className="text-muted-foreground size-4 pointer-events-none" />
+          <Icon name="↕️" className="text-muted-foreground pointer-events-none" />
         }
       />
     </SelectPrimitive.Trigger>
@@ -137,7 +132,7 @@ function SelectItem({
           <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
         }
       >
-        <IconCheck className="pointer-events-none" />
+        <Icon name="✅" className="pointer-events-none" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   );
@@ -172,7 +167,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <IconChevronUp />
+      <Icon name="🔼" />
     </SelectPrimitive.ScrollUpArrow>
   );
 }
@@ -190,7 +185,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <IconChevronDown />
+      <Icon name="🔽" />
     </SelectPrimitive.ScrollDownArrow>
   );
 }

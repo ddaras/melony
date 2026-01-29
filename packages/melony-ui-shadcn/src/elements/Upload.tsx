@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { UIContract } from "@melony/ui-kit";
 import { Button } from "../ui/button";
 import { useMelony } from "@melony/react";
-import { IconUpload, IconLoader2, IconCheck, IconX } from "@tabler/icons-react";
+import { Icon } from "./Icon";
 import { MelonyRenderer } from "@melony/ui-kit";
 import { Image } from "./Image";
 
@@ -138,13 +138,13 @@ export const Upload: React.FC<UIContract["upload"]> = ({
           variant="default"
         >
           {isUploading ? (
-            <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+            <Icon name="⏳" size="sm" className="animate-spin mr-2" />
           ) : status === "success" ? (
-            <IconCheck className="h-4 w-4 text-green-500 mr-2" />
+            <Icon name="✅" size="sm" className="mr-2" />
           ) : status === "error" ? (
-            <IconX className="h-4 w-4 mr-2" />
+            <Icon name="❌" size="sm" className="mr-2" />
           ) : (
-            <IconUpload className="h-4 w-4 mr-2" />
+            <Icon name="📤" size="sm" className="mr-2" />
           )}
           {status === "success"
             ? "Uploaded"

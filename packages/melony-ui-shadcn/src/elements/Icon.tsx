@@ -1,6 +1,5 @@
 import React from "react";
 import { UIContract } from "@melony/ui-kit";
-import * as ICONS from "@tabler/icons-react";
 import { colorTextMap } from "../lib/theme-utils";
 import { cn } from "../lib/utils";
 
@@ -10,30 +9,34 @@ export const Icon: React.FC<UIContract["icon"] & { className?: string }> = ({
   color,
   className,
 }) => {
-  const IconComponent = ICONS[name as keyof typeof ICONS] as React.ElementType;
-
-  if (!IconComponent) return null;
-
   const sizeMap = {
-    sm: 16,
-    md: 20,
-    lg: 24,
+    sm: "14px",
+    md: "18px",
+    lg: "24px",
   };
 
   const resolvedSize =
     typeof size === "number"
-      ? size
-      : sizeMap[size as keyof typeof sizeMap] || 20;
+      ? `${size}px`
+      : sizeMap[size as keyof typeof sizeMap] || "18px";
 
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center",
+        "inline-flex items-center justify-center leading-none",
         color && colorTextMap[color],
         className
       )}
+      style={{ 
+        fontSize: resolvedSize, 
+        width: resolvedSize, 
+        height: resolvedSize,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
     >
-      <IconComponent size={resolvedSize} strokeWidth={1.5} />
+      {name}
     </div>
   );
 };

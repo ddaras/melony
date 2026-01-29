@@ -2,10 +2,7 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
-import {
-  IconArrowUp,
-  IconLoader2
-} from "@tabler/icons-react";
+import { Icon } from "./Icon";
 
 interface ComposerProps {
   value: string;
@@ -53,13 +50,13 @@ export function Composer({
             disabled={
               !value.trim() || streaming
             }
-            size="icon-lg"
+            size="default"
             onClick={() => onSubmit()}
           >
             {streaming ? (
-              <IconLoader2 className="h-5 w-5 animate-spin" />
+              <span>Loading...</span>
             ) : (
-              <IconArrowUp className="h-5 w-5" />
+              <span>Send</span>
             )}
           </Button>
         </div>

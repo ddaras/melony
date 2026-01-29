@@ -19,8 +19,7 @@
     "tailwind-merge": "^3.0.1",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.454.0",
-    "@base-ui/react": "^1.0.0-alpha.3",
-    "@tabler/icons-react": "^3.36.0"
+    "@base-ui/react": "^1.0.0-alpha.3"
   },
   "peerDependencies": {
     "@melony/react": "workspace:*",

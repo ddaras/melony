@@ -23,13 +23,14 @@ export const shellPlugin = (options: ShellPluginOptions = {}): MelonyPlugin<any,
   const { cwd = process.cwd(), env = process.env } = options;
 
   builder.on("action:executeCommand", async function* (event) {
-    const { command } = event.data;
+    const { command, toolCallId } = event.data;
     try {
       const { stdout, stderr } = await execAsync(command, { cwd, env });
       yield {
         type: "action:result",
         data: {
           action: "executeCommand",
+          toolCallId,
           result: { stdout, stderr, success: true },
         },
       };
@@ -38,6 +39,7 @@ export const shellPlugin = (options: ShellPluginOptions = {}): MelonyPlugin<any,
         type: "action:result",
         data: {
           action: "executeCommand",
+          toolCallId,
           result: {
             error: error.message,
             stdout: error.stdout,

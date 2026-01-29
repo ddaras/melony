@@ -87,6 +87,26 @@ const agent = melony()
 - **Generic propagation** maintains type safety
 - **Minimalist core** with zero required dependencies
 
+## CLI
+
+Melony comes with a built-in interactive CLI to chat with your agents.
+
+```bash
+npx melony chat --url http://localhost:4001/api/chat
+```
+
+You can also run it without arguments (defaults to chat):
+```bash
+npx melony
+```
+
+### Studio (Coming Soon)
+
+```bash
+npx melony studio
+```
+A local Vite-based UI for interacting with and debugging your agents.
+
 ## Core Concepts
 
 - **Event**: The universal unit of streaming (`{ type, data, meta }`).

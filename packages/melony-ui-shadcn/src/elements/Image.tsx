@@ -7,7 +7,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "../ui/dialog";
-import { IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
+import { Icon } from "./Icon";
 import { widthMap, radiusMap } from "../lib/theme-utils";
 
 export const Image: React.FC<UIContract["image"]> = ({
@@ -124,7 +124,7 @@ export const Image: React.FC<UIContract["image"]> = ({
       >
         <div className="relative flex items-center justify-center group/lightbox">
           <DialogClose className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors z-50 bg-black/50 rounded-full p-2">
-            <IconX size={20} />
+            <Icon name="❌" size={20} />
           </DialogClose>
 
           {hasMultiple && (
@@ -136,7 +136,7 @@ export const Image: React.FC<UIContract["image"]> = ({
                 }}
                 className="absolute left-4 z-50 p-3 bg-black/40 hover:bg-black/60 text-white rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100"
               >
-                <IconChevronLeft size={28} />
+                <Icon name="◀️" size={28} />
               </button>
               <button
                 onClick={(e) => {
@@ -145,7 +145,7 @@ export const Image: React.FC<UIContract["image"]> = ({
                 }}
                 className="absolute right-4 z-50 p-3 bg-black/40 hover:bg-black/60 text-white rounded-full transition-all opacity-0 group-hover/lightbox:opacity-100"
               >
-                <IconChevronRight size={28} />
+                <Icon name="▶️" size={28} />
               </button>
             </>
           )}

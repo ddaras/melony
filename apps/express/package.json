@@ -1,5 +1,5 @@
 {
-  "name": "melony-express",
+  "name": "openbot",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,11 +8,19 @@
     "build": "tsc",
     "start": "node dist/server.js"
   },
+  "bin": {
+    "openbot-server": "./dist/server.js"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.13",
     "@melony/plugin-ai-sdk": "workspace:*",
+    "@melony/plugin-browser": "workspace:*",
     "@melony/plugin-file-system": "workspace:*",
+    "@melony/plugin-meta-agent": "workspace:*",
     "@melony/plugin-shell": "workspace:*",
+    "@types/cors": "^2.8.19",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "melony": "workspace:*",
     "zod": "^4.3.5"

@@ -3,7 +3,7 @@ import { useMelony, AggregatedMessage } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessagesList";
-import { IconSparkles } from "@tabler/icons-react";
+import { Icon } from "./Icon";
 
 interface ThreadProps {
   placeholder?: string;
@@ -93,7 +93,7 @@ export function Thread({
                       className="flex items-center justify-between p-4 rounded-2xl border bg-card hover:bg-accent hover:border-accent-foreground/20 transition-all text-left group"
                     >
                       <span className="text-sm font-medium">{suggestion}</span>
-                      <IconSparkles className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Icon name="✨" size="sm" className="text-muted-foreground group-hover:text-primary transition-colors" />
                     </button>
                   ))}
                 </div>

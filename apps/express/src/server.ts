@@ -1,20 +1,41 @@
+#!/usr/bin/env node
+import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { fileURLToPath } from "node:url";
 
-import { expressAgent } from "./agent";
-import type { ChatEvent, ChatRequest } from "./types";
+import { createOpenBot } from "./agent.js";
+import { loadConfig } from "./config.js";
+import type { ChatEvent, ChatRequest, ChatState } from "./types.js";
 
-const PORT = Number(process.env.PORT ?? 4001);
+const config = loadConfig();
+const PORT = Number(config.port ?? process.env.PORT ?? 4001);
 const app = express();
 
+// In-memory state store (use a real database for production)
+const stateStore = new Map<string, ChatState>();
+
+app.use(cors());
 app.use(express.json());
 
-app.get("/", (_, res) => {
+app.get("/", async (req, res) => {
   res.json({
     message: "Melony Express demo server",
     chatEndpoint: "/api/chat",
     stream: "Server-Sent Events (SSE)",
   });
+});
+
+app.get<{ platform: string }>("/api/init", async (req, res) => {
+  const platform = req.query.platform || "web";
+  const openBot = await createOpenBot();
+
+  const response = await openBot.jsonResponse({
+    type: "init",
+    data: { platform }
+  } as any);
+
+  res.json(await response.json());
 });
 
 app.post("/api/chat", async (req, res) => {
@@ -33,9 +54,15 @@ app.post("/api/chat", async (req, res) => {
   });
   res.flushHeaders?.();
 
-  const runtime = expressAgent.build();
+  const openBot = await createOpenBot();
+  const runtime = openBot.build();
+
+  const runId = body.runId ?? "default";
+  const state = stateStore.get(runId) ?? {};
+
   const iterator = runtime.run(body.event as ChatEvent, {
-    runId: body.runId,
+    runId,
+    state,
   });
 
   const stopStreaming = () => {
@@ -51,6 +78,8 @@ app.post("/api/chat", async (req, res) => {
       }
       res.write(`data: ${JSON.stringify(chunk)}\n\n`);
     }
+    // After the run finishes, the state might have been updated by plugins
+    stateStore.set(runId, state);
   } catch (error) {
     console.error("Melony stream error:", error);
     if (!res.writableEnded) {
@@ -74,7 +103,8 @@ const isMain = process.argv[1] === currentModule;
 
 if (isMain) {
   app.listen(PORT, () => {
-    console.log(`Melony Express server listening at http://localhost:${PORT}`);
+    console.log(`OpenBot server listening at http://localhost:${PORT}`);
+    console.log(`  - Chat endpoint: POST /api/chat`);
   });
 }
 

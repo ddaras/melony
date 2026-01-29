@@ -22,6 +22,9 @@
   "author": "",
   "license": "MIT",
   "description": "Fast, unopinionated, minimalist event-based framework for AI agents.",
+  "bin": {
+    "melony": "./dist/cli.js"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -48,5 +51,10 @@
     "rimraf": "^5.0.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "dotenv": "^16.4.5",
+    "open": "^11.0.0"
   }
 }

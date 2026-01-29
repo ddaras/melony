@@ -1,5 +1,6 @@
 import * as elements from "./elements";
 import { MelonyComponents } from "@melony/ui-kit";
+import * as themeProvider from "./providers/theme-provider";
 
 // The elements object matches UIContract keys for use with MelonyUIProvider
 export const shadcnElements: Partial<MelonyComponents> = {
@@ -33,3 +34,6 @@ export const shadcnElements: Partial<MelonyComponents> = {
   dropdown: elements.Dropdown,
   thread: elements.Thread,
 };
+
+export const ThemeProvider = themeProvider.ThemeProvider;
+export const useTheme = themeProvider.useTheme;
