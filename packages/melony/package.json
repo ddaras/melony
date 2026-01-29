@@ -1,12 +1,13 @@
 {
   "name": "melony",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "tsup",
-    "clean": "rimraf dist",
+    "build": "tsup && npm run copy-studio",
+    "copy-studio": "rimraf studio && mkdir -p studio && (cp -r ../../apps/vite/dist/* ./studio/ 2>/dev/null || true)",
+    "clean": "rimraf dist studio",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
@@ -44,7 +45,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "studio"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

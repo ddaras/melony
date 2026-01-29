@@ -3,7 +3,7 @@ import { MelonyRenderer, MelonyUIProvider, type UINode } from "@melony/ui-kit";
 import { shadcnElements, ThemeProvider } from "@melony/ui-shadcn";
 import { MelonyClient } from "melony/client";
 
-const BASE_URL = "http://localhost:4001";
+const BASE_URL = (window as any).MELONY_BASE_URL || "http://localhost:4001";
 
 const melonyClient = new MelonyClient({
   url: `${BASE_URL}/api/chat`,
