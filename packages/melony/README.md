@@ -100,12 +100,18 @@ You can also run it without arguments (defaults to chat):
 npx melony
 ```
 
-### Studio (Coming Soon)
+### Studio (Recommended)
+
+A local UI for interacting with and debugging your agents.
 
 ```bash
-npx melony studio
+npx @melony/studio
 ```
-A local Vite-based UI for interacting with and debugging your agents.
+
+For more options:
+```bash
+npx @melony/studio --port 4000 --url http://localhost:4001
+```
 
 ## Core Concepts
 

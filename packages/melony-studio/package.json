@@ -1,0 +1,32 @@
+{
+  "name": "@melony/studio",
+  "version": "0.2.5",
+  "description": "A local UI for interacting with and debugging Melony agents.",
+  "type": "module",
+  "bin": {
+    "melony-studio": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:cli": "tsup src/cli.ts --format esm --clean",
+    "build": "npm run build:cli && npm run copy-dist",
+    "copy-dist": "rimraf dist/studio && mkdir -p dist/studio && cp -r ../../apps/vite/dist/* dist/studio/ 2>/dev/null || true",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "dotenv": "^16.4.5",
+    "open": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -5,9 +5,8 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "tsup && npm run copy-studio",
-    "copy-studio": "rimraf studio && mkdir -p studio && (cp -r ../../apps/vite/dist/* ./studio/ 2>/dev/null || true)",
-    "clean": "rimraf dist studio",
+    "build": "tsup",
+    "clean": "rimraf dist",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
@@ -45,8 +44,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "studio"
+    "dist"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",
@@ -56,7 +54,6 @@
   },
   "dependencies": {
     "commander": "^14.0.2",
-    "dotenv": "^16.4.5",
-    "open": "^11.0.0"
+    "dotenv": "^16.4.5"
   }
 }
