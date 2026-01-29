@@ -27,10 +27,10 @@ program
       { name: "GPT-5 Nano (OpenAI)", value: "openai:gpt-5-nano" },
       { name: "GPT-4o (OpenAI)", value: "openai:gpt-4o" },
       { name: "GPT-4o-mini (OpenAI)", value: "openai:gpt-4o-mini" },
-      { name: "Claude 4.5 Opus (Anthropic)", value: "anthropic:claude-4-5-opus" },
-      { name: "Claude 4 Sonnet (Anthropic)", value: "anthropic:claude-4-sonnet" },
+      { name: "Claude Opus 4.5 (Anthropic)", value: "anthropic:claude-opus-4-5-20251101" },
+      { name: "Claude Sonnet 4.5 (Anthropic)", value: "anthropic:claude-sonnet-4-5-20250929" },
+      { name: "Claude 3.7 Sonnet (Anthropic)", value: "anthropic:claude-3-7-sonnet-20250219" },
       { name: "Claude 3.5 Sonnet (Anthropic)", value: "anthropic:claude-3-5-sonnet-20240620" },
-      { name: "Claude 3 Opus (Anthropic)", value: "anthropic:claude-3-opus-20240229" },
     ];
 
     console.log("Please choose a model:");
