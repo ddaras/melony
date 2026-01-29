@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import "dotenv/config";
 import * as http from "node:http";
 import * as fs from "node:fs";
@@ -14,7 +13,7 @@ const program = new Command();
 program
   .name("melony-studio")
   .description("Melony Studio - A local UI for interacting with and debugging Melony agents")
-  .version("0.2.5")
+  .version("0.2.7")
   .option("-p, --port <port>", "Port to run the studio on", "4000")
   .option("-u, --url <url>", "Agent server BASE_URL", process.env.MELONY_SERVER_URL ?? "http://localhost:4001")
   .action(async (options) => {
