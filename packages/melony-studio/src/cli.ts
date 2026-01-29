@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import "dotenv/config";
 import * as http from "node:http";
 import * as fs from "node:fs";

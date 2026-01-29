@@ -1,10 +1,10 @@
 {
   "name": "@melony/studio",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A local UI for interacting with and debugging Melony agents.",
   "type": "module",
   "bin": {
-    "melony-studio": "./dist/cli.js"
+    "studio": "./dist/cli.js"
   },
   "files": [
     "dist"
