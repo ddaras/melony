@@ -7,6 +7,7 @@ import { fileSystemPlugin, fileSystemToolDefinitions } from "@melony/plugin-file
 import { metaAgentPlugin, metaAgentToolDefinitions, buildSystemPrompt } from "@melony/plugin-meta-agent";
 import { aiSDKPlugin } from "@melony/plugin-ai-sdk";
 import { openai } from "@ai-sdk/openai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { initHandler } from "./handlers/init.js";
 import { loadConfig, resolvePath, DEFAULT_BASE_DIR } from "./config.js";
 
@@ -14,11 +15,21 @@ import { loadConfig, resolvePath, DEFAULT_BASE_DIR } from "./config.js";
  * Create the OpenBot meta-agent
  * This bot has self-modification capabilities, skill management, and persistent identity
  */
-export async function createOpenBot() {
+export async function createOpenBot(options?: {
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+}) {
   const config = loadConfig();
 
-  if (config.openaiApiKey) {
-    process.env.OPENAI_API_KEY = config.openaiApiKey;
+  const openaiKey = options?.openaiApiKey || config.openaiApiKey || process.env.OPENAI_API_KEY;
+  const anthropicKey = options?.anthropicApiKey || config.anthropicApiKey || process.env.ANTHROPIC_API_KEY;
+
+  if (openaiKey) {
+    process.env.OPENAI_API_KEY = openaiKey;
+  }
+
+  if (anthropicKey) {
+    process.env.ANTHROPIC_API_KEY = anthropicKey;
   }
 
   const baseDir = config.baseDir || DEFAULT_BASE_DIR;
@@ -35,6 +46,8 @@ export async function createOpenBot() {
 
     if (provider === "openai") {
       model = openai(modelId);
+    } else if (provider === "anthropic") {
+      model = anthropic(modelId);
     }
   }
 
