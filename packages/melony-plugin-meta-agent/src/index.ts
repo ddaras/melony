@@ -118,6 +118,17 @@ export async function buildSystemPrompt(baseDir: string): Promise<string> {
   const expandedBase = expandPath(baseDir);
   const parts: string[] = [];
 
+  // Add environment context
+  parts.push(`## Environment
+You are running as a global system agent.
+- **System Access**: You have access to the entire file system (root: /).
+- **Current Working Directory**: ${process.cwd()}
+- **Bot Home (Internal State)**: ${expandedBase}
+
+All filesystem operations (readFile, writeFile, listFiles) are relative to the system root (/). 
+To work with files in the current directory, prefix them with "${process.cwd()}/".
+To access your own skills and memory, use paths starting with "${expandedBase}/".`);
+
   // Load SOUL.md
   try {
     const soul = await fs.readFile(path.join(expandedBase, "SOUL.md"), "utf-8");

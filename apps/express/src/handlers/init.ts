@@ -9,11 +9,13 @@ export async function* initHandler(event: InitEvent) {
   const thredUI = {
     type: "thread",
     props: {
-      placeholder: "Ask me anything...",
-      welcomeTitle: "Hello, Foodie!",
-      welcomeMessage: "I'm your Melony assistant. How can I help you satisfy your cravings today?",
+      placeholder: "Ask me anything about your system or projects...",
+      welcomeTitle: "OpenBot System Agent",
+      welcomeMessage: "I'm your global system assistant. I have access to your file system and shell. How can I help you today?",
       suggestions: [
-        "What's your name?",
+        "What is in my current directory?",
+        "Check system status",
+        "Who am I?",
       ]
     },
   };

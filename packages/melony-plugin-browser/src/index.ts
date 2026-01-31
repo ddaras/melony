@@ -46,13 +46,29 @@ export const browserToolDefinitions = {
 
 export interface BrowserPluginOptions {
   headless?: boolean;
+  /**
+   * Maximum number of characters to keep when getting page content.
+   * If exceeded, the content will be truncated from the middle.
+   * Default: 10000
+   */
+  maxContentLength?: number;
+}
+
+/**
+ * Truncates a string by keeping the first and last N characters.
+ */
+function truncate(str: string | undefined | null, maxChars: number): string | undefined | null {
+  if (!str || str.length <= maxChars) return str;
+  const half = Math.floor(maxChars / 2);
+  const truncatedCount = str.length - maxChars;
+  return `${str.slice(0, half)}\n\n[... ${truncatedCount} characters truncated ...]\n\n${str.slice(-half)}`;
 }
 
 export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<any, any> => {
   let browser: Browser | null = null;
   let page: Page | null = null;
 
-  const { headless = true } = options;
+  const { headless = true, maxContentLength = 10000 } = options;
 
   async function ensurePage(): Promise<Page> {
     if (!browser) {
@@ -180,7 +196,14 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
         }
         yield {
           type: "action:result",
-          data: { action: "browser_getContent", toolCallId, result: { success: true, content } },
+          data: { 
+            action: "browser_getContent", 
+            toolCallId, 
+            result: { 
+              success: true, 
+              content: truncate(content, maxContentLength) 
+            } 
+          },
         };
       } catch (error: any) {
         yield {

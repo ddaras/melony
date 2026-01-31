@@ -1,6 +1,19 @@
 import { MelonyPlugin, Event, RuntimeContext } from "melony";
-import { streamText, LanguageModel, ModelMessage } from "ai";
+import { streamText, LanguageModel } from "ai";
 import { z } from "zod";
+
+interface SimpleMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+/**
+ * Builds a simple history summary from recent messages.
+ * Keeps the last N messages as simple role/content pairs.
+ */
+function getRecentHistory(messages: SimpleMessage[], maxMessages: number): SimpleMessage[] {
+  return messages.slice(-maxMessages);
+}
 
 export interface AISDKPluginOptions {
   model: LanguageModel;
@@ -27,21 +40,21 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
   const { model, system, toolDefinitions = {}, actionEventPrefix = "action:", promptInputType = "user:text", actionResultInputType = "action:result" } = options;
 
   async function* routeToLLM(
-    newMessages: any[],
+    newMessage: SimpleMessage,
     context: RuntimeContext
   ): AsyncGenerator<Event, void, unknown> {
     const state = context.state as any;
     if (!state.messages) {
-      state.messages = [];
+      state.messages = [] as SimpleMessage[];
     }
 
-    // Add new messages to history
-    state.messages.push(...newMessages);
+    // Add new message to history
+    state.messages.push(newMessage);
 
     const result = streamText({
       model,
       system,
-      messages: state.messages.slice(-10), // it causes tool issues as the tool result can match its call id
+      messages: getRecentHistory(state.messages, 20),
       tools: toolDefinitions,
     });
 
@@ -57,26 +70,15 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     // Wait for tool calls to complete
     const toolCalls = await result.toolCalls;
 
-    if (assistantText || toolCalls.length > 0) {
-      const content: any[] = [];
-      if (assistantText) {
-        content.push({ type: "text", text: assistantText });
-      }
-      if (toolCalls.length > 0) {
-        content.push(...toolCalls.map(call => ({
-          type: "tool-call",
-          toolCallId: call.toolCallId,
-          toolName: call.toolName,
-          input: call.input,
-        })));
-      }
-
+    // Store assistant response as simple text
+    if (assistantText) {
       state.messages.push({
         role: "assistant",
-        content: content.length === 1 && content[0].type === "text" ? assistantText : content,
+        content: assistantText,
       });
     }
 
+    // Emit tool call events
     for (const call of toolCalls) {
       yield {
         type: `${actionEventPrefix}${call.toolName}`,
@@ -88,35 +90,28 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     }
 
     const usage = await result.usage;
+
+    yield {
+      type: "ui",
+      data: {
+        type: 'text',
+        props: {
+          value: `Usage: ${usage.totalTokens} tokens`,
+        }
+      },
+    } as Event;
   }
 
   // Handle user text input
   builder.on(promptInputType, async function* (event, context) {
     const content = event.data.content;
-    yield* routeToLLM([{ role: "user", content }], context);
+    yield* routeToLLM({ role: "user", content }, context);
   });
 
-  // feed action results back to the LLM
+  // Feed action results back to the LLM as system messages
   builder.on(actionResultInputType, async function* (event, context) {
-    const { action, result, toolCallId } = event.data as any;
-
-    const resultMessage = toolCallId
-      ? {
-        role: "tool",
-        content: [
-          {
-            type: "tool-result",
-            toolCallId,
-            toolName: action,
-            output: {
-              type: "json",
-              value: result,
-            },
-          },
-        ],
-      }
-      : { role: "system", content: `[System: Action "${action}" completed with result: ${JSON.stringify(result)}]` };
-
-    yield* routeToLLM([resultMessage], context);
+    const { action, result } = event.data as any;
+    const summary = typeof result === "string" ? result : JSON.stringify(result);
+    yield* routeToLLM({ role: "system", content: `Action "${action}" completed: ${summary}` }, context);
   });
 };
