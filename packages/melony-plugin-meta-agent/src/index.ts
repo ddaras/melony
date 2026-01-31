@@ -130,8 +130,10 @@ export async function buildSystemPrompt(baseDir: string): Promise<string> {
   const parts: string[] = [];
 
   // Add environment context
+  const now = new Date();
   parts.push(`## Environment
 You are running as a global system agent.
+- **Current Time**: ${now.toLocaleString()} (${Intl.DateTimeFormat().resolvedOptions().timeZone})
 - **System Access**: You have access to the entire file system (root: /).
 - **Bot Home (Internal State)**: ${expandedBase}
 
