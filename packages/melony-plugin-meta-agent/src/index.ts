@@ -112,6 +112,17 @@ function expandPath(p: string): string {
 }
 
 /**
+ * Truncate a markdown file by keeping the header and the last N entries (separated by ##)
+ */
+function truncateToRecent(content: string, limit: number = 10): string {
+  const parts = content.split(/\n(?=## )/);
+  if (parts.length <= limit + 1) return content.trim();
+  const header = parts[0].trim();
+  const recent = parts.slice(-limit).map((p) => p.trim());
+  return `${header}\n\n*... (older entries truncated) ...*\n\n${recent.join("\n\n")}`;
+}
+
+/**
  * Build the dynamic system prompt from identity files and skills
  */
 export async function buildSystemPrompt(baseDir: string): Promise<string> {
@@ -127,7 +138,9 @@ You are running as a global system agent.
 
 All filesystem operations (readFile, writeFile, listFiles) are relative to the system root (/). 
 To work with files in the current directory, prefix them with "${process.cwd()}/".
-To access your own skills and memory, use paths starting with "${expandedBase}/".`);
+To access your own skills and memory, use paths starting with "${expandedBase}/".
+
+Always check the **Memory** section below before answering questions about the user, their preferences, or past interactions. If information is missing, you can use tools to search your files or ask the user.`);
 
   // Load SOUL.md
   try {
@@ -143,6 +156,27 @@ To access your own skills and memory, use paths starting with "${expandedBase}/"
     parts.push(identity.trim());
   } catch {
     // File doesn't exist yet
+  }
+
+  // Load Memory (Facts and Journal)
+  const memoryParts: string[] = [];
+  
+  try {
+    const facts = await fs.readFile(path.join(expandedBase, "memory/facts.md"), "utf-8");
+    if (facts.trim().length > 0) {
+      memoryParts.push(`### Facts\n${truncateToRecent(facts, 10)}`);
+    }
+  } catch {}
+
+  try {
+    const journal = await fs.readFile(path.join(expandedBase, "memory/journal.md"), "utf-8");
+    if (journal.trim().length > 0) {
+      memoryParts.push(`### Journal\n${truncateToRecent(journal, 10)}`);
+    }
+  } catch {}
+
+  if (memoryParts.length > 0) {
+    parts.push(`## Memory\n\nRefer to these facts and notes to provide personalized and context-aware responses.\n\n${memoryParts.join("\n\n")}`);
   }
 
   // Scan skills and build index
