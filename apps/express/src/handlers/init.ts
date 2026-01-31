@@ -71,7 +71,7 @@ export async function* initHandler(event: InitEvent) {
   const layoutUI = {
     type: "box",
     props: {
-      padding: "md",
+      padding: "none",
       radius: "md",
       shadow: "sm",
       height: "full",

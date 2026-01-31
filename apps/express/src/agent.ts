@@ -10,6 +10,7 @@ import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { initHandler } from "./handlers/init.js";
 import { loadConfig, resolvePath, DEFAULT_BASE_DIR } from "./config.js";
+import path from "node:path";
 
 type Provider = "openai" | "anthropic";
 
@@ -30,7 +31,7 @@ function parseModelString(modelString: string): ParsedModel {
       return { provider, modelId };
     }
   }
-  
+
   // Check for provider/model format
   if (modelString.includes("/")) {
     const [provider, modelId] = modelString.split("/");
@@ -88,7 +89,7 @@ export async function createOpenBot(options?: {
 
   // Create the appropriate LLM plugin based on provider
   let model;
-  
+
   if (provider === "anthropic") {
     if (!anthropicKey) {
       console.warn("Warning: Anthropic model selected but ANTHROPIC_API_KEY is not set");
@@ -106,10 +107,18 @@ export async function createOpenBot(options?: {
     system: systemPrompt,
     toolDefinitions,
   });
+  
+  // Use a dedicated directory for the agent's browser data to avoid conflicts with your main Chrome.
+  // Using the root Chrome directory causes conflicts and can log you out of your main browser.
+  const userDataDir = path.join(os.homedir(), ".openbot", "browser-data");
 
   return melony<ChatState, ChatEvent>()
     .use(shellPlugin({ cwd: process.cwd() }))
-    .use(browserPlugin({ headless: true }))
+    .use(browserPlugin({ 
+      headless: true, // Set to false once to log in manually if needed
+      userDataDir: userDataDir,
+      channel: 'chrome'
+    }))
     .use(fileSystemPlugin({
       baseDir: "/", // Global access
     }))

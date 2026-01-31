@@ -22,6 +22,12 @@ program
     const PORT = Number(options.port ?? config.port ?? process.env.PORT ?? 4001);
     const app = express();
 
+    // Initialize the bot instance once at startup
+    const openBot = await createOpenBot({
+      openaiApiKey: options.openaiApiKey,
+      anthropicApiKey: options.anthropicApiKey,
+    });
+
     // In-memory state store (use a real database for production)
     const stateStore = new Map<string, ChatState>();
 
@@ -38,10 +44,6 @@ program
 
     app.get<{ platform: string }>("/api/init", async (req, res) => {
       const platform = req.query.platform || "web";
-      const openBot = await createOpenBot({
-        openaiApiKey: options.openaiApiKey,
-        anthropicApiKey: options.anthropicApiKey,
-      });
 
       const response = await openBot.jsonResponse({
         type: "init",
@@ -67,10 +69,6 @@ program
       });
       res.flushHeaders?.();
 
-      const openBot = await createOpenBot({
-        openaiApiKey: options.openaiApiKey,
-        anthropicApiKey: options.anthropicApiKey,
-      });
       const runtime = openBot.build();
 
       const runId = body.runId ?? "default";

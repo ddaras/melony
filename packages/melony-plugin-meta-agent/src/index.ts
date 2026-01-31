@@ -133,14 +133,12 @@ export async function buildSystemPrompt(baseDir: string): Promise<string> {
   parts.push(`## Environment
 You are running as a global system agent.
 - **System Access**: You have access to the entire file system (root: /).
-- **Current Working Directory**: ${process.cwd()}
 - **Bot Home (Internal State)**: ${expandedBase}
 
-All filesystem operations (readFile, writeFile, listFiles) are relative to the system root (/). 
-To work with files in the current directory, prefix them with "${process.cwd()}/".
+All filesystem operations (readFile, writeFile, listFiles) are relative to the system root (/).
 To access your own skills and memory, use paths starting with "${expandedBase}/".
 
-Always check the **Memory** section below before answering questions about the user, their preferences, or past interactions. If information is missing, you can use tools to search your files or ask the user.`);
+When you want to execute skill scripts, always use the full path to the skill directory. For example, if the skill is at "${expandedBase}/skills/my-skill", the full path to the script is "${expandedBase}/skills/my-skill/scripts/script.sh".`);
 
   // Load SOUL.md
   try {

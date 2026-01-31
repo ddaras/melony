@@ -78,6 +78,19 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
       });
     }
 
+    const usage = await result.usage;
+
+    yield {
+      type: "ui",
+      data: {
+        type: 'text',
+        props: {
+          size: "sm",
+          value: `Usage: ${usage.totalTokens} tokens`,
+        }
+      },
+    } as Event;
+
     // Emit tool call events
     for (const call of toolCalls) {
       yield {
@@ -88,18 +101,6 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
         },
       } as Event;
     }
-
-    const usage = await result.usage;
-
-    yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          value: `Usage: ${usage.totalTokens} tokens`,
-        }
-      },
-    } as Event;
   }
 
   // Handle user text input
