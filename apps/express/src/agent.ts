@@ -76,9 +76,6 @@ export async function createOpenBot(options?: {
   // Parse model configuration
   const { provider, modelId } = parseModelString(config.model || "gpt-4o-mini");
 
-  // Build dynamic system prompt from identity files and skills
-  const systemPrompt = await buildSystemPrompt(resolvedBaseDir);
-
   // Tool definitions shared by both providers
   const toolDefinitions = {
     ...shellToolDefinitions,
@@ -104,7 +101,7 @@ export async function createOpenBot(options?: {
 
   const llmPlugin = aiSDKPlugin({
     model: model as any,
-    system: systemPrompt,
+    system: (_context) => buildSystemPrompt(resolvedBaseDir),
     toolDefinitions,
   });
   

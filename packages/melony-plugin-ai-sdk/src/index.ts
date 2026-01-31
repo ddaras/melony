@@ -17,7 +17,7 @@ function getRecentHistory(messages: SimpleMessage[], maxMessages: number): Simpl
 
 export interface AISDKPluginOptions {
   model: LanguageModel;
-  system?: string;
+  system?: string | ((context: RuntimeContext) => string | Promise<string>);
   /**
    * Optional mapping of tool names to their descriptions and schemas.
    * Tool calls will emit events with the same name.
@@ -27,8 +27,8 @@ export interface AISDKPluginOptions {
     inputSchema: z.ZodType<any>;
   }>;
   actionEventPrefix?: string;
-  promptInputType?: string,
-  actionResultInputType?: string,
+  promptInputType?: string;
+  actionResultInputType?: string;
 }
 
 /**
@@ -51,9 +51,12 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     // Add new message to history
     state.messages.push(newMessage);
 
+    // Evaluate dynamic system prompt if it's a function
+    const systemPrompt = typeof system === "function" ? await system(context) : system;
+
     const result = streamText({
       model,
-      system,
+      system: systemPrompt,
       messages: getRecentHistory(state.messages, 20),
       tools: toolDefinitions,
     });

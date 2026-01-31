@@ -26,9 +26,6 @@ importers:
       '@melony/plugin-ai-sdk':
         specifier: workspace:*
         version: link:../../packages/melony-plugin-ai-sdk
-      '@melony/plugin-approval':
-        specifier: workspace:*
-        version: link:../../packages/melony-plugin-approval
       '@melony/plugin-browser':
         specifier: workspace:*
         version: link:../../packages/melony-plugin-browser
