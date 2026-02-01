@@ -1,7 +1,7 @@
 import { MelonyProvider, useMelonyInit } from "@melony/react";
 import { MelonyRenderer, MelonyUIProvider, type UINode } from "@melony/ui-kit";
 import { shadcnElements, ThemeProvider } from "@melony/ui-shadcn";
-import { MelonyClient } from "melony/client";
+import { generateId, MelonyClient } from "melony/client";
 
 const BASE_URL = (window as any).MELONY_BASE_URL || "http://localhost:4001";
 
@@ -10,8 +10,12 @@ const melonyClient = new MelonyClient({
 })
 
 export function App() {
+  const sessionId = `ses_${generateId()}`;
+
   return (
-    <MelonyProvider client={melonyClient} eventHandlers={{
+    <MelonyProvider client={melonyClient} initialAdditionalBody={{
+      sessionId
+    }} eventHandlers={{
       "client:navigate": (event) => {
         console.log("Navigating to:", event.data.path);
         // push without reloading the page
@@ -21,16 +25,17 @@ export function App() {
     }}>
       <MelonyUIProvider components={{ ...shadcnElements }}>
         <ThemeProvider>
-          <AppContent />
+          <AppContent sessionId={sessionId} />
         </ThemeProvider>
       </MelonyUIProvider>
     </MelonyProvider>
   )
 }
 
-export function AppContent() {
+export function AppContent({ sessionId }: { sessionId: string }) {
   const { data, loading, error } = useMelonyInit(`${BASE_URL}/api/init`, {
-    platform: "web"
+    platform: "web",
+    sessionId
   });
 
   const uiTree = data as UINode | null;

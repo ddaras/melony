@@ -16,4 +16,5 @@ export interface ChatState {
 export interface ChatRequest {
   event: ChatEvent;
   runId?: string;
+  sessionId?: string;
 }

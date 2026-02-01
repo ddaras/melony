@@ -10,15 +10,16 @@ import {
   Config,
   Event,
 } from "melony";
-import { 
-  AggregatedMessage, 
-  AggregateOptions, 
-  convertEventsToAggregatedMessages 
+import {
+  AggregatedMessage,
+  AggregateOptions,
+  convertEventsToAggregatedMessages
 } from "../utils/message-converter";
 
 export interface MelonyContextValue extends ClientState {
-  send: (event: Event) => Promise<void>;
+  send: (event: Event, additionalBody?: Record<string, any>) => Promise<void>;
   reset: (events?: Event[]) => void;
+  stop: () => void;
   client: MelonyClient;
   config?: Config;
   messages: AggregatedMessage[];
@@ -37,6 +38,7 @@ export interface MelonyProviderProps {
   children: ReactNode;
   client: MelonyClient;
   initialEvents?: Event[];
+  initialAdditionalBody?: Record<string, any>;
   aggregationOptions?: AggregateOptions;
   eventHandlers?: Record<string, ClientHandler>;
 }
@@ -45,6 +47,7 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
   children,
   client,
   initialEvents,
+  initialAdditionalBody,
   aggregationOptions,
   eventHandlers,
 }) => {
@@ -72,20 +75,21 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     () => ({
       ...state,
       messages,
-      send: async (event: Event) => {
+      send: async (event: Event, additionalBody?: Record<string, any>) => {
         const handler = eventHandlers?.[event.type];
         if (handler) {
           await handler(event, { client });
           return;
         }
 
-        const generator = client.send(event);
+        const generator = client.send(event, { ...initialAdditionalBody, ...additionalBody });
         // Consume the generator to ensure event processing completes
         for await (const _ of generator) {
           // Events are handled by the client subscription
         }
       },
       reset: client.reset.bind(client),
+      stop: client.stop.bind(client),
       client,
     }),
     [state, messages, client],

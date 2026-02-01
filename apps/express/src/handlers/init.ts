@@ -4,8 +4,6 @@ import { InitEvent } from "../types.js";
  * Initial application layout handler
  */
 export async function* initHandler(event: InitEvent) {
-  console.log(`[InitHandler] Initializing app for platform: ${event.data.platform}`);
-
   const thredUI = {
     type: "thread",
     props: {

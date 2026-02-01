@@ -26,6 +26,7 @@ export function Thread({
     streaming,
     error,
     send,
+    stop,
     messages: melonyMessages,
   } = useMelony();
 
@@ -119,6 +120,7 @@ export function Thread({
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
+            onStop={stop}
             placeholder={placeholder}
             streaming={streaming}
             autoFocus={autoFocus}

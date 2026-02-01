@@ -74,7 +74,7 @@ export async function createOpenBot(options?: {
   const resolvedBaseDir = resolvePath(baseDir);
 
   // Parse model configuration
-  const { provider, modelId } = parseModelString(config.model || "gpt-5-nano");
+  const { provider, modelId } = parseModelString(config.model || "gpt-4o-mini");
 
   // Tool definitions shared by both providers
   const toolDefinitions = {

@@ -8,6 +8,7 @@ interface ComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (state?: Record<string, any>) => void;
+  onStop?: () => void;
   placeholder?: string;
   streaming?: boolean;
   className?: string;
@@ -18,6 +19,7 @@ export function Composer({
   value,
   onChange,
   onSubmit,
+  onStop,
   placeholder = "Type a message...",
   streaming,
   className,
@@ -45,20 +47,28 @@ export function Composer({
         <div className="flex justify-between items-center px-1">
           <div className="flex items-center gap-1">
           </div>
-          <Button
-            type="submit"
-            disabled={
-              !value.trim() || streaming
-            }
-            size="default"
-            onClick={() => onSubmit()}
-          >
-            {streaming ? (
-              <span>Loading...</span>
-            ) : (
+          {streaming ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={() => onStop?.()}
+            >
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-foreground rounded-[2px]" />
+                Stop
+              </span>
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={!value.trim()}
+              size="default"
+              onClick={() => onSubmit()}
+            >
               <span>Send</span>
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
       </div>
     </div>

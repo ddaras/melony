@@ -21,7 +21,6 @@ export interface MelonyClientOptions<TEvent extends Event = Event> {
 export class MelonyClient<TEvent extends Event = Event> {
   private state: ClientState<TEvent>;
   public readonly url: string;
-  public readonly runId: string;
   private headers?: MelonyClientOptions<TEvent>["headers"];
   private lastServerState: any = null;
   private abortController: AbortController | null = null;
@@ -30,7 +29,6 @@ export class MelonyClient<TEvent extends Event = Event> {
   constructor(options: MelonyClientOptions<TEvent>) {
     this.url = options.url;
     this.headers = options.headers;
-    this.runId = generateId();
     this.state = {
       events: options.initialEvents ?? [],
       streaming: false,
@@ -69,7 +67,10 @@ export class MelonyClient<TEvent extends Event = Event> {
     this.stateListeners.forEach((l) => l(this.getState()));
   }
 
-  async *send(event: TEvent): AsyncGenerator<TEvent> {
+  async *send(
+    event: TEvent, 
+    additionalBody?: Record<string, any>
+  ): AsyncGenerator<TEvent> {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
@@ -91,7 +92,7 @@ export class MelonyClient<TEvent extends Event = Event> {
         headers,
         body: JSON.stringify({ 
           event: optimisticEvent,
-          runId: this.runId,
+          ...additionalBody,
         }),
         signal: this.abortController.signal,
       });
@@ -150,11 +151,19 @@ export class MelonyClient<TEvent extends Event = Event> {
   }
 
   reset(events: TEvent[] = []) {
-    if (this.abortController) this.abortController.abort();
+    this.stop();
     this.setState({
       events,
       error: null,
       streaming: false,
     });
+  }
+
+  stop() {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+      this.setState({ streaming: false });
+    }
   }
 }

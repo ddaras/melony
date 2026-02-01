@@ -2,12 +2,13 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 
+import { generateId } from "melony";
 import { createOpenBot } from "./agent.js";
 import { loadConfig } from "./config.js";
-import type { ChatEvent, ChatRequest, ChatState } from "./types.js";
+import { loadSession, saveSession, logEvent } from "./session.js";
+import type { ChatEvent, ChatRequest } from "./types.js";
 
 const program = new Command();
 
@@ -28,9 +29,6 @@ program
       anthropicApiKey: options.anthropicApiKey,
     });
 
-    // In-memory state store (use a real database for production)
-    const stateStore = new Map<string, ChatState>();
-
     app.use(cors());
     app.use(express.json());
 
@@ -42,17 +40,28 @@ program
       });
     });
 
+    // Init endpoint
     app.get<{ platform: string }>("/api/init", async (req, res) => {
       const platform = req.query.platform || "web";
+      const sessionId = req.query.sessionId as string || "default";
+      const state = await loadSession(sessionId) ?? {};
 
       const response = await openBot.jsonResponse({
         type: "init",
         data: { platform }
-      } as any);
+      } as any, {
+        state,
+        runId: generateId()
+      });
 
-      res.json(await response.json());
+      const result = await response.json();
+      // Save state in case init handler modified it
+      await saveSession(sessionId, state);
+      
+      res.json(result);
     });
 
+    // Chat endpoint
     app.post("/api/chat", async (req, res) => {
       const body = req.body as Partial<ChatRequest>;
 
@@ -71,8 +80,9 @@ program
 
       const runtime = openBot.build();
 
-      const runId = body.runId ?? "default";
-      const state = stateStore.get(runId) ?? {};
+      const sessionId = body.sessionId ?? "default";
+      const runId = body.runId ?? `run_${generateId()}`;
+      const state = await loadSession(sessionId) ?? {};
 
       const iterator = runtime.run(body.event as ChatEvent, {
         runId,
@@ -90,10 +100,12 @@ program
           if (res.writableEnded) {
             break;
           }
+          // Log each event to the persistent file
+          // await logEvent(sessionId, runId, chunk);
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         }
-        // After the run finishes, the state might have been updated by plugins
-        stateStore.set(runId, state);
+        // After the run finishes, save the final state back to disk
+        await saveSession(sessionId, state);
       } catch (error) {
         console.error("Melony stream error:", error);
         if (!res.writableEnded) {
