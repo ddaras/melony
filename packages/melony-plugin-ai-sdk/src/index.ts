@@ -57,7 +57,9 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     const result = streamText({
       model,
       system: systemPrompt,
-      messages: getRecentHistory(state.messages, 20),
+      messages: getRecentHistory(state.messages, 20).map(m => 
+        m.role === "system" ? { role: "user", content: `System: ${m.content}` } : m
+      ) as any,
       tools: toolDefinitions,
     });
 
@@ -112,10 +114,12 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     yield* routeToLLM({ role: "user", content }, context);
   });
 
-  // Feed action results back to the LLM as system messages
+  // Feed action results back to the LLM as user messages (with a System prefix)
+  // We use "user" role instead of "system" to avoid errors with providers like Anthropic
+  // that don't support multiple system messages or system messages after the first turn.
   builder.on(actionResultInputType, async function* (event, context) {
     const { action, result } = event.data as any;
     const summary = typeof result === "string" ? result : JSON.stringify(result);
-    yield* routeToLLM({ role: "system", content: `Action "${action}" completed: ${summary}` }, context);
+    yield* routeToLLM({ role: "user", content: `System: Action "${action}" completed: ${summary}` }, context);
   });
 };
