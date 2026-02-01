@@ -8,7 +8,7 @@ const program = new Command();
 program
   .name("openbot")
   .description("OpenBot CLI - Secure and easy configuration")
-  .version("0.1.14");
+  .version("0.1.15");
 
 program
   .command("configure")
