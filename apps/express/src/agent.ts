@@ -74,7 +74,7 @@ export async function createOpenBot(options?: {
   const resolvedBaseDir = resolvePath(baseDir);
 
   // Parse model configuration
-  const { provider, modelId } = parseModelString(config.model || "gpt-4o-mini");
+  const { provider, modelId } = parseModelString(config.model || "gpt-5-nano");
 
   // Tool definitions shared by both providers
   const toolDefinitions = {
@@ -104,14 +104,14 @@ export async function createOpenBot(options?: {
     system: (_context) => buildSystemPrompt(resolvedBaseDir),
     toolDefinitions,
   });
-  
+
   // Use a dedicated directory for the agent's browser data to avoid conflicts with your main Chrome.
   // Using the root Chrome directory causes conflicts and can log you out of your main browser.
   const userDataDir = path.join(os.homedir(), ".openbot", "browser-data");
 
   return melony<ChatState, ChatEvent>()
     .use(shellPlugin({ cwd: process.cwd() }))
-    .use(browserPlugin({ 
+    .use(browserPlugin({
       headless: true, // Set to false once to log in manually if needed
       userDataDir: userDataDir,
       channel: 'chrome'

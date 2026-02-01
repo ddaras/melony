@@ -68,6 +68,60 @@ export async function* initHandler(event: InitEvent) {
     ]
   };
 
+  const browserMonitorUI = {
+    type: "card",
+    props: {
+      title: "Browser Manager",
+      subtitle: "Manage open tabs & memory",
+      padding: "sm",
+      width: "300px",
+    },
+    children: [
+      {
+        type: "col",
+        props: { gap: "sm" },
+        children: [
+          {
+            type: "text",
+            props: {
+              value: "Status: Persistent session active",
+              size: "xs",
+              color: "muted"
+            }
+          },
+          {
+            type: "row",
+            props: { gap: "xs", justify: "end" },
+            children: [
+              {
+                type: "button",
+                props: {
+                  label: "Refresh",
+                  size: "xs",
+                  variant: "outline",
+                  onClickAction: {
+                    type: "browser:poll_state", // Sends this event to the server
+                  }
+                }
+              },
+              {
+                type: "button",
+                props: {
+                  label: "Clean Junk",
+                  size: "xs",
+                  variant: "danger",
+                  onClickAction: {
+                    type: "browser:cleanup", // Sends this event to the server
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
   const layoutUI = {
     type: "box",
     props: {
@@ -86,7 +140,12 @@ export async function* initHandler(event: InitEvent) {
         children: [
           navigationUI
         ]
-      }
+      },
+      // {
+      //   type: "float",
+      //   props: { position: "top-right", margin: "md" }, // Add it to the top right
+      //   children: [browserMonitorUI]
+      // }
     ]
   };
 

@@ -47,7 +47,7 @@ export const browserToolDefinitions = {
     inputSchema: z.object({
       script: z.string().describe("The JavaScript code to execute"),
     }),
-  },
+  }
 };
 
 export interface BrowserPluginOptions {
@@ -135,7 +135,7 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
           context.on("close", () => persistentContexts.delete(userDataDir));
           persistentContexts.set(userDataDir, context);
         }
-        
+
         // Ensure we have a page
         if (!page || page.isClosed()) {
           page = context.pages()[0] || await context.newPage();
@@ -144,13 +144,13 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
     } else {
       // Standard non-persistent browser
       const isBrowserUsable = (b: Browser | null) => b && b.isConnected();
-      
+
       if (!browser || !isBrowserUsable(browser)) {
         const browserKey = `${channel || "default"}-${headless}`;
         if (sharedBrowsers.has(browserKey)) {
           browser = sharedBrowsers.get(browserKey)!;
         }
-        
+
         if (!browser || !isBrowserUsable(browser)) {
           browser = await chromium.launch({
             headless,
@@ -175,6 +175,161 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
   }
 
   return (builder) => {
+    async function* yieldStateUpdate(page: Page) {
+      try {
+        const url = page.url();
+        const title = await page.title();
+        const screenshot = await page.screenshot({ type: "jpeg", quality: 60 });
+        const base64 = screenshot.toString("base64");
+        
+        // Get all pages to show tab count in UI
+        const pages = context ? await context.pages() : [page];
+        const tabs = await Promise.all(pages.map(async (p, i) => ({
+          index: i,
+          title: await p.title().catch(() => "Untitled"),
+          url: p.url(),
+          isActive: p === page
+        })));
+
+        // Yield for potential sidebars/background state
+        yield {
+          type: "browser:state-update",
+          data: {
+            url,
+            title,
+            screenshot: base64,
+            tabCount: pages.length,
+            tabs,
+          },
+        };
+
+        // Yield as a UI element for the chat bubble
+        yield {
+          type: "ui",
+          data: {
+            type: "card",
+            props: {
+              title: title || "Browser View",
+              subtitle: url,
+              padding: "none",
+            },
+            children: [
+              {
+                type: "image",
+                props: {
+                  src: `data:image/jpeg;base64,${base64}`,
+                  alt: "Browser Screenshot",
+                  width: "full",
+                },
+              },
+              {
+                type: "row",
+                props: { justify: "between", padding: "sm" },
+                children: [
+                  {
+                    type: "text",
+                    props: { value: `Tabs open: ${pages.length}`, size: "xs", color: "muted" }
+                  },
+                  {
+                    type: "button",
+                    props: { 
+                      label: "Cleanup Tabs", 
+                      size: "xs", 
+                      variant: "outline",
+                      onClickAction: { type: "browser:cleanup" }
+                    }
+                  }
+                ]
+              }
+            ],
+          },
+        };
+      } catch (e) {
+        console.error("Failed to yield state update", e);
+      }
+    }
+
+    builder.on("browser:poll_state", async function* (event) {
+      const p = await ensurePage();
+      yield* yieldStateUpdate(p);
+    });
+
+    builder.on("browser:cleanup", async function* (event) {
+      if (context) {
+        const pages = await context.pages();
+        // Keep the current page, close all others
+        for (const p of pages) {
+          if (p !== page && !p.isClosed()) {
+            await p.close().catch(() => {});
+          }
+        }
+      }
+      const p = await ensurePage();
+      yield* yieldStateUpdate(p);
+    });
+
+    builder.on("action:browser_listTabs", async function* (event) {
+      const { toolCallId } = event.data;
+      try {
+        await ensurePage();
+        const pages = context ? await context.pages() : [page!];
+        const tabs = await Promise.all(pages.map(async (p, i) => ({
+          index: i,
+          title: await p.title().catch(() => "Untitled"),
+          url: p.url(),
+          isActive: p === page
+        })));
+
+        yield {
+          type: "action:result",
+          data: {
+            action: "browser_listTabs",
+            toolCallId,
+            result: { success: true, tabs },
+          },
+        };
+      } catch (error: any) {
+        yield {
+          type: "action:result",
+          data: { action: "browser_listTabs", toolCallId, result: { error: error.message } },
+        };
+      }
+    });
+
+    builder.on("action:browser_closeTab", async function* (event) {
+      const { index, toolCallId } = event.data;
+      try {
+        await ensurePage();
+        const pages = context ? await context.pages() : [page!];
+        
+        if (index >= 0 && index < pages.length) {
+          const tabToClose = pages[index];
+          if (tabToClose === page) {
+            // If we're closing the active page, we need to pick a new one
+            page = null;
+          }
+          await tabToClose.close();
+        }
+
+        const p = await ensurePage();
+        yield* yieldStateUpdate(p);
+
+        yield {
+          type: "action:result",
+          data: {
+            action: "browser_closeTab",
+            toolCallId,
+            result: { success: true },
+          },
+        };
+      } catch (error: any) {
+        yield {
+          type: "action:result",
+          data: { action: "browser_closeTab", toolCallId, result: { error: error.message } },
+        };
+      }
+    });
+
     builder.on("action:browser_navigate", async function* (event) {
       const { url, waitUntil, toolCallId } = event.data;
 
@@ -191,6 +346,8 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       try {
         const page = await ensurePage();
         await page.goto(url, { waitUntil });
+
+        yield* yieldStateUpdate(page);
 
         yield {
           type: "ui",
@@ -245,6 +402,8 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
         const page = await ensurePage();
         const buffer = await page.screenshot({ fullPage, type: "png" });
         const base64 = buffer.toString("base64");
+
+        yield* yieldStateUpdate(page);
 
         // Return both the raw result and a UI event to show the screenshot
         yield {
@@ -301,6 +460,9 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       try {
         const page = await ensurePage();
         await page.click(selector);
+
+        yield* yieldStateUpdate(page);
+
         yield {
           type: "action:result",
           data: { action: "browser_click", toolCallId, result: { success: true } },
@@ -339,6 +501,9 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       try {
         const page = await ensurePage();
         await page.type(selector, text, { delay });
+
+        yield* yieldStateUpdate(page);
+
         yield {
           type: "action:result",
           data: { action: "browser_type", toolCallId, result: { success: true } },
@@ -439,6 +604,9 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       try {
         const page = await ensurePage();
         const result = await page.evaluate(script);
+
+        yield* yieldStateUpdate(page);
+
         yield {
           type: "action:result",
           data: { action: "browser_evaluate", toolCallId, result: { success: true, result } },
