@@ -1,6 +1,6 @@
 {
   "name": "@melony/studio",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "A local UI for interacting with and debugging Melony agents.",
   "type": "module",
   "bin": {
