@@ -31,7 +31,8 @@ export type UIWidth =
   | "1/3"
   | "2/3"
   | "1/4"
-  | "3/4";
+  | "3/4" 
+  | number;
 export type UIShadow = "none" | "sm" | "md" | "lg" | "xl";
 export type UIRadius = "none" | "sm" | "md" | "lg" | "full";
 
@@ -57,6 +58,7 @@ export interface UIContract {
     gap?: UISpacing;
     padding?: UISpacing;
     width?: UIWidth;
+    height?: "auto" | "full";
     group?: boolean;
   };
   col: {
@@ -72,7 +74,11 @@ export interface UIContract {
   };
   box: {
     padding?: UISpacing;
+    paddingVertical?: UISpacing;
+    paddingHorizontal?: UISpacing;
     margin?: UISpacing;
+    marginVertical?: UISpacing;
+    marginHorizontal?: UISpacing;
     background?: UIColor;
     border?: boolean;
     borderColor?: UIColor;

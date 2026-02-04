@@ -74,7 +74,7 @@ export async function createOpenBot(options?: {
   const resolvedBaseDir = resolvePath(baseDir);
 
   // Parse model configuration
-  const { provider, modelId } = parseModelString(config.model || "gpt-4o-mini");
+  const { provider, modelId } = parseModelString(config.model || "gpt-5-nano");
 
   // Tool definitions shared by both providers
   const toolDefinitions = {
@@ -114,7 +114,8 @@ export async function createOpenBot(options?: {
     .use(browserPlugin({
       headless: true, // Set to false once to log in manually if needed
       userDataDir: userDataDir,
-      channel: 'chrome'
+      channel: 'chrome',
+      model: model as any
     }))
     .use(fileSystemPlugin({
       baseDir: "/", // Global access

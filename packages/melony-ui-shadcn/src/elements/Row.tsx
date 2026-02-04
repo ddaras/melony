@@ -20,6 +20,7 @@ export const Row: React.FC<
   gap = "none",
   padding = "none",
   width = "full",
+  height = "auto",
 }) => {
   return (
     <div
@@ -31,7 +32,9 @@ export const Row: React.FC<
         gapMap[gap],
         paddingMap[padding],
         widthMap[width],
+        height === "full" && "h-full",
       )}
+      style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
     >
       {children as React.ReactNode}
     </div>

@@ -7,7 +7,7 @@ import { marginMap, colorBgMap } from "../lib/theme-utils";
 export const Divider: React.FC<UIContract["divider"]> = ({
   orientation = "horizontal",
   color = "border",
-  margin = "md",
+  margin = "none",
 }) => {
   return (
     <Separator

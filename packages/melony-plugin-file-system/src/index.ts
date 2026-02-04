@@ -161,10 +161,6 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
     try {
       const files = await fs.readdir(resolvePath(dirPath));
       yield {
-        type: "action:result",
-        data: { action: "listFiles", result: { files }, toolCallId },
-      };
-      yield {
         type: "ui",
         data: {
           type: 'text',
@@ -173,11 +169,11 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
           }
         },
       };
-    } catch (error: any) {
       yield {
         type: "action:result",
-        data: { action: "listFiles", result: { error: error.message }, toolCallId },
+        data: { action: "listFiles", result: { files }, toolCallId },
       };
+    } catch (error: any) {
       yield {
         type: "ui",
         data: {
@@ -186,6 +182,10 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
             value: `Files listing failed: ${error.message}`,
           }
         },
+      };
+      yield {
+        type: "action:result",
+        data: { action: "listFiles", result: { error: error.message }, toolCallId },
       };
     }
   });

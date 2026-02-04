@@ -20,6 +20,36 @@ export const paddingMap: Record<UISpacing, string> = {
   xxl: "p-12",
 };
 
+export const paddingVerticalMap: Record<UISpacing, string> = {
+  none: "py-0",
+  xs: "py-1",
+  sm: "py-2",
+  md: "py-4",
+  lg: "py-6",
+  xl: "py-8",
+  xxl: "py-12",
+};
+
+export const paddingHorizontalMap: Record<UISpacing, string> = {
+  none: "px-0",
+  xs: "px-1",
+  sm: "px-2",
+  md: "px-4",
+  lg: "px-6",
+  xl: "px-8",
+  xxl: "px-12",
+};
+
+export const interactivePaddingMap: Record<UISpacing, string> = {
+  none: "p-0",
+  xs: "py-1 px-2",
+  sm: "py-1.5 px-3",
+  md: "py-2 px-4",
+  lg: "py-3 px-6",
+  xl: "py-4 px-8",
+  xxl: "py-6 px-10",
+};
+
 export const marginMap: Record<UISpacing, string> = {
   none: "m-0",
   xs: "m-1",
@@ -28,6 +58,26 @@ export const marginMap: Record<UISpacing, string> = {
   lg: "m-6",
   xl: "m-8",
   xxl: "m-12",
+};
+
+export const marginVerticalMap: Record<UISpacing, string> = {
+  none: "my-0",
+  xs: "my-1",
+  sm: "my-2",
+  md: "my-4",
+  lg: "my-6",
+  xl: "my-8",
+  xxl: "my-12",
+};
+
+export const marginHorizontalMap: Record<UISpacing, string> = {
+  none: "mx-0",
+  xs: "mx-1",
+  sm: "mx-2",
+  md: "mx-4",
+  lg: "mx-6",
+  xl: "mx-8",
+  xxl: "mx-12",
 };
 
 export const gapMap: Record<UISpacing, string> = {

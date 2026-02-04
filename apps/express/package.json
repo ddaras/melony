@@ -1,6 +1,6 @@
 {
   "name": "openbot",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "private": false,
   "type": "module",
   "scripts": {
@@ -20,6 +20,7 @@
     "@melony/plugin-file-system": "workspace:*",
     "@melony/plugin-meta-agent": "workspace:*",
     "@melony/plugin-shell": "workspace:*",
+    "@melony/ui-kit": "workspace:*",
     "@types/cors": "^2.8.19",
     "commander": "^14.0.2",
     "cors": "^2.8.6",

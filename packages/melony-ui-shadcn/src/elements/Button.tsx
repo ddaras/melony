@@ -4,6 +4,7 @@ import { Button as ButtonBase } from "../ui/button";
 import { useMelony } from "@melony/react";
 import { cn } from "../lib/utils";
 import { justifyMap } from "../lib/theme-utils";
+import { widthMap } from "./helpers";
 
 export const Button: React.FC<
   UIContract["button"] & { justify?: UIJustify }
@@ -17,45 +18,36 @@ export const Button: React.FC<
   onClickAction,
   justify = "center",
 }) => {
-  const { send } = useMelony();
+    const { send } = useMelony();
 
-  const variantMap: Record<
-    string,
-    "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
-  > = {
-    primary: "default",
-    secondary: "secondary",
-    danger: "destructive",
-    success: "default", // We might want a custom success style later
-    outline: "outline",
-    ghost: "ghost",
-    link: "link",
+    const variantMap: Record<
+      string,
+      "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
+    > = {
+      primary: "default",
+      secondary: "secondary",
+      danger: "destructive",
+      success: "default", // We might want a custom success style later
+      outline: "outline",
+      ghost: "ghost",
+      link: "link",
+    };
+
+    return (
+      <ButtonBase
+        type={type}
+        variant={variantMap[variant] || "default"}
+        size={size === "md" ? "default" : (size as any)}
+        disabled={disabled}
+        className={cn(width && widthMap[width], justifyMap[justify])}
+        onClick={() => {
+          if (onClickAction) {
+            send(onClickAction as any);
+          }
+        }}
+        style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
+      >
+        {label}
+      </ButtonBase>
+    );
   };
-
-  const widthMap: Record<string, string> = {
-    full: "w-full",
-    auto: "w-auto",
-    "1/2": "w-1/2",
-    "1/3": "w-1/3",
-    "2/3": "w-2/3",
-    "1/4": "w-1/4",
-    "3/4": "w-3/4",
-  };
-
-  return (
-    <ButtonBase
-      type={type}
-      variant={variantMap[variant] || "default"}
-      size={size === "md" ? "default" : (size as any)}
-      disabled={disabled}
-      className={cn(width && widthMap[width], justifyMap[justify])}
-      onClick={() => {
-        if (onClickAction) {
-          send(onClickAction as any);
-        }
-      }}
-    >
-      {label}
-    </ButtonBase>
-  );
-};

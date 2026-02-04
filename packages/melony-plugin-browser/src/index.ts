@@ -1,62 +1,28 @@
-import { MelonyPlugin, Event } from "melony";
+import { MelonyPlugin } from "melony";
 import { z } from "zod";
 import { chromium, Browser, BrowserContext, Page } from "playwright";
+import { generateText, LanguageModel, Output } from "ai";
 
 export const browserToolDefinitions = {
-  browser_navigate: {
-    description: "Navigate to a URL and wait for the page to load",
+  browser_act: {
+    description: "Perform a browser action like clicking, typing, or navigating...",
     inputSchema: z.object({
-      url: z.string().describe("The URL to navigate to"),
-      waitUntil: z.enum(["load", "domcontentloaded", "networkidle", "commit"]).default("load").describe("When to consider navigation finished"),
+      instruction: z.string().describe("The action to perform, e.g., 'click the login button' or 'type pizza in search'"),
     }),
   },
-  browser_screenshot: {
-    description: "Take a screenshot of the current page",
+  browser_extract: {
+    description: "Extract structured data from the page using natural language instructions",
     inputSchema: z.object({
-      fullPage: z.boolean().default(false).describe("Whether to take a screenshot of the full scrollable page"),
+      instruction: z.string().describe("What data to extract, e.g., 'get all product titles and prices'"),
     }),
   },
-  browser_click: {
-    description: "Click an element on the page",
-    inputSchema: z.object({
-      selector: z.string().describe("CSS selector or XPath of the element to click"),
-    }),
-  },
-  browser_type: {
-    description: "Type text into an input field",
-    inputSchema: z.object({
-      selector: z.string().describe("CSS selector or XPath of the element to type into"),
-      text: z.string().describe("The text to type"),
-      delay: z.number().optional().describe("Delay between keystrokes in milliseconds"),
-    }),
-  },
-  browser_getContent: {
-    description: "Get the content of the current page",
-    inputSchema: z.object({
-      format: z.enum(["text", "html", "markdown"]).default("text").describe("The format to return the content in"),
-    }),
-  },
-  browser_evaluate: {
-    description: "Execute JavaScript code in the context of the page",
-    inputSchema: z.object({
-      script: z.string().describe("The JavaScript code to execute"),
-    }),
-  },
-  browser_openVisible: {
-    description: "Open the browser in a visible window (non-headless) for manual interaction",
-    inputSchema: z.object({
-      url: z.string().optional().describe("An optional URL to open immediately"),
-    }),
-  },
-  browser_listTabs: {
-    description: "List all open browser tabs",
+  browser_observe: {
+    description: "Observe the current page and get a list of possible actions in natural language",
     inputSchema: z.object({}),
   },
-  browser_closeTab: {
-    description: "Close a browser tab by its index",
-    inputSchema: z.object({
-      index: z.number().describe("The index of the tab to close"),
-    }),
+  browser_state_update: {
+    description: "Update the current state of the browser",
+    inputSchema: z.object({}),
   },
 };
 
@@ -65,152 +31,449 @@ export interface BrowserPluginOptions {
   maxContentLength?: number;
   userDataDir?: string;
   channel?: string;
+  model?: LanguageModel; // Required for smart features (act, extract, observe)
 }
 
 /**
- * Manages the Playwright browser lifecycle and provides high-level helpers
+ * Manages the Playwright browser and its pages.
  */
 class BrowserManager {
-  private browser: Browser | null = null;
-  private context: BrowserContext | null = null;
-  private page: Page | null = null;
-  private defaultHeadless: boolean;
-  private activeHeadless: boolean | null = null;
+  private browser: Browser | undefined;
+  private context: BrowserContext | undefined;
+  private pages: Page[] = [];
+  private headless: boolean;
+  private userDataDir: string;
 
   constructor(private options: BrowserPluginOptions) {
-    this.defaultHeadless = options.headless !== false;
+    this.headless = this.options.headless ?? true;
+    this.userDataDir = this.options.userDataDir ?? '';
   }
 
-  async ensurePage(forceHeadless?: boolean): Promise<Page> {
-    const targetHeadless = forceHeadless !== undefined ? forceHeadless : (this.options.headless ?? this.defaultHeadless);
+  async ensureBrowser(headlessOverride?: boolean) {
+    if (headlessOverride !== undefined) {
+      this.headless = headlessOverride;
+    }
+    if (!this.browser) {
+      if (this.userDataDir) {
+        this.context = await chromium.launchPersistentContext(this.userDataDir, {
+          headless: this.headless,
+          channel: this.options.channel,
+        });
+        this.browser = this.context.browser() ?? undefined;
+        this.pages = this.context.pages();
+      } else {
+        this.browser = await chromium.launch({
+          headless: this.headless,
+          channel: this.options.channel,
+        });
+        this.context = await this.browser.newContext();
+      }
+    }
+    return this.browser;
+  }
 
-    const isHealthy = async () => {
+  async ensurePage(headlessOverride?: boolean) {
+    await this.ensureBrowser(headlessOverride);
+    if (this.pages.length === 0) {
+      const page = await this.context!.newPage();
+      this.pages.push(page);
+    }
+    return this.pages[0];
+  }
+
+  getPages() {
+    return this.pages;
+  }
+
+  async cleanup() {
+    if (this.context) {
+      await this.context.close();
+    } else if (this.browser) {
+      await this.browser.close();
+    }
+    this.browser = undefined;
+    this.context = undefined;
+    this.pages = [];
+  }
+
+  isHeadless() {
+    return this.headless;
+  }
+
+  async relaunch(headlessOverride: boolean) {
+    await this.cleanup();
+    await this.ensureBrowser(headlessOverride);
+  }
+}
+
+/**
+ * Smart Browser functionality (Stagehand-style)
+ */
+class SmartBrowser {
+  constructor(private model: LanguageModel | undefined, private manager: BrowserManager) { }
+
+  /**
+   * Captures the accessibility tree and simplifies it for the LLM.
+   * Also injects IDs into the DOM and draws visual annotations for screenshots.
+   */
+  public async injectActionIds(page: Page, annotate: boolean = false) {
+    await page.evaluate(({ annotate }) => {
+      // 1. Clear existing IDs and annotations
+      document.querySelectorAll('[data-melony-id]').forEach(el => el.removeAttribute('data-melony-id'));
+      document.querySelectorAll('.melony-annotation').forEach(el => el.remove());
+
+      // 2. Identify interactive elements
+      const interactiveSelector = 'button, a, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [role="tab"], [role="treeitem"], [role="option"], [role="switch"], [role="radio"], [contenteditable="true"]';
+      const interactiveElements = Array.from(document.querySelectorAll(interactiveSelector));
+
+      let id = 0;
+      interactiveElements.forEach((el) => {
+        // Only assign ID if visible or likely to be reachable
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') return;
+
+        const melonyId = String(id++);
+        el.setAttribute('data-melony-id', melonyId);
+
+        // 3. Draw visual annotations if requested
+        if (annotate) {
+          const rect = el.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            const label = document.createElement('div');
+            label.className = 'melony-annotation';
+            label.textContent = melonyId;
+            Object.assign(label.style, {
+              position: 'fixed',
+              top: `${rect.top}px`,
+              left: `${rect.left}px`,
+              background: 'red',
+              color: 'white',
+              fontSize: '10px',
+              padding: '1px 3px',
+              borderRadius: '3px',
+              zIndex: '1000000',
+              pointerEvents: 'none',
+              fontWeight: 'bold',
+              border: '1px solid white'
+            });
+            document.body.appendChild(label);
+          }
+        }
+      });
+    }, { annotate });
+  }
+
+  public async cleanupAnnotations(page: Page) {
+    await page.evaluate(() => {
+      document.querySelectorAll('.melony-annotation').forEach(el => el.remove());
+    });
+  }
+
+  private async clickById(page: Page, elementId: string) {
+    const locator = page.locator(`[data-melony-id="${elementId}"]`).first();
+    await locator.waitFor({ state: "attached", timeout: 10000 });
+    await locator.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => { });
+    await locator.click({ timeout: 10000 });
+  }
+
+  private async typeById(page: Page, elementId: string, text: string) {
+    const locator = page.locator(`[data-melony-id="${elementId}"]`).first();
+    await locator.waitFor({ state: "attached", timeout: 10000 });
+    await locator.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => { });
+    await locator.fill(text, { timeout: 10000 });
+  }
+
+  private async scroll(page: Page, direction: 'up' | 'down') {
+    const amount = direction === 'up' ? -window.innerHeight * 0.8 : window.innerHeight * 0.8;
+    await page.evaluate((y) => window.scrollBy(0, y), amount);
+    await page.waitForTimeout(500);
+  }
+
+  private async waitForStable(page: Page) {
+    try {
+      await page.waitForLoadState('domcontentloaded', { timeout: 3000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => { });
+      // Wait for any potential "loading" or "busy" states to clear
+      await page.waitForFunction(() => {
+        const isBusy = document.querySelector('[aria-busy="true"], .loading, .spinner');
+        return !isBusy;
+      }, { timeout: 2000 }).catch(() => { });
+    } catch (e) { }
+    await page.waitForTimeout(500);
+  }
+
+  async getPageMap(page: Page) {
+    await this.injectActionIds(page);
+
+    return await page.evaluate(() => {
+      const vWidth = window.innerWidth;
+      const vHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const totalHeight = document.body.scrollHeight;
+      const MAX_NODES = 1500;
+      let nodesCount = 0;
+
+      const getSectionType = (el: Element, style: CSSStyleDeclaration) => {
+        const tagName = el.tagName;
+        const role = el.getAttribute('role');
+        const id = (el.id || '').toLowerCase();
+        const className = (typeof el.className === 'string' ? el.className : '').toLowerCase();
+
+        if (tagName === 'HEADER' || role === 'banner') return 'header';
+        if (tagName === 'FOOTER' || role === 'contentinfo') return 'footer';
+        if (tagName === 'NAV' || role === 'navigation') return 'navigation';
+        if (tagName === 'MAIN' || role === 'main') return 'main';
+        if (tagName === 'ASIDE' || role === 'complementary' || id.includes('sidebar') || className.includes('sidebar')) return 'sidebar';
+        if (role === 'dialog' || role === 'alertdialog' || className.includes('modal') || className.includes('popup')) return 'popups';
+
+        if (style.position === 'fixed' || style.position === 'sticky') {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 50 && rect.width > vWidth * 0.8) return 'header';
+          if (rect.bottom >= vHeight - 50 && rect.width > vWidth * 0.8) return 'footer';
+        }
+        return null;
+      };
+
+      const sections: Record<string, any[]> = {
+        header: [],
+        sidebar: [],
+        navigation: [],
+        main: [],
+        footer: [],
+        popups: [],
+        other: []
+      };
+
+      const buildTree = (el: Element, depth = 0, currentSection?: string): any => {
+        if (nodesCount > MAX_NODES || depth > 15) return null;
+        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'SVG', 'IFRAME'].includes(el.tagName)) return null;
+
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden' || el.getAttribute('aria-hidden') === 'true') return null;
+
+        const rect = el.getBoundingClientRect();
+        const inViewport = rect.bottom > 0 && rect.right > 0 && rect.top < vHeight && rect.left < vWidth;
+
+        // Pruning: if it's very far from viewport and not a main section, skip it
+        if (!inViewport && rect.top > vHeight * 3) return null;
+
+        const melonyId = el.getAttribute('data-melony-id');
+        const isInteractive = !!melonyId;
+        const role = el.getAttribute('role');
+        const isHeading = /^H[1-6]$/.test(el.tagName);
+
+        const directText = Array.from(el.childNodes)
+          .filter(node => node.nodeType === 3 && node.textContent?.trim())
+          .map(node => node.textContent?.trim())
+          .join(' ');
+
+        const sectionType = depth < 6 ? getSectionType(el, style) : null;
+        const activeSection = sectionType || currentSection || 'other';
+
+        const children = Array.from(el.children)
+          .map(c => buildTree(c, depth + 1, activeSection))
+          .filter(Boolean);
+
+        const interestingRoles = ['heading', 'img', 'alert', 'dialog', 'status', 'gridcell', 'list'];
+        const isInteresting = isInteractive || isHeading || directText || children.length > 0 || interestingRoles.includes(role || '');
+
+        if (!isInteresting && !el.getAttribute('aria-label') && !el.getAttribute('title')) return null;
+
+        // Flatten container-only nodes
+        if (!isInteractive && !directText && children.length === 1 && !sectionType && !isHeading && !role) {
+          return children[0];
+        }
+
+        nodesCount++;
+        const node: any = {
+          tag: el.tagName,
+          id: melonyId || undefined,
+          text: (isInteractive || isHeading) ? (el as HTMLElement).innerText?.trim().slice(0, 100) : (directText || undefined),
+          role: role || undefined,
+          label: el.getAttribute('aria-label') || el.getAttribute('title') || undefined,
+          inViewport
+        };
+
+        if (el.tagName === 'INPUT') {
+          node.type = (el as HTMLInputElement).type;
+          node.value = (el as HTMLInputElement).value;
+        }
+
+        if (children.length > 0) node.children = children;
+
+        if (sectionType && depth < 6) {
+          sections[sectionType].push(node);
+          return null; // Don't return to parent tree if it's a root section
+        }
+
+        return node;
+      };
+
+      const otherNodes = buildTree(document.body);
+      if (otherNodes) sections.other.push(otherNodes);
+
+      return {
+        url: window.location.href,
+        title: document.title,
+        scroll: {
+          y: scrollY,
+          percentage: Math.round((scrollY / (totalHeight - vHeight || 1)) * 100),
+          totalHeight
+        },
+        sections: Object.fromEntries(Object.entries(sections).filter(([_, v]) => v.length > 0))
+      };
+    });
+  }
+
+  async act(page: Page, instruction: string) {
+    if (!this.model) throw new Error("LanguageModel required for 'act'");
+
+    const actionSchema = z.object({
+      action: z.enum(['click', 'type', 'press', 'wait', 'navigate', 'scroll', 'done']),
+      elementId: z.string().nullable().describe("ID from the DOM tree"),
+      text: z.string().nullable().describe("Text for 'type'"),
+      key: z.string().nullable().describe("Key for 'press'"),
+      url: z.string().nullable().describe("URL for 'navigate'"),
+      direction: z.enum(['up', 'down']).nullable(),
+      reasoning: z.string().describe("Brief explanation of choice")
+    });
+
+    const runLoop = async (retry = 0, lastError?: string): Promise<any> => {
+      await this.waitForStable(page);
+
+      // 1. Annotate for screenshot
+      await this.injectActionIds(page, true);
+      const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
+      await this.cleanupAnnotations(page); // Clean up immediately after screenshot
+
+      const state = await this.getPageMap(page);
+
+      const { output } = await generateText({
+        model: this.model!,
+        output: Output.object({ schema: actionSchema }),
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert browser agent. Your task: "${instruction}"
+Current State:
+- URL: ${state.url}
+- Title: ${state.title}
+- Scroll: ${state.scroll.percentage}% of page
+
+Page Structure:
+The page is grouped into semantic sections (header, main, sidebar, etc.).
+Elements have IDs which correspond to RED labels in the screenshot.
+Use 'inViewport: false' elements to trigger automatic scrolling.
+
+Guidelines:
+1. Prefer clicking elements in 'main' or 'navigation'.
+2. If the goal is not visible, use 'scroll' or look for 'inViewport: false' elements.
+3. If a popup/modal appears, handle it first.
+4. When the task is complete, use action 'done'.`
+          },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: `DOM Tree Snapshot:\n${JSON.stringify(state.sections, null, 2)}` },
+              ...(screenshot ? [{ type: 'image', image: screenshot } as any] : []),
+              ...(lastError ? [{ type: 'text', text: `Previous error: ${lastError}` }] : [])
+            ]
+          }
+        ]
+      });
+
+      console.log('Browser Action:', output.action, output.reasoning);
+
+      if (output.action === 'done') return { success: true, message: output.reasoning };
+
       try {
-        if (!this.page || this.page.isClosed()) return false;
-        if (!this.context) return false;
-        await this.page.url();
-        return true;
-      } catch {
-        return false;
+        switch (output.action) {
+          case 'click': await this.clickById(page, output.elementId!); break;
+          case 'type': await this.typeById(page, output.elementId!, output.text!); break;
+          case 'press': await page.keyboard.press(output.key!); break;
+          case 'scroll': await this.scroll(page, output.direction || 'down'); break;
+          case 'navigate': await page.goto(output.url!); break;
+          case 'wait': await page.waitForTimeout(2000); break;
+        }
+        // After one action, we return the result.
+        return { action: output.action, reasoning: output.reasoning };
+      } catch (e: any) {
+        if (retry < 1) return runLoop(retry + 1, e.message);
+        throw e;
       }
     };
 
-    let currentUrl: string | undefined;
-
-    // If current browser exists but is in the wrong mode, close it to switch
-    if ((this.browser || this.context) && this.activeHeadless !== targetHeadless) {
-      if (this.page && !this.page.isClosed()) {
-        try {
-          currentUrl = this.page.url();
-        } catch (e) {
-          // ignore
-        }
-      }
-      await this.close();
-    }
-
-    if (await isHealthy()) return this.page!;
-
-    // Cleanup before launch if unhealthy
-    if (this.page || this.context || this.browser) {
-      await this.close();
-    }
-
-    const { userDataDir, channel } = this.options;
-    this.activeHeadless = targetHeadless;
-
-    if (userDataDir) {
-      this.context = await chromium.launchPersistentContext(userDataDir, {
-        headless: targetHeadless,
-        channel,
-        viewport: { width: 1280, height: 720 },
-        ignoreDefaultArgs: ["--enable-automation"],
-        args: [
-          "--disable-blink-features=AutomationControlled",
-          "--no-sandbox",
-          "--disable-infobars",
-          "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        ],
-      });
-      this.context.on("close", () => (this.context = null));
-      this.page = this.context.pages()[0] || (await this.context.newPage());
-    } else {
-      if (!this.browser || !this.browser.isConnected()) {
-        this.browser = await chromium.launch({
-          headless: targetHeadless,
-          channel,
-          ignoreDefaultArgs: ["--enable-automation"],
-          args: ["--disable-blink-features=AutomationControlled"],
-        });
-        this.browser.on("disconnected", () => (this.browser = null));
-      }
-
-      this.context = await this.browser.newContext({
-        viewport: { width: 1280, height: 720 },
-        userAgent:
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      });
-      this.context.on("close", () => (this.context = null));
-      this.page = await this.context.newPage();
-    }
-
-    this.page.on("close", () => (this.page = null));
-
-    if (currentUrl && currentUrl !== "about:blank") {
-      await this.page.goto(currentUrl).catch(() => {});
-    }
-
-    return this.page!;
+    return runLoop();
   }
 
-  async close() {
-    try {
-      if (this.context) await this.context.close().catch(() => {});
-      if (this.browser) await this.browser.close().catch(() => {});
-    } finally {
-      this.context = null;
-      this.browser = null;
-      this.page = null;
-      this.activeHeadless = null;
-    }
+  async observe(page: Page) {
+    if (!this.model) throw new Error("LanguageModel required for 'observe'");
+    await this.waitForStable(page);
+
+    await this.injectActionIds(page, true);
+    const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
+    await this.cleanupAnnotations(page);
+
+    const state = await this.getPageMap(page);
+
+    const { output } = await generateText({
+      model: this.model!,
+      output: Output.object({
+        schema: z.object({
+          observations: z.array(z.string().describe("Natural language instruction for 'act'"))
+        })
+      }),
+      prompt: `Analyze this page state and suggest 5 logical next steps for a user.
+Current URL: ${state.url}
+Scroll: ${state.scroll.percentage}%
+DOM: ${JSON.stringify(state.sections, null, 2)}`
+    });
+
+    return output;
   }
 
-  async getPages() {
-    if (!this.context) return this.page ? [this.page] : [];
-    return await this.context.pages();
-  }
+  async extract(page: Page, instruction: string) {
+    if (!this.model) throw new Error("LanguageModel required for 'extract'");
+    await this.waitForStable(page);
+    const content = await page.evaluate(() => document.body.innerText);
 
-  getActiveHeadless() {
-    return this.activeHeadless;
-  }
+    const { output } = await generateText({
+      model: this.model,
+      output: Output.object({
+        schema: z.object({ data: z.string(), confidence: z.number() })
+      }),
+      prompt: `Extract "${instruction}" from:\n${content.slice(0, 15000)}`
+    });
 
-  setHeadless(headless: boolean) {
-    this.options.headless = headless;
-  }
-
-  setPage(page: Page | null) {
-    this.page = page;
+    try { return { ...output, data: JSON.parse(output.data) }; }
+    catch { return output; }
   }
 }
 
 export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<any, any> => {
   const manager = new BrowserManager(options);
-  const maxContentLength = options.maxContentLength || 10000;
+  const smartBrowser = new SmartBrowser(options.model, manager);
 
   return (builder) => {
-    async function* yieldState(page: Page, options: { screenshot?: boolean } = { screenshot: true }) {
+    async function* yieldState(page: Page, options: { screenshot?: boolean, annotate?: boolean } = { screenshot: true, annotate: false }) {
       try {
         const url = page.url();
         const title = await page.title();
-        const pages = await manager.getPages();
-        const tabs = await Promise.all(
-          pages.map(async (p, i) => ({
-            index: i,
-            title: (await p.title().catch(() => "Untitled")) || "Untitled",
-            url: p.url(),
-            isActive: p === page,
-          }))
-        );
+        const pages = manager.getPages();
+
+        if (options.annotate) {
+          await smartBrowser.injectActionIds(page, true);
+          const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
+          yield {
+            type: "ui",
+            data: {
+              type: "image",
+              props: { src: `data:image/jpeg;base64,${screenshot?.toString("base64") ?? ""}`, alt: "Screenshot", width: "full" },
+            },
+          };
+        }
+
+
 
         let base64: string | undefined;
         if (options.screenshot) {
@@ -218,10 +481,9 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
           base64 = screenshot.toString("base64");
         }
 
-        yield {
-          type: "browser:state-update",
-          data: { url, title, screenshot: base64, tabCount: pages.length, tabs },
-        };
+        if (options.annotate) {
+          await smartBrowser.cleanupAnnotations(page);
+        }
 
         const children: any[] = [];
         if (base64) {
@@ -246,10 +508,19 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
                 {
                   type: "button",
                   props: {
+                    label: options.annotate ? "Hide IDs" : "Show IDs",
+                    size: "xs",
+                    variant: options.annotate ? "default" : "outline",
+                    onClickAction: { type: "action:browser_state_update", annotate: !options.annotate },
+                  },
+                },
+                {
+                  type: "button",
+                  props: {
                     label: "Open Visible",
                     size: "xs",
                     variant: "outline",
-                    onClickAction: { type: "browser:show" },
+                    onClickAction: { type: "action:browser_show" },
                   },
                 },
                 {
@@ -258,7 +529,7 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
                     label: "Cleanup",
                     size: "xs",
                     variant: "outline",
-                    onClickAction: { type: "browser:cleanup" },
+                    onClickAction: { type: "action:browser_cleanup" },
                   },
                 },
               ],
@@ -279,111 +550,168 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       }
     }
 
-    builder.on("browser:show", async function* () {
-      yield* yieldState(await manager.ensurePage(false), { screenshot: false });
+    const buildResult = (action: string, toolCallId: string, result: Record<string, unknown>) => ({
+      type: "action:result",
+      data: { action, toolCallId, result },
     });
 
-    builder.on("browser:cleanup", async function* () {
-      const page = await manager.ensurePage();
-      const pages = await manager.getPages();
-      for (const p of pages) {
-        if (p !== page && !p.isClosed()) await p.close().catch(() => {});
+    builder.on("action:browser_act" as any, async function* (event) {
+      const { toolCallId, instruction } = event.data;
+
+      yield {
+        type: "ui",
+        data: {
+          type: 'text',
+          props: {
+            value: `Performing action: ${instruction}`,
+          }
+        },
+      };
+
+      try {
+        const page = await manager.ensurePage();
+        const result = await smartBrowser.act(page, instruction);
+        yield* yieldState(page, { annotate: true });
+        yield buildResult("browser_act", toolCallId, { success: true, ...result });
+      } catch (error: any) {
+        yield buildResult("browser_act", toolCallId, { error: error.message });
       }
-      yield* yieldState(page, { screenshot: false });
     });
 
-    const handleAction = (
-      name: string,
-      handler: (page: Page, data: any) => Promise<any>,
-      options: { screenshot?: boolean } = { screenshot: true }
-    ) => {
-      builder.on(`action:${name}` as any, async function* (event) {
-        const { toolCallId, ...data } = event.data;
-        try {
-          const page = await manager.ensurePage();
-          const result = await handler(page, data);
-          yield* yieldState(page, options);
-          yield {
-            type: "action:result",
-            data: { action: name, toolCallId, result: { success: true, ...result } },
-          };
-        } catch (error: any) {
-          yield {
-            type: "action:result",
-            data: { action: name, toolCallId, result: { error: error.message } },
-          };
+    builder.on("action:browser_extract" as any, async function* (event) {
+      const { toolCallId, instruction } = event.data;
+
+      yield {
+        type: "ui",
+        data: {
+          type: 'text',
+          props: {
+            value: `Extracting data: ${instruction}`,
+          }
+        },
+      };
+
+      try {
+        const page = await manager.ensurePage();
+        const result = await smartBrowser.extract(page, instruction);
+
+        yield {
+          type: "ui",
+          data: {
+            type: 'text',
+            props: {
+              value: `Extracted data: ${JSON.stringify(result, null, 2)}`,
+            }
+          },
+        };
+
+        yield* yieldState(page);
+        yield buildResult("browser_extract", toolCallId, { success: true, ...result });
+      } catch (error: any) {
+        yield buildResult("browser_extract", toolCallId, { error: error.message });
+      }
+    });
+
+    builder.on("action:browser_observe" as any, async function* (event) {
+      const { toolCallId } = event.data;
+
+      yield {
+        type: "ui",
+        data: {
+          type: 'text',
+          props: {
+            value: `Observing page`,
+          }
+        },
+      };
+
+      try {
+        const page = await manager.ensurePage();
+        const result = await smartBrowser.observe(page);
+
+        yield {
+          type: "ui",
+          data: {
+            type: 'text',
+            props: {
+              value: (result as any).observations
+                ? `Possible actions:\n${(result as any).observations.map((o: string) => `• ${o}`).join('\n')}`
+                : `Observations: ${JSON.stringify(result, null, 2)}`,
+            }
+          },
+        };
+
+        yield* yieldState(page);
+        yield buildResult("browser_observe", toolCallId, { success: true, ...result });
+      } catch (error: any) {
+        yield buildResult("browser_observe", toolCallId, { error: error.message });
+      }
+    });
+
+    builder.on("action:browser_cleanup" as any, async function* (event) {
+      const { toolCallId } = event.data;
+      try {
+        await manager.cleanup();
+        yield buildResult("browser_cleanup", toolCallId, { success: true, message: "Browser closed" });
+      } catch (error: any) {
+        yield buildResult("browser_cleanup", toolCallId, { error: error.message });
+      }
+    });
+
+    builder.on("action:browser_show" as any, async function* (event) {
+      const { toolCallId } = event.data;
+
+      yield {
+        type: "ui",
+        data: {
+          type: 'text',
+          props: {
+            value: `Showing browser`,
+          }
+        },
+      };
+
+      try {
+        const page = await manager.ensurePage();
+        let activePage = page;
+        let result = { message: "Browser is active", url: page.url() };
+        if (manager.isHeadless()) {
+          const url = page.url();
+          await manager.relaunch(false);
+          const newPage = await manager.ensurePage(false);
+          activePage = newPage;
+          if (url) {
+            await newPage.goto(url);
+          }
+          result = { message: "Browser opened (headed)", url: newPage.url() };
         }
-      });
-    };
-
-    handleAction("browser_navigate", async (page, { url, waitUntil }) => {
-      await page.goto(url, { waitUntil });
-      return { url: page.url(), title: await page.title() };
-    });
-
-    handleAction("browser_screenshot", async (page, { fullPage }) => {
-      await page.screenshot({ fullPage, type: "png" });
-      return { message: "Screenshot taken" };
-    });
-
-    handleAction("browser_click", async (page, { selector }) => {
-      await page.click(selector);
-      return {};
-    });
-
-    handleAction("browser_type", async (page, { selector, text, delay }) => {
-      await page.type(selector, text, { delay });
-      return {};
-    });
-
-    handleAction("browser_getContent", async (page, { format }) => {
-      let content = "";
-      if (format === "html") content = await page.content();
-      else content = await page.evaluate(() => document.body.innerText);
-
-      if (content.length > maxContentLength) {
-        const half = Math.floor(maxContentLength / 2);
-        content = `${content.slice(0, half)}\n\n[... Truncated ...]\n\n${content.slice(-half)}`;
+        yield* yieldState(activePage);
+        yield buildResult("browser_show", toolCallId, { success: true, ...result });
+      } catch (error: any) {
+        yield buildResult("browser_show", toolCallId, { error: error.message });
       }
-      return { content };
-    }, { screenshot: false });
-
-    handleAction("browser_evaluate", async (page, { script }) => {
-      const result = await page.evaluate(script);
-      return { result };
     });
 
-    handleAction("browser_listTabs", async (page) => {
-      const pages = await manager.getPages();
-      const tabs = await Promise.all(
-        pages.map(async (p, i) => ({
-          index: i,
-          title: (await p.title().catch(() => "Untitled")) || "Untitled",
-          url: p.url(),
-          isActive: p === page,
-        }))
-      );
-      return { tabs };
-    }, { screenshot: false });
+    builder.on("action:browser_state_update" as any, async function* (event) {
+      const { toolCallId, annotate } = event.data;
 
-    handleAction("browser_closeTab", async (page, { index }) => {
-      const pages = await manager.getPages();
-      if (index >= 0 && index < pages.length) {
-        const tab = pages[index];
-        if (tab === page) manager.setPage(null);
-        await tab.close();
+      yield {
+        type: "ui",
+        data: {
+          type: 'text',
+          props: {
+            value: `Updating browser state`,
+          }
+        },
+      };
+
+      try {
+        const page = await manager.ensurePage();
+        yield* yieldState(page, { screenshot: true, annotate: !!annotate });
+        yield buildResult("browser_state_update", toolCallId, { success: true });
+      } catch (error: any) {
+        yield buildResult("browser_state_update", toolCallId, { error: error.message });
       }
-      return {};
-    }, { screenshot: false });
-
-    handleAction("browser_openVisible", async (_page, { url }) => {
-      const p = await manager.ensurePage(false);
-      if (url) await p.goto(url);
-      return { message: "Browser is now visible" };
-    }, { screenshot: false });
-
-    builder.on("browser:poll_state", async function* () {
-      yield* yieldState(await manager.ensurePage(manager.getActiveHeadless() ?? undefined));
     });
   };
 };

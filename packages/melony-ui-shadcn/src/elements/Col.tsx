@@ -24,21 +24,22 @@ export const Col: React.FC<
   background,
   radius,
 }) => {
-  return (
-    <div
-      className={cn(
-        "flex flex-col",
-        alignMap[align],
-        justifyMap[justify],
-        gapMap[gap],
-        paddingMap[padding],
-        widthMap[width],
-        height === "full" && "h-full",
-        background && colorBgMap[background],
-        radius && radiusMap[radius],
-      )}
-    >
-      {children as React.ReactNode}
-    </div>
-  );
-};
+    return (
+      <div
+        className={cn(
+          "flex flex-col",
+          alignMap[align],
+          justifyMap[justify],
+          gapMap[gap],
+          paddingMap[padding],
+          widthMap[width],
+          height === "full" && "h-full",
+          background && colorBgMap[background],
+          radius && radiusMap[radius],
+        )}
+        style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
+      >
+        {children as React.ReactNode}
+      </div>
+    );
+  };

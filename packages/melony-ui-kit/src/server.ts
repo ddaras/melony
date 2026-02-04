@@ -45,6 +45,9 @@ export const ui = {
   col: (props: UIContract["col"] = {}, children: UINode[] = []) =>
     ui.node("col", props, children),
 
+  box: (props: UIContract["box"] = {}, children: UINode[] = []) =>
+    ui.node("box", props, children),
+
   badge: (label: string, variant: UIContract["badge"]["variant"] = "primary", props: Partial<UIContract["badge"]> = {}) =>
     ui.node("badge", { label, variant, ...props }),
 
@@ -80,4 +83,8 @@ export const ui = {
 
   listItem: (props: UIContract["listItem"] = {}, children: UINode[] = []) =>
     ui.node("listItem", props, children),
+
+  // organisms
+  thread: (props: UIContract["thread"] = {}, children: UINode[] = []) =>
+    ui.node("thread", props, children),
 };
