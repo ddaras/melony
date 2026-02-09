@@ -1,7 +1,7 @@
 import React from "react";
-import { UIContract } from "@melony/ui-kit";
+import { UIContract, UIWidth } from "@melony/ui-kit";
 import { cn } from "../lib/utils";
-import { paddingMap, gapMap } from "../lib/theme-utils";
+import { paddingMap, gapMap, widthMap } from "../lib/theme-utils";
 
 export const List: React.FC<
   UIContract["list"] & {
@@ -9,15 +9,16 @@ export const List: React.FC<
     flex?: string;
     overflow?: string;
   }
-> = ({ children, padding = "none", gap = "none", flex, overflow }) => {
+> = ({ children, padding = "none", gap = "none", flex, overflow, width }) => {
   return (
     <div
       className={cn(
         "flex flex-col list-none m-0",
         paddingMap[padding],
         gapMap[gap],
+        widthMap[width as UIWidth],
       )}
-      style={{ flex, overflow }}
+      style={{ flex, overflow, width: width && typeof width === "number" ? `${width}px` : undefined }}
     >
       {children as React.ReactNode}
     </div>

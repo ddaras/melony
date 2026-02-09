@@ -10,13 +10,13 @@ export function MessageBubble({ message }: MessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
+    <div className={cn("flex flex-col w-full", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
-          "flex flex-col items-start max-w-[85%] rounded-2xl px-4 py-2 space-y-4 whitespace-pre-wrap",
+          "flex flex-col items-start max-w-[85%] transition-all duration-200",
           isUser
-            ? "bg-primary text-primary-foreground"
-            : "px-0 py-0 text-foreground",
+            ? "bg-muted/80 text-foreground px-3 py-1.5 rounded-lg"
+            : "px-0 py-0 text-foreground w-full",
         )}
       >
         <MessageContent content={message.content} />

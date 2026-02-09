@@ -2,13 +2,15 @@ import React from "react";
 import { UIContract } from "@melony/ui-kit";
 import { colorTextMap } from "../lib/theme-utils";
 import { cn } from "../lib/utils";
+import * as LucideIcons from "lucide-react";
 
-export const Icon: React.FC<UIContract["icon"] & { className?: string }> = ({
-  name,
-  size = "md",
-  color,
-  className,
-}) => {
+export const Icon: React.FC<UIContract["icon"] & { className?: string }> = (props) => {
+  const {
+    name,
+    size = "md",
+    color,
+    className,
+  } = props;
   const sizeMap = {
     sm: "14px",
     md: "18px",
@@ -19,6 +21,9 @@ export const Icon: React.FC<UIContract["icon"] & { className?: string }> = ({
     typeof size === "number"
       ? `${size}px`
       : sizeMap[size as keyof typeof sizeMap] || "18px";
+
+  // Check if name is a Lucide icon
+  const LucideIcon = (LucideIcons as any)[name];
 
   return (
     <div
@@ -36,7 +41,11 @@ export const Icon: React.FC<UIContract["icon"] & { className?: string }> = ({
         justifyContent: 'center'
       }}
     >
-      {name}
+      {LucideIcon ? (
+        <LucideIcon size={resolvedSize} />
+      ) : (
+        name
+      )}
     </div>
   );
 };

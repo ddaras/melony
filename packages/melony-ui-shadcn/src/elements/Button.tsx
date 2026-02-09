@@ -3,21 +3,21 @@ import { UIContract, UIJustify } from "@melony/ui-kit";
 import { Button as ButtonBase } from "../ui/button";
 import { useMelony } from "@melony/react";
 import { cn } from "../lib/utils";
-import { justifyMap } from "../lib/theme-utils";
-import { widthMap } from "./helpers";
+import { justifyMap, widthMap } from "../lib/theme-utils";
 
 export const Button: React.FC<
   UIContract["button"] & { justify?: UIJustify }
-> = ({
-  type = "button",
-  label,
-  variant = "primary",
-  size = "md",
-  disabled = false,
-  width,
-  onClickAction,
-  justify = "center",
-}) => {
+> = (props) => {
+    const {
+      type = "button",
+      label,
+      variant = "primary",
+      size = "md",
+      disabled = false,
+      width,
+      onClickAction,
+      justify = "center",
+    } = props;
     const { send } = useMelony();
 
     const variantMap: Record<

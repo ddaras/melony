@@ -10,7 +10,7 @@ export interface MelonyConfig {
   port?: number;
 }
 
-export const DEFAULT_BASE_DIR = "~/openbot";
+export const DEFAULT_BASE_DIR = "~/.openbot";
 
 export function loadConfig(): MelonyConfig {
   const configPath = path.join(os.homedir(), ".openbot", "config.json");

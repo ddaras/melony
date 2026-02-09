@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
+import { useMelony } from "./use-melony";
 
 /**
- * A hook to initialize a Melony application by fetching the initial UI state.
- * 
- * @param url The API endpoint to fetch the initial state from.
- * @param params Optional query parameters to include in the request.
- * @returns An object containing the UI data, loading state, and any error encountered.
+ * Fetches the initial UI state from a jsonResponse endpoint.
  */
 export function useMelonyInit<T = any>(
-  url: string, 
+  url: string,
   params: Record<string, string | number | boolean | undefined> = {}
 ) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { client } = useMelony();
 
   useEffect(() => {
     let isMounted = true;
@@ -29,18 +27,19 @@ export function useMelonyInit<T = any>(
             searchParams.append(key, String(value));
           }
         });
-        
+
         const queryString = searchParams.toString();
         const fullUrl = queryString ? `${url}${url.includes('?') ? '&' : '?'}${queryString}` : url;
-        
+
         const response = await fetch(fullUrl);
         if (!response.ok) {
           throw new Error(`Failed to initialize: ${response.statusText}`);
         }
-        const json = await response.json();
-        
+
+        const data = await response.json();
+
         if (isMounted) {
-          setData(json);
+          setData(data);
         }
       } catch (err) {
         if (isMounted) {

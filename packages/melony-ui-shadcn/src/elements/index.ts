@@ -43,5 +43,8 @@ export { MessageBubble } from "./Message";
 export { MessageContent } from "./MessageContent";
 export { Composer } from "./Composer";
 
+// Theme
+export { ThemeToggle } from "./ThemeToggle";
+
 // Export types
 export type { UIContract } from "@melony/ui-kit";

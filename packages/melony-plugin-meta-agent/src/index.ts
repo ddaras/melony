@@ -1,4 +1,4 @@
-import { MelonyPlugin } from "melony";
+import { MelonyPlugin, RuntimeContext } from "melony";
 import { z } from "zod";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
@@ -125,20 +125,27 @@ function truncateToRecent(content: string, limit: number = 10): string {
 /**
  * Build the dynamic system prompt from identity files and skills
  */
-export async function buildSystemPrompt(baseDir: string): Promise<string> {
+export async function buildSystemPrompt(baseDir: string, context?: RuntimeContext): Promise<string> {
   const expandedBase = expandPath(baseDir);
   const parts: string[] = [];
+
+  const state = context?.state as any;
+  const currentCwd = state?.cwd || process.cwd();
 
   // Add environment context
   const now = new Date();
   parts.push(`## Environment
 You are running as a global system agent.
 - **Current Time**: ${now.toLocaleString()} (${Intl.DateTimeFormat().resolvedOptions().timeZone})
+- **Current Working Directory (CWD)**: ${currentCwd}
 - **System Access**: You have access to the entire file system (root: /).
 - **Bot Home (Internal State)**: ${expandedBase}
 
-All filesystem operations (readFile, writeFile, listFiles) are relative to the system root (/).
-To access your own skills and memory, use paths starting with "${expandedBase}/".
+### Path Rules:
+1. **Shell Commands**: All commands (executeCommand) run in the CWD: ${currentCwd}.
+2. **File Operations**: Relative paths in readFile, writeFile, listFiles, etc. resolve against the CWD.
+3. **Changing Directory**: Use \`cd <path>\` in executeCommand to move. Your CWD is persisted across turns.
+4. **Skills/Memory**: To access your own skills and memory, use absolute paths starting with "${expandedBase}/".
 
 When you want to execute skill scripts, always use the full path to the skill directory. For example, if the skill is at "${expandedBase}/skills/my-skill", the full path to the script is "${expandedBase}/skills/my-skill/scripts/script.sh".`);
 
@@ -247,6 +254,9 @@ export const metaAgentPlugin = (options: MetaAgentPluginOptions): MelonyPlugin<a
 
   // Ensure directory structure exists
   const ensureStructure = async () => {
+    // Ensure base directory exists with restricted permissions (0o700)
+    await fs.mkdir(expandedBase, { recursive: true, mode: 0o700 });
+    
     await fs.mkdir(resolvePath("skills"), { recursive: true });
     await fs.mkdir(resolvePath("memory"), { recursive: true });
 
@@ -270,10 +280,15 @@ export const metaAgentPlugin = (options: MetaAgentPluginOptions): MelonyPlugin<a
   };
 
   // Initialize on the "init" event
-  builder.on("init", async function* () {
+  builder.on("init", async function* (event, context) {
+    yield {
+      type: "meta:status",
+      data: { message: "Initializing meta-agent structure..." },
+    };
+
     await ensureStructure();
 
-    const systemPrompt = await buildSystemPrompt(baseDir);
+    const systemPrompt = await buildSystemPrompt(baseDir, context);
 
     yield {
       type: "meta:initialized",
@@ -281,6 +296,11 @@ export const metaAgentPlugin = (options: MetaAgentPluginOptions): MelonyPlugin<a
         baseDir: expandedBase,
         systemPrompt,
       },
+    };
+
+    yield {
+      type: "meta:status",
+      data: { message: "Meta-agent initialized", severity: "success" },
     };
   });
 
@@ -292,6 +312,11 @@ export const metaAgentPlugin = (options: MetaAgentPluginOptions): MelonyPlugin<a
     try {
       const content = await fs.readFile(skillPath, "utf-8");
       const { data, content: body } = matter(content);
+
+      yield {
+        type: "meta:skill-loaded",
+        data: { skillId, title: data.title || skillId, instructions: data.description || "No description" },
+      };
 
       yield {
         type: "action:result",
@@ -393,6 +418,11 @@ ${content}`;
       await fs.writeFile(path.join(skillDir, "SKILL.md"), skillContent, "utf-8");
 
       yield {
+        type: "meta:status",
+        data: { message: `Skill "${title}" created`, severity: "success" },
+      };
+
+      yield {
         type: "action:result",
         data: {
           action: "createSkill",
@@ -405,6 +435,10 @@ ${content}`;
         },
       };
     } catch (error: any) {
+      yield {
+        type: "meta:status",
+        data: { message: `Failed to create skill: ${error.message}`, severity: "error" },
+      };
       yield {
         type: "action:result",
         data: {
@@ -455,6 +489,11 @@ ${content}`;
       await fs.writeFile(skillPath, skillContent, "utf-8");
 
       yield {
+        type: "meta:status",
+        data: { message: `Skill "${newTitle}" updated to v${version}`, severity: "success" },
+      };
+
+      yield {
         type: "action:result",
         data: {
           action: "updateSkill",
@@ -468,12 +507,17 @@ ${content}`;
         },
       };
     } catch (error: any) {
+      const errorMsg = error.code === "ENOENT" ? `Skill "${id}" does not exist` : error.message;
+      yield {
+        type: "meta:status",
+        data: { message: `Failed to update skill: ${errorMsg}`, severity: "error" },
+      };
       yield {
         type: "action:result",
         data: {
           action: "updateSkill",
           toolCallId,
-          result: { error: error.code === "ENOENT" ? `Skill "${id}" does not exist` : error.message },
+          result: { error: errorMsg },
         },
       };
     }
@@ -487,6 +531,11 @@ ${content}`;
       await fs.writeFile(resolvePath("IDENTITY.md"), content, "utf-8");
 
       yield {
+        type: "meta:status",
+        data: { message: "Identity updated", severity: "success" },
+      };
+
+      yield {
         type: "action:result",
         data: {
           action: "updateIdentity",
@@ -498,6 +547,10 @@ ${content}`;
         },
       };
     } catch (error: any) {
+      yield {
+        type: "meta:status",
+        data: { message: `Failed to update identity: ${error.message}`, severity: "error" },
+      };
       yield {
         type: "action:result",
         data: {
@@ -548,6 +601,11 @@ ${content}`;
       await fs.appendFile(memoryFile, entry, "utf-8");
 
       yield {
+        type: "meta:status",
+        data: { message: `Added to ${category} memory`, severity: "success" },
+      };
+
+      yield {
         type: "action:result",
         data: {
           action: "appendToMemory",
@@ -559,6 +617,10 @@ ${content}`;
         },
       };
     } catch (error: any) {
+      yield {
+        type: "meta:status",
+        data: { message: `Failed to append to memory: ${error.message}`, severity: "error" },
+      };
       yield {
         type: "action:result",
         data: {

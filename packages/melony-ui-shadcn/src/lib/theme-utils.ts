@@ -163,14 +163,14 @@ export const radiusMap: Record<UIRadius, string> = {
   full: "rounded-full",
 };
 
-export const alignMap = {
+export const alignMap: Record<string, string> = {
   start: "items-start",
   center: "items-center",
   end: "items-end",
   stretch: "items-stretch",
 };
 
-export const justifyMap = {
+export const justifyMap: Record<string, string> = {
   start: "justify-start",
   center: "justify-center",
   end: "justify-end",
@@ -178,13 +178,13 @@ export const justifyMap = {
   around: "justify-around",
 };
 
-export const wrapMap = {
+export const wrapMap: Record<string, string> = {
   nowrap: "flex-nowrap",
   wrap: "flex-wrap",
   "wrap-reverse": "flex-wrap-reverse",
 };
 
-export const textSizeMap = {
+export const textSizeMap: Record<string, string> = {
   none: "text-[0]",
   xs: "text-xs",
   sm: "text-sm",
@@ -194,16 +194,55 @@ export const textSizeMap = {
   xxl: "text-2xl",
 };
 
-export const textAlignMap = {
+export const textAlignMap: Record<string, string> = {
   start: "text-left",
   center: "text-center",
   end: "text-right",
   stretch: "text-justify",
 };
 
-export const fontWeightMap = {
+export const fontWeightMap: Record<string, string> = {
   normal: "font-normal",
   medium: "font-medium",
   semibold: "font-semibold",
   bold: "font-bold",
+};
+
+/**
+ * Resolves an SDUI color (e.g., "primary/50") to a React style object.
+ * This handles opacity using CSS Relative Color Syntax.
+ */
+export const resolveUIStyle = (
+  property: "backgroundColor" | "color" | "borderColor",
+  value?: UIColor,
+) => {
+  if (!value) return {};
+
+  const [colorName, opacityStr] = value.split("/");
+
+  // If it's a standard mapping and no opacity is requested, return nothing
+  // and let the Tailwind classes handle it (to preserve text-foreground etc.)
+  if (!opacityStr && (colorBgMap[value as UIColor] || colorTextMap[value as UIColor] || colorBorderMap[value as UIColor])) {
+    return {};
+  }
+
+  const opacity = opacityStr ? parseInt(opacityStr, 10) / 100 : 1;
+
+  // Map camelCase to kebab-case for CSS variables if needed, 
+  // but most of our colors are single words.
+  const kebabName = colorName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+  
+  // Tailwind 4 defines colors as --color-{name}
+  // Shadcn often defines them as --{name}
+  const variable = `var(--color-${kebabName}, var(--${kebabName}))`;
+
+  if (opacity === 1) {
+    return { [property]: variable };
+  }
+
+  // Use CSS color-mix as it's very robust and handles the opacity well
+  // mixed with transparent. This is a very safe way to handle opacity.
+  return {
+    [property]: `color-mix(in oklch, ${variable}, transparent ${100 - opacity * 100}%)`,
+  };
 };

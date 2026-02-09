@@ -1,6 +1,6 @@
 {
   "name": "@melony/plugin-ai-sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -24,7 +24,8 @@
     "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "dependencies": {
-    "ai": "^6.0.42"
+    "ai": "^6.0.42",
+    "@melony/ui-kit": "workspace:*"
   },
   "peerDependencies": {
     "melony": "workspace:*",

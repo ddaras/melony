@@ -2,9 +2,13 @@ import os from "node:os";
 import { melony } from "melony";
 import { ChatEvent, ChatState } from "./types.js";
 import { shellPlugin, shellToolDefinitions } from "@melony/plugin-shell";
+import { shellUIPlugin } from "@melony/plugin-shell/ui";
 import { browserPlugin, browserToolDefinitions } from "@melony/plugin-browser";
+import { browserUIPlugin } from "@melony/plugin-browser/ui";
 import { fileSystemPlugin, fileSystemToolDefinitions } from "@melony/plugin-file-system";
+import { fileSystemUIPlugin } from "@melony/plugin-file-system/ui";
 import { metaAgentPlugin, metaAgentToolDefinitions, buildSystemPrompt } from "@melony/plugin-meta-agent";
+import { metaAgentUIPlugin } from "@melony/plugin-meta-agent/ui";
 import { aiSDKPlugin } from "@melony/plugin-ai-sdk";
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
@@ -74,7 +78,7 @@ export async function createOpenBot(options?: {
   const resolvedBaseDir = resolvePath(baseDir);
 
   // Parse model configuration
-  const { provider, modelId } = parseModelString(config.model || "gpt-5-nano");
+  const { provider, modelId } = parseModelString(config.model || "gpt-4o-mini");
 
   // Tool definitions shared by both providers
   const toolDefinitions = {
@@ -101,29 +105,33 @@ export async function createOpenBot(options?: {
 
   const llmPlugin = aiSDKPlugin({
     model: model as any,
-    system: (_context) => buildSystemPrompt(resolvedBaseDir),
+    system: (context) => buildSystemPrompt(resolvedBaseDir, context),
     toolDefinitions,
   });
 
   // Use a dedicated directory for the agent's browser data to avoid conflicts with your main Chrome.
   // Using the root Chrome directory causes conflicts and can log you out of your main browser.
-  const userDataDir = path.join(os.homedir(), ".openbot", "browser-data");
+  const userDataDir = path.join(resolvedBaseDir, "browser-data");
 
   return melony<ChatState, ChatEvent>()
     .use(shellPlugin({ cwd: process.cwd() }))
+    .use(shellUIPlugin())
     .use(browserPlugin({
       headless: true, // Set to false once to log in manually if needed
       userDataDir: userDataDir,
       channel: 'chrome',
       model: model as any
     }))
+    .use(browserUIPlugin())
     .use(fileSystemPlugin({
       baseDir: "/", // Global access
     }))
+    .use(fileSystemUIPlugin())
     .use(metaAgentPlugin({
       baseDir: resolvedBaseDir,
       allowSoulModification: false, // Protect core values
     }))
+    .use(metaAgentUIPlugin())
     .use(llmPlugin)
     .on("init", initHandler);
 }

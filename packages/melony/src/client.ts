@@ -8,11 +8,13 @@ export interface ClientState<TEvent extends Event = Event> {
   events: TEvent[];
   streaming: boolean;
   error: Error | null;
+  context: Record<string, any>;
 }
 
 export interface MelonyClientOptions<TEvent extends Event = Event> {
   url: string;
   initialEvents?: TEvent[];
+  initialContext?: Record<string, any>;
   headers?:
   | Record<string, string>
   | (() => Record<string, string> | Promise<Record<string, string>>);
@@ -33,6 +35,7 @@ export class MelonyClient<TEvent extends Event = Event> {
       events: options.initialEvents ?? [],
       streaming: false,
       error: null,
+      context: options.initialContext ?? {},
     };
   }
 
@@ -68,7 +71,7 @@ export class MelonyClient<TEvent extends Event = Event> {
   }
 
   async *send(
-    event: TEvent, 
+    event: TEvent,
     additionalBody?: Record<string, any>
   ): AsyncGenerator<TEvent> {
     if (this.abortController) this.abortController.abort();
@@ -90,7 +93,7 @@ export class MelonyClient<TEvent extends Event = Event> {
       const response = await fetch(this.url, {
         method: "POST",
         headers,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           event: optimisticEvent,
           ...additionalBody,
         }),
@@ -117,7 +120,8 @@ export class MelonyClient<TEvent extends Event = Event> {
           if (!line.startsWith("data: ")) continue;
           try {
             const incomingEvent: TEvent = JSON.parse(line.slice(6));
-            this.handleIncomingEvent(incomingEvent);
+            const handled = this.handleIncomingEvent(incomingEvent);
+            if (!handled) continue;
             yield incomingEvent;
           } catch (e) {
             console.error("Failed to parse event", e);
@@ -148,6 +152,7 @@ export class MelonyClient<TEvent extends Event = Event> {
     }
 
     this.setState({ events });
+    return true;
   }
 
   reset(events: TEvent[] = []) {

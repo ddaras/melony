@@ -87,4 +87,56 @@ export const ui = {
   // organisms
   thread: (props: UIContract["thread"] = {}, children: UINode[] = []) =>
     ui.node("thread", props, children),
+
+  themeToggle: (props: UIContract["themeToggle"] = {}) =>
+    ui.node("themeToggle", props),
+
+  // --- Semantic Helpers (Intent-based) ---
+
+  /**
+   * Status text for tool results or process updates.
+   */
+  status: (message: string, severity: 'info' | 'success' | 'error' = 'info') =>
+    ui.node('text', {
+      value: message,
+      color: severity === 'error' ? 'danger' : severity === 'success' ? 'success' : 'muted',
+      size: 'xs',
+      weight: 'medium'
+    }),
+
+  /**
+   * A standardized card for resources (files, websites, terminal sessions).
+   */
+  resourceCard: (title: string, subtitle?: string, children: UINode[] = []) =>
+    ui.card({
+      title,
+      subtitle,
+      padding: 'none',
+      radius: 'lg',
+      shadow: 'none',
+      background: 'background',
+    }, children.length > 0 ? [
+      ui.box({ padding: 'md' }, children)
+    ] : []),
+
+  /**
+   * A horizontal group for action buttons, typically at the bottom of a card.
+   */
+  actionGroup: (children: UINode[]) =>
+    ui.row({
+      gap: 'xs',
+      padding: 'xs',
+      justify: 'end',
+    }, children),
+
+  /**
+   * A block for displaying structured data (key/value pairs).
+   */
+  dataBlock: (data: Record<string, any>) =>
+    ui.col({ gap: 'xs' }, Object.entries(data).filter(([_, v]) => v !== undefined && v !== null).map(([key, value]) =>
+      ui.row({ gap: 'sm', align: 'start' }, [
+        ui.text(`${key}:`, { weight: 'semibold', size: 'xs', color: 'muted' }),
+        ui.text(String(value), { size: 'xs' }),
+      ])
+    )),
 };

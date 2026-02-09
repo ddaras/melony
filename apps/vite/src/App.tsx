@@ -1,7 +1,8 @@
-import { MelonyProvider, useMelonyInit } from "@melony/react";
+import { MelonyProvider, useMelonyInit, useMelony } from "@melony/react";
 import { MelonyRenderer, MelonyUIProvider, type UINode } from "@melony/ui-kit";
 import { shadcnElements, ThemeProvider } from "@melony/ui-shadcn";
 import { generateId, MelonyClient } from "melony/client";
+import { useEffect, useMemo, useState } from "react";
 
 const BASE_URL = (window as any).MELONY_BASE_URL || "http://localhost:4001";
 
@@ -10,42 +11,95 @@ const melonyClient = new MelonyClient({
 })
 
 export function App() {
-  const sessionId = `ses_${generateId()}`;
+  const [context, setContext] = useState<Record<string, any>>({
+    sidebarWidth: 240,
+    isSidebarOpen: true,
+  });
+  const [path, setPath] = useState(window.location.search);
+  
+  const sessionId = useMemo(() => {
+    const params = new URLSearchParams(path);
+    return params.get("sessionId") || `ses_${generateId()}`;
+  }, [path]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setPath(window.location.search);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   return (
-    <MelonyProvider client={melonyClient} initialAdditionalBody={{
-      sessionId
-    }} eventHandlers={{
-      "client:navigate": (event) => {
-        console.log("Navigating to:", event.data.path);
-        // push without reloading the page
-        window.history.pushState({}, "", event.data.path);
-        return;
-      }
-    }}>
+    <MelonyProvider
+      client={melonyClient}
+      initialAdditionalBody={{
+        sessionId
+      }}
+      eventHandlers={{
+        "client:navigate": (event) => {
+          console.log("Navigating to:", event.data.path);
+          // push without reloading the page
+          window.history.pushState({}, "", event.data.path);
+          setPath(window.location.search);
+          return;
+        },
+        "client:set-context": (event) => {
+          setContext({ ...context, ...event.data });
+          return;
+        },
+        "user:text": async (event, { client }) => {
+          const params = new URLSearchParams(window.location.search);
+          if (!params.has("sessionId")) {
+            params.set("sessionId", sessionId);
+            const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+            window.history.replaceState({}, "", newUrl);
+            setPath(window.location.search);
+          }
+
+          const generator = client.send(event, { sessionId });
+          for await (const _ of generator) {
+            // Events are handled by the client subscription
+          }
+        },
+      }}
+    >
       <MelonyUIProvider components={{ ...shadcnElements }}>
         <ThemeProvider>
-          <AppContent sessionId={sessionId} />
+          <AppContent sessionId={sessionId} path={path} />
         </ThemeProvider>
       </MelonyUIProvider>
     </MelonyProvider>
   )
 }
 
-export function AppContent({ sessionId }: { sessionId: string }) {
+export function AppContent({ sessionId, path }: { sessionId: string, path: string }) {
+  const { reset } = useMelony();
+  const searchParams = new URLSearchParams(path);
+  const tab = searchParams.get("tab") || "chat";
+
   const { data, loading, error } = useMelonyInit(`${BASE_URL}/api/init`, {
     platform: "web",
-    sessionId
+    sessionId,
+    tab
   });
 
-  const uiTree = data as UINode | null;
+  console.log("data", data);
+
+  useEffect(() => {
+    if (data?.initialEvents) {
+      reset(data.initialEvents);
+    }
+  }, [data?.initialEvents, reset]);
+
+  const uiTree = data?.data as UINode | null;
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div style={{ fontSize: "11px", fontWeight: "bold", height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>Loading...</div>;
   }
 
   if (error || !uiTree) {
-    return <div>Failed to load UI</div>;
+    return <div style={{ fontSize: "11px", fontWeight: "bold", height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>Failed to load UI</div>;
   }
 
   return (

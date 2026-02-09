@@ -1,6 +1,6 @@
 {
   "name": "@melony/plugin-file-system",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "default": "./dist/ui.js"
     }
   },
   "files": [
@@ -20,6 +25,9 @@
     "dev": "tsup --watch",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@melony/ui-kit": "workspace:*"
   },
   "peerDependencies": {
     "melony": "workspace:*",

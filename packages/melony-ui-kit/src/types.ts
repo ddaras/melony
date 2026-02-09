@@ -1,10 +1,10 @@
 import type { Event } from "melony";
 
-export type UISize = "sm" | "md" | "lg";
-export type UIAlign = "start" | "center" | "end" | "stretch";
-export type UIJustify = "start" | "center" | "end" | "between" | "around";
-export type UIWrap = "nowrap" | "wrap" | "wrap-reverse";
-export type UIOrientation = "horizontal" | "vertical";
+export type UISize = "sm" | "md" | "lg" | (string & {});
+export type UIAlign = "start" | "center" | "end" | "stretch" | (string & {});
+export type UIJustify = "start" | "center" | "end" | "between" | "around" | (string & {});
+export type UIWrap = "nowrap" | "wrap" | "wrap-reverse" | (string & {});
+export type UIOrientation = "horizontal" | "vertical" | (string & {});
 
 export type UIColor =
   | "primary"
@@ -18,9 +18,10 @@ export type UIColor =
   | "muted"
   | "mutedForeground"
   | "border"
-  | "transparent";
+  | "transparent"
+  | (string & {});
 
-export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | (string & {});
 
 export type UIWidth =
   | "auto"
@@ -31,10 +32,11 @@ export type UIWidth =
   | "1/3"
   | "2/3"
   | "1/4"
-  | "3/4" 
-  | number;
-export type UIShadow = "none" | "sm" | "md" | "lg" | "xl";
-export type UIRadius = "none" | "sm" | "md" | "lg" | "full";
+  | "3/4"
+  | number
+  | (string & {});
+export type UIShadow = "none" | "sm" | "md" | "lg" | "xl" | (string & {});
+export type UIRadius = "none" | "sm" | "md" | "lg" | "full" | (string & {});
 
 /**
  * UI Component Contracts
@@ -60,6 +62,8 @@ export interface UIContract {
     width?: UIWidth;
     height?: "auto" | "full";
     group?: boolean;
+    flex?: number;
+    overflow?: "hidden" | "visible" | "scroll" | "auto";
   };
   col: {
     align?: UIAlign;
@@ -71,6 +75,8 @@ export interface UIContract {
     background?: UIColor;
     radius?: UIRadius;
     group?: boolean;
+    flex?: number;
+    overflow?: "hidden" | "visible" | "scroll" | "auto";
   };
   box: {
     padding?: UISpacing;
@@ -87,6 +93,8 @@ export interface UIContract {
     height?: "auto" | "full";
     shadow?: UIShadow;
     group?: boolean;
+    flex?: number;
+    overflow?: "hidden" | "visible" | "scroll" | "auto";
   };
   spacer: {
     size?: UISpacing;
@@ -159,6 +167,7 @@ export interface UIContract {
   list: {
     padding?: UISpacing;
     gap?: UISpacing;
+    width?: UIWidth;
   };
   listItem: {
     onClickAction?: Event;
@@ -294,6 +303,9 @@ export interface UIContract {
     welcomeTitle?: string;
     welcomeMessage?: string;
     suggestions?: string[];
+  };
+  themeToggle: {
+    theme?: "light" | "dark" | "system";
   };
 }
 

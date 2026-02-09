@@ -7,7 +7,7 @@ import { Command } from "commander";
 import { generateId } from "melony";
 import { createOpenBot } from "./agent.js";
 import { loadConfig } from "./config.js";
-import { loadSession, saveSession, logEvent } from "./session.js";
+import { loadSession, saveSession, logEvent, loadEvents } from "./session.js";
 import type { ChatEvent, ChatRequest } from "./types.js";
 
 const program = new Command();
@@ -44,21 +44,25 @@ program
     app.get<{ platform: string }>("/api/init", async (req, res) => {
       const platform = req.query.platform || "web";
       const sessionId = req.query.sessionId as string || "default";
+      const tab = req.query.tab as string;
       const state = await loadSession(sessionId) ?? {};
 
       const response = await openBot.jsonResponse({
         type: "init",
-        data: { platform }
+        data: { platform, tab }
       } as any, {
-        state,
+        state: { ...state, sessionId },
         runId: generateId()
       });
 
       const result = await response.json();
-      // Save state in case init handler modified it
-      await saveSession(sessionId, state);
-      
-      res.json(result);
+
+      const initialEvents = await loadEvents(sessionId);
+
+      res.json({
+        data: result.data,
+        initialEvents
+      });
     });
 
     // Chat endpoint
@@ -84,6 +88,9 @@ program
       const runId = body.runId ?? `run_${generateId()}`;
       const state = await loadSession(sessionId) ?? {};
 
+      // Log the incoming event
+      await logEvent(sessionId, runId, body.event as ChatEvent);
+
       const iterator = runtime.run(body.event as ChatEvent, {
         runId,
         state,
@@ -101,7 +108,7 @@ program
             break;
           }
           // Log each event to the persistent file
-          // await logEvent(sessionId, runId, chunk);
+          await logEvent(sessionId, runId, chunk);
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         }
         // After the run finishes, save the final state back to disk

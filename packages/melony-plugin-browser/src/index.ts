@@ -1,4 +1,4 @@
-import { MelonyPlugin } from "melony";
+import { MelonyPlugin, Event } from "melony";
 import { z } from "zod";
 import { chromium, Browser, BrowserContext, Page } from "playwright";
 import { generateText, LanguageModel, Output } from "ai";
@@ -32,6 +32,21 @@ export interface BrowserPluginOptions {
   userDataDir?: string;
   channel?: string;
   model?: LanguageModel; // Required for smart features (act, extract, observe)
+}
+
+export interface BrowserStatusEvent extends Event {
+  type: "browser:status";
+  data: { message: string; severity?: "info" | "success" | "error" };
+}
+
+export interface BrowserStateUpdateEvent extends Event {
+  type: "browser:state-update";
+  data: {
+    url: string;
+    title: string;
+    screenshot?: string;
+    pagesCount: number;
+  };
 }
 
 /**
@@ -116,11 +131,10 @@ class SmartBrowser {
    * Captures the accessibility tree and simplifies it for the LLM.
    * Also injects IDs into the DOM and draws visual annotations for screenshots.
    */
-  public async injectActionIds(page: Page, annotate: boolean = false) {
-    await page.evaluate(({ annotate }) => {
-      // 1. Clear existing IDs and annotations
+  public async injectActionIds(page: Page) {
+    await page.evaluate(() => {
+      // 1. Clear existing IDs
       document.querySelectorAll('[data-melony-id]').forEach(el => el.removeAttribute('data-melony-id'));
-      document.querySelectorAll('.melony-annotation').forEach(el => el.remove());
 
       // 2. Identify interactive elements
       const interactiveSelector = 'button, a, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [role="tab"], [role="treeitem"], [role="option"], [role="switch"], [role="radio"], [contenteditable="true"]';
@@ -134,38 +148,7 @@ class SmartBrowser {
 
         const melonyId = String(id++);
         el.setAttribute('data-melony-id', melonyId);
-
-        // 3. Draw visual annotations if requested
-        if (annotate) {
-          const rect = el.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            const label = document.createElement('div');
-            label.className = 'melony-annotation';
-            label.textContent = melonyId;
-            Object.assign(label.style, {
-              position: 'fixed',
-              top: `${rect.top}px`,
-              left: `${rect.left}px`,
-              background: 'red',
-              color: 'white',
-              fontSize: '10px',
-              padding: '1px 3px',
-              borderRadius: '3px',
-              zIndex: '1000000',
-              pointerEvents: 'none',
-              fontWeight: 'bold',
-              border: '1px solid white'
-            });
-            document.body.appendChild(label);
-          }
-        }
       });
-    }, { annotate });
-  }
-
-  public async cleanupAnnotations(page: Page) {
-    await page.evaluate(() => {
-      document.querySelectorAll('.melony-annotation').forEach(el => el.remove());
     });
   }
 
@@ -341,11 +324,8 @@ class SmartBrowser {
     const runLoop = async (retry = 0, lastError?: string): Promise<any> => {
       await this.waitForStable(page);
 
-      // 1. Annotate for screenshot
-      await this.injectActionIds(page, true);
+      // 1. Get screenshot and state
       const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
-      await this.cleanupAnnotations(page); // Clean up immediately after screenshot
-
       const state = await this.getPageMap(page);
 
       const { output } = await generateText({
@@ -362,7 +342,7 @@ Current State:
 
 Page Structure:
 The page is grouped into semantic sections (header, main, sidebar, etc.).
-Elements have IDs which correspond to RED labels in the screenshot.
+Elements have IDs which you can use for clicking or typing.
 Use 'inViewport: false' elements to trigger automatic scrolling.
 
 Guidelines:
@@ -381,8 +361,6 @@ Guidelines:
           }
         ]
       });
-
-      console.log('Browser Action:', output.action, output.reasoning);
 
       if (output.action === 'done') return { success: true, message: output.reasoning };
 
@@ -410,11 +388,9 @@ Guidelines:
     if (!this.model) throw new Error("LanguageModel required for 'observe'");
     await this.waitForStable(page);
 
-    await this.injectActionIds(page, true);
-    const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
-    await this.cleanupAnnotations(page);
-
     const state = await this.getPageMap(page);
+
+    const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
 
     const { output } = await generateText({
       model: this.model!,
@@ -423,10 +399,33 @@ Guidelines:
           observations: z.array(z.string().describe("Natural language instruction for 'act'"))
         })
       }),
-      prompt: `Analyze this page state and suggest 5 logical next steps for a user.
-Current URL: ${state.url}
-Scroll: ${state.scroll.percentage}%
-DOM: ${JSON.stringify(state.sections, null, 2)}`
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert browser analyst. Your task is to analyze the current page state and suggest logical next steps for a user.
+Current State:
+- URL: ${state.url}
+- Title: ${state.title}
+- Scroll: ${state.scroll.percentage}% of page
+
+Page Structure:
+The page is grouped into semantic sections (header, main, sidebar, etc.).
+Elements have IDs which can be used for interaction.
+
+Guidelines for observations:
+1. Suggest 5 logical, high-level actions the user might want to take.
+2. Each observation should be a natural language instruction that can be passed to the 'act' tool.
+3. Focus on primary content and navigation.
+4. If a modal or popup is open, suggest actions to handle it.`
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: `DOM Tree Snapshot:\n${JSON.stringify(state.sections, null, 2)}` },
+            ...(screenshot ? [{ type: 'image', image: screenshot } as any] : [])
+          ]
+        }
+      ]
     });
 
     return output;
@@ -455,96 +454,29 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
   const smartBrowser = new SmartBrowser(options.model, manager);
 
   return (builder) => {
-    async function* yieldState(page: Page, options: { screenshot?: boolean, annotate?: boolean } = { screenshot: true, annotate: false }) {
+    async function* yieldState(page: Page, options: { screenshot?: boolean } = { screenshot: true }) {
       try {
         const url = page.url();
         const title = await page.title();
         const pages = manager.getPages();
 
-        if (options.annotate) {
-          await smartBrowser.injectActionIds(page, true);
-          const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
-          yield {
-            type: "ui",
-            data: {
-              type: "image",
-              props: { src: `data:image/jpeg;base64,${screenshot?.toString("base64") ?? ""}`, alt: "Screenshot", width: "full" },
-            },
-          };
-        }
-
-
-
         let base64: string | undefined;
         if (options.screenshot) {
-          const screenshot = await page.screenshot({ type: "jpeg", quality: 60 });
-          base64 = screenshot.toString("base64");
+          const screenshot = await page.screenshot({ type: "jpeg", quality: 60 }).catch(() => null);
+          if (screenshot) {
+            base64 = screenshot.toString("base64");
+          }
         }
-
-        if (options.annotate) {
-          await smartBrowser.cleanupAnnotations(page);
-        }
-
-        const children: any[] = [];
-        if (base64) {
-          children.push({
-            type: "image",
-            props: { src: `data:image/jpeg;base64,${base64}`, alt: "Screenshot", width: "full" },
-          });
-        }
-
-        children.push({
-          type: "row",
-          props: { justify: "between", padding: "sm" },
-          children: [
-            {
-              type: "text",
-              props: { value: `Tabs: ${pages.length}`, size: "xs", color: "muted" },
-            },
-            {
-              type: "row",
-              props: { gap: "xs" },
-              children: [
-                {
-                  type: "button",
-                  props: {
-                    label: options.annotate ? "Hide IDs" : "Show IDs",
-                    size: "xs",
-                    variant: options.annotate ? "default" : "outline",
-                    onClickAction: { type: "action:browser_state_update", annotate: !options.annotate },
-                  },
-                },
-                {
-                  type: "button",
-                  props: {
-                    label: "Open Visible",
-                    size: "xs",
-                    variant: "outline",
-                    onClickAction: { type: "action:browser_show" },
-                  },
-                },
-                {
-                  type: "button",
-                  props: {
-                    label: "Cleanup",
-                    size: "xs",
-                    variant: "outline",
-                    onClickAction: { type: "action:browser_cleanup" },
-                  },
-                },
-              ],
-            },
-          ],
-        });
 
         yield {
-          type: "ui",
+          type: "browser:state-update",
           data: {
-            type: "card",
-            props: { title: title || "Browser View", subtitle: url, padding: "none" },
-            children,
+            url,
+            title,
+            screenshot: base64,
+            pagesCount: pages.length,
           },
-        };
+        } as BrowserStateUpdateEvent;
       } catch (e) {
         console.error("Browser state update failed", e);
       }
@@ -559,19 +491,14 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       const { toolCallId, instruction } = event.data;
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Performing action: ${instruction}`,
-          }
-        },
-      };
+        type: "browser:status",
+        data: { message: `Performing action: ${instruction}` }
+      } as BrowserStatusEvent;
 
       try {
         const page = await manager.ensurePage();
         const result = await smartBrowser.act(page, instruction);
-        yield* yieldState(page, { annotate: true });
+        yield* yieldState(page);
         yield buildResult("browser_act", toolCallId, { success: true, ...result });
       } catch (error: any) {
         yield buildResult("browser_act", toolCallId, { error: error.message });
@@ -582,30 +509,20 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       const { toolCallId, instruction } = event.data;
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Extracting data: ${instruction}`,
-          }
-        },
-      };
+        type: "browser:status",
+        data: { message: `Extracting data: ${instruction}` }
+      } as BrowserStatusEvent;
 
       try {
         const page = await manager.ensurePage();
         const result = await smartBrowser.extract(page, instruction);
 
         yield {
-          type: "ui",
-          data: {
-            type: 'text',
-            props: {
-              value: `Extracted data: ${JSON.stringify(result, null, 2)}`,
-            }
-          },
-        };
+          type: "browser:status",
+          data: { message: `Extracted data: ${JSON.stringify(result, null, 2)}` }
+        } as BrowserStatusEvent;
 
-        yield* yieldState(page);
+        yield* yieldState(page, { screenshot: false });
         yield buildResult("browser_extract", toolCallId, { success: true, ...result });
       } catch (error: any) {
         yield buildResult("browser_extract", toolCallId, { error: error.message });
@@ -616,32 +533,24 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       const { toolCallId } = event.data;
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Observing page`,
-          }
-        },
-      };
+        type: "browser:status",
+        data: { message: `Observing page` }
+      } as BrowserStatusEvent;
 
       try {
         const page = await manager.ensurePage();
         const result = await smartBrowser.observe(page);
 
         yield {
-          type: "ui",
+          type: "browser:status",
           data: {
-            type: 'text',
-            props: {
-              value: (result as any).observations
-                ? `Possible actions:\n${(result as any).observations.map((o: string) => `• ${o}`).join('\n')}`
-                : `Observations: ${JSON.stringify(result, null, 2)}`,
-            }
-          },
-        };
+            message: (result as any).observations
+              ? `Possible actions:\n${(result as any).observations.map((o: string) => `• ${o}`).join('\n')}`
+              : `Observations: ${JSON.stringify(result, null, 2)}`,
+          }
+        } as BrowserStatusEvent;
 
-        yield* yieldState(page);
+        yield* yieldState(page, { screenshot: true });
         yield buildResult("browser_observe", toolCallId, { success: true, ...result });
       } catch (error: any) {
         yield buildResult("browser_observe", toolCallId, { error: error.message });
@@ -662,14 +571,9 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
       const { toolCallId } = event.data;
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Showing browser`,
-          }
-        },
-      };
+        type: "browser:status",
+        data: { message: `Showing browser` }
+      } as BrowserStatusEvent;
 
       try {
         const page = await manager.ensurePage();
@@ -693,21 +597,16 @@ export const browserPlugin = (options: BrowserPluginOptions = {}): MelonyPlugin<
     });
 
     builder.on("action:browser_state_update" as any, async function* (event) {
-      const { toolCallId, annotate } = event.data;
+      const { toolCallId } = event.data;
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Updating browser state`,
-          }
-        },
-      };
+        type: "browser:status",
+        data: { message: `Updating browser state` }
+      } as BrowserStatusEvent;
 
       try {
         const page = await manager.ensurePage();
-        yield* yieldState(page, { screenshot: true, annotate: !!annotate });
+        yield* yieldState(page, { screenshot: true });
         yield buildResult("browser_state_update", toolCallId, { success: true });
       } catch (error: any) {
         yield buildResult("browser_state_update", toolCallId, { error: error.message });

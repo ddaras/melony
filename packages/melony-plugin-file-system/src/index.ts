@@ -1,35 +1,40 @@
-import { MelonyPlugin } from "melony";
+import { MelonyPlugin, Event } from "melony";
 import { z } from "zod";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 export const fileSystemToolDefinitions = {
   readFile: {
-    description: "Read the contents of a file. Path is relative to the system root (/).",
+    description: "Read the contents of a file. Path can be absolute or relative to the current working directory.",
     inputSchema: z.object({
-      path: z.string().describe("The absolute path to the file (e.g., '/home/user/file.txt')"),
+      path: z.string().describe("The path to the file (e.g., 'src/main.ts' or '/etc/hosts')"),
     }),
   },
   writeFile: {
-    description: "Write content to a file. Path is relative to the system root (/).",
+    description: "Write content to a file. Path can be absolute or relative to the current working directory.",
     inputSchema: z.object({
-      path: z.string().describe("The absolute path to the file (e.g., '/home/user/new-file.ts')"),
+      path: z.string().describe("The path to the file (e.g., 'new-file.ts')"),
       content: z.string().describe("The content to write to the file"),
     }),
   },
   listFiles: {
-    description: "List files in a directory. Path is relative to the system root (/).",
+    description: "List files in a directory. Path can be absolute or relative to the current working directory.",
     inputSchema: z.object({
-      path: z.string().describe("The absolute path to the directory (use '/' for system root)"),
+      path: z.string().describe("The path to the directory (use '.' for current directory)"),
     }),
   },
   deleteFile: {
-    description: "Delete a file. Path is relative to the system root (/).",
+    description: "Delete a file. Path can be absolute or relative to the current working directory.",
     inputSchema: z.object({
-      path: z.string().describe("The absolute path to the file"),
+      path: z.string().describe("The path to the file"),
     }),
   },
 };
+
+export interface FileSystemStatusEvent extends Event {
+  type: "file-system:status";
+  data: { message: string; severity?: "info" | "success" | "error" };
+}
 
 export interface FileSystemPluginOptions {
   baseDir?: string;
@@ -52,31 +57,24 @@ function truncate(str: string | undefined | null, maxChars: number): string | un
 }
 
 export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyPlugin<any, any> => (builder) => {
-  const { baseDir = process.cwd(), maxFileReadLength = 10000 } = options;
+  const { baseDir = "/", maxFileReadLength = 10000 } = options;
 
-  const resolvePath = (p: string) => {
-    const resolved = path.resolve(baseDir, p);
-    if (!resolved.startsWith(path.resolve(baseDir))) {
-      throw new Error(`Access denied: Path ${p} is outside of base directory ${baseDir}`);
-    }
+  const resolvePath = (p: string, stateCwd?: string) => {
+    // If p is absolute, resolve from root. If relative, resolve from stateCwd or baseDir.
+    const resolved = path.isAbsolute(p) ? p : path.resolve(stateCwd || baseDir, p);
     return resolved;
   };
 
-  builder.on("action:readFile", async function* (event) {
+  builder.on("action:readFile", async function* (event, { state }) {
     const { path: filePath, toolCallId } = event.data;
 
     yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          value: `Reading file: ${filePath}`,
-        }
-      },
-    };
+      type: "file-system:status",
+      data: { message: `Reading file: ${filePath} (relative to ${state.cwd || baseDir})` }
+    } as FileSystemStatusEvent;
 
     try {
-      const content = await fs.readFile(resolvePath(filePath), "utf-8");
+      const content = await fs.readFile(resolvePath(filePath, state.cwd), "utf-8");
       yield {
         type: "action:result",
         data: { 
@@ -86,103 +84,72 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
         },
       };
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `File read successfully`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `File read successfully`, severity: "success" }
+      } as FileSystemStatusEvent;
     } catch (error: any) {
       yield {
         type: "action:result",
         data: { action: "readFile", result: { error: error.message }, toolCallId },
       };
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `File read failed: ${error.message}`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `File read failed: ${error.message}`, severity: "error" }
+      } as FileSystemStatusEvent;
     }
   });
 
-  builder.on("action:writeFile", async function* (event) {
+  builder.on("action:writeFile", async function* (event, { state }) {
     const { path: filePath, content, toolCallId } = event.data;
     yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          value: `Writing file: ${filePath}`,
-        }
-      },
-    };
+      type: "file-system:status",
+      data: { message: `Writing file: ${filePath}` }
+    } as FileSystemStatusEvent;
     try {
-      const fullPath = resolvePath(filePath);
+      const fullPath = resolvePath(filePath, state.cwd);
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.writeFile(fullPath, content, "utf-8");
       yield {
         type: "action:result",
         data: { action: "writeFile", result: { success: true }, toolCallId },
       };
+      yield {
+        type: "file-system:status",
+        data: { message: `File written successfully`, severity: "success" }
+      } as FileSystemStatusEvent;
     } catch (error: any) {
       yield {
         type: "action:result",
         data: { action: "writeFile", result: { error: error.message }, toolCallId },
       };
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `File written successfully`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `File write failed: ${error.message}`, severity: "error" }
+      } as FileSystemStatusEvent;
     }
   });
 
-  builder.on("action:listFiles", async function* (event) {
+  builder.on("action:listFiles", async function* (event, { state }) {
     const { path: dirPath, toolCallId } = event.data;
     yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          value: `Listing files in: ${dirPath}`,
-        }
-      },
-    };
+      type: "file-system:status",
+      data: { message: `Listing files in: ${dirPath}` }
+    } as FileSystemStatusEvent;
     try {
-      const files = await fs.readdir(resolvePath(dirPath));
+      const files = await fs.readdir(resolvePath(dirPath, state.cwd));
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Files listed successfully`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `Files listed successfully`, severity: "success" }
+      } as FileSystemStatusEvent;
       yield {
         type: "action:result",
         data: { action: "listFiles", result: { files }, toolCallId },
       };
     } catch (error: any) {
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Files listing failed: ${error.message}`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `Files listing failed: ${error.message}`, severity: "error" }
+      } as FileSystemStatusEvent;
       yield {
         type: "action:result",
         data: { action: "listFiles", result: { error: error.message }, toolCallId },
@@ -190,46 +157,31 @@ export const fileSystemPlugin = (options: FileSystemPluginOptions = {}): MelonyP
     }
   });
 
-  builder.on("action:deleteFile", async function* (event) {
+  builder.on("action:deleteFile", async function* (event, { state }) {
     const { path: filePath, toolCallId } = event.data;
     yield {
-      type: "status",
-      data: {
-        type: 'text',
-        props: {
-          value: `Deleting file: ${filePath}`,
-        }
-      },
-    };
+      type: "file-system:status",
+      data: { message: `Deleting file: ${filePath}` }
+    } as FileSystemStatusEvent;
     try {
-      await fs.unlink(resolvePath(filePath));
+      await fs.unlink(resolvePath(filePath, state.cwd));
       yield {
         type: "action:result",
         data: { action: "deleteFile", result: { success: true }, toolCallId },
       };
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `File deleted successfully`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `File deleted successfully`, severity: "success" }
+      } as FileSystemStatusEvent;
     } catch (error: any) {
       yield {
         type: "action:result",
         data: { action: "deleteFile", result: { error: error.message }, toolCallId },
       };
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `File deletion failed: ${error.message}`,
-          }
-        },
-      };
+        type: "file-system:status",
+        data: { message: `File deletion failed: ${error.message}`, severity: "error" }
+      } as FileSystemStatusEvent;
     }
   });
 };

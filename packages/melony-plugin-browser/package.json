@@ -1,6 +1,6 @@
 {
   "name": "@melony/plugin-browser",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "default": "./dist/ui.js"
     }
   },
   "files": [
@@ -27,6 +32,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.13",
+    "@melony/ui-kit": "workspace:*",
     "ai": "^6.0.42",
     "playwright": "^1.45.0"
   },

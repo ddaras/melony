@@ -33,6 +33,7 @@ export const shadcnElements: Partial<MelonyComponents> = {
   upload: elements.Upload,
   dropdown: elements.Dropdown,
   thread: elements.Thread,
+  themeToggle: elements.ThemeToggle,
 };
 
 export const ThemeProvider = themeProvider.ThemeProvider;

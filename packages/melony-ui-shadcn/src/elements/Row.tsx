@@ -1,5 +1,5 @@
 import React from "react";
-import { UIContract } from "@melony/ui-kit";
+import { UIContract, UIAlign, UIJustify, UIWrap, UISpacing, UIWidth } from "@melony/ui-kit";
 import { cn } from "../lib/utils";
 import {
   alignMap,
@@ -12,29 +12,32 @@ import {
 
 export const Row: React.FC<
   UIContract["row"] & { children?: React.ReactNode }
-> = ({
-  children,
-  align = "start",
-  justify = "start",
-  wrap = "nowrap",
-  gap = "none",
-  padding = "none",
-  width = "full",
-  height = "auto",
-}) => {
+> = (props) => {
+  const {
+    children,
+    align = "start",
+    justify = "start",
+    wrap = "nowrap",
+    gap = "none",
+    padding = "none",
+    width = "full",
+    height = "auto",
+    flex = undefined,
+    overflow = "hidden",
+  } = props;
   return (
     <div
       className={cn(
         "flex flex-row",
-        alignMap[align],
-        justifyMap[justify],
-        wrapMap[wrap],
-        gapMap[gap],
-        paddingMap[padding],
-        widthMap[width],
+        alignMap[align as UIAlign],
+        justifyMap[justify as UIJustify],
+        wrapMap[wrap as UIWrap],
+        gapMap[gap as UISpacing],
+        paddingMap[padding as UISpacing],
+        widthMap[width as UIWidth],
         height === "full" && "h-full",
       )}
-      style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
+      style={{ flex, width: width && typeof width === "number" ? `${width}px` : undefined, overflow }}
     >
       {children as React.ReactNode}
     </div>

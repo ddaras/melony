@@ -1,6 +1,6 @@
 {
   "name": "@melony/plugin-shell",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "default": "./dist/ui.js"
     }
   },
   "files": [
@@ -23,6 +28,7 @@
   },
   "peerDependencies": {
     "melony": "workspace:*",
+    "@melony/ui-kit": "workspace:*",
     "zod": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 import { MelonyPlugin, Event, RuntimeContext } from "melony";
 import { streamText, LanguageModel } from "ai";
 import { z } from "zod";
+import { ui } from "@melony/ui-kit";
 
 interface SimpleMessage {
   role: "system" | "user" | "assistant";
@@ -57,7 +58,7 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
     const result = streamText({
       model,
       system: systemPrompt,
-      messages: getRecentHistory(state.messages, 20).map(m => 
+      messages: getRecentHistory(state.messages, 20).map(m =>
         m.role === "system" ? { role: "user", content: `System: ${m.content}` } : m
       ) as any,
       tools: toolDefinitions,
@@ -85,16 +86,9 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
 
     const usage = await result.usage;
 
-    yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          size: "sm",
-          value: `Usage: ${usage.totalTokens} tokens`,
-        }
-      },
-    } as Event;
+    yield ui.event(
+      ui.status(`Usage: ${usage.totalTokens} tokens`, "info")
+    );
 
     // Emit tool call events
     for (const call of toolCalls) {

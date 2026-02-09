@@ -29,19 +29,20 @@ export const Card: React.FC<
   return (
     <CardBase
       className={cn(
-        "min-w-96 relative",
+        "w-full max-w-full relative overflow-hidden transition-all duration-200",
         background && colorBgMap[background],
         radius && radiusMap[radius],
         shadow && shadowMap[shadow],
+        !shadow && "shadow-sm border border-border/40",
       )}
     >
       {(title || subtitle) && (
-        <CardHeader className="pb-3">
-          {title && <CardTitle className="text-lg">{title}</CardTitle>}
-          {subtitle && <CardDescription>{subtitle}</CardDescription>}
+        <CardHeader className="py-2.5 px-3 space-y-0.5 border-b border-border/40 bg-muted/5">
+          {title && <CardTitle className="text-sm font-semibold tracking-tight leading-none">{title}</CardTitle>}
+          {subtitle && <CardDescription className="text-xs leading-tight text-muted-foreground/80">{subtitle}</CardDescription>}
         </CardHeader>
       )}
-      <CardContent className={cn("flex flex-col gap-4", paddingMap[padding])}>
+      <CardContent className={cn("flex flex-col gap-2", paddingMap[padding])}>
         {children}
       </CardContent>
     </CardBase>

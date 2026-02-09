@@ -1,18 +1,24 @@
-import { MelonyPlugin } from "melony";
+import { MelonyPlugin, Event } from "melony";
 import { z } from "zod";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
+import * as path from "node:path";
 
 const execAsync = promisify(exec);
 
 export const shellToolDefinitions = {
   executeCommand: {
-    description: "Execute a shell command",
+    description: "Execute a shell command. Use 'cd' to change the current working directory for subsequent commands.",
     inputSchema: z.object({
       command: z.string().describe("The shell command to execute"),
     }),
   },
 };
+
+export interface ShellStatusEvent extends Event {
+  type: "shell:status";
+  data: { message: string; severity?: "info" | "success" | "error" };
+}
 
 export interface ShellPluginOptions {
   cwd?: string;
@@ -38,32 +44,48 @@ function truncate(str: string | undefined | null, maxChars: number): string | un
 export const shellPlugin = (options: ShellPluginOptions = {}): MelonyPlugin<any, any> => (builder) => {
   const { cwd = process.cwd(), env = process.env, maxOutputLength = 10000 } = options;
 
-  builder.on("action:executeCommand", async function* (event) {
+  builder.on("action:executeCommand", async function* (event, { state }) {
     const { command, toolCallId } = event.data;
+    const currentCwd = state.cwd || cwd;
 
     yield {
-      type: "ui",
-      data: {
-        type: 'text',
-        props: {
-          value: `Executing command: ${command}`,
-        }
-      },
-    };
+      type: "shell:status",
+      data: { message: `Executing command: ${command} in ${currentCwd}` }
+    } as ShellStatusEvent;
 
-
-    try {
-      const { stdout, stderr } = await execAsync(command, { cwd, env });
+    // Basic 'cd' detection and state update
+    if (command.trim().startsWith("cd ")) {
+      const targetDir = command.trim().slice(3).trim();
+      const newCwd = path.resolve(currentCwd, targetDir);
+      state.cwd = newCwd;
+      
+      yield {
+        type: "shell:status",
+        data: { message: `Directory changed to ${newCwd}`, severity: "success" }
+      } as ShellStatusEvent;
 
       yield {
-        type: "ui",
+        type: "action:result",
         data: {
-          type: 'text',
-          props: {
-            value: `Command executed successfully`,
-          }
+          action: "executeCommand",
+          toolCallId,
+          result: {
+            stdout: `Changed directory to ${newCwd}`,
+            stderr: "",
+            success: true
+          },
         },
       };
+      return;
+    }
+
+    try {
+      const { stdout, stderr } = await execAsync(command, { cwd: currentCwd, env });
+
+      yield {
+        type: "shell:status",
+        data: { message: `Command executed successfully`, severity: "success" }
+      } as ShellStatusEvent;
 
       yield {
         type: "action:result",
@@ -93,14 +115,9 @@ export const shellPlugin = (options: ShellPluginOptions = {}): MelonyPlugin<any,
       };
 
       yield {
-        type: "ui",
-        data: {
-          type: 'text',
-          props: {
-            value: `Command failed: ${error.message}`,
-          }
-        },
-      };
+        type: "shell:status",
+        data: { message: `Command failed: ${error.message}`, severity: "error" }
+      } as ShellStatusEvent;
     }
   });
 };

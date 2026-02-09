@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useState,
   useMemo,
+  useCallback,
   ReactNode,
 } from "react";
 import { MelonyClient, ClientState } from "melony/client";
@@ -71,28 +72,38 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     [state.events, aggregationOptions]
   );
 
+  const send = useCallback(async (event: Event, additionalBody?: Record<string, any>) => {
+    const handler = eventHandlers?.[event.type];
+    if (handler) {
+      await handler(event, { client });
+      return;
+    }
+
+    const generator = client.send(event, { ...initialAdditionalBody, ...additionalBody });
+    // Consume the generator to ensure event processing completes
+    for await (const _ of generator) {
+      // Events are handled by the client subscription
+    }
+  }, [client, eventHandlers, initialAdditionalBody]);
+
+  const reset = useCallback((events: Event[] = []) => {
+    client.reset(events);
+  }, [client]);
+
+  const stop = useCallback(() => {
+    client.stop();
+  }, [client]);
+
   const contextValue = useMemo(
     () => ({
       ...state,
       messages,
-      send: async (event: Event, additionalBody?: Record<string, any>) => {
-        const handler = eventHandlers?.[event.type];
-        if (handler) {
-          await handler(event, { client });
-          return;
-        }
-
-        const generator = client.send(event, { ...initialAdditionalBody, ...additionalBody });
-        // Consume the generator to ensure event processing completes
-        for await (const _ of generator) {
-          // Events are handled by the client subscription
-        }
-      },
-      reset: client.reset.bind(client),
-      stop: client.stop.bind(client),
+      send,
+      reset,
+      stop,
       client,
     }),
-    [state, messages, client],
+    [state, messages, send, reset, stop, client],
   );
 
   return (
