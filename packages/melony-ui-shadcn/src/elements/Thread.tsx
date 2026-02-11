@@ -1,29 +1,16 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useMelony, AggregatedMessage } from "@melony/react";
+import { useMelony } from "@melony/react";
 import { cn } from "@/lib/utils";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessagesList";
-import { Button } from "./Button";
-import { Text } from "./Text";
-import { Heading } from "./Heading";
-
-interface ThreadProps {
-  placeholder?: string;
-  messages?: AggregatedMessage[];
-  autoFocus?: boolean;
-  welcomeTitle?: string;
-  welcomeMessage?: string;
-  suggestions?: string[];
-}
+import { UIContract } from "@melony/ui-kit";
 
 export function Thread({
   placeholder = "Type a message...",
   messages: propMessages,
   autoFocus = false,
-  welcomeTitle,
-  welcomeMessage,
-  suggestions,
-}: ThreadProps) {
+  children,
+}: UIContract["thread"]) {
   const {
     streaming,
     error,
@@ -75,27 +62,9 @@ export function Thread({
             "max-w-3xl mx-auto w-full p-4",
           )}
         >
-          {messages.length === 0 && !streaming && (welcomeTitle || welcomeMessage || suggestions) ? (
+          {messages.length === 0 && !streaming && children ? (
             <div className="flex flex-col items-start justify-center min-h-[50vh] space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              {welcomeTitle && (
-                <Heading value={welcomeTitle} level={1} />
-              )}
-              {welcomeMessage && (
-                <Text value={welcomeMessage} size="lg" color="muted" />
-              )}
-              {suggestions && suggestions.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mt-8">
-                  {suggestions.map((suggestion, i) => (
-                    <Button
-                      key={i}
-                      variant="outline"
-                      justify="start"
-                      onClickAction={{ type: "user:text", data: { content: suggestion } }}
-                      label={suggestion}
-                    />
-                  ))}
-                </div>
-              )}
+              {children}
             </div>
           ) : (
             <MessageList
@@ -111,7 +80,7 @@ export function Thread({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="absolute bottom-0 p-4 md:pb-6 w-full bg-gradient-to-t from-background via-background/90 to-transparent">
+      <div className="absolute bottom-0 p-4 w-full bg-gradient-to-t from-background via-background/90 to-transparent">
         <div className="max-w-3xl mx-auto">
           <Composer
             value={input}
@@ -123,9 +92,9 @@ export function Thread({
             autoFocus={autoFocus}
           />
           <div className="mt-2 text-center">
-             <p className="text-[10px] text-muted-foreground/60">
-               Melony can make mistakes. Check important info.
-             </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Melony can make mistakes. Check important info.
+            </p>
           </div>
         </div>
       </div>

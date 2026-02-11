@@ -5,7 +5,7 @@ import cors from "cors";
 import { Command } from "commander";
 
 import { generateId } from "melony";
-import { createOpenBot } from "./agent.js";
+import { createOpenBot } from "./open-bot.js";
 import { loadConfig } from "./config.js";
 import { loadSession, saveSession, logEvent, loadEvents } from "./session.js";
 import type { ChatEvent, ChatRequest } from "./types.js";
@@ -23,8 +23,8 @@ program
     const PORT = Number(options.port ?? config.port ?? process.env.PORT ?? 4001);
     const app = express();
 
-    // Initialize the bot instance once at startup
-    const openBot = await createOpenBot({
+    // Initialize the agent instance once at startup
+    const openBotAgent = await createOpenBot({
       openaiApiKey: options.openaiApiKey,
       anthropicApiKey: options.anthropicApiKey,
     });
@@ -41,13 +41,13 @@ program
     });
 
     // Init endpoint
-    app.get<{ platform: string }>("/api/init", async (req, res) => {
+    app.get("/api/init", async (req, res) => {
       const platform = req.query.platform || "web";
       const sessionId = req.query.sessionId as string || "default";
       const tab = req.query.tab as string;
       const state = await loadSession(sessionId) ?? {};
 
-      const response = await openBot.jsonResponse({
+      const response = await openBotAgent.jsonResponse({
         type: "init",
         data: { platform, tab }
       } as any, {
@@ -57,10 +57,12 @@ program
 
       const result = await response.json();
 
+      const layout = result.events.find((event: { type: string, meta: { type: string } }) => event.type === "ui" && event?.meta?.type === "layout");
+
       const initialEvents = await loadEvents(sessionId);
 
       res.json({
-        data: result.data,
+        ui: layout?.data,
         initialEvents
       });
     });
@@ -82,7 +84,7 @@ program
       });
       res.flushHeaders?.();
 
-      const runtime = openBot.build();
+      const runtime = openBotAgent.build();
 
       const sessionId = body.sessionId ?? "default";
       const runId = body.runId ?? `run_${generateId()}`;
@@ -93,7 +95,7 @@ program
 
       const iterator = runtime.run(body.event as ChatEvent, {
         runId,
-        state,
+        state: { ...state, sessionId },
       });
 
       const stopStreaming = () => {

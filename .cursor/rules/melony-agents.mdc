@@ -1,0 +1,81 @@
+---
+description: Standards for creating specialized agents and manager delegation in Melony.
+globs: apps/express/src/agents/**/*.ts, apps/express/src/open-bot.ts
+alwaysApply: false
+---
+
+# Melony Agent Architecture
+
+Melony uses a Manager-Worker pattern for complex tasks. The main agent (Manager) delegates specialized work to Worker Plugins using a unified `delegateTask` tool.
+
+## Manager Agent (open-bot.ts)
+The Manager orchestrates the flow and uses the `delegateTask` tool.
+
+```typescript
+// apps/express/src/open-bot.ts
+builder.use(agentPlugin({
+  model,
+  system: (context) => {
+    return `You are the Manager Agent. Use 'delegateTask' to specialized agents.
+- 'os': For file system and shell operations.
+- 'browser': For web browsing and data extraction.`;
+  },
+  toolDefinitions: {
+    delegateTask: {
+      description: "Delegate a task to a specialized agent.",
+      inputSchema: z.object({
+        agent: z.enum(["os", "browser"]),
+        task: z.string(),
+      }),
+    },
+  },
+}))
+.on("action:delegateTask", async function* (event, { state }) {
+  const { agent, task, toolCallId } = event.data;
+  if (agent === "os") {
+    state.pendingOSTask = { toolCallId };
+    yield { type: "agent:os:input", data: { content: task } };
+  } else if (agent === "browser") {
+    state.pendingBrowserTask = { toolCallId };
+    yield { type: "agent:browser:input", data: { content: task } };
+  }
+});
+```
+
+## Worker Agents (Specialized Plugins)
+Workers are implemented as `MelonyPlugin` that encapsulate specific tools and their own LLM loop. They yield a completion event that the plugin bridges back to the manager.
+
+### Example: OS Agent
+```typescript
+// apps/express/src/agents/os-agent.ts
+export const osAgentPlugin = (options: OSAgentOptions): MelonyPlugin<ChatState, ChatEvent> => (builder) => {
+  builder
+    .use(shellPlugin({ cwd }))
+    .use(fileSystemPlugin({ baseDir: "/" }))
+    .use(agentPlugin({
+      model,
+      system: "You are an OS Agent...",
+      promptInputType: "agent:os:input",
+      actionResultInputType: "agent:os:result",
+      completionEventType: "agent:os:output", // Yield this when done
+    }));
+
+  // Bridge completion back to Manager's delegateTask tool
+  builder.on("agent:os:output", async function* (event, { state }) {
+    if (state.pendingOSTask) {
+      const { toolCallId } = state.pendingOSTask;
+      delete state.pendingOSTask;
+      yield {
+        type: "action:result",
+        data: { action: "delegateTask", toolCallId, result: event.data.content },
+      };
+    }
+  });
+};
+```
+
+## Best Practices
+- **Unified Delegation**: Use `delegateTask` with an enum for the agent type.
+- **Completion Events**: Workers should yield a specific event (e.g., `agent:os:output`) upon completion.
+- **Bridging**: The bridge handler in the worker plugin must yield an `action:result` with the `action` name matching the manager's tool (`delegateTask`).
+- **Isolation**: Keep worker-specific tools inside the worker plugin.

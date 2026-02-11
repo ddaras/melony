@@ -10,6 +10,14 @@ export type InitEvent = ChatEventBase<"init", { platform: string; version?: stri
 export type UserTextEvent = ChatEventBase<"user:text", { content: string }>;
 export type AssistantTextEvent = ChatEventBase<"assistant:text", { content: string }>;
 
+export type ActionResultEvent = ChatEventBase<"action:result", { action: string; result: any; toolCallId?: string; error?: string }>;
+export type ActionEvent = ChatEventBase<`action:${string}`, any>;
+export type AgentOSInputEvent = ChatEventBase<"agent:os:input", { content: string }>;
+export type AgentBrowserInputEvent = ChatEventBase<"agent:browser:input", { content: string }>;
+
+export type AgentOSOutputEvent = ChatEventBase<"agent:os:output", { content: string }>;
+export type AgentBrowserOutputEvent = ChatEventBase<"agent:browser:output", { content: string }>;
+
 export type ChatEvent =
   | InitEvent
   | UserTextEvent
@@ -18,9 +26,16 @@ export type ChatEvent =
   | BrowserStatusEvent
   | BrowserStateUpdateEvent
   | ShellStatusEvent
-  | FileSystemStatusEvent;
+  | FileSystemStatusEvent
+  | ActionResultEvent
+  | ActionEvent
+  | AgentOSInputEvent
+  | AgentBrowserInputEvent
+  | AgentOSOutputEvent
+  | AgentBrowserOutputEvent;
 
 export interface ChatState {
+  title?: string;
   sessionId?: string;
   lastUserMessage?: string;
   messages?: any[];

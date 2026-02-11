@@ -1,8 +1,9 @@
-import { MelonyProvider, useMelonyInit, useMelony } from "@melony/react";
+import { MelonyProvider, useMelony } from "@melony/react";
 import { MelonyRenderer, MelonyUIProvider, type UINode } from "@melony/ui-kit";
 import { shadcnElements, ThemeProvider } from "@melony/ui-shadcn";
 import { generateId, MelonyClient } from "melony/client";
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const BASE_URL = (window as any).MELONY_BASE_URL || "http://localhost:4001";
 
@@ -16,7 +17,7 @@ export function App() {
     isSidebarOpen: true,
   });
   const [path, setPath] = useState(window.location.search);
-  
+
   const sessionId = useMemo(() => {
     const params = new URLSearchParams(path);
     return params.get("sessionId") || `ses_${generateId()}`;
@@ -78,13 +79,21 @@ export function AppContent({ sessionId, path }: { sessionId: string, path: strin
   const searchParams = new URLSearchParams(path);
   const tab = searchParams.get("tab") || "chat";
 
-  const { data, loading, error } = useMelonyInit(`${BASE_URL}/api/init`, {
-    platform: "web",
-    sessionId,
-    tab
+  const { data, isLoading: loading, error } = useQuery({
+    queryKey: ["init", sessionId, tab],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        platform: "web",
+        sessionId,
+        tab
+      });
+      const response = await fetch(`${BASE_URL}/api/init?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Failed to initialize: ${response.statusText}`);
+      }
+      return response.json();
+    }
   });
-
-  console.log("data", data);
 
   useEffect(() => {
     if (data?.initialEvents) {
@@ -92,7 +101,7 @@ export function AppContent({ sessionId, path }: { sessionId: string, path: strin
     }
   }, [data?.initialEvents, reset]);
 
-  const uiTree = data?.data as UINode | null;
+  const uiTree = data?.ui as UINode | null;
 
   if (loading) {
     return <div style={{ fontSize: "11px", fontWeight: "bold", height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>Loading...</div>;

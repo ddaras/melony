@@ -16,7 +16,7 @@ function getRecentHistory(messages: SimpleMessage[], maxMessages: number): Simpl
   return messages.slice(-maxMessages);
 }
 
-export interface AISDKPluginOptions {
+export interface AgentPluginOptions {
   model: LanguageModel;
   system?: string | ((context: RuntimeContext) => string | Promise<string>);
   /**
@@ -30,6 +30,7 @@ export interface AISDKPluginOptions {
   actionEventPrefix?: string;
   promptInputType?: string;
   actionResultInputType?: string;
+  completionEventType?: string;
 }
 
 /**
@@ -37,14 +38,23 @@ export interface AISDKPluginOptions {
  * Automatically handles text events and routes them through an LLM using Vercel AI SDK.
  * It can also automatically trigger events based on tool calls.
  */
-export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any> => (builder) => {
-  const { model, system, toolDefinitions = {}, actionEventPrefix = "action:", promptInputType = "user:text", actionResultInputType = "action:result" } = options;
+export const agentPlugin = (options: AgentPluginOptions): MelonyPlugin<any, any> => (builder) => {
+  const { 
+    model, 
+    system, 
+    toolDefinitions = {}, 
+    actionEventPrefix = "action:", 
+    promptInputType = "user:text", 
+    actionResultInputType = "action:result",
+    completionEventType
+  } = options;
 
   async function* routeToLLM(
     newMessage: SimpleMessage,
     context: RuntimeContext
   ): AsyncGenerator<Event, void, unknown> {
     const state = context.state as any;
+
     if (!state.messages) {
       state.messages = [] as SimpleMessage[];
     }
@@ -82,6 +92,13 @@ export const aiSDKPlugin = (options: AISDKPluginOptions): MelonyPlugin<any, any>
         role: "assistant",
         content: assistantText,
       });
+
+      if (completionEventType) {
+        yield {
+          type: completionEventType,
+          data: { content: assistantText },
+        } as Event;
+      }
     }
 
     const usage = await result.usage;

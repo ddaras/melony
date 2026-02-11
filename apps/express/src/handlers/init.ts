@@ -13,12 +13,16 @@ export async function* initHandler(
   if (!state.cwd) {
     state.cwd = process.cwd();
   }
+
   if (!state.workspaceRoot) {
     state.workspaceRoot = process.cwd();
   }
 
   yield {
     type: "ui",
+    meta: {
+      type: "layout",
+    },
     data: await layoutUI({ tab: event.data?.tab || "chat", sessionId: state.sessionId })
-  } as ChatEvent;
+  } as unknown as ChatEvent;
 }

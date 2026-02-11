@@ -111,6 +111,7 @@ export interface UIContract {
     weight?: "normal" | "medium" | "semibold" | "bold";
     color?: UIColor;
     align?: UIAlign;
+    className?: string;
   };
   heading: {
     value: string;
@@ -300,9 +301,7 @@ export interface UIContract {
     placeholder?: string;
     messages?: any[];
     autoFocus?: boolean;
-    welcomeTitle?: string;
-    welcomeMessage?: string;
-    suggestions?: string[];
+    children?: React.ReactNode;
   };
   themeToggle: {
     theme?: "light" | "dark" | "system";

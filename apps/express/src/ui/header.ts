@@ -10,15 +10,14 @@ export const headerUI = (tab: string) =>
     [
       ui.row({ justify: "between", align: "center", width: "full" }, [
         ui.row({ gap: "xs", align: "center" }, [
-          ui.button({
-            label: "OpenBot",
-            variant: "ghost",
-            size: "sm",
+          ui.listItem({
             onClickAction: {
               type: "client:navigate",
-              data: { path: "/" },
-            },
-          }),
+              data: { path: "/" }
+            }
+          },
+            [ui.text("OpenBot")]
+          ),
           ui.divider({ orientation: "vertical", margin: "xs" }),
           ui.button({
             label: "Chat",

@@ -89,20 +89,16 @@ export class MelonyBuilder<
     options?: {
       state?: TState;
       runId?: string;
-      targetType?: string; // Default to "ui"
     }
   ): Promise<Response> {
-    const targetType = options?.targetType ?? "ui";
+    const events = [];
     const runtime = this.build();
-    let data = null;
 
     for await (const e of runtime.run(event, options)) {
-      if (e.type === targetType) {
-        data = e.data;
-      }
+      events.push(e);
     }
 
-    return new Response(JSON.stringify({ data }), {
+    return new Response(JSON.stringify({ events }), {
       headers: { "Content-Type": "application/json" },
     });
   }

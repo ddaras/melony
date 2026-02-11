@@ -15,6 +15,7 @@ export const Text: React.FC<UIContract["text"]> = (props) => {
     weight = "normal",
     align = "start",
     color = "foreground",
+    className,
   } = props;
   return (
     <span
@@ -23,6 +24,7 @@ export const Text: React.FC<UIContract["text"]> = (props) => {
         fontWeightMap[weight],
         textAlignMap[align],
         colorTextMap[color],
+        className,
       )}
     >
       {value}

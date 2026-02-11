@@ -15,18 +15,16 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.33",
     "@ai-sdk/openai": "^3.0.13",
-    "@melony/plugin-ai-sdk": "workspace:*",
-    "@melony/plugin-browser": "workspace:*",
-    "@melony/plugin-file-system": "workspace:*",
-    "@melony/plugin-meta-agent": "workspace:*",
-    "@melony/plugin-shell": "workspace:*",
     "@melony/ui-kit": "workspace:*",
     "@types/cors": "^2.8.19",
+    "ai": "^6.0.42",
     "commander": "^14.0.2",
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "gray-matter": "^4.0.3",
     "melony": "workspace:*",
+    "playwright": "^1.45.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
