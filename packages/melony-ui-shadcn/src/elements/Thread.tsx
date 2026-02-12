@@ -93,7 +93,7 @@ export function Thread({
           />
           <div className="mt-2 text-center">
             <p className="text-[10px] text-muted-foreground/60">
-              Melony can make mistakes. Check important info.
+              LLMs can make mistakes. Check important info.
             </p>
           </div>
         </div>
