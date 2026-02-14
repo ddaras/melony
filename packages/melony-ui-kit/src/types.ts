@@ -176,6 +176,7 @@ export interface UIContract {
     padding?: UISpacing;
     background?: UIColor;
     radius?: UIRadius;
+    truncate?: boolean;
   };
   form: {
     onSubmitAction?: Event | ((data: any) => Event);

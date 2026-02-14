@@ -15,6 +15,7 @@ export const ListItem: React.FC<
   background,
   radius = "md",
   align = "center",
+  truncate = false,
 }) => {
     const { send } = useMelony();
     const isInteractive = !!onClickAction;
@@ -34,6 +35,7 @@ export const ListItem: React.FC<
           background ? colorBgMap[background] : isInteractive && "hover:bg-muted",
           radiusMap[radius],
           isInteractive ? "cursor-pointer" : "cursor-default",
+          truncate && "truncate",
         )}
       >
         <Row align={align} gap={gap}>
