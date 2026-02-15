@@ -44,14 +44,24 @@ export interface RuntimeContext<TState = any, TEvent extends Event = Event> {
 }
 
 /**
+ * Interceptors run before any event handlers.
+ * They can modify the event or call context.suspend() to stop execution.
+ */
+export type Interceptor<TState = any, TEvent extends Event = Event> = (
+  event: TEvent,
+  context: RuntimeContext<TState, TEvent>
+) => Promise<TEvent | void> | TEvent | void;
+
+/**
  * Event handler function for processing events.
  * Can return events to emit or undefined to continue processing.
  */
 export type EventHandler<TState = any, TEvent extends Event = Event> = (
   event: TEvent,
-  context?: RuntimeContext<TState, TEvent>
+  context: RuntimeContext<TState, TEvent>
 ) => AsyncGenerator<TEvent, void, unknown> | void;
 
 export interface Config<TState = any, TEvent extends Event = Event> {
   eventHandlers: Map<string, EventHandler<TState, TEvent>[]>;
+  interceptors: Interceptor<TState, TEvent>[];
 }

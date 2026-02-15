@@ -3,6 +3,7 @@ import {
   EventHandler,
   Config,
   RuntimeContext,
+  Interceptor,
 } from "./types";
 import { Runtime } from "./runtime";
 import { createStreamResponse } from "./utils/create-stream-response";
@@ -28,6 +29,7 @@ export class MelonyBuilder<
   constructor(initialConfig?: Partial<Config<TState, TEvent>>) {
     this.config = {
       eventHandlers: initialConfig?.eventHandlers ?? new Map(),
+      interceptors: initialConfig?.interceptors ?? [],
     };
   }
 
@@ -47,6 +49,15 @@ export class MelonyBuilder<
     }
     // Cast is safe because runtime only calls this handler for matching event types
     this.config.eventHandlers.get(eventType)!.push(handler as EventHandler<TState, TEvent>);
+    return this;
+  }
+
+  /**
+   * Register an interceptor that runs before any handlers.
+   * Useful for logging, validation, or suspending for approval.
+   */
+  intercept(interceptor: Interceptor<TState, TEvent>): this {
+    this.config.interceptors.push(interceptor);
     return this;
   }
 

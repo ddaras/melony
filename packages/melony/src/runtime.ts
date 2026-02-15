@@ -74,18 +74,30 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
    */
   private async *runEventHandlers(
     event: TEvent,
-    context?: RuntimeContext<TState, TEvent>,
+    context: RuntimeContext<TState, TEvent>,
   ): AsyncGenerator<TEvent> {
+    let currentEvent = event;
+
+    // Run all interceptors sequentially
+    for (const interceptor of this.config.interceptors) {
+      const result = await interceptor(currentEvent, context);
+      
+      // If interceptor returns a new event object, we use it for subsequent steps
+      if (result && typeof result === "object" && "type" in result) {
+        currentEvent = result as TEvent;
+      }
+    }
+
     const handlers = [
-      ...(this.config.eventHandlers.get(event.type) || []),
+      ...(this.config.eventHandlers.get(currentEvent.type) || []),
       ...(this.config.eventHandlers.get("*") || []),
     ];
     
     // First emit the event itself
-    yield* this.emit(event, context);
+    yield* this.emit(currentEvent, context);
 
     for (const handler of handlers) {
-      const result = handler(event, context);
+      const result = handler(currentEvent, context);
       if (result) {
         for await (const yieldedEvent of result) {
           // Recursively process yielded events through their handlers
