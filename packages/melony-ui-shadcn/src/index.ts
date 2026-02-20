@@ -4,13 +4,11 @@ import * as themeProvider from "./providers/theme-provider";
 
 // The elements object matches UIContract keys for use with MelonyUIProvider
 export const shadcnElements: Partial<MelonyComponents> = {
-  card: elements.Card,
   button: elements.Button,
   row: elements.Row,
   col: elements.Col,
   text: elements.Text,
   heading: elements.Heading,
-  badge: elements.Badge,
   input: elements.Input,
   hidden: elements.Hidden,
   textarea: elements.Textarea,
@@ -25,15 +23,9 @@ export const shadcnElements: Partial<MelonyComponents> = {
   image: elements.Image,
   video: elements.Video,
   icon: elements.Icon,
-  list: elements.List,
-  listItem: elements.ListItem,
   form: elements.Form,
-  chart: elements.Chart,
   label: elements.Label,
-  upload: elements.Upload,
-  dropdown: elements.Dropdown,
-  thread: elements.Thread,
-  themeToggle: elements.ThemeToggle,
+  upload: elements.Upload
 };
 
 export const ThemeProvider = themeProvider.ThemeProvider;
