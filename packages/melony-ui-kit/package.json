@@ -1,6 +1,6 @@
 {
   "name": "@melony/ui-kit",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -29,7 +29,9 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "clean": "rimraf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
   },
   "peerDependencies": {
     "melony": "workspace:*",
