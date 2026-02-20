@@ -25,7 +25,7 @@ export const Col: React.FC<
       background,
       radius,
       flex = undefined,
-      overflow = "hidden",
+      overflow = "visible",
     } = props;
     return (
       <div

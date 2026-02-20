@@ -8,46 +8,47 @@ import { justifyMap, widthMap } from "../lib/theme-utils";
 export const Button: React.FC<
   UIContract["button"] & { justify?: UIJustify }
 > = (props) => {
-    const {
-      type = "button",
-      label,
-      variant = "primary",
-      size = "md",
-      disabled = false,
-      width,
-      onClickAction,
-      justify = "center",
-    } = props;
-    const { send } = useMelony();
+  const {
+    type = "button",
+    label,
+    variant = "primary",
+    size = "md",
+    disabled = false,
+    width,
+    onClickAction,
+    justify = "center",
+    truncate = true,
+  } = props;
+  const { send } = useMelony();
 
-    const variantMap: Record<
-      string,
-      "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
-    > = {
-      primary: "default",
-      secondary: "secondary",
-      danger: "destructive",
-      success: "default", // We might want a custom success style later
-      outline: "outline",
-      ghost: "ghost",
-      link: "link",
-    };
-
-    return (
-      <ButtonBase
-        type={type}
-        variant={variantMap[variant] || "default"}
-        size={size === "md" ? "default" : (size as any)}
-        disabled={disabled}
-        className={cn(width && widthMap[width], justifyMap[justify])}
-        onClick={() => {
-          if (onClickAction) {
-            send(onClickAction as any);
-          }
-        }}
-        style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
-      >
-        {label}
-      </ButtonBase>
-    );
+  const variantMap: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
+  > = {
+    primary: "default",
+    secondary: "secondary",
+    danger: "destructive",
+    success: "default", // We might want a custom success style later
+    outline: "outline",
+    ghost: "ghost",
+    link: "link",
   };
+
+  return (
+    <ButtonBase
+      type={type}
+      variant={variantMap[variant] || "default"}
+      size={size === "md" ? "default" : (size as any)}
+      disabled={disabled}
+      className={cn(width && widthMap[width], justifyMap[justify], truncate && "truncate")}
+      onClick={() => {
+        if (onClickAction) {
+          send(onClickAction as any);
+        }
+      }}
+      style={{ width: width && typeof width === "number" ? `${width}px` : undefined }}
+    >
+      {label}
+    </ButtonBase>
+  );
+};

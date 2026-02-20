@@ -230,6 +230,8 @@ export interface UIContract {
     disabled?: boolean;
     width?: UIWidth;
     onClickAction?: Event;
+    justify?: UIJustify;
+    truncate?: boolean;
   };
   popover: {
     side?: "top" | "right" | "bottom" | "left";

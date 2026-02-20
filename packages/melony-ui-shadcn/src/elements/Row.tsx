@@ -23,7 +23,7 @@ export const Row: React.FC<
     width = "full",
     height = "auto",
     flex = undefined,
-    overflow = "hidden",
+    overflow = "visible",
   } = props;
   return (
     <div
