@@ -154,3 +154,10 @@
     background-clip: padding-box;
   }
 }
+
+@layer utilities {
+  .mask-fade-out {
+    mask-image: linear-gradient(to right, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  }
+}

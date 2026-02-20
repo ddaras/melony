@@ -40,7 +40,7 @@ export const Button: React.FC<
       variant={variantMap[variant] || "default"}
       size={size === "md" ? "default" : (size as any)}
       disabled={disabled}
-      className={cn(width && widthMap[width], justifyMap[justify], truncate && "truncate")}
+      className={cn(width && widthMap[width], justifyMap[justify], truncate && "overflow-hidden whitespace-nowrap mask-fade-out")}
       onClick={() => {
         if (onClickAction) {
           send(onClickAction as any);
