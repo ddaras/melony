@@ -28,7 +28,7 @@ export const Row: React.FC<
   return (
     <div
       className={cn(
-        "flex flex-row",
+        "flex flex-row min-w-0",
         alignMap[align as UIAlign],
         justifyMap[justify as UIJustify],
         wrapMap[wrap as UIWrap],

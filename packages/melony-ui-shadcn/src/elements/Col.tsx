@@ -30,7 +30,7 @@ export const Col: React.FC<
     return (
       <div
         className={cn(
-          "flex flex-col",
+          "flex flex-col min-w-0",
           alignMap[align as UIAlign],
           justifyMap[justify as UIJustify],
           gapMap[gap as UISpacing],
