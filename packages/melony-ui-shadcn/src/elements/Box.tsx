@@ -15,6 +15,7 @@ import {
   marginHorizontalMap,
   resolveUIStyle,
 } from "../lib/theme-utils";
+import { useMelony } from "@melony/react";
 
 export const Box: React.FC<
   UIContract["box"] & { children?: React.ReactNode }
@@ -37,13 +38,25 @@ export const Box: React.FC<
     group = false,
     flex = undefined,
     overflow = "hidden",
+    onClickAction,
   } = props;
+
+  const { send } = useMelony();
+
   const [baseBgColor] = (background || "").split("/");
   const [baseBorderColor] = (borderColor || "").split("/");
 
   const dynamicStyles = {
     ...resolveUIStyle("backgroundColor", background),
     ...resolveUIStyle("borderColor", borderColor),
+  };
+
+  const isInteractive = !!onClickAction;
+
+  const handleClick = () => {
+    if (onClickAction) {
+      send(onClickAction as any);
+    }
   };
 
   return (
@@ -64,6 +77,7 @@ export const Box: React.FC<
         height === "full" && "h-full",
         shadowMap[shadow as UIShadow],
         group && "group",
+        isInteractive && "cursor-pointer",
       )}
       style={{
         ...dynamicStyles,
@@ -71,6 +85,7 @@ export const Box: React.FC<
         width: width && typeof width === "number" ? `${width}px` : undefined,
         overflow,
       }}
+      onClick={isInteractive ? handleClick : undefined}
     >
       {children as React.ReactNode}
     </div>

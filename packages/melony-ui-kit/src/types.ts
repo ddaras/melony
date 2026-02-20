@@ -117,7 +117,6 @@ export interface UIContract {
     height?: string | number;
     radius?: UIRadius;
     objectFit?: "cover" | "contain" | "fill";
-    groupId?: string;
   };
   video: {
     src: string;
