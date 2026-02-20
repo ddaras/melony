@@ -231,6 +231,14 @@ export interface UIContract {
     width?: UIWidth;
     onClickAction?: Event;
   };
+  popover: {
+    side?: "top" | "right" | "bottom" | "left";
+    align?: "start" | "center" | "end";
+    sideOffset?: number;
+    alignOffset?: number;
+    modal?: boolean;
+    trigger?: UINode;
+  };
   float: {
     position?:
     | "top-left"

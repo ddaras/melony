@@ -71,4 +71,10 @@ export const ui = {
 
   divider: (props: UIContract["divider"] = {}) =>
     ui.node("divider", props),
+
+  popover: (props: UIContract["popover"] = {}, children: UINode[] = []) =>
+    ui.node("popover", props, children),
+
+  float: (props: UIContract["float"] = {}, children: UINode[] = []) =>
+    ui.node("float", props, children),
 };
