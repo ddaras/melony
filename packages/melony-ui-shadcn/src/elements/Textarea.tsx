@@ -16,7 +16,7 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
   width = "full",
   onChangeAction,
   background = "background",
-  border = false,
+  border = true,
   shadow = "none",
   radius = "none",
 }) => {
@@ -41,7 +41,7 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
         id={name}
         className={cn(
           background && colorBgMap[background],
-          border && "border",
+          !border && "border-none",
           shadow && shadowMap[shadow],
           radius && radiusMap[radius],
         )}
