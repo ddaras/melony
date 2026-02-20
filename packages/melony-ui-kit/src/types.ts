@@ -85,6 +85,7 @@ export interface UIContract {
     group?: boolean;
     flex?: number;
     overflow?: "hidden" | "visible" | "scroll" | "auto";
+    onClickAction?: Event;
   };
   spacer: {
     size?: UISpacing;
