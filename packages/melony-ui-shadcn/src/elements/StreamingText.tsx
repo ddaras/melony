@@ -14,7 +14,7 @@ import {
 
 export const StreamingText: React.FC<UIContract["streamingText"]> = (props) => {
   const {
-    id,
+    eventType,
     size = "md",
     weight = "normal",
     align = "start",
@@ -28,11 +28,11 @@ export const StreamingText: React.FC<UIContract["streamingText"]> = (props) => {
   // Accumulate text from events that match this component's ID
   const text = useMemo(() => {
     return events
-      .filter((e) => e.type === "assistant:text-delta" && (e.id === id || e.data?.id === id))
+      .filter((e) => e.type === eventType)
       .map((e) => e.data?.delta || e.data?.text || e.data?.content || "")
       .filter(Boolean)
       .join("");
-  }, [events, id]);
+  }, [events, eventType]);
 
   if (!text) return null;
 

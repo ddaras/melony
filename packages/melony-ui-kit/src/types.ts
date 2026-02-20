@@ -259,7 +259,7 @@ export interface UIContract {
     showOnHover?: boolean;
   };
   streamingText: {
-    id: string;
+    eventType: string;
     size?: UISpacing;
     weight?: "normal" | "medium" | "semibold" | "bold";
     color?: UIColor;
