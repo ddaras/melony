@@ -27,9 +27,6 @@ export const ui = {
     data: node,
   }),
 
-  card: (props: UIContract["card"] = {}, children: UINode[] = []) =>
-    ui.node("card", props, children),
-
   button: (props: UIContract["button"], children: UINode[] = []) =>
     ui.node("button", props, children),
 
@@ -47,9 +44,6 @@ export const ui = {
 
   box: (props: UIContract["box"] = {}, children: UINode[] = []) =>
     ui.node("box", props, children),
-
-  badge: (label: string, variant: UIContract["badge"]["variant"] = "primary", props: Partial<UIContract["badge"]> = {}) =>
-    ui.node("badge", { label, variant, ...props }),
 
   input: (name: string, label?: string, props: Partial<UIContract["input"]> = {}) =>
     ui.node("input", { name, label, ...props }),
@@ -77,66 +71,4 @@ export const ui = {
 
   divider: (props: UIContract["divider"] = {}) =>
     ui.node("divider", props),
-
-  list: (props: UIContract["list"] = {}, children: UINode[] = []) =>
-    ui.node("list", props, children),
-
-  listItem: (props: UIContract["listItem"] = {}, children: UINode[] = []) =>
-    ui.node("listItem", props, children),
-
-  // organisms
-  thread: (props: UIContract["thread"] = {}, children: UINode[] = []) =>
-    ui.node("thread", props, children),
-
-  themeToggle: (props: UIContract["themeToggle"] = {}) =>
-    ui.node("themeToggle", props),
-
-  // --- Semantic Helpers (Intent-based) ---
-
-  /**
-   * Status text for tool results or process updates.
-   */
-  status: (message: string, severity: 'info' | 'success' | 'error' = 'info') =>
-    ui.node('text', {
-      value: message,
-      color: severity === 'error' ? 'danger' : severity === 'success' ? 'success' : 'muted',
-      size: 'xs',
-      weight: 'medium'
-    }),
-
-  /**
-   * A standardized card for resources (files, websites, terminal sessions).
-   */
-  resourceCard: (title: string, subtitle?: string, children: UINode[] = []) =>
-    ui.card({
-      title,
-      subtitle,
-      padding: 'none',
-      radius: 'lg',
-      shadow: 'none',
-      background: 'background',
-    }, children.length > 0 ? [
-      ui.box({ padding: 'md' }, children)
-    ] : []),
-
-  /**
-   * A horizontal group for action buttons, typically at the bottom of a card.
-   */
-  actionGroup: (children: UINode[]) =>
-    ui.row({
-      gap: 'xs',
-      padding: 'xs',
-      justify: 'end',
-    }, children),
-
-  /**
-   * A block for displaying structured data (key/value pairs).
-   */
-  dataBlock: (data: Record<string, any>) =>
-    ui.col({ gap: 'xs' }, Object.entries(data).filter(([_, v]) => v !== undefined && v !== null).map(([key, value]) =>
-      ui.row({ gap: 'sm', align: 'start' }, [
-        ui.text(`${key}:`, { weight: 'semibold', size: 'xs', color: 'muted' }),
-        ui.text(String(value), { size: 'xs' }),
-      ])
-    )),
 };

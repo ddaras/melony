@@ -43,16 +43,6 @@ export type UIRadius = "none" | "sm" | "md" | "lg" | "full" | (string & {});
  * This acts as the source of truth for the SDUI protocol.
  */
 export interface UIContract {
-  card: {
-    title?: string;
-    subtitle?: string;
-    background?: UIColor;
-    padding?: UISpacing;
-    radius?: UIRadius;
-    shadow?: UIShadow;
-    streaming?: boolean;
-    group?: boolean;
-  };
   row: {
     align?: UIAlign;
     justify?: UIJustify;
@@ -119,17 +109,6 @@ export interface UIContract {
     color?: UIColor;
     align?: UIAlign;
   };
-  badge: {
-    label: string;
-    variant?:
-    | "primary"
-    | "secondary"
-    | "success"
-    | "danger"
-    | "warning"
-    | "outline";
-    size?: UISize;
-  };
   image: {
     src: string;
     alt?: string;
@@ -155,28 +134,6 @@ export interface UIContract {
     name: string;
     size?: UISize | number;
     color?: UIColor;
-  };
-  chart: {
-    data: Array<{ label: string; value: number; color?: string }>;
-    chartType?: "bar" | "line" | "area" | "pie";
-    title?: string;
-    height?: number;
-    showValues?: boolean;
-    showGrid?: boolean;
-    showTooltips?: boolean;
-  };
-  list: {
-    padding?: UISpacing;
-    gap?: UISpacing;
-    width?: UIWidth;
-  };
-  listItem: {
-    onClickAction?: Event;
-    gap?: UISpacing;
-    padding?: UISpacing;
-    background?: UIColor;
-    radius?: UIRadius;
-    truncate?: boolean;
   };
   form: {
     onSubmitAction?: Event | ((data: any) => Event);
@@ -288,24 +245,6 @@ export interface UIContract {
     offsetX?: UISpacing;
     offsetY?: UISpacing;
     showOnHover?: boolean;
-  };
-  dropdown: {
-    items: Array<{
-      label: string;
-      icon?: string;
-      onClickAction?: Event;
-    }>;
-    className?: string;
-    triggerClassName?: string;
-  };
-  thread: {
-    placeholder?: string;
-    messages?: any[];
-    autoFocus?: boolean;
-    children?: React.ReactNode;
-  };
-  themeToggle: {
-    theme?: "light" | "dark" | "system";
   };
 }
 
