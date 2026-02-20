@@ -152,7 +152,6 @@ export interface UIContract {
   };
   textarea: {
     name: string;
-    label?: string;
     placeholder?: string;
     defaultValue?: string;
     rows?: number;
@@ -160,6 +159,10 @@ export interface UIContract {
     disabled?: boolean;
     required?: boolean;
     width?: UIWidth;
+    background?: UIColor;
+    border?: boolean;
+    shadow?: UIShadow;
+    radius?: UIRadius;
   };
   select: {
     name: string;

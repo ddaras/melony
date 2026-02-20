@@ -48,8 +48,8 @@ export const ui = {
   input: (name: string, label?: string, props: Partial<UIContract["input"]> = {}) =>
     ui.node("input", { name, label, ...props }),
 
-  textarea: (name: string, label?: string, props: Partial<UIContract["textarea"]> = {}) =>
-    ui.node("textarea", { name, label, ...props }),
+  textarea: (name: string, props: Partial<UIContract["textarea"]> = {}) =>
+    ui.node("textarea", { name, ...props }),
 
   select: (name: string, options: UIContract["select"]["options"], label?: string, props: Partial<UIContract["select"]> = {}) =>
     ui.node("select", { name, options, label, ...props }),
