@@ -258,6 +258,73 @@ export interface UIContract {
     offsetY?: UISpacing;
     showOnHover?: boolean;
   };
+  streamingText: {
+    id: string;
+    size?: UISpacing;
+    weight?: "normal" | "medium" | "semibold" | "bold";
+    color?: UIColor;
+    align?: UIAlign;
+    className?: string;
+    markdown?: boolean;
+  };
+  badge: {
+    label: string;
+    variant?: "primary" | "secondary" | "danger" | "success" | "warning" | "outline";
+    size?: UISize;
+  };
+  card: {
+    title?: string;
+    subtitle?: string;
+    background?: UIColor;
+    padding?: UISpacing;
+    radius?: UIRadius;
+    shadow?: UIShadow;
+  };
+  chart: {
+    data: Array<{
+      label: string;
+      value: number;
+      color?: string;
+    }>;
+    chartType?: "bar" | "line";
+    title?: string;
+    height?: number;
+    showValues?: boolean;
+    showGrid?: boolean;
+    showTooltips?: boolean;
+  };
+  dropdown: {
+    items?: Array<{
+      label: string;
+      icon?: string;
+      onClickAction?: Event;
+    }>;
+  };
+  list: {
+    padding?: UISpacing;
+    gap?: UISpacing;
+    width?: UIWidth;
+  };
+  listItem: {
+    onClickAction?: Event;
+    gap?: UISpacing;
+    padding?: UISpacing;
+    background?: UIColor;
+    radius?: UIRadius;
+    align?: UIAlign;
+    truncate?: boolean;
+  };
+  thread: {
+    placeholder?: string;
+    messages?: Array<{
+      role: string;
+      content: any[];
+      runId?: string;
+      threadId?: string;
+    }>;
+    autoFocus?: boolean;
+    children?: any;
+  };
 }
 
 export type UINode<T extends keyof UIContract = keyof UIContract> = {

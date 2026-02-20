@@ -25,7 +25,8 @@ export const shadcnElements: Partial<MelonyComponents> = {
   icon: elements.Icon,
   form: elements.Form,
   label: elements.Label,
-  upload: elements.Upload
+  upload: elements.Upload,
+  streamingText: elements.StreamingText
 };
 
 export const ThemeProvider = themeProvider.ThemeProvider;

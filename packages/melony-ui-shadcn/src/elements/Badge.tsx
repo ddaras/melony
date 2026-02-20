@@ -28,7 +28,7 @@ export const Badge: React.FC<UIContract["badge"]> = ({
   return (
     <BadgeBase
       variant={variantMap[variant] || "default"}
-      className={sizeClasses[size]}
+      className={sizeClasses[size as keyof typeof sizeClasses] || sizeClasses.md}
     >
       {label}
     </BadgeBase>

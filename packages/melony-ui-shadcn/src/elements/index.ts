@@ -21,6 +21,7 @@ export { Chart } from "./Chart";
 // Typography
 export { Text } from "./Text";
 export { Heading } from "./Heading";
+export { StreamingText } from "./StreamingText";
 
 // Form Components
 export { Input } from "./Input";
