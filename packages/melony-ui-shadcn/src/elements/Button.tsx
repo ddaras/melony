@@ -1,16 +1,15 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { UIContract, UIJustify } from "@melony/ui-kit";
+import { UIContract } from "@melony/ui-kit";
 import { Button as ButtonBase } from "../ui/button";
 import { useMelony } from "@melony/react";
 import { cn } from "../lib/utils";
 import { justifyMap, widthMap } from "../lib/theme-utils";
 
 export const Button: React.FC<
-  UIContract["button"] & { justify?: UIJustify }
+  UIContract["button"] & { children?: React.ReactNode }
 > = (props) => {
   const {
     type = "button",
-    label,
     variant = "primary",
     size = "md",
     disabled = false,
@@ -18,6 +17,7 @@ export const Button: React.FC<
     onClickAction,
     justify = "center",
     truncate = true,
+    children,
   } = props;
   const { send } = useMelony();
 
@@ -45,7 +45,7 @@ export const Button: React.FC<
     }
 
     return () => observer.disconnect();
-  }, [label, truncate]);
+  }, [children, truncate]);
 
   const variantMap: Record<
     string,
@@ -82,7 +82,7 @@ export const Button: React.FC<
         width: width && typeof width === "number" ? `${width}px` : undefined,
       }}
     >
-      {label}
+      {children}
     </ButtonBase>
   );
 };

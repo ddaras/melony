@@ -217,7 +217,6 @@ export interface UIContract {
   };
   button: {
     type?: "button" | "submit" | "reset";
-    label: string;
     variant?:
     | "primary"
     | "secondary"
