@@ -82,7 +82,7 @@ export const Box: React.FC<
       style={{
         ...dynamicStyles,
         flex,
-        width: width && typeof width === "number" ? `${width}px` : undefined,
+        width: width && typeof width === "number" ? `${width}px` : width,
         overflow,
       }}
       onClick={isInteractive ? handleClick : undefined}
