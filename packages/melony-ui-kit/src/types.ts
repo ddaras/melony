@@ -268,6 +268,8 @@ export interface UIContract {
     zIndex?: number;
     background?: UIColor;
     padding?: UISpacing;
+    width?: UIWidth;
+    maxWidth?: number;
   };
   streamingText: {
     eventType: string;
