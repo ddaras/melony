@@ -259,6 +259,15 @@ export interface UIContract {
     offsetY?: UISpacing;
     showOnHover?: boolean;
   };
+  sticky: {
+    top?: UISpacing | number;
+    bottom?: UISpacing | number;
+    left?: UISpacing | number;
+    right?: UISpacing | number;
+    zIndex?: number;
+    background?: UIColor;
+    padding?: UISpacing;
+  };
   streamingText: {
     eventType: string;
     size?: UISpacing;

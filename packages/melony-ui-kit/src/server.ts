@@ -77,6 +77,8 @@ export const ui = {
 
   float: (props: UIContract["float"] = {}, children: UINode[] = []) =>
     ui.node("float", props, children),
+  sticky: (props: UIContract["sticky"] = {}, children: UINode[] = []) =>
+    ui.node("sticky", props, children),
   streamingText: (eventType: string, props: Partial<UIContract["streamingText"]> = {}) =>
     ui.node("streamingText", { eventType, ...props }),
 };

@@ -20,6 +20,7 @@ export const shadcnElements: Partial<MelonyComponents> = {
   divider: elements.Divider,
   box: elements.Box,
   float: elements.Float,
+  sticky: elements.Sticky,
   image: elements.Image,
   video: elements.Video,
   icon: elements.Icon,

@@ -6,6 +6,7 @@ export { Row } from "./Row";
 export { Col } from "./Col";
 export { Box } from "./Box";
 export { Float } from "./Float";
+export { Sticky } from "./Sticky";
 export { Spacer } from "./Spacer";
 export { Divider } from "./Divider";
 export { List } from "./List";
