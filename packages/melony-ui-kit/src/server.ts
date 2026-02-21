@@ -32,6 +32,9 @@ export const ui = {
 
   text: (value: string, props: Partial<UIContract["text"]> = {}) =>
     ui.node("text", { value, ...props }),
+  
+  markdown: (value: string, props: Partial<UIContract["markdown"]> = {}) =>
+    ui.node("markdown", { value, ...props }),
 
   heading: (value: string, level: UIContract["heading"]["level"] = 1, props: Partial<UIContract["heading"]> = {}) =>
     ui.node("heading", { value, level, ...props }),
