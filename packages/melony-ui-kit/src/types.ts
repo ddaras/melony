@@ -112,6 +112,13 @@ export interface UIContract {
     color?: UIColor;
     align?: UIAlign;
   };
+  markdown: {
+    value: string;
+    size?: UISpacing;
+    color?: UIColor;
+    align?: UIAlign;
+    className?: string;
+  };
   image: {
     src: string;
     alt?: string;

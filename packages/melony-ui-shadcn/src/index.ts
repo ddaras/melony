@@ -27,6 +27,7 @@ export const shadcnElements: Partial<MelonyComponents> = {
   form: elements.Form,
   label: elements.Label,
   upload: elements.Upload,
+  markdown: elements.Markdown,
   streamingText: elements.StreamingText
 };
 
