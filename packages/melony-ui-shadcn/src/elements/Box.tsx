@@ -78,14 +78,14 @@ export const Box: React.FC<
         height === "full" && "h-full",
         shadowMap[shadow as UIShadow],
         group && "group",
-        isInteractive && "cursor-pointer",
-        maxWidth && widthMap[maxWidth as UIWidth]
+        isInteractive && "cursor-pointer"
       )}
       style={{
         ...dynamicStyles,
         flex,
         width: width && typeof width === "number" ? `${width}px` : width,
         overflow,
+        maxWidth: maxWidth && typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth,
       }}
       onClick={isInteractive ? handleClick : undefined}
     >
