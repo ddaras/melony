@@ -15,12 +15,29 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
   required,
   width = "full",
   onChangeAction,
+  onSubmitAction,
+  submitOnEnter,
   background = "background",
   border = true,
   shadow = "none",
   radius = "none",
 }) => {
   const { send } = useMelony();
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (submitOnEnter && e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (onSubmitAction) {
+        send({
+          ...onSubmitAction,
+          data: {
+            name: name || "",
+            value: e.currentTarget.value,
+          },
+        } as any);
+      }
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onChangeAction) {
@@ -49,6 +66,7 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
         defaultValue={defaultValue}
         disabled={disabled}
         rows={rows}
+        onKeyDown={handleKeyDown}
         onChange={handleChange}
         required={required}
       />

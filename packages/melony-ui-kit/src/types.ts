@@ -44,6 +44,7 @@ export type UIRadius = "none" | "sm" | "md" | "lg" | "full" | (string & {});
  */
 export interface UIContract {
   row: {
+    id?: string;
     align?: UIAlign;
     justify?: UIJustify;
     wrap?: UIWrap;
@@ -56,6 +57,7 @@ export interface UIContract {
     overflow?: "hidden" | "visible" | "scroll" | "auto";
   };
   col: {
+    id?: string;
     align?: UIAlign;
     justify?: UIJustify;
     gap?: UISpacing;
@@ -70,6 +72,7 @@ export interface UIContract {
     maxWidth?: number;
   };
   box: {
+    id?: string;
     padding?: UISpacing;
     paddingVertical?: UISpacing;
     paddingHorizontal?: UISpacing;
@@ -90,15 +93,18 @@ export interface UIContract {
     onClickAction?: Event;
   };
   spacer: {
+    id?: string;
     size?: UISpacing;
     direction?: UIOrientation;
   };
   divider: {
+    id?: string;
     orientation?: UIOrientation;
     color?: UIColor;
     margin?: UISpacing;
   };
   text: {
+    id?: string;
     value: string;
     size?: UISpacing;
     weight?: "normal" | "medium" | "semibold" | "bold";
@@ -107,12 +113,14 @@ export interface UIContract {
     className?: string;
   };
   heading: {
+    id?: string;
     value: string;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
     color?: UIColor;
     align?: UIAlign;
   };
   markdown: {
+    id?: string;
     value: string;
     size?: UISpacing;
     color?: UIColor;
@@ -120,6 +128,7 @@ export interface UIContract {
     className?: string;
   };
   image: {
+    id?: string;
     src: string;
     alt?: string;
     width?: UIWidth;
@@ -128,6 +137,7 @@ export interface UIContract {
     objectFit?: "cover" | "contain" | "fill";
   };
   video: {
+    id?: string;
     src: string;
     poster?: string;
     autoPlay?: boolean;
@@ -140,15 +150,18 @@ export interface UIContract {
     radius?: UIRadius;
   };
   icon: {
+    id?: string;
     name: string;
     size?: UISize | number;
     color?: UIColor;
   };
   form: {
+    id?: string;
     onSubmitAction?: Event | ((data: any) => Event);
     gap?: UISpacing;
   };
   input: {
+    id?: string;
     name: string;
     label?: string;
     placeholder?: string;
@@ -160,11 +173,14 @@ export interface UIContract {
     width?: UIWidth;
   };
   textarea: {
+    id?: string;
     name: string;
     placeholder?: string;
     defaultValue?: string;
     rows?: number;
     onChangeAction?: Event;
+    onSubmitAction?: Event;
+    submitOnEnter?: boolean;
     disabled?: boolean;
     required?: boolean;
     width?: UIWidth;
@@ -174,6 +190,7 @@ export interface UIContract {
     radius?: UIRadius;
   };
   select: {
+    id?: string;
     name: string;
     label?: string;
     options: Array<{ label: string; value: string }>;
@@ -185,6 +202,7 @@ export interface UIContract {
     width?: UIWidth;
   };
   checkbox: {
+    id?: string;
     name: string;
     label?: string;
     checked?: boolean;
@@ -192,10 +210,12 @@ export interface UIContract {
     disabled?: boolean;
   };
   hidden: {
+    id?: string;
     name: string;
     value: string;
   };
   radioGroup: {
+    id?: string;
     name: string;
     options: Array<{ label: string; value: string; disabled?: boolean }>;
     label?: string;
@@ -205,6 +225,7 @@ export interface UIContract {
     disabled?: boolean;
   };
   label: {
+    id?: string;
     value: string;
     htmlFor?: string;
     required?: boolean;
@@ -212,6 +233,7 @@ export interface UIContract {
     color?: UIColor;
   };
   colorPicker: {
+    id?: string;
     name: string;
     label?: string;
     defaultValue?: string;
@@ -219,6 +241,7 @@ export interface UIContract {
     disabled?: boolean;
   };
   upload: {
+    id?: string;
     label?: string;
     multiple?: boolean;
     accept?: string;
@@ -228,6 +251,7 @@ export interface UIContract {
     disabled?: boolean;
   };
   button: {
+    id?: string;
     type?: "button" | "submit" | "reset";
     variant?:
     | "primary"
@@ -245,6 +269,7 @@ export interface UIContract {
     truncate?: boolean;
   };
   popover: {
+    id?: string;
     side?: "top" | "right" | "bottom" | "left";
     align?: "start" | "center" | "end";
     sideOffset?: number;
@@ -253,6 +278,7 @@ export interface UIContract {
     trigger?: UINode;
   };
   float: {
+    id?: string;
     position?:
     | "top-left"
     | "top-right"
@@ -268,6 +294,7 @@ export interface UIContract {
     showOnHover?: boolean;
   };
   sticky: {
+    id?: string;
     top?: UISpacing | number;
     bottom?: UISpacing | number;
     left?: UISpacing | number;
@@ -279,6 +306,7 @@ export interface UIContract {
     maxWidth?: number;
   };
   streamingText: {
+    id?: string;
     eventType: string;
     size?: UISpacing;
     weight?: "normal" | "medium" | "semibold" | "bold";
@@ -288,11 +316,13 @@ export interface UIContract {
     markdown?: boolean;
   };
   badge: {
+    id?: string;
     label: string;
     variant?: "primary" | "secondary" | "danger" | "success" | "warning" | "outline";
     size?: UISize;
   };
   card: {
+    id?: string;
     title?: string;
     subtitle?: string;
     background?: UIColor;
@@ -301,6 +331,7 @@ export interface UIContract {
     shadow?: UIShadow;
   };
   chart: {
+    id?: string;
     data: Array<{
       label: string;
       value: number;
@@ -314,6 +345,7 @@ export interface UIContract {
     showTooltips?: boolean;
   };
   dropdown: {
+    id?: string;
     items?: Array<{
       label: string;
       icon?: string;
@@ -321,11 +353,13 @@ export interface UIContract {
     }>;
   };
   list: {
+    id?: string;
     padding?: UISpacing;
     gap?: UISpacing;
     width?: UIWidth;
   };
   listItem: {
+    id?: string;
     onClickAction?: Event;
     gap?: UISpacing;
     padding?: UISpacing;
@@ -335,6 +369,7 @@ export interface UIContract {
     truncate?: boolean;
   };
   thread: {
+    id?: string;
     placeholder?: string;
     messages?: Array<{
       role: string;
