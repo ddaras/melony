@@ -67,6 +67,7 @@ export interface UIContract {
     group?: boolean;
     flex?: number;
     overflow?: "hidden" | "visible" | "scroll" | "auto";
+    maxWidth?: number;
   };
   box: {
     padding?: UISpacing;

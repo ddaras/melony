@@ -26,6 +26,7 @@ export const Col: React.FC<
       radius,
       flex = undefined,
       overflow = "visible",
+      maxWidth,
     } = props;
     return (
       <div
@@ -40,7 +41,7 @@ export const Col: React.FC<
           background && colorBgMap[background as UIColor],
           radius && radiusMap[radius as UIRadius],
         )}
-        style={{ flex, width: width && typeof width === "number" ? `${width}px` : undefined, overflow }}
+        style={{ flex, width: width && typeof width === "number" ? `${width}px` : undefined, overflow, maxWidth: maxWidth && typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth }}
       >
         {children as React.ReactNode}
       </div>
