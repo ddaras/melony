@@ -69,7 +69,7 @@ export interface UIContract {
     group?: boolean;
     flex?: number;
     overflow?: "hidden" | "visible" | "scroll" | "auto";
-    maxWidth?: number;
+    maxWidth?: number | string;
   };
   box: {
     id?: string;
@@ -84,7 +84,7 @@ export interface UIContract {
     borderColor?: UIColor;
     radius?: UIRadius;
     width?: UIWidth;
-    maxWidth?: number;
+    maxWidth?: number | string;
     height?: "auto" | "full";
     shadow?: UIShadow;
     group?: boolean;
@@ -303,7 +303,7 @@ export interface UIContract {
     background?: UIColor;
     padding?: UISpacing;
     width?: UIWidth;
-    maxWidth?: number;
+    maxWidth?: number | string;
   };
   streamingText: {
     id?: string;
