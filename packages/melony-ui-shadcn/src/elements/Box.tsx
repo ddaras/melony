@@ -39,6 +39,7 @@ export const Box: React.FC<
     flex = undefined,
     overflow = "hidden",
     onClickAction,
+    maxWidth
   } = props;
 
   const { send } = useMelony();
@@ -78,6 +79,7 @@ export const Box: React.FC<
         shadowMap[shadow as UIShadow],
         group && "group",
         isInteractive && "cursor-pointer",
+        maxWidth && widthMap[maxWidth as UIWidth]
       )}
       style={{
         ...dynamicStyles,

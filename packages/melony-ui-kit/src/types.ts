@@ -80,6 +80,7 @@ export interface UIContract {
     borderColor?: UIColor;
     radius?: UIRadius;
     width?: UIWidth;
+    maxWidth?: UIWidth;
     height?: "auto" | "full";
     shadow?: UIShadow;
     group?: boolean;
