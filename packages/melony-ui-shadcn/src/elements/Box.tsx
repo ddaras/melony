@@ -37,7 +37,7 @@ export const Box: React.FC<
     shadow = "none",
     group = false,
     flex = undefined,
-    overflow = "hidden",
+    overflow = "visible",
     onClickAction,
     maxWidth
   } = props;
