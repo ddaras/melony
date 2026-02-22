@@ -21,7 +21,7 @@ export const sidebarUI = ({ sessions, sessionId }: { sessions: { id: string; mti
               },
               background: "transparent",
             },
-              [ui.text("OpenBot", { className: "logo" })]
+              [ui.text("OpenBot", { weight: "semibold" })]
             ),
           ]),
         ]),

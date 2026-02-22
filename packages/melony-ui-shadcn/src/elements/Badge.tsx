@@ -19,10 +19,12 @@ export const Badge: React.FC<UIContract["badge"]> = ({
     outline: "outline",
   };
 
-  const sizeClasses = {
+  const sizeClasses: Record<string, string> = {
+    xs: "text-[10px] px-1 py-0",
     sm: "text-[10px] px-1.5 py-0",
     md: "text-xs px-2.5 py-0.5",
     lg: "text-sm px-3 py-1",
+    xl: "text-sm px-4 py-1.5",
   };
 
   return (

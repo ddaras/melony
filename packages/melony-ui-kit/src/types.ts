@@ -1,10 +1,12 @@
 import type { Event } from "melony";
 
-export type UISize = "sm" | "md" | "lg" | (string & {});
-export type UIAlign = "start" | "center" | "end" | "stretch" | (string & {});
-export type UIJustify = "start" | "center" | "end" | "between" | "around" | (string & {});
-export type UIWrap = "nowrap" | "wrap" | "wrap-reverse" | (string & {});
-export type UIOrientation = "horizontal" | "vertical" | (string & {});
+// ─── Design Tokens ──────────────────────────────────────────────────────────────
+// Platform-agnostic tokens that map to each renderer's design system.
+
+export type UISize = "xs" | "sm" | "md" | "lg" | "xl";
+export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+export type UIRadius = "none" | "sm" | "md" | "lg" | "full";
+export type UIShadow = "none" | "sm" | "md" | "lg" | "xl";
 
 export type UIColor =
   | "primary"
@@ -21,8 +23,6 @@ export type UIColor =
   | "transparent"
   | (string & {});
 
-export type UISpacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | (string & {});
-
 export type UIWidth =
   | "auto"
   | "full"
@@ -35,100 +35,97 @@ export type UIWidth =
   | "3/4"
   | number
   | (string & {});
-export type UIShadow = "none" | "sm" | "md" | "lg" | "xl" | (string & {});
-export type UIRadius = "none" | "sm" | "md" | "lg" | "full" | (string & {});
 
-/**
- * UI Component Contracts
- * This acts as the source of truth for the SDUI protocol.
- */
+export type UIAlign = "start" | "center" | "end" | "stretch";
+export type UIJustify = "start" | "center" | "end" | "between" | "around";
+export type UIWrap = "nowrap" | "wrap" | "wrap-reverse";
+export type UIOrientation = "horizontal" | "vertical";
+export type UIOverflow = "hidden" | "visible" | "scroll" | "auto";
+export type UIFontWeight = "normal" | "medium" | "semibold" | "bold";
+export type UITextAlign = "start" | "center" | "end";
+
+// ─── Shared Prop Interfaces ─────────────────────────────────────────────────────
+// Composable interfaces used by layout/container components.
+
+interface UIBaseProps {
+  id?: string;
+}
+
+interface UIFlexProps {
+  align?: UIAlign;
+  justify?: UIJustify;
+  gap?: UISpacing;
+  wrap?: UIWrap;
+}
+
+interface UIContainerProps {
+  padding?: UISpacing;
+  width?: UIWidth;
+  maxWidth?: number | string;
+  height?: "auto" | "full";
+  flex?: number;
+  overflow?: UIOverflow;
+  background?: UIColor;
+  border?: boolean;
+  borderColor?: UIColor;
+  radius?: UIRadius;
+  shadow?: UIShadow;
+}
+
+// ─── UI Component Contract ──────────────────────────────────────────────────────
+
 export interface UIContract {
-  row: {
-    id?: string;
-    align?: UIAlign;
-    justify?: UIJustify;
-    wrap?: UIWrap;
-    gap?: UISpacing;
-    padding?: UISpacing;
-    width?: UIWidth;
-    height?: "auto" | "full";
+  // ── Layout ──────────────────────────────────────────────────────────────────
+
+  row: UIBaseProps & UIFlexProps & UIContainerProps & {
     group?: boolean;
-    flex?: number;
-    overflow?: "hidden" | "visible" | "scroll" | "auto";
   };
-  col: {
-    id?: string;
-    align?: UIAlign;
-    justify?: UIJustify;
-    gap?: UISpacing;
-    width?: UIWidth;
-    height?: "auto" | "full";
-    padding?: UISpacing;
-    background?: UIColor;
-    radius?: UIRadius;
+
+  col: UIBaseProps & UIFlexProps & UIContainerProps & {
     group?: boolean;
-    flex?: number;
-    overflow?: "hidden" | "visible" | "scroll" | "auto";
-    maxWidth?: number | string;
   };
-  box: {
-    id?: string;
-    padding?: UISpacing;
-    paddingVertical?: UISpacing;
-    paddingHorizontal?: UISpacing;
+
+  box: UIBaseProps & UIContainerProps & {
     margin?: UISpacing;
-    marginVertical?: UISpacing;
-    marginHorizontal?: UISpacing;
-    background?: UIColor;
-    border?: boolean;
-    borderColor?: UIColor;
-    radius?: UIRadius;
-    width?: UIWidth;
-    maxWidth?: number | string;
-    height?: "auto" | "full";
-    shadow?: UIShadow;
     group?: boolean;
-    flex?: number;
-    overflow?: "hidden" | "visible" | "scroll" | "auto";
     onClickAction?: Event;
   };
-  spacer: {
-    id?: string;
+
+  spacer: UIBaseProps & {
     size?: UISpacing;
     direction?: UIOrientation;
   };
-  divider: {
-    id?: string;
+
+  divider: UIBaseProps & {
     orientation?: UIOrientation;
     color?: UIColor;
     margin?: UISpacing;
   };
-  text: {
-    id?: string;
+
+  // ── Content ─────────────────────────────────────────────────────────────────
+
+  text: UIBaseProps & {
     value: string;
-    size?: UISpacing;
-    weight?: "normal" | "medium" | "semibold" | "bold";
+    size?: UISize;
+    weight?: UIFontWeight;
     color?: UIColor;
-    align?: UIAlign;
-    className?: string;
+    align?: UITextAlign;
   };
-  heading: {
-    id?: string;
+
+  heading: UIBaseProps & {
     value: string;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
     color?: UIColor;
-    align?: UIAlign;
+    align?: UITextAlign;
   };
-  markdown: {
-    id?: string;
+
+  markdown: UIBaseProps & {
     value: string;
-    size?: UISpacing;
+    size?: UISize;
     color?: UIColor;
-    align?: UIAlign;
-    className?: string;
   };
-  image: {
-    id?: string;
+
+  image: UIBaseProps & {
     src: string;
     alt?: string;
     width?: UIWidth;
@@ -136,8 +133,8 @@ export interface UIContract {
     radius?: UIRadius;
     objectFit?: "cover" | "contain" | "fill";
   };
-  video: {
-    id?: string;
+
+  video: UIBaseProps & {
     src: string;
     poster?: string;
     autoPlay?: boolean;
@@ -149,19 +146,64 @@ export interface UIContract {
     height?: string | number;
     radius?: UIRadius;
   };
-  icon: {
-    id?: string;
+
+  icon: UIBaseProps & {
     name: string;
     size?: UISize | number;
     color?: UIColor;
   };
-  form: {
-    id?: string;
+
+  // ── Interactive ─────────────────────────────────────────────────────────────
+
+  button: UIBaseProps & {
+    type?: "button" | "submit" | "reset";
+    variant?:
+      | "primary"
+      | "secondary"
+      | "success"
+      | "danger"
+      | "outline"
+      | "ghost"
+      | "link";
+    size?: UISize;
+    disabled?: boolean;
+    width?: UIWidth;
+    onClickAction?: Event;
+    justify?: UIJustify;
+    truncate?: boolean;
+  };
+
+  badge: UIBaseProps & {
+    label: string;
+    variant?: "primary" | "secondary" | "danger" | "success" | "warning" | "outline";
+    size?: UISize;
+  };
+
+  dropdown: UIBaseProps & {
+    items?: Array<{
+      label: string;
+      icon?: string;
+      onClickAction?: Event;
+    }>;
+  };
+
+  popover: UIBaseProps & {
+    side?: "top" | "right" | "bottom" | "left";
+    align?: "start" | "center" | "end";
+    sideOffset?: number;
+    alignOffset?: number;
+    modal?: boolean;
+    trigger?: UINode;
+  };
+
+  // ── Forms ───────────────────────────────────────────────────────────────────
+
+  form: UIBaseProps & {
     onSubmitAction?: Event | ((data: any) => Event);
     gap?: UISpacing;
   };
-  input: {
-    id?: string;
+
+  input: UIBaseProps & {
     name: string;
     label?: string;
     placeholder?: string;
@@ -172,8 +214,8 @@ export interface UIContract {
     required?: boolean;
     width?: UIWidth;
   };
-  textarea: {
-    id?: string;
+
+  textarea: UIBaseProps & {
     name: string;
     placeholder?: string;
     defaultValue?: string;
@@ -184,13 +226,9 @@ export interface UIContract {
     disabled?: boolean;
     required?: boolean;
     width?: UIWidth;
-    background?: UIColor;
-    border?: boolean;
-    shadow?: UIShadow;
-    radius?: UIRadius;
   };
-  select: {
-    id?: string;
+
+  select: UIBaseProps & {
     name: string;
     label?: string;
     options: Array<{ label: string; value: string }>;
@@ -201,21 +239,16 @@ export interface UIContract {
     required?: boolean;
     width?: UIWidth;
   };
-  checkbox: {
-    id?: string;
+
+  checkbox: UIBaseProps & {
     name: string;
     label?: string;
     checked?: boolean;
     onChangeAction?: Event;
     disabled?: boolean;
   };
-  hidden: {
-    id?: string;
-    name: string;
-    value: string;
-  };
-  radioGroup: {
-    id?: string;
+
+  radioGroup: UIBaseProps & {
     name: string;
     options: Array<{ label: string; value: string; disabled?: boolean }>;
     label?: string;
@@ -224,24 +257,28 @@ export interface UIContract {
     onChangeAction?: Event;
     disabled?: boolean;
   };
-  label: {
-    id?: string;
+
+  label: UIBaseProps & {
     value: string;
-    htmlFor?: string;
     required?: boolean;
-    size?: UISpacing;
+    size?: UISize;
     color?: UIColor;
   };
-  colorPicker: {
-    id?: string;
+
+  hidden: UIBaseProps & {
+    name: string;
+    value: string;
+  };
+
+  colorPicker: UIBaseProps & {
     name: string;
     label?: string;
     defaultValue?: string;
     onChangeAction?: Event;
     disabled?: boolean;
   };
-  upload: {
-    id?: string;
+
+  upload: UIBaseProps & {
     label?: string;
     multiple?: boolean;
     accept?: string;
@@ -250,51 +287,26 @@ export interface UIContract {
     mode?: "append" | "replace";
     disabled?: boolean;
   };
-  button: {
-    id?: string;
-    type?: "button" | "submit" | "reset";
-    variant?:
-    | "primary"
-    | "secondary"
-    | "success"
-    | "danger"
-    | "outline"
-    | "ghost"
-    | "link";
-    size?: UISize;
-    disabled?: boolean;
-    width?: UIWidth;
-    onClickAction?: Event;
-    justify?: UIJustify;
-    truncate?: boolean;
-  };
-  popover: {
-    id?: string;
-    side?: "top" | "right" | "bottom" | "left";
-    align?: "start" | "center" | "end";
-    sideOffset?: number;
-    alignOffset?: number;
-    modal?: boolean;
-    trigger?: UINode;
-  };
-  float: {
-    id?: string;
+
+  // ── Positioning ─────────────────────────────────────────────────────────────
+
+  float: UIBaseProps & {
     position?:
-    | "top-left"
-    | "top-right"
-    | "top-center"
-    | "bottom-left"
-    | "bottom-right"
-    | "bottom-center"
-    | "center"
-    | "left-center"
-    | "right-center";
+      | "top-left"
+      | "top-right"
+      | "top-center"
+      | "bottom-left"
+      | "bottom-right"
+      | "bottom-center"
+      | "center"
+      | "left-center"
+      | "right-center";
     offsetX?: UISpacing;
     offsetY?: UISpacing;
     showOnHover?: boolean;
   };
-  sticky: {
-    id?: string;
+
+  sticky: UIBaseProps & {
     top?: UISpacing | number;
     bottom?: UISpacing | number;
     left?: UISpacing | number;
@@ -305,24 +317,10 @@ export interface UIContract {
     width?: UIWidth;
     maxWidth?: number | string;
   };
-  streamingText: {
-    id?: string;
-    eventType: string;
-    size?: UISpacing;
-    weight?: "normal" | "medium" | "semibold" | "bold";
-    color?: UIColor;
-    align?: UIAlign;
-    className?: string;
-    markdown?: boolean;
-  };
-  badge: {
-    id?: string;
-    label: string;
-    variant?: "primary" | "secondary" | "danger" | "success" | "warning" | "outline";
-    size?: UISize;
-  };
-  card: {
-    id?: string;
+
+  // ── Compound ────────────────────────────────────────────────────────────────
+
+  card: UIBaseProps & {
     title?: string;
     subtitle?: string;
     background?: UIColor;
@@ -330,8 +328,8 @@ export interface UIContract {
     radius?: UIRadius;
     shadow?: UIShadow;
   };
-  chart: {
-    id?: string;
+
+  chart: UIBaseProps & {
     data: Array<{
       label: string;
       value: number;
@@ -344,22 +342,14 @@ export interface UIContract {
     showGrid?: boolean;
     showTooltips?: boolean;
   };
-  dropdown: {
-    id?: string;
-    items?: Array<{
-      label: string;
-      icon?: string;
-      onClickAction?: Event;
-    }>;
-  };
-  list: {
-    id?: string;
+
+  list: UIBaseProps & {
     padding?: UISpacing;
     gap?: UISpacing;
     width?: UIWidth;
   };
-  listItem: {
-    id?: string;
+
+  listItem: UIBaseProps & {
     onClickAction?: Event;
     gap?: UISpacing;
     padding?: UISpacing;
@@ -368,8 +358,17 @@ export interface UIContract {
     align?: UIAlign;
     truncate?: boolean;
   };
-  thread: {
-    id?: string;
+
+  streamingText: UIBaseProps & {
+    eventType: string;
+    size?: UISize;
+    weight?: UIFontWeight;
+    color?: UIColor;
+    align?: UITextAlign;
+    markdown?: boolean;
+  };
+
+  thread: UIBaseProps & {
     placeholder?: string;
     messages?: Array<{
       role: string;
@@ -382,15 +381,14 @@ export interface UIContract {
   };
 }
 
+// ─── Node & Event Types ─────────────────────────────────────────────────────────
+
 export type UINode<T extends keyof UIContract = keyof UIContract> = {
   type: T;
   props?: UIContract[T];
   children?: UINode<any>[];
 };
 
-/**
- * Standard UI event type for Melony.
- */
 export interface UIEvent extends Event<UINode> {
   type: "ui";
 }

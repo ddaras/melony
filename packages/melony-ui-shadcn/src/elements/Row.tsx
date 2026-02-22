@@ -1,47 +1,72 @@
 import React from "react";
-import { UIContract, UIAlign, UIJustify, UIWrap, UISpacing, UIWidth } from "@melony/ui-kit";
+import { UIContract } from "@melony/ui-kit";
 import { cn } from "../lib/utils";
 import {
   alignMap,
   justifyMap,
+  wrapMap,
   gapMap,
   paddingMap,
   widthMap,
-  wrapMap,
+  colorBgMap,
+  colorBorderMap,
+  radiusMap,
+  shadowMap,
+  resolveUIStyle,
 } from "../lib/theme-utils";
 
 export const Row: React.FC<
   UIContract["row"] & { children?: React.ReactNode }
-> = (props) => {
-  const {
-    children,
-    align = "start",
-    justify = "start",
-    wrap = "nowrap",
-    gap = "none",
-    padding = "none",
-    width = "full",
-    height = "auto",
-    flex = undefined,
-    overflow = "visible",
-  } = props;
+> = ({
+  children,
+  align = "start",
+  justify = "start",
+  wrap = "nowrap",
+  gap = "none",
+  padding = "none",
+  width = "full",
+  height = "auto",
+  flex,
+  overflow = "visible",
+  background,
+  border = false,
+  borderColor = "border",
+  radius,
+  shadow,
+  maxWidth,
+  group = false,
+}) => {
+  const [baseBgColor] = (background || "").split("/");
+  const [baseBorderColor] = (borderColor || "").split("/");
+
   return (
     <div
       className={cn(
         "flex flex-row min-w-0",
-        alignMap[align as UIAlign],
-        justifyMap[justify as UIJustify],
-        wrapMap[wrap as UIWrap],
-        gapMap[gap as UISpacing],
-        paddingMap[padding as UISpacing],
-        widthMap[width as UIWidth],
+        alignMap[align],
+        justifyMap[justify],
+        wrapMap[wrap],
+        gapMap[gap],
+        paddingMap[padding],
+        widthMap[width],
         height === "full" && "h-full",
+        baseBgColor && colorBgMap[baseBgColor],
+        border && "border",
+        border && baseBorderColor && colorBorderMap[baseBorderColor],
+        radius && radiusMap[radius],
+        shadow && shadowMap[shadow],
+        group && "group",
       )}
-      style={{ flex, width: width && typeof width === "number" ? `${width}px` : undefined, overflow }}
+      style={{
+        ...resolveUIStyle("backgroundColor", background),
+        ...resolveUIStyle("borderColor", borderColor),
+        flex,
+        width: typeof width === "number" ? `${width}px` : undefined,
+        overflow,
+        maxWidth: typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth,
+      }}
     >
-      {children as React.ReactNode}
+      {children}
     </div>
   );
 };
-
-// Add missing maps to theme-utils

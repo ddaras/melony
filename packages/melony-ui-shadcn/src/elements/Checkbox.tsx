@@ -1,8 +1,7 @@
 import React from "react";
 import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
-import { Label } from "./Label";
-import { cn } from "../lib/utils";
+import { Label } from "../ui/label";
 
 export const Checkbox: React.FC<UIContract["checkbox"]> = ({
   label,
@@ -39,10 +38,10 @@ export const Checkbox: React.FC<UIContract["checkbox"]> = ({
       {label && (
         <Label
           htmlFor={name}
-          value={label}
-          color={disabled ? "muted" : "foreground"}
-          size="sm"
-        />
+          className={disabled ? "text-muted-foreground" : "text-foreground"}
+        >
+          {label}
+        </Label>
       )}
     </div>
   );

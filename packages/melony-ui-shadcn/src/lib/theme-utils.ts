@@ -1,6 +1,21 @@
-import { UIColor, UISpacing, UIWidth, UIShadow, UIRadius } from "@melony/ui-kit";
+import type {
+  UIColor,
+  UISpacing,
+  UIWidth,
+  UIShadow,
+  UIRadius,
+  UISize,
+  UIAlign,
+  UIJustify,
+  UIWrap,
+  UIFontWeight,
+  UITextAlign,
+} from "@melony/ui-kit";
 
-export const spacingMap: Record<UISpacing, string> = {
+// ─── Spacing Scale ──────────────────────────────────────────────────────────────
+// Single spacing scale used to derive all spacing-related class maps.
+
+const SPACING_SCALE: Record<UISpacing, string> = {
   none: "0",
   xs: "1",
   sm: "2",
@@ -10,35 +25,22 @@ export const spacingMap: Record<UISpacing, string> = {
   xxl: "12",
 };
 
-export const paddingMap: Record<UISpacing, string> = {
-  none: "p-0",
-  xs: "p-1",
-  sm: "p-2",
-  md: "p-4",
-  lg: "p-6",
-  xl: "p-8",
-  xxl: "p-12",
-};
+function buildSpacingMap(prefix: string): Record<UISpacing, string> {
+  const map = {} as Record<UISpacing, string>;
+  for (const [token, value] of Object.entries(SPACING_SCALE)) {
+    map[token as UISpacing] = `${prefix}-${value}`;
+  }
+  return map;
+}
 
-export const paddingVerticalMap: Record<UISpacing, string> = {
-  none: "py-0",
-  xs: "py-1",
-  sm: "py-2",
-  md: "py-4",
-  lg: "py-6",
-  xl: "py-8",
-  xxl: "py-12",
-};
-
-export const paddingHorizontalMap: Record<UISpacing, string> = {
-  none: "px-0",
-  xs: "px-1",
-  sm: "px-2",
-  md: "px-4",
-  lg: "px-6",
-  xl: "px-8",
-  xxl: "px-12",
-};
+export const spacingMap = SPACING_SCALE;
+export const paddingMap = buildSpacingMap("p");
+export const paddingXMap = buildSpacingMap("px");
+export const paddingYMap = buildSpacingMap("py");
+export const marginMap = buildSpacingMap("m");
+export const marginXMap = buildSpacingMap("mx");
+export const marginYMap = buildSpacingMap("my");
+export const gapMap = buildSpacingMap("gap");
 
 export const interactivePaddingMap: Record<UISpacing, string> = {
   none: "p-0",
@@ -50,48 +52,10 @@ export const interactivePaddingMap: Record<UISpacing, string> = {
   xxl: "py-6 px-10",
 };
 
-export const marginMap: Record<UISpacing, string> = {
-  none: "m-0",
-  xs: "m-1",
-  sm: "m-2",
-  md: "m-4",
-  lg: "m-6",
-  xl: "m-8",
-  xxl: "m-12",
-};
-
-export const marginVerticalMap: Record<UISpacing, string> = {
-  none: "my-0",
-  xs: "my-1",
-  sm: "my-2",
-  md: "my-4",
-  lg: "my-6",
-  xl: "my-8",
-  xxl: "my-12",
-};
-
-export const marginHorizontalMap: Record<UISpacing, string> = {
-  none: "mx-0",
-  xs: "mx-1",
-  sm: "mx-2",
-  md: "mx-4",
-  lg: "mx-6",
-  xl: "mx-8",
-  xxl: "mx-12",
-};
-
-export const gapMap: Record<UISpacing, string> = {
-  none: "gap-0",
-  xs: "gap-1",
-  sm: "gap-2",
-  md: "gap-4",
-  lg: "gap-6",
-  xl: "gap-8",
-  xxl: "gap-12",
-};
+// ─── Color Maps ─────────────────────────────────────────────────────────────────
 
 export const colorBgMap: Record<UIColor, string> = {
-  primary: "bg-primary text-primary-foreground",
+  primary: "bg-primary text-(--color-primary-foreground)",
   secondary: "bg-secondary text-secondary-foreground",
   success: "bg-green-500 text-white",
   danger: "bg-destructive text-destructive-foreground",
@@ -135,6 +99,8 @@ export const colorBorderMap: Record<UIColor, string> = {
   transparent: "border-transparent",
 };
 
+// ─── Layout Maps ────────────────────────────────────────────────────────────────
+
 export const widthMap: Record<UIWidth, string> = {
   auto: "w-auto",
   full: "w-full",
@@ -163,14 +129,14 @@ export const radiusMap: Record<UIRadius, string> = {
   full: "rounded-full",
 };
 
-export const alignMap: Record<string, string> = {
+export const alignMap: Record<UIAlign, string> = {
   start: "items-start",
   center: "items-center",
   end: "items-end",
   stretch: "items-stretch",
 };
 
-export const justifyMap: Record<string, string> = {
+export const justifyMap: Record<UIJustify, string> = {
   start: "justify-start",
   center: "justify-center",
   end: "justify-end",
@@ -178,71 +144,69 @@ export const justifyMap: Record<string, string> = {
   around: "justify-around",
 };
 
-export const wrapMap: Record<string, string> = {
+export const wrapMap: Record<UIWrap, string> = {
   nowrap: "flex-nowrap",
   wrap: "flex-wrap",
   "wrap-reverse": "flex-wrap-reverse",
 };
 
-export const textSizeMap: Record<string, string> = {
-  none: "text-[0]",
+// ─── Typography Maps ────────────────────────────────────────────────────────────
+
+export const textSizeMap: Record<UISize, string> = {
   xs: "text-xs",
   sm: "text-sm",
   md: "text-base",
   lg: "text-lg",
   xl: "text-xl",
-  xxl: "text-2xl",
 };
 
-export const textAlignMap: Record<string, string> = {
+export const textAlignMap: Record<UITextAlign, string> = {
   start: "text-left",
   center: "text-center",
   end: "text-right",
-  stretch: "text-justify",
 };
 
-export const fontWeightMap: Record<string, string> = {
+export const fontWeightMap: Record<UIFontWeight, string> = {
   normal: "font-normal",
   medium: "font-medium",
   semibold: "font-semibold",
   bold: "font-bold",
 };
 
+// ─── Dynamic Style Resolver ─────────────────────────────────────────────────────
+
 /**
- * Resolves an SDUI color (e.g., "primary/50") to a React style object.
- * This handles opacity using CSS Relative Color Syntax.
+ * Resolves a UIColor (with optional opacity like "primary/50") to a style object.
+ * Uses CSS color-mix for opacity, which works across modern browsers.
  */
-export const resolveUIStyle = (
+export function resolveUIStyle(
   property: "backgroundColor" | "color" | "borderColor",
   value?: UIColor,
-) => {
+): React.CSSProperties {
   if (!value) return {};
 
   const [colorName, opacityStr] = value.split("/");
 
-  // If it's a standard mapping and no opacity is requested, return nothing
-  // and let the Tailwind classes handle it (to preserve text-foreground etc.)
-  if (!opacityStr && (colorBgMap[value as UIColor] || colorTextMap[value as UIColor] || colorBorderMap[value as UIColor])) {
+  if (
+    !opacityStr &&
+    (colorBgMap[value as UIColor] ||
+      colorTextMap[value as UIColor] ||
+      colorBorderMap[value as UIColor])
+  ) {
     return {};
   }
 
   const opacity = opacityStr ? parseInt(opacityStr, 10) / 100 : 1;
-
-  // Map camelCase to kebab-case for CSS variables if needed, 
-  // but most of our colors are single words.
-  const kebabName = colorName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-  
-  // Tailwind 4 defines colors as --color-{name}
-  // Shadcn often defines them as --{name}
+  const kebabName = colorName
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .toLowerCase();
   const variable = `var(--color-${kebabName}, var(--${kebabName}))`;
 
   if (opacity === 1) {
     return { [property]: variable };
   }
 
-  // Use CSS color-mix as it's very robust and handles the opacity well
-  // mixed with transparent. This is a very safe way to handle opacity.
   return {
     [property]: `color-mix(in oklch, ${variable}, transparent ${100 - opacity * 100}%)`,
   };
-};
+}

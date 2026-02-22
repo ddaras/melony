@@ -1,7 +1,8 @@
 import React from "react";
 import { UIContract } from "@melony/ui-kit";
-import { Label } from "./Label";
 import { useMelony } from "@melony/react";
+import { Label as LabelBase } from "../ui/label";
+import { Label } from "./Label";
 import { cn } from "../lib/utils";
 
 export const RadioGroup: React.FC<UIContract["radioGroup"]> = ({
@@ -52,12 +53,15 @@ export const RadioGroup: React.FC<UIContract["radioGroup"]> = ({
                 onChange={handleChange}
                 className="h-4 w-4 border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
               />
-              <Label
+              <LabelBase
                 htmlFor={radioId}
-                value={option.label}
-                size="sm"
-                color={isDisabled ? "muted" : "foreground"}
-              />
+                className={cn(
+                  "text-sm",
+                  isDisabled ? "text-muted-foreground" : "text-foreground",
+                )}
+              >
+                {option.label}
+              </LabelBase>
             </div>
           );
         })}

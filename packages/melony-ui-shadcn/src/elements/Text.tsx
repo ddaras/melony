@@ -8,15 +8,13 @@ import {
   colorTextMap,
 } from "../lib/theme-utils";
 
-export const Text: React.FC<UIContract["text"]> = (props) => {
-  const {
-    value,
-    size = "md",
-    weight = "normal",
-    align = "start",
-    color = "foreground",
-    className,
-  } = props;
+export const Text: React.FC<UIContract["text"]> = ({
+  value,
+  size = "md",
+  weight = "normal",
+  align = "start",
+  color = "foreground",
+}) => {
   return (
     <span
       className={cn(
@@ -24,7 +22,6 @@ export const Text: React.FC<UIContract["text"]> = (props) => {
         fontWeightMap[weight],
         textAlignMap[align],
         colorTextMap[color],
-        className,
       )}
     >
       {value}

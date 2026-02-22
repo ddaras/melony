@@ -6,14 +6,12 @@ import { textSizeMap, colorTextMap } from "../lib/theme-utils";
 
 export const Label: React.FC<UIContract["label"]> = ({
   value,
-  htmlFor,
   required,
   size = "md",
   color = "foreground",
 }) => {
   return (
     <LabelBase
-      htmlFor={htmlFor}
       className={cn(
         "flex items-center gap-1",
         textSizeMap[size],

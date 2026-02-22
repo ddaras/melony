@@ -8,14 +8,14 @@ export const settingsUI = ui.box({
 }, [
   ui.col({ gap: "xl", width: "full" }, [
     ui.col({ gap: "xs" }, [
-      ui.heading("Settings", 2),
+      ui.heading("Settings", { level: 2 }),
       ui.text("Manage your OpenBot configuration", { color: "mutedForeground" }),
     ]),
 
     ui.divider(),
 
     ui.col({ gap: "md" }, [
-      ui.heading("Model Configuration", 4),
+      ui.heading("Model Configuration", { level: 4 }),
       ui.row({ align: "center", gap: "md" }, [
         ui.box({ flex: 1 }, [
           ui.node("label", { value: "Provider" }),
@@ -26,15 +26,15 @@ export const settingsUI = ui.box({
     ]),
 
     ui.col({ gap: "md" }, [
-      ui.heading("API Keys", 4),
+      ui.heading("API Keys", { level: 4 }),
       ui.col({ gap: "sm" }, [
         ui.node("label", { value: "OpenAI API Key" }),
         ui.row({ gap: "sm" }, [
-          ui.input("openai_api_key", undefined, {
+          ui.input("openai_api_key", {
             placeholder: "sk-...",
             inputType: "password",
             defaultValue: "••••••••••••••••",
-            width: "full"
+            width: "full",
           }),
           ui.button({ label: "Save", size: "sm" })
         ])
@@ -42,7 +42,7 @@ export const settingsUI = ui.box({
     ]),
 
     ui.col({ gap: "md" }, [
-      ui.heading("Theme", 4),
+      ui.heading("Theme", { level: 4 }),
       ui.themeToggle(),
     ])
   ])

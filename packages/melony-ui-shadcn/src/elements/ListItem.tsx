@@ -1,12 +1,12 @@
 import React from "react";
-import { UIAlign, UIContract } from "@melony/ui-kit";
+import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import { cn } from "../lib/utils";
-import { paddingMap, colorBgMap, radiusMap, interactivePaddingMap } from "../lib/theme-utils";
+import { colorBgMap, radiusMap, interactivePaddingMap } from "../lib/theme-utils";
 import { Row } from "./Row";
 
 export const ListItem: React.FC<
-  UIContract["listItem"] & { children?: React.ReactNode; align?: UIAlign }
+  UIContract["listItem"] & { children?: React.ReactNode }
 > = ({
   children,
   onClickAction,

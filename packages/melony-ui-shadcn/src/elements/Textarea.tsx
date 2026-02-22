@@ -2,9 +2,9 @@ import React from "react";
 import { UIContract } from "@melony/ui-kit";
 import { useMelony } from "@melony/react";
 import { Textarea as TextareaBase } from "../ui/textarea";
-import { Field, FieldTitle } from "../ui/field";
+import { Field } from "../ui/field";
 import { cn } from "../lib/utils";
-import { colorBgMap, colorBorderMap, radiusMap, shadowMap, widthMap } from "../lib/theme-utils";
+import { widthMap } from "../lib/theme-utils";
 
 export const Textarea: React.FC<UIContract["textarea"]> = ({
   placeholder,
@@ -17,10 +17,6 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
   onChangeAction,
   onSubmitAction,
   submitOnEnter,
-  background = "background",
-  border = true,
-  shadow = "none",
-  radius = "none",
 }) => {
   const { send } = useMelony();
 
@@ -56,12 +52,6 @@ export const Textarea: React.FC<UIContract["textarea"]> = ({
       <TextareaBase
         name={name}
         id={name}
-        className={cn(
-          background && colorBgMap[background],
-          !border && "border-none",
-          shadow && shadowMap[shadow],
-          radius && radiusMap[radius],
-        )}
         placeholder={placeholder}
         defaultValue={defaultValue}
         disabled={disabled}
