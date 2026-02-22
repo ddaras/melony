@@ -13,7 +13,7 @@ export const Text: React.FC<UIContract["text"]> = ({
   size = "md",
   weight = "normal",
   align = "start",
-  color = "foreground",
+  color
 }) => {
   return (
     <span
@@ -21,7 +21,7 @@ export const Text: React.FC<UIContract["text"]> = ({
         textSizeMap[size],
         fontWeightMap[weight],
         textAlignMap[align],
-        colorTextMap[color],
+        color && colorTextMap[color],
       )}
     >
       {value}
