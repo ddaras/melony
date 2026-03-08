@@ -9,4 +9,4 @@ Fast, unopinionated, minimalist event-based framework for AI agents.
 - [**Core Concepts**](./core-concepts.md): Events, Event Handlers, and the Plugin System.
 - [**Server-Driven UI**](./server-driven-ui.md): Building rich interactive interfaces from the server.
 - [**Serving & Client**](./adapters.md): Streaming your agent and consuming it on the frontend.
-- [**Advanced Usage**](./advanced-usage.md): HITL, Persistence, and custom components.
+- [**Advanced Usage**](./advanced-usage.md): HITL, Persistence, and recursive orchestration.

@@ -16,18 +16,11 @@ export async function POST(req: Request) {
   const { event } = await req.json();
   return agent.streamResponse(event);
 }
-
-export async function GET() {
-  // Optionally expose config like starter prompts
-  return Response.json({
-    starterPrompts: [],
-  });
-}
 ```
 
 ### Manual Streaming with `createStreamResponse`
 
-If you need more control (e.g., using a custom runtime instance), you can use the built-in `createStreamResponse` utility. It converts an async generator into a streaming `Response`.
+If you need more control (e.g., using a custom runtime instance), you can use the built-in `createStreamResponse` utility from `melony`. It converts an async generator into a streaming `Response`.
 
 ```typescript
 import { createStreamResponse } from "melony";
@@ -40,24 +33,9 @@ export async function POST(req: Request) {
 }
 ```
 
-### Custom Streaming
-
-If you need more control, you can iterate over the generator manually:
-
-```typescript
-async function handleRequest(req, res) {
-  const { event } = await req.json();
-  
-  for await (const chunk of agent.run(event)) {
-    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-  }
-  res.end();
-}
-```
-
 ## Melony Client
 
-The `MelonyClient` is a lightweight, framework-agnostic library for communicating with your Melony server.
+The `MelonyClient` is a lightweight, framework-agnostic library for communicating with your Melony server. It is available via the `melony/client` export.
 
 ```typescript
 import { MelonyClient } from "melony/client";

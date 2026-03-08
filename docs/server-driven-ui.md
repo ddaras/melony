@@ -118,16 +118,6 @@ function UIRenderer({ node }) {
 }
 ```
 
-## Available UI Elements
+## Flexible Contract
 
-While you can define any contract, the pattern used in our demo applications includes these component types:
-
-**Layout**: `card`, `row`, `col`, `box`, `list`, `listItem`, `spacer`, `divider`
-
-**Display**: `text`, `heading`, `badge`, `icon`, `image`, `video`, `chart`
-
-**Interaction**: `button`, `form`, `input`, `select`, `checkbox`, `textarea`, `radioGroup`, `colorPicker`, `upload`
-
-**Utility**: `float`, `dropdown`, `hidden`, `label`
-
-See `@melony/react` for the complete UI contract and supported properties.
+With Melony, you are not limited to a pre-defined set of components. You can emit any event type and handle it on the client however you see fit. This makes it easy to integrate with any UI library or design system.

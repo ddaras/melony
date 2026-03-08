@@ -19,9 +19,9 @@ Melony treats the interaction between a user and an agent as a continuous, react
 
 Instead of a rigid Request/Response model or a fixed "Plan -> Execute -> Observe" loop, Melony provides a **fluent builder** to wire up event handlers. Your logic can yield events that trigger other handlers, creating complex behaviors from simple, decoupled pieces.
 
-## What's Included?
+## Packages
 
-1. **`melony`**: The core runtime and fluent builder.
-2. **`@melony/react`**: React hooks and components to render Melony streams and SDUI nodes effortlessly.
+1. **`melony`**: The core runtime, fluent builder, and lightweight client.
+2. **`@melony/react`**: React hooks and providers to render Melony streams and SDUI nodes effortlessly.
 
 Ready to build? [Head over to the Getting Started guide](./getting-started.md).

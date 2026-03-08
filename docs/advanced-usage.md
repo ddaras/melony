@@ -1,6 +1,6 @@
 # Advanced Usage
 
-Go beyond the basics with persistence, human-in-the-loop workflows, and complex orchestration.
+Go beyond the basics with human-in-the-loop workflows, persistence, and recursive orchestration using `melony` and `@melony/react`.
 
 ## Human-in-the-Loop (HITL)
 
@@ -49,49 +49,6 @@ const agent = melony()
   });
 ```
 
-## Custom UI Events
-
-Since Melony is unopinionated, you can define your own event types to trigger specific UI components on your frontend.
-
-### Server-side
-
-```typescript
-yield {
-  type: "show-chart",
-  data: {
-    chartType: "bar",
-    points: [10, 20, 30],
-  },
-};
-```
-
-### Client-side (React)
-
-```tsx
-import { useMelony } from "@melony/react";
-
-function Chat() {
-  const { messages } = useMelony();
-
-  return (
-    <div>
-      {messages.map(message => (
-        <div key={message.runId}>
-          {message.content.map(event => {
-            if (event.type === "show-chart") {
-              return <MyChart key={event.id} type={event.data.chartType} points={event.data.points} />;
-            }
-            if (event.type === "assistant:text-delta") {
-              return <span key={event.id}>{event.data.delta}</span>;
-            }
-          })}
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
 ## Recursive Orchestration
 
 When a handler yields an event, it is automatically passed back through the runtime's handlers. This allows for powerful, recursive behaviors.
@@ -109,4 +66,42 @@ const agent = melony()
     const summary = await summarize(event.data.text);
     yield { type: "assistant:text", data: { content: summary } };
   });
+```
+
+## Client-Side Integration (React)
+
+Using `@melony/react`, you can easily handle custom events and HITL workflows in your UI.
+
+```tsx
+import { useMelony } from "@melony/react";
+
+function Chat() {
+  const { messages, send } = useMelony();
+
+  return (
+    <div>
+      {messages.map(message => (
+        <div key={message.runId}>
+          {message.content.map(event => {
+            if (event.type === "approval-required") {
+              return (
+                <div key={event.id}>
+                  <p>Approval required for: {event.data.operation}</p>
+                  <button onClick={() => send({ 
+                    type: "place-order", 
+                    data: event.data.params,
+                    meta: { approved: true } 
+                  })}>
+                    Approve
+                  </button>
+                </div>
+              );
+            }
+            // ... handle other events
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
 ```
