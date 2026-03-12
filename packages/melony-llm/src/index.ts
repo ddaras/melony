@@ -114,8 +114,6 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
             } as any,
             { state: context.state, runId: context.runId }
           )) {
-            yield actionEvent as any;
-
             const eventData = (actionEvent as any)?.data;
             const eventToolCallId = eventData?.toolCallId;
             const matchesToolCall =
