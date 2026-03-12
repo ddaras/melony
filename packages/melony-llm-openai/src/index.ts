@@ -14,19 +14,56 @@ export interface OpenAIProviderOptions {
 }
 
 const toOpenAiMessages = (messages: LlmMessage[], system?: string) => {
-  const openAiMessages: Array<{ role: string; content?: string; tool_call_id?: string; name?: string }> = [];
+  const openAiMessages: Array<{
+    role: string;
+    content?: string | null;
+    tool_call_id?: string;
+    name?: string;
+    tool_calls?: Array<{
+      id: string;
+      type: "function";
+      function: { name: string; arguments: string };
+    }>;
+  }> = [];
 
   if (system) {
     openAiMessages.push({ role: "system", content: system });
   }
 
   for (const message of messages) {
+    const assistantWithToolCalls = message as LlmMessage & {
+      toolCalls?: Array<{ id: string; name: string; input: any }>;
+    };
+
     if (message.role === "tool") {
       openAiMessages.push({
         role: "tool",
         content: message.content,
         tool_call_id: message.toolCallId,
         name: message.name
+      });
+      continue;
+    }
+
+    if (
+      message.role === "assistant" &&
+      Array.isArray(assistantWithToolCalls.toolCalls) &&
+      assistantWithToolCalls.toolCalls.length > 0
+    ) {
+      openAiMessages.push({
+        role: "assistant",
+        content: message.content?.length ? message.content : null,
+        tool_calls: assistantWithToolCalls.toolCalls.map((toolCall: { id: string; name: string; input: any }) => ({
+          id: toolCall.id,
+          type: "function",
+          function: {
+            name: toolCall.name,
+            arguments:
+              typeof toolCall.input === "string"
+                ? toolCall.input
+                : JSON.stringify(toolCall.input ?? {})
+          }
+        }))
       });
       continue;
     }

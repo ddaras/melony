@@ -1,10 +1,17 @@
 import { Event, RuntimeContext } from "melony";
 
+export interface LlmToolCallMessage {
+  id: string;
+  name: string;
+  input: any;
+}
+
 export interface LlmMessage {
   role: "system" | "user" | "assistant" | "tool";
   content: string;
   name?: string;
   toolCallId?: string;
+  toolCalls?: LlmToolCallMessage[];
 }
 
 export interface LlmTool {

@@ -18,8 +18,6 @@ function isEvent(val: any): val is Event {
  */
 export class Runtime<TState = any, TEvent extends Event = Event> {
   public readonly config: Config<TState, TEvent>;
-  private queue: TEvent[] = [];
-  private isEmitting = false;
 
   constructor(config: Config<TState, TEvent>) {
     this.config = config;
@@ -89,8 +87,8 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
     }
 
     const handlers = [
-      ...(this.config.eventHandlers.get(currentEvent.type) || []),
       ...(this.config.eventHandlers.get("*") || []),
+      ...(this.config.eventHandlers.get(currentEvent.type) || []),
     ];
     
     // First emit the event itself
@@ -114,18 +112,6 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
     event: TEvent,
     context?: RuntimeContext<TState, TEvent>,
   ): AsyncGenerator<TEvent> {
-    this.queue.push(event);
-
-    if (this.isEmitting) return;
-
-    this.isEmitting = true;
-    try {
-      while (this.queue.length > 0) {
-        const current = this.queue.shift()!;
-        yield current;
-      }
-    } finally {
-      this.isEmitting = false;
-    }
+    yield event;
   }
 }

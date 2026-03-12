@@ -1,5 +1,13 @@
 import { AgentPlugin } from "@melony/agents";
 
+const runSequences = new Map<string, number>();
+
+const nextSequence = (runId: string): number => {
+  const next = (runSequences.get(runId) || 0) + 1;
+  runSequences.set(runId, next);
+  return next;
+};
+
 export interface InspectorOptions {
   /**
    * The URL of the Melony Studio server.
@@ -26,10 +34,12 @@ export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
     builder.intercept(async (event, context) => {
       const agentState = (context.state as any)?.agent;
       const agentName = agentState?.name || 'Anonymous Agent';
+      const sequence = nextSequence(context.runId);
 
       const payload = {
         runId: context.runId,
         agentName,
+        sequence,
         timestamp: Date.now(),
         event,
         state: context.state,
@@ -52,10 +62,12 @@ export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
     builder.on("*", (event, context) => {
       const agentState = (context.state as any)?.agent;
       const agentName = agentState?.name || 'Anonymous Agent';
+      const sequence = nextSequence(context.runId);
 
       const payload = {
         runId: context.runId,
         agentName,
+        sequence,
         timestamp: Date.now(),
         event,
         state: context.state,
@@ -67,6 +79,10 @@ export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }).catch(() => {});
+
+      if ((event as any)?.type === "agent:complete") {
+        runSequences.delete(context.runId);
+      }
     });
   };
 };

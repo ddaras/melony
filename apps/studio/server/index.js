@@ -13,6 +13,15 @@ const wss = new WebSocketServer({ server });
 // In-memory storage for events (current session only)
 const runs = new Map();
 
+const compareRunEvents = (a, b) => {
+  const aSeq = typeof a.sequence === 'number' ? a.sequence : Number.MAX_SAFE_INTEGER;
+  const bSeq = typeof b.sequence === 'number' ? b.sequence : Number.MAX_SAFE_INTEGER;
+  if (aSeq !== bSeq) {
+    return aSeq - bSeq;
+  }
+  return a.timestamp - b.timestamp;
+};
+
 wss.on('connection', (ws) => {
   console.log('Studio UI connected via WebSocket');
   
@@ -25,7 +34,7 @@ wss.on('connection', (ws) => {
 
 // Endpoint for the Inspector to send events
 app.post('/api/events', (req, res) => {
-  const { runId, sessionId: incomingSessionId, agentName, timestamp, event, state, type } = req.body;
+  const { runId, sessionId: incomingSessionId, agentName, sequence, timestamp, event, state, type } = req.body;
   const sessionId = incomingSessionId || state?.sessionId || 'default';
   
   if (!runs.has(runId)) {
@@ -53,8 +62,9 @@ app.post('/api/events', (req, res) => {
   // We only store the event if it's an emission (to avoid duplicates from intercept)
   // or if it's the first intercept for this runId.
   // Actually, we can store both and mark them.
-  run.events.push({ timestamp, event, state, type });
-  run.lastUpdatedAt = timestamp;
+  run.events.push({ sequence, timestamp, event, state, type });
+  run.events.sort(compareRunEvents);
+  run.lastUpdatedAt = Math.max(run.lastUpdatedAt || timestamp, timestamp);
   if (state) {
     run.state = state;
   }
@@ -62,7 +72,7 @@ app.post('/api/events', (req, res) => {
   // Broadcast to all connected Studio UI clients
   const payload = JSON.stringify({ 
     type: 'event', 
-    data: { runId, sessionId: run.sessionId, agentName: run.agentName, timestamp, event, state, type } 
+    data: { runId, sessionId: run.sessionId, agentName: run.agentName, sequence, timestamp, event, state, type } 
   });
   
   wss.clients.forEach((client) => {

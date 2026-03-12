@@ -4,25 +4,36 @@ import {
   MessageSquare,
   Send,
   Trash2, 
-  Clock, 
-  Zap, 
   Terminal,
   ChevronRight,
-  Info
+  Zap,
+  Activity,
+  Box,
+  Cpu,
+  Layers
 } from 'lucide-react';
 import { JsonView, darkStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 
 interface MelonyEvent {
+  sequence?: number;
   timestamp: number;
   event: {
     type: string;
     data: any;
-    id?: string;
   };
   state: any;
   type: 'intercept' | 'emit';
 }
+
+const compareRunEvents = (a: MelonyEvent, b: MelonyEvent): number => {
+  const aSeq = typeof a.sequence === 'number' ? a.sequence : Number.MAX_SAFE_INTEGER;
+  const bSeq = typeof b.sequence === 'number' ? b.sequence : Number.MAX_SAFE_INTEGER;
+  if (aSeq !== bSeq) {
+    return aSeq - bSeq;
+  }
+  return a.timestamp - b.timestamp;
+};
 
 interface Run {
   runId: string;
@@ -73,9 +84,9 @@ const mergeAssistantText = (currentText: string, incomingText: string, eventType
 
 const formatSessionLabel = (sessionId: string): string => {
   if (!sessionId || sessionId === 'default') {
-    return 'DEFAULT SESSION';
+    return 'Default Session';
   }
-  return `SESSION ${sessionId.slice(0, 12)}${sessionId.length > 12 ? '...' : ''}`;
+  return `Session ${sessionId.slice(0, 8)}`;
 };
 
 const createId = (): string => crypto.randomUUID();
@@ -101,17 +112,35 @@ const normalizeRuntimeMessages = (messages: unknown): ChatMessage[] => {
     }));
 };
 
+const getTraceTone = (eventType: string): { dot: string; bar: string } => {
+  const normalized = eventType.toLowerCase();
+  if (normalized.includes('error')) {
+    return { dot: 'bg-rose-400', bar: 'bg-rose-400/45' };
+  }
+  if (normalized.includes('llm')) {
+    return { dot: 'bg-violet-400', bar: 'bg-violet-400/40' };
+  }
+  if (normalized.includes('action')) {
+    return { dot: 'bg-amber-300', bar: 'bg-amber-300/40' };
+  }
+  return { dot: 'bg-emerald-400', bar: 'bg-emerald-400/40' };
+};
+
 const App: React.FC = () => {
   const [runs, setRuns] = useState<Map<string, Run>>(new Map());
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(null);
-  const [activePanel, setActivePanel] = useState<'inspector' | 'chat'>('inspector');
+  
+  // Chat state
   const [chatEndpoint, setChatEndpoint] = useState('http://localhost:3000/chat');
   const [chatSessionId, setChatSessionId] = useState(() => createId());
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+
+  // Inspector layout state
+  const [inspectorTab, setInspectorTab] = useState<'payload' | 'state'>('payload');
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:7777');
@@ -124,6 +153,7 @@ const App: React.FC = () => {
         data.forEach((run: Run) => {
           newRuns.set(run.runId, {
             ...run,
+            events: [...(run.events || [])].sort(compareRunEvents),
             sessionId: run.sessionId || run.state?.sessionId || 'default'
           });
         });
@@ -131,7 +161,7 @@ const App: React.FC = () => {
       } else if (type === 'event') {
         setRuns((prev) => {
           const newRuns = new Map(prev);
-          const { runId, sessionId, agentName, timestamp, event, state, type: eventType } = data;
+          const { runId, sessionId, agentName, sequence, timestamp, event, state, type: eventType } = data;
           const resolvedSessionId = sessionId || state?.sessionId || 'default';
           
           if (!newRuns.has(runId)) {
@@ -151,10 +181,16 @@ const App: React.FC = () => {
           if (agentName && (!run.agentName || run.agentName === 'Anonymous Agent')) {
             run.agentName = agentName;
           }
-          run.events.push({ timestamp, event, state, type: eventType });
-          run.lastUpdatedAt = timestamp;
+          run.events.push({ sequence, timestamp, event, state, type: eventType });
+          run.events.sort(compareRunEvents);
+          run.lastUpdatedAt = Math.max(run.lastUpdatedAt || timestamp, timestamp);
           if (state) {
             run.state = state;
+          }
+          
+          // Auto-select latest run if it matches our active chat session
+          if (resolvedSessionId === chatSessionId && !selectedRunId) {
+            setSelectedRunId(runId);
           }
           
           return newRuns;
@@ -167,7 +203,7 @@ const App: React.FC = () => {
     };
 
     return () => ws.close();
-  }, []);
+  }, [chatSessionId, selectedRunId]);
 
   const groupedRuns = useMemo(() => {
     const sessionMap = new Map<string, Run[]>();
@@ -187,25 +223,76 @@ const App: React.FC = () => {
       }))
       .sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt);
   }, [runs]);
+
   const selectedRun = selectedRunId ? runs.get(selectedRunId) : null;
   const selectedEvent = selectedRun && selectedEventIndex !== null ? selectedRun.events[selectedEventIndex] : null;
-
-  useEffect(() => {
-    if (!selectedRun) {
-      return;
+  const selectedRunDurationMs = useMemo(() => {
+    if (!selectedRun || selectedRun.events.length === 0) {
+      return 0;
     }
-
-    const latestState = selectedRun.events[selectedRun.events.length - 1]?.state || selectedRun.state;
-    const stateMessages = normalizeRuntimeMessages(latestState?.messages);
-    setChatMessages(stateMessages);
-    if (selectedRun.sessionId) {
-      setChatSessionId(selectedRun.sessionId);
-    }
-    setChatInput('');
+    const firstTimestamp = selectedRun.startedAt || selectedRun.events[0].timestamp;
+    const lastTimestamp = Math.max(
+      selectedRun.lastUpdatedAt,
+      selectedRun.events[selectedRun.events.length - 1].timestamp
+    );
+    return Math.max(0, lastTimestamp - firstTimestamp);
   }, [selectedRun]);
 
+  const timelineRows = useMemo(() => {
+    if (!selectedRun || selectedRun.events.length === 0) {
+      return [];
+    }
+
+    const runStart = selectedRun.startedAt || selectedRun.events[0].timestamp;
+    const runEnd = Math.max(
+      selectedRun.lastUpdatedAt,
+      selectedRun.events[selectedRun.events.length - 1].timestamp + 1
+    );
+    const totalDuration = Math.max(1, runEnd - runStart);
+
+    return selectedRun.events.map((event, idx) => {
+      const nextEvent = selectedRun.events[idx + 1];
+      const startMs = Math.max(0, event.timestamp - runStart);
+      const rawDurationMs = nextEvent
+        ? Math.max(1, nextEvent.timestamp - event.timestamp)
+        : Math.max(1, runEnd - event.timestamp);
+
+      const leftPercent = Math.min(100, (startMs / totalDuration) * 100);
+      const requestedWidth = Math.max(0.9, (rawDurationMs / totalDuration) * 100);
+      const widthPercent = Math.max(0.9, Math.min(100 - leftPercent, requestedWidth));
+      const tone = getTraceTone(event.event.type);
+
+      return {
+        event,
+        idx,
+        startMs,
+        durationMs: rawDurationMs,
+        leftPercent,
+        widthPercent,
+        tone
+      };
+    });
+  }, [selectedRun]);
+
+  // Restore chat messages from run state when a run is selected
   useEffect(() => {
-    chatMessagesRef.current?.scrollTo({ top: chatMessagesRef.current.scrollHeight });
+    if (!selectedRun) return;
+
+    // Only update chat session if it's different, to avoid resetting input unnecessarily
+    if (selectedRun.sessionId && selectedRun.sessionId !== chatSessionId) {
+      setChatSessionId(selectedRun.sessionId);
+      
+      const latestState = selectedRun.events[selectedRun.events.length - 1]?.state || selectedRun.state;
+      if (latestState?.messages) {
+        setChatMessages(normalizeRuntimeMessages(latestState.messages));
+      }
+    }
+  }, [selectedRun, chatSessionId]);
+
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
   }, [chatMessages, isSendingMessage]);
 
   const clearRuns = async () => {
@@ -216,6 +303,8 @@ const App: React.FC = () => {
     setChatSessionId(createId());
     setChatMessages([]);
     setChatInput('');
+    setSelectedRunId(null);
+    setSelectedEventIndex(null);
   };
 
   const sendChatMessage = async () => {
@@ -232,7 +321,6 @@ const App: React.FC = () => {
     ]);
     setChatInput('');
     setIsSendingMessage(true);
-    setActivePanel('chat');
 
     const updateAssistantMessage = (content: string, role: ChatMessage['role'] = 'assistant') => {
       setChatMessages((prev) =>
@@ -246,13 +334,11 @@ const App: React.FC = () => {
       let updatedText = currentText;
       const lines = chunk.split('\n');
       for (const line of lines) {
-        if (!line.startsWith('data:')) {
-          continue;
-        }
+        if (!line.startsWith('data:')) continue;
+        
         const payload = line.slice(5).trim();
-        if (!payload) {
-          continue;
-        }
+        if (!payload) continue;
+        
         try {
           const parsedEvent = JSON.parse(payload);
           if (parsedEvent?.type === 'error') {
@@ -261,9 +347,8 @@ const App: React.FC = () => {
             continue;
           }
           const eventText = extractEventText(parsedEvent);
-          if (!eventText) {
-            continue;
-          }
+          if (!eventText) continue;
+          
           updatedText = mergeAssistantText(updatedText, eventText, parsedEvent?.type);
           updateAssistantMessage(updatedText || '...');
         } catch {
@@ -276,19 +361,12 @@ const App: React.FC = () => {
     try {
       const response = await fetch(chatEndpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, sessionId: chatSessionId })
       });
 
-      if (!response.ok) {
-        throw new Error(`Chat request failed with status ${response.status}`);
-      }
-
-      if (!response.body) {
-        throw new Error('Chat response body is empty.');
-      }
+      if (!response.ok) throw new Error(`Chat request failed with status ${response.status}`);
+      if (!response.body) throw new Error('Chat response body is empty.');
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -297,9 +375,8 @@ const App: React.FC = () => {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
+        if (done) break;
+        
         buffer += decoder.decode(value, { stream: true });
         const chunks = buffer.split('\n\n');
         buffer = chunks.pop() || '';
@@ -324,301 +401,350 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full bg-zinc-950 text-zinc-100 overflow-hidden font-sans">
-      {/* Sidebar: Run List */}
-      <div className="w-80 border-r border-zinc-800 flex flex-col h-full bg-zinc-900/50">
-        <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
-          <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500/10" />
-            <h1 className="font-bold text-lg tracking-tight">Melony Studio</h1>
+    <div className="flex h-screen w-full bg-zinc-950 text-zinc-300 overflow-hidden font-sans selection:bg-zinc-500/30">
+      
+      {/* 1. LEFT PANEL: Session & Run Management */}
+      <div className="w-72 border-r border-zinc-800 flex flex-col h-full bg-zinc-950 shadow-sm z-10">
+        <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-950">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded border border-zinc-700 flex items-center justify-center">
+              <Cpu className="w-4 h-4 text-zinc-300" />
+            </div>
+            <h1 className="font-semibold text-sm tracking-tight text-zinc-100">Melony Studio</h1>
           </div>
-          <button onClick={clearRuns} className="p-1.5 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-red-400">
+          <button 
+            onClick={clearRuns} 
+            className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+            title="Clear all runs"
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div className="p-3 border-b border-zinc-800 flex flex-col gap-2 bg-zinc-950">
+          <button
+            onClick={startNewSession}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-md text-xs font-medium transition-colors"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            New Session
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-4 custom-scrollbar">
           {groupedRuns.length === 0 && (
-            <div className="p-8 text-center text-zinc-500 text-sm italic">
-              No runs captured yet...
+            <div className="py-12 px-4 flex flex-col items-center text-center text-zinc-600">
+              <Layers className="w-8 h-8 mb-3 opacity-20" />
+              <p className="text-xs font-medium">No sessions.</p>
             </div>
           )}
+          
           {groupedRuns.map((group) => (
-            <section key={group.sessionId} className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center justify-between">
-                <span className="truncate">{formatSessionLabel(group.sessionId)}</span>
-                <span className="text-zinc-600">{group.runs.length}</span>
+            <div key={group.sessionId} className="space-y-1.5">
+              <div 
+                className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer ${
+                  chatSessionId === group.sessionId ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'
+                }`}
+                onClick={() => {
+                  setChatSessionId(group.sessionId);
+                  if (group.runs.length > 0) {
+                    setSelectedRunId(group.runs[0].runId);
+                    
+                    const latestRun = group.runs[0];
+                    const latestState = latestRun.events[latestRun.events.length - 1]?.state || latestRun.state;
+                    if (latestState?.messages) {
+                      setChatMessages(normalizeRuntimeMessages(latestState.messages));
+                    }
+                  }
+                }}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  {formatSessionLabel(group.sessionId)}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full border border-sky-500/30 text-sky-300 bg-sky-500/10">
+                  {group.runs.length}
+                </span>
               </div>
-              <div className="space-y-1">
+              
+              <div className="pl-2 space-y-1 border-l border-zinc-800 ml-2">
                 {group.runs.map((run) => (
                   <button
                     key={run.runId}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChatSessionId(run.sessionId);
                       setSelectedRunId(run.runId);
                       setSelectedEventIndex(null);
-                      setActivePanel('chat');
                     }}
-                    className={`w-full text-left p-3 rounded-lg transition-all border border-transparent ${
+                    className={`w-full text-left px-3 py-2 rounded-md transition-all ${
                       selectedRunId === run.runId 
-                        ? 'bg-zinc-800 border-zinc-700 shadow-sm' 
-                        : 'hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-200'
+                        ? 'bg-zinc-900 border border-zinc-800 shadow-sm' 
+                        : 'border border-transparent hover:bg-zinc-900/50 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-mono font-medium truncate opacity-60">RUN: {run.runId.slice(0, 8)}...</span>
-                      <span className="text-[10px] opacity-40 uppercase tracking-widest">{new Date(run.lastUpdatedAt).toLocaleTimeString([], { hour12: false })}</span>
+                      <span className={`text-xs font-medium truncate ${selectedRunId === run.runId ? 'text-zinc-100' : ''}`}>
+                        {run.agentName || 'Agent'}
+                      </span>
+                      <span className="text-[9px] text-zinc-600">
+                        {new Date(run.lastUpdatedAt).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm font-semibold truncate text-zinc-100">
-                      {run.agentName || 'Anonymous Agent'}
-                    </div>
-                    <div className="flex items-center gap-1 mt-1.5 opacity-50 text-[10px]">
-                      <Clock className="w-3 h-3" />
-                      <span>{run.events.length} events emitted</span>
+                    <div className="flex items-center justify-between text-[10px] text-zinc-600">
+                      <span className="font-mono opacity-50 text-[9px]">
+                        {run.runId.slice(0, 8)}
+                      </span>
+                      <span className="flex items-center gap-1 opacity-50">
+                        <Activity className="w-3 h-3" />
+                        {run.events.length}
+                      </span>
                     </div>
                   </button>
                 ))}
               </div>
-            </section>
+            </div>
           ))}
         </div>
+        
+        <div className="p-3 border-t border-zinc-800 bg-zinc-950 flex items-center justify-between text-[10px] font-mono text-zinc-600">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            Connected
+          </div>
+          <div className="flex flex-col gap-1 w-32">
+             <input
+              value={chatEndpoint}
+              onChange={(event) => setChatEndpoint(event.target.value)}
+              title="Chat API Endpoint"
+              className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-[9px] text-zinc-500 focus:outline-none focus:border-zinc-700 w-full"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Main Content: Timeline */}
-      <div className="flex-1 flex flex-col h-full bg-zinc-950">
-        {!selectedRun ? (
-          <div className="flex-1 flex flex-col items-center justify-center opacity-40 select-none">
-            <div className="p-8 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
-               <Zap className="w-16 h-16 text-zinc-600" />
+      {/* 2. CENTRAL PANEL: Chat Interface */}
+      <div className="flex-1 flex flex-col h-full bg-zinc-950 relative z-0">
+        
+        {/* Chat Header */}
+        <div className="h-14 border-b border-zinc-800 bg-zinc-950 flex items-center px-6 justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="text-xs font-medium text-zinc-400 uppercase tracking-widest">Chat</div>
+            <div className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-500 font-mono flex items-center gap-1.5">
+              {chatSessionId.slice(0,8)}
             </div>
-            <p className="text-lg font-medium tracking-wide">SELECT A RUN TO BEGIN INSPECTION</p>
-            <p className="text-sm mt-2 opacity-60">Ready to trace your agent's stream of thought</p>
           </div>
-        ) : (
-          <>
-            <div className="p-4 border-b border-zinc-800 bg-zinc-900/40 backdrop-blur-md sticky top-0 z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-bold text-lg text-zinc-100 leading-tight">
-                    {selectedRun.agentName || 'Anonymous Agent'}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-400 border border-zinc-700">ID: {selectedRunId}</span>
-                    <span className="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-400 border border-zinc-700">SESSION: {selectedRun.sessionId}</span>
-                    <span className="text-xs text-zinc-500 ml-1">Started {new Date(selectedRun.startedAt).toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                   {/* Add any toolbar buttons here */}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div className="max-w-4xl mx-auto space-y-3">
-                {selectedRun.events.map((e, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedEventIndex(idx)}
-                    className={`group w-full flex items-start text-left gap-4 p-3 rounded-lg border transition-all ${
-                      selectedEventIndex === idx 
-                        ? 'bg-zinc-800 border-zinc-600 shadow-lg translate-x-1' 
-                        : 'bg-zinc-900/40 border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/60'
-                    }`}
-                  >
-                    <div className="mt-1 flex-shrink-0">
-                      <div className={`w-2.5 h-2.5 rounded-full ring-4 ring-zinc-950 ${
-                        e.event.type.includes('error') ? 'bg-red-500' :
-                        e.event.type.includes('llm') ? 'bg-blue-400' :
-                        e.event.type.includes('action') ? 'bg-purple-400' :
-                        'bg-emerald-400'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono opacity-40 uppercase tracking-widest">{new Date(e.timestamp).toLocaleTimeString([], { hour12: false, fractionalSecondDigits: 3 })}</span>
-                        <span className={`text-[10px] px-1 rounded font-mono ${e.type === 'intercept' ? 'bg-amber-900/30 text-amber-500 border border-amber-900/50' : 'bg-zinc-800 text-zinc-500'}`}>
-                          {e.type.toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="font-mono text-sm font-bold tracking-tight text-zinc-200 truncate group-hover:text-white transition-colors">
-                        {e.event.type}
-                      </div>
-                      {typeof e.event.data === 'string' && (
-                        <div className="text-xs text-zinc-400 mt-1.5 line-clamp-2 leading-relaxed opacity-80 italic">
-                          "{e.event.data}"
-                        </div>
-                      )}
-                      {e.event.type === 'llm:text:delta' && (
-                        <div className="text-xs text-zinc-400 mt-1.5 font-mono line-clamp-1 opacity-60">
-                          {typeof e.event.data === 'string'
-                            ? e.event.data
-                            : typeof e.event.data?.text === 'string'
-                              ? e.event.data.text
-                              : JSON.stringify(e.event.data)}
-                        </div>
-                      )}
-                    </div>
-                    <ChevronRight className={`w-4 h-4 mt-1 transition-transform opacity-0 group-hover:opacity-100 ${selectedEventIndex === idx ? 'opacity-100 rotate-90' : ''}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Right Panel: Event/State Details + Chat */}
-      <div className="w-[450px] border-l border-zinc-800 flex flex-col h-full bg-zinc-900/20 backdrop-blur-xl">
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900/40 flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900 p-1">
-            <button
-              onClick={() => setActivePanel('inspector')}
-              className={`px-2 py-1 text-xs font-semibold rounded transition-colors ${
-                activePanel === 'inspector'
-                  ? 'bg-zinc-700 text-zinc-100'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-              }`}
-            >
-              <span className="flex items-center gap-1">
-                <Info className="w-3.5 h-3.5" />
-                Inspector
-              </span>
-            </button>
-            <button
-              onClick={() => setActivePanel('chat')}
-              className={`px-2 py-1 text-xs font-semibold rounded transition-colors ${
-                activePanel === 'chat'
-                  ? 'bg-zinc-700 text-zinc-100'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-              }`}
-            >
-              <span className="flex items-center gap-1">
-                <MessageSquare className="w-3.5 h-3.5" />
-                Chat
-              </span>
-            </button>
-          </div>
-          {activePanel === 'chat' && (
-            <button
-              onClick={() => setChatMessages([])}
-              className="text-xs text-zinc-400 hover:text-zinc-100 transition-colors"
-            >
-              Clear chat
-            </button>
-          )}
         </div>
 
-        {activePanel === 'inspector' && !selectedEvent && (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-zinc-600 opacity-60">
-            <Terminal className="w-12 h-12 mb-4 opacity-20" />
-            <p className="text-xs uppercase tracking-widest font-bold">Select an event to view payload and state</p>
-          </div>
-        )}
-
-        {activePanel === 'inspector' && selectedEvent && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            <section>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3 border-b border-zinc-800/50 pb-1.5">Event Data</h4>
-              <div className="bg-zinc-900/80 rounded-lg p-4 border border-zinc-800 shadow-inner overflow-hidden">
-                <JsonView 
-                  data={selectedEvent.event} 
-                  style={darkStyles} 
-                  shouldExpandNode={() => true}
-                />
+        {/* Messages */}
+        <div ref={chatMessagesRef} className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 scroll-smooth">
+          {chatMessages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-zinc-600 space-y-4">
+              <div className="w-12 h-12 rounded-xl border border-zinc-800 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-zinc-600" />
               </div>
-            </section>
-            
-            <section>
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3 border-b border-zinc-800/50 pb-1.5">Context State Snapshot</h4>
-              <div className="bg-zinc-900/80 rounded-lg p-4 border border-zinc-800 shadow-inner overflow-hidden">
-                <JsonView 
-                  data={selectedEvent.state} 
-                  style={darkStyles} 
-                  shouldExpandNode={(level) => level < 2}
-                />
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activePanel === 'chat' && (
-          <>
-            <div className="p-3 border-b border-zinc-800 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold block">
-                  Express Chat Endpoint
-                </label>
-                <button
-                  onClick={startNewSession}
-                  className="text-[10px] uppercase tracking-widest text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 rounded px-2 py-1 transition-colors"
-                >
-                  New Session
-                </button>
-              </div>
-              <input
-                value={chatEndpoint}
-                onChange={(event) => setChatEndpoint(event.target.value)}
-                placeholder="http://localhost:3000/chat"
-                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-              />
-              <div className="text-[10px] font-mono text-zinc-500 truncate">
-                SESSION ID: {chatSessionId}
-              </div>
+              <h2 className="text-lg font-medium text-zinc-400">Melony Studio</h2>
             </div>
-
-            <div ref={chatMessagesRef} className="flex-1 overflow-y-auto p-3 space-y-3">
-              {chatMessages.length === 0 && (
-                <div className="text-xs text-zinc-500 text-center pt-8">
-                  Send a message to test your Express app chat endpoint.
-                </div>
-              )}
+          ) : (
+            <div className="max-w-3xl mx-auto space-y-8">
               {chatMessages.map((entry) => (
                 <div
                   key={entry.id}
-                  className={`rounded-lg p-2.5 text-sm leading-relaxed border ${
-                    entry.role === 'user'
-                      ? 'bg-zinc-800 border-zinc-700 ml-6'
-                      : entry.role === 'error'
-                        ? 'bg-red-950/40 border-red-900/60 text-red-200 mr-6'
-                        : 'bg-zinc-900 border-zinc-800 mr-6'
-                  }`}
+                  className={`flex gap-4 ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className="text-[10px] uppercase tracking-widest mb-1 opacity-60">
-                    {entry.role}
+                  <div
+                    className={`px-0 py-0 text-[14px] leading-relaxed max-w-[90%] ${
+                      entry.role === 'user'
+                        ? 'text-zinc-100'
+                        : entry.role === 'error'
+                          ? 'text-red-400'
+                          : 'text-zinc-300'
+                    }`}
+                  >
+                    <div className={`flex items-center gap-2 mb-2 ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                       <span className="text-[10px] font-bold uppercase tracking-widest opacity-30">
+                        {entry.role}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-wrap break-words">
+                      {entry.content || (isSendingMessage && entry.role === 'assistant' ? (
+                        <span className="flex gap-1 items-center h-5">
+                          <span className="w-1 h-1 bg-zinc-600 rounded-full animate-pulse"></span>
+                          <span className="w-1 h-1 bg-zinc-600 rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                          <span className="w-1 h-1 bg-zinc-600 rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                        </span>
+                      ) : '')}
+                    </div>
                   </div>
-                  <div className="whitespace-pre-wrap break-words">{entry.content || '...'}</div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
 
-            <div className="p-3 border-t border-zinc-800">
-              <div className="flex items-end gap-2">
-                <textarea
-                  value={chatInput}
-                  onChange={(event) => setChatInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
-                      event.preventDefault();
-                      void sendChatMessage();
-                    }
-                  }}
-                  placeholder="Type a message..."
-                  rows={2}
-                  className="flex-1 resize-none bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-                />
-                <button
-                  onClick={() => void sendChatMessage()}
-                  disabled={isSendingMessage || !chatInput.trim()}
-                  className="h-10 w-10 rounded bg-zinc-100 text-zinc-900 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-opacity"
-                  title="Send message"
-                >
-                  {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+        {/* Input */}
+        <div className="p-6 pt-2 relative z-10">
+          <div className="max-w-3xl mx-auto relative">
+            <textarea
+              value={chatInput}
+              onChange={(event) => setChatInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  void sendChatMessage();
+                }
+              }}
+              placeholder="Message..."
+              rows={1}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-5 pr-14 py-4 text-[14px] text-zinc-200 focus:outline-none focus:border-zinc-700 transition-all resize-none shadow-sm"
+              style={{ minHeight: '56px', maxHeight: '200px' }}
+            />
+            <button
+              onClick={() => void sendChatMessage()}
+              disabled={isSendingMessage || !chatInput.trim()}
+              className="absolute right-3 bottom-3 p-2 rounded-md bg-zinc-100 text-zinc-950 disabled:bg-zinc-800 disabled:text-zinc-600 transition-all flex items-center justify-center hover:bg-zinc-200"
+            >
+              {isSendingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* 3. RIGHT PANEL: Inspector (Timeline & Details) */}
+      <div className="w-[480px] 2xl:w-[820px] border-l border-zinc-800 flex flex-col h-full bg-zinc-950 shadow-sm z-20">
+        
+        {/* Top Half: Timeline */}
+        <div className="flex-1 flex flex-col min-h-0 border-b border-zinc-800">
+          <div className="p-3.5 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Activity className="w-4 h-4" />
+              <h3 className="font-semibold text-[10px] uppercase tracking-widest">Waterfall</h3>
+            </div>
+            {selectedRunId && (
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono text-zinc-600 px-2 py-0.5 rounded border border-zinc-800">
+                  {selectedRunId.slice(0, 8)}
+                </span>
+                <span className="text-[9px] font-mono text-zinc-600 px-2 py-0.5 rounded border border-zinc-800">
+                  {selectedRunDurationMs}ms
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-3 bg-zinc-950">
+            {!selectedRun ? (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-700 text-center space-y-3">
+                <Terminal className="w-6 h-6 opacity-20" />
+                <p className="text-[10px] uppercase tracking-widest opacity-30">Select Run</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {timelineRows.map((row) => {
+                  return (
+                    <button
+                      key={row.idx}
+                      onClick={() => setSelectedEventIndex(row.idx)}
+                      className={`w-full text-left px-3 py-2.5 rounded border transition-all ${
+                        selectedEventIndex === row.idx
+                          ? 'bg-zinc-900 border-zinc-700'
+                          : 'bg-transparent border-transparent hover:bg-zinc-900/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="min-w-0 w-32 2xl:w-48">
+                          <div className="flex items-center gap-2">
+                            <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${row.tone.dot}`} />
+                            <span className="text-[10px] font-bold text-zinc-300 font-mono truncate uppercase">
+                              {row.event.event.type}
+                            </span>
+                            <span
+                              className={`text-[8px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider border ${
+                                row.event.type === 'intercept'
+                                  ? 'text-amber-300 bg-amber-500/10 border-amber-400/30'
+                                  : 'text-emerald-300 bg-emerald-500/10 border-emerald-400/30'
+                              }`}
+                            >
+                              {row.event.type}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="h-1 rounded-full bg-zinc-900 relative overflow-hidden">
+                            <div
+                              className={`absolute top-0 bottom-0 rounded-full ${row.tone.bar}`}
+                              style={{
+                                left: `${row.leftPercent}%`,
+                                width: `${row.widthPercent}%`
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="w-24 text-[9px] font-mono text-zinc-600 text-right whitespace-nowrap">
+                          {row.durationMs}ms
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Half: Details */}
+        <div className="h-[340px] flex flex-col min-h-0 bg-zinc-950">
+          <div className="flex items-center border-b border-zinc-800 bg-zinc-950 px-2 pt-1">
+            <button
+              onClick={() => setInspectorTab('payload')}
+              className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold border-b transition-colors ${
+                inspectorTab === 'payload' 
+                  ? 'border-zinc-300 text-zinc-200' 
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              Payload
+            </button>
+            <button
+              onClick={() => setInspectorTab('state')}
+              className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold border-b transition-colors ${
+                inspectorTab === 'state' 
+                  ? 'border-zinc-300 text-zinc-200' 
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              State
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 bg-zinc-950">
+            {!selectedEvent ? (
+              <div className="h-full flex items-center justify-center text-zinc-700 text-[10px] uppercase tracking-widest opacity-30">
+                Select Event
+              </div>
+            ) : (
+              <div className="font-mono text-[11px]">
+                {inspectorTab === 'payload' ? (
+                  <JsonView 
+                    data={selectedEvent.event} 
+                    style={darkStyles} 
+                    shouldExpandNode={() => true}
+                  />
+                ) : (
+                  <JsonView 
+                    data={selectedEvent.state} 
+                    style={darkStyles} 
+                    shouldExpandNode={(level) => level < 2}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+      
     </div>
   );
 };

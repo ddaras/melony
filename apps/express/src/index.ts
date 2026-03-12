@@ -80,7 +80,8 @@ app.post("/chat", async (req, res) => {
     for await (const event of myAgent.run(message, {
       state: {
         sessionId: activeSessionId,
-        messages: nextMessages
+        // Pass a copy to prevent plugins from accidentally mutating our session history
+        messages: [...nextMessages]
       }
     })) {
       if (event.type === "llm:text:delta") {
@@ -99,10 +100,16 @@ app.post("/chat", async (req, res) => {
     }
 
     if (assistantText.trim()) {
-      sessionMessages.set(activeSessionId, [
-        ...nextMessages,
-        { role: "assistant", content: assistantText }
-      ]);
+      // Check if the assistant message was already added by a plugin or handler
+      // If it was, we just save the final nextMessages as is
+      const historyUpdate = [...nextMessages];
+      const lastMessage = historyUpdate[historyUpdate.length - 1];
+      
+      if (!lastMessage || lastMessage.role !== "assistant" || lastMessage.content !== assistantText) {
+        historyUpdate.push({ role: "assistant", content: assistantText });
+      }
+      
+      sessionMessages.set(activeSessionId, historyUpdate);
     } else {
       sessionMessages.set(activeSessionId, nextMessages);
     }

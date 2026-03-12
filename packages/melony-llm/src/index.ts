@@ -4,6 +4,17 @@ import { RuntimeContext, Event } from "melony";
 
 export * from "./types";
 
+function toToolMessageContent(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
 async function resolveInstructions(context: RuntimeContext<any, any>): Promise<string | undefined> {
   const state = context.state as AgentState;
   const instructions = state.agent?.instructions;
@@ -33,7 +44,8 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
       while (steps < maxSteps) {
         steps++;
         const tools = toolSelector(context);
-        let hasToolCall = false;
+        const pendingToolCalls: Array<{ id?: string; name: string; args: any }> = [];
+        let assistantText = "";
 
         for await (const providerEvent of options.provider.generate({
           system,
@@ -44,29 +56,99 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
           context
         })) {
           if (providerEvent.type === "text:delta") {
+            if (typeof providerEvent.text === "string") {
+              assistantText += providerEvent.text;
+            }
             yield { type: "llm:text:delta", data: { text: providerEvent.text } } as any;
           } else if (providerEvent.type === "text:done") {
+            if (typeof providerEvent.text === "string" && providerEvent.text.length > 0) {
+              assistantText = providerEvent.text;
+            }
             yield { type: "llm:text", data: { text: providerEvent.text } } as any;
           } else if (providerEvent.type === "tool:call") {
-            hasToolCall = true;
-            yield {
-              type: "action:call",
-              data: {
-                id: providerEvent.callId,
-                name: providerEvent.name,
-                args: providerEvent.input
-              }
-            } as any;
+            if (!providerEvent.name) {
+              yield {
+                type: "llm:error",
+                data: { message: "Provider emitted tool:call without a name." }
+              } as any;
+              continue;
+            }
+            const callId = providerEvent.callId || `tool_call_${context.runId}_${steps}_${pendingToolCalls.length}`;
+            pendingToolCalls.push({
+              id: callId,
+              name: providerEvent.name,
+              args: providerEvent.input
+            });
           } else if (providerEvent.type === "error") {
             yield { type: "llm:error", data: providerEvent.error } as any;
           }
         }
 
-        if (!hasToolCall) break;
+        if (pendingToolCalls.length > 0) {
+          messages.push({
+            role: "assistant",
+            content: assistantText,
+            toolCalls: pendingToolCalls.map((toolCall) => ({
+              id: toolCall.id!,
+              name: toolCall.name,
+              input: toolCall.args
+            }))
+          });
+        } else if (assistantText.trim().length > 0) {
+          messages.push({ role: "assistant", content: assistantText });
+        }
 
-        // In a real implementation, we would wait for action:result and update messages
-        // For now, this is the architectural skeleton
-        break;
+        if (pendingToolCalls.length === 0) break;
+
+        for (const toolCall of pendingToolCalls) {
+          let sawResult = false;
+
+          for await (const actionEvent of context.runtime.run(
+            {
+              type: "action:call",
+              data: {
+                id: toolCall.id,
+                name: toolCall.name,
+                args: toolCall.args
+              }
+            } as any,
+            { state: context.state, runId: context.runId }
+          )) {
+            yield actionEvent as any;
+
+            const eventData = (actionEvent as any)?.data;
+            const eventToolCallId = eventData?.toolCallId;
+            const matchesToolCall =
+              toolCall.id == null || eventToolCallId == null || eventToolCallId === toolCall.id;
+
+            if ((actionEvent as any).type === "action:result" && matchesToolCall) {
+              sawResult = true;
+              messages.push({
+                role: "tool",
+                name: toolCall.name,
+                toolCallId: toolCall.id,
+                content: toToolMessageContent(eventData?.result)
+              });
+            } else if ((actionEvent as any).type === "action:error" && matchesToolCall) {
+              sawResult = true;
+              messages.push({
+                role: "tool",
+                name: toolCall.name,
+                toolCallId: toolCall.id,
+                content: toToolMessageContent({ error: eventData?.error ?? "Unknown action error" })
+              });
+            }
+          }
+
+          if (!sawResult) {
+            messages.push({
+              role: "tool",
+              name: toolCall.name,
+              toolCallId: toolCall.id,
+              content: toToolMessageContent({ error: `Action "${toolCall.name}" produced no result event.` })
+            });
+          }
+        }
       }
     });
   };
