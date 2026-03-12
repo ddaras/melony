@@ -29,6 +29,9 @@ importers:
       '@melony/llm':
         specifier: workspace:*
         version: link:../../packages/melony-llm
+      '@melony/llm-openai':
+        specifier: workspace:*
+        version: link:../../packages/melony-llm-openai
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
@@ -215,6 +218,25 @@ importers:
       melony:
         specifier: workspace:*
         version: link:../melony
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.27
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
+  packages/melony-llm-openai:
+    dependencies:
+      '@melony/llm':
+        specifier: workspace:*
+        version: link:../melony-llm
     devDependencies:
       '@types/node':
         specifier: ^20.11.0

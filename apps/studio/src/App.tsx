@@ -40,6 +40,11 @@ interface ChatMessage {
   content: string;
 }
 
+type RuntimeMessage = {
+  role?: unknown;
+  content?: unknown;
+};
+
 const extractEventText = (event: any): string => {
   if (typeof event?.text === 'string') return event.text;
   if (typeof event?.data === 'string') return event.data;
@@ -74,6 +79,27 @@ const formatSessionLabel = (sessionId: string): string => {
 };
 
 const createId = (): string => crypto.randomUUID();
+
+const toChatRole = (role: unknown): ChatMessage['role'] => {
+  if (role === 'user' || role === 'assistant' || role === 'error') {
+    return role;
+  }
+  return 'assistant';
+};
+
+const normalizeRuntimeMessages = (messages: unknown): ChatMessage[] => {
+  if (!Array.isArray(messages)) {
+    return [];
+  }
+
+  return (messages as RuntimeMessage[])
+    .filter((entry) => typeof entry?.content === 'string' && entry.content.trim().length > 0)
+    .map((entry) => ({
+      id: createId(),
+      role: toChatRole(entry.role),
+      content: entry.content as string
+    }));
+};
 
 const App: React.FC = () => {
   const [runs, setRuns] = useState<Map<string, Run>>(new Map());
@@ -163,6 +189,20 @@ const App: React.FC = () => {
   }, [runs]);
   const selectedRun = selectedRunId ? runs.get(selectedRunId) : null;
   const selectedEvent = selectedRun && selectedEventIndex !== null ? selectedRun.events[selectedEventIndex] : null;
+
+  useEffect(() => {
+    if (!selectedRun) {
+      return;
+    }
+
+    const latestState = selectedRun.events[selectedRun.events.length - 1]?.state || selectedRun.state;
+    const stateMessages = normalizeRuntimeMessages(latestState?.messages);
+    setChatMessages(stateMessages);
+    if (selectedRun.sessionId) {
+      setChatSessionId(selectedRun.sessionId);
+    }
+    setChatInput('');
+  }, [selectedRun]);
 
   useEffect(() => {
     chatMessagesRef.current?.scrollTo({ top: chatMessagesRef.current.scrollHeight });
@@ -316,6 +356,7 @@ const App: React.FC = () => {
                     onClick={() => {
                       setSelectedRunId(run.runId);
                       setSelectedEventIndex(null);
+                      setActivePanel('chat');
                     }}
                     className={`w-full text-left p-3 rounded-lg transition-all border border-transparent ${
                       selectedRunId === run.runId 

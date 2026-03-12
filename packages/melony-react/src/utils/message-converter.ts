@@ -10,8 +10,8 @@ export interface AggregatedMessage {
   content: Event[];
   /** The unique ID for the run that produced this message */
   runId?: string;
-  /** The ID of the thread this message belongs to */
-  threadId?: string;
+  /** The ID of the session this message belongs to */
+  sessionId?: string;
 }
 
 /**
@@ -31,10 +31,10 @@ export interface AggregateOptions<TEvent extends Event = Event> {
   getRunId?: (event: TEvent) => string | undefined;
 
   /**
-   * Custom logic to extract the threadId from an event.
-   * Defaults to event.meta.threadId.
+   * Custom logic to extract the sessionId from an event.
+   * Defaults to event.data.sessionId, with threadId fallback.
    */
-  getThreadId?: (event: TEvent) => string | undefined;
+  getSessionId?: (event: TEvent) => string | undefined;
 
   /**
    * Custom logic to determine if a new message should be started.
@@ -72,9 +72,11 @@ export const defaultGetRunId = <T extends Event>(e: T, context?: RuntimeContext<
 };
 
 /**
- * Default implementation for extracting threadId from an event.
+ * Default implementation for extracting sessionId from an event.
  */
-export const defaultGetThreadId = <T extends Event>(e: T): string | undefined => e.data?.threadId;
+export const defaultGetSessionId = <T extends Event>(e: T): string | undefined => {
+  return e.data?.sessionId || e.data?.threadId;
+};
 
 /**
  * Default logic for determining if a new message should start.
@@ -82,7 +84,7 @@ export const defaultGetThreadId = <T extends Event>(e: T): string | undefined =>
 export const defaultShouldStartNewMessage = <T extends Event>(
   event: T,
   current: AggregatedMessage | null,
-  utils: { getRole: (e: T) => string; getRunId: (e: T) => string | undefined; getThreadId: (e: T) => string | undefined }
+  utils: { getRole: (e: T) => string; getRunId: (e: T) => string | undefined; getSessionId: (e: T) => string | undefined }
 ): boolean => {
   if (!current) return true;
   const role = utils.getRole(event);
@@ -118,7 +120,7 @@ export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
 ): AggregatedMessage[] {
   const getRole = options.getRole || defaultGetRole;
   const getRunId = options.getRunId || defaultGetRunId;
-  const getThreadId = options.getThreadId || defaultGetThreadId;
+  const getSessionId = options.getSessionId || defaultGetSessionId;
   const shouldStartNewMessage = options.shouldStartNewMessage || defaultShouldStartNewMessage;
   const processEvent = options.processEvent || defaultProcessEvent;
 
@@ -128,12 +130,12 @@ export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
   let currentMessage: AggregatedMessage | null = null;
 
   for (const event of events) {
-    if (shouldStartNewMessage(event, currentMessage, { getRole, getRunId, getThreadId })) {
+    if (shouldStartNewMessage(event, currentMessage, { getRole, getRunId, getSessionId })) {
       currentMessage = {
         role: getRole(event),
         content: [],
         runId: getRunId(event),
-        threadId: getThreadId(event),
+        sessionId: getSessionId(event),
       };
       messages.push(currentMessage);
     }
@@ -149,11 +151,11 @@ export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
         }
       }
 
-      // If current message didn't have a threadId but this event does, update it
-      if (!currentMessage.threadId) {
-        const threadId = getThreadId(event);
-        if (threadId) {
-          currentMessage.threadId = threadId;
+      // If current message didn't have a sessionId but this event does, update it
+      if (!currentMessage.sessionId) {
+        const sessionId = getSessionId(event);
+        if (sessionId) {
+          currentMessage.sessionId = sessionId;
         }
       }
     }

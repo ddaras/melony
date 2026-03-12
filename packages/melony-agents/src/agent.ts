@@ -1,4 +1,4 @@
-import { melony, MelonyBuilder, Event } from "melony";
+import { melony, MelonyBuilder, Event, generateId } from "melony";
 import { AgentConfig, AgentPlugin, AgentEvents, AgentState } from "./types";
 
 /**
@@ -44,15 +44,16 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent extends
     const runtime = this.builder.build();
     const event = { type: AgentEvents.Run, data: input } as TEvent;
     const self = this;
+    const runId = options?.runId ?? generateId();
 
     return (async function* () {
       try {
-        yield* runtime.run(event, options);
+        yield* runtime.run(event, { ...options, runId });
       } finally {
-        yield {
+        yield* runtime.run({
           type: AgentEvents.Complete,
           data: { agent: self.config.name }
-        } as TEvent;
+        } as TEvent, { ...options, runId });
       }
     })();
   }
