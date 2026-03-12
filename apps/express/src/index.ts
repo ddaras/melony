@@ -2,12 +2,23 @@ import express from "express";
 import { agent } from "@melony/agents";
 import { llm, LlmProviderEvent, LlmProvider } from "@melony/llm";
 import { actions, defineAction } from "@melony/actions";
+import { inspector } from "@melony/inspector";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
 
 // Mock LLM Provider
 const mockProvider: LlmProvider = {
@@ -44,6 +55,7 @@ const myAgent = agent({
   instructions: "You are a helpful assistant. Use tools when necessary."
 })
   .use(actions({ actions: [weatherAction] }))
+  .use(inspector({ url: "http://localhost:7777" }))
   .use(llm({ provider: mockProvider }));
 
 app.post("/chat", async (req, res) => {

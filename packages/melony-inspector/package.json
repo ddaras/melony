@@ -1,0 +1,48 @@
+{
+  "name": "@melony/inspector",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "melony",
+    "inspector",
+    "studio"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "Real-time inspection and observability for Melony agents.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "melony": "workspace:*",
+    "@melony/agents": "workspace:*"
+  }
+}

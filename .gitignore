@@ -6,5 +6,3 @@ examples/**/node_modules
 .turbo
 .pnpm-store
 *.original
-
-studio
