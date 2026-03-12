@@ -2,6 +2,7 @@ import express from "express";
 import { agent } from "@melony/agents";
 import { llm, LlmMessage } from "@melony/llm";
 import { createOpenAIProvider } from "@melony/llm-openai";
+import { createGeminiProvider } from "@melony/llm-gemini";
 import { actions, defineAction } from "@melony/actions";
 import { inspector } from "@melony/inspector";
 import dotenv from "dotenv";
@@ -28,6 +29,13 @@ const openAiProvider = createOpenAIProvider({
   model: OPENAI_MODEL
 });
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const geminiProvider = createGeminiProvider({
+  apiKey: GEMINI_API_KEY,
+  model: GEMINI_MODEL
+});
+
 // Define some example actions
 const weatherAction = defineAction({
   name: "get_weather",
@@ -52,7 +60,7 @@ const myAgent = agent({
 })
   .use(actions({ actions: [weatherAction] }))
   .use(inspector({ url: "http://localhost:7777" }))
-  .use(llm({ provider: openAiProvider }));
+  .use(llm({ provider: geminiProvider }));
 
 const sessionMessages = new Map<string, LlmMessage[]>();
 

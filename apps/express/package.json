@@ -14,6 +14,7 @@
     "@melony/agents": "workspace:*",
     "@melony/llm": "workspace:*",
     "@melony/llm-openai": "workspace:*",
+    "@melony/llm-gemini": "workspace:*",
     "@melony/actions": "workspace:*",
     "@melony/inspector": "workspace:*",
     "dotenv": "^16.4.5"

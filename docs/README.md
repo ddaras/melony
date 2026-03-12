@@ -21,6 +21,7 @@ This folder documents the Melony ecosystem from first principles.
 - `docs/packages/melony-agents.md`
 - `docs/packages/melony-actions.md`
 - `docs/packages/melony-llm.md`
+- `docs/packages/melony-llm-gemini.md`
 - `docs/packages/melony-memory.md`
 - `docs/packages/melony-workflows.md`
 - `docs/packages/melony-react.md`
