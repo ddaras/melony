@@ -25,11 +25,13 @@ wss.on('connection', (ws) => {
 
 // Endpoint for the Inspector to send events
 app.post('/api/events', (req, res) => {
-  const { runId, agentName, timestamp, event, state, type } = req.body;
+  const { runId, sessionId: incomingSessionId, agentName, timestamp, event, state, type } = req.body;
+  const sessionId = incomingSessionId || state?.sessionId || 'default';
   
   if (!runs.has(runId)) {
     runs.set(runId, { 
       runId,
+      sessionId,
       agentName,
       events: [], 
       startedAt: timestamp, 
@@ -39,6 +41,9 @@ app.post('/api/events', (req, res) => {
   }
   
   const run = runs.get(runId);
+  if (!run.sessionId) {
+    run.sessionId = sessionId;
+  }
   
   // Update agent name if it was previously unknown
   if (agentName && (!run.agentName || run.agentName === 'Anonymous Agent')) {
@@ -57,7 +62,7 @@ app.post('/api/events', (req, res) => {
   // Broadcast to all connected Studio UI clients
   const payload = JSON.stringify({ 
     type: 'event', 
-    data: { runId, timestamp, event, state, type } 
+    data: { runId, sessionId: run.sessionId, agentName: run.agentName, timestamp, event, state, type } 
   });
   
   wss.clients.forEach((client) => {

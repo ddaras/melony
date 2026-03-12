@@ -26,6 +26,7 @@ interface MelonyEvent {
 
 interface Run {
   runId: string;
+  sessionId: string;
   agentName?: string;
   events: MelonyEvent[];
   startedAt: number;
@@ -65,12 +66,22 @@ const mergeAssistantText = (currentText: string, incomingText: string, eventType
   return `${currentText}\n${incomingText}`;
 };
 
+const formatSessionLabel = (sessionId: string): string => {
+  if (!sessionId || sessionId === 'default') {
+    return 'DEFAULT SESSION';
+  }
+  return `SESSION ${sessionId.slice(0, 12)}${sessionId.length > 12 ? '...' : ''}`;
+};
+
+const createId = (): string => crypto.randomUUID();
+
 const App: React.FC = () => {
   const [runs, setRuns] = useState<Map<string, Run>>(new Map());
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(null);
   const [activePanel, setActivePanel] = useState<'inspector' | 'chat'>('inspector');
   const [chatEndpoint, setChatEndpoint] = useState('http://localhost:3000/chat');
+  const [chatSessionId, setChatSessionId] = useState(() => createId());
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -84,16 +95,23 @@ const App: React.FC = () => {
       
       if (type === 'init') {
         const newRuns = new Map();
-        data.forEach((run: Run) => newRuns.set(run.runId, run));
+        data.forEach((run: Run) => {
+          newRuns.set(run.runId, {
+            ...run,
+            sessionId: run.sessionId || run.state?.sessionId || 'default'
+          });
+        });
         setRuns(newRuns);
       } else if (type === 'event') {
         setRuns((prev) => {
           const newRuns = new Map(prev);
-          const { runId, agentName, timestamp, event, state, type: eventType } = data;
+          const { runId, sessionId, agentName, timestamp, event, state, type: eventType } = data;
+          const resolvedSessionId = sessionId || state?.sessionId || 'default';
           
           if (!newRuns.has(runId)) {
             newRuns.set(runId, { 
               runId, 
+              sessionId: resolvedSessionId,
               agentName,
               events: [], 
               startedAt: timestamp, 
@@ -103,6 +121,7 @@ const App: React.FC = () => {
           }
           
           const run = newRuns.get(runId)!;
+          run.sessionId = run.sessionId || resolvedSessionId;
           if (agentName && (!run.agentName || run.agentName === 'Anonymous Agent')) {
             run.agentName = agentName;
           }
@@ -124,7 +143,24 @@ const App: React.FC = () => {
     return () => ws.close();
   }, []);
 
-  const runList = useMemo(() => Array.from(runs.values()).sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt), [runs]);
+  const groupedRuns = useMemo(() => {
+    const sessionMap = new Map<string, Run[]>();
+    for (const run of runs.values()) {
+      const sessionId = run.sessionId || run.state?.sessionId || 'default';
+      if (!sessionMap.has(sessionId)) {
+        sessionMap.set(sessionId, []);
+      }
+      sessionMap.get(sessionId)!.push(run);
+    }
+
+    return Array.from(sessionMap.entries())
+      .map(([sessionId, sessionRuns]) => ({
+        sessionId,
+        runs: sessionRuns.sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt),
+        lastUpdatedAt: Math.max(...sessionRuns.map((run) => run.lastUpdatedAt))
+      }))
+      .sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt);
+  }, [runs]);
   const selectedRun = selectedRunId ? runs.get(selectedRunId) : null;
   const selectedEvent = selectedRun && selectedEventIndex !== null ? selectedRun.events[selectedEventIndex] : null;
 
@@ -136,16 +172,22 @@ const App: React.FC = () => {
     await fetch('http://localhost:7777/api/runs', { method: 'DELETE' });
   };
 
+  const startNewSession = () => {
+    setChatSessionId(createId());
+    setChatMessages([]);
+    setChatInput('');
+  };
+
   const sendChatMessage = async () => {
     const message = chatInput.trim();
     if (!message || isSendingMessage) {
       return;
     }
 
-    const assistantMessageId = crypto.randomUUID();
+    const assistantMessageId = createId();
     setChatMessages((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: 'user', content: message },
+      { id: createId(), role: 'user', content: message },
       { id: assistantMessageId, role: 'assistant', content: '' }
     ]);
     setChatInput('');
@@ -197,7 +239,7 @@ const App: React.FC = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message, sessionId: chatSessionId })
       });
 
       if (!response.ok) {
@@ -256,36 +298,46 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {runList.length === 0 && (
+          {groupedRuns.length === 0 && (
             <div className="p-8 text-center text-zinc-500 text-sm italic">
               No runs captured yet...
             </div>
           )}
-          {runList.map((run) => (
-            <button
-              key={run.runId}
-              onClick={() => {
-                setSelectedRunId(run.runId);
-                setSelectedEventIndex(null);
-              }}
-              className={`w-full text-left p-3 rounded-lg transition-all border border-transparent ${
-                selectedRunId === run.runId 
-                  ? 'bg-zinc-800 border-zinc-700 shadow-sm' 
-                  : 'hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-mono font-medium truncate opacity-60">RUN: {run.runId.slice(0, 8)}...</span>
-                <span className="text-[10px] opacity-40 uppercase tracking-widest">{new Date(run.lastUpdatedAt).toLocaleTimeString([], { hour12: false })}</span>
+          {groupedRuns.map((group) => (
+            <section key={group.sessionId} className="mb-3">
+              <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center justify-between">
+                <span className="truncate">{formatSessionLabel(group.sessionId)}</span>
+                <span className="text-zinc-600">{group.runs.length}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-semibold truncate text-zinc-100">
-                {run.agentName || 'Anonymous Agent'}
+              <div className="space-y-1">
+                {group.runs.map((run) => (
+                  <button
+                    key={run.runId}
+                    onClick={() => {
+                      setSelectedRunId(run.runId);
+                      setSelectedEventIndex(null);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-all border border-transparent ${
+                      selectedRunId === run.runId 
+                        ? 'bg-zinc-800 border-zinc-700 shadow-sm' 
+                        : 'hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-mono font-medium truncate opacity-60">RUN: {run.runId.slice(0, 8)}...</span>
+                      <span className="text-[10px] opacity-40 uppercase tracking-widest">{new Date(run.lastUpdatedAt).toLocaleTimeString([], { hour12: false })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm font-semibold truncate text-zinc-100">
+                      {run.agentName || 'Anonymous Agent'}
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 opacity-50 text-[10px]">
+                      <Clock className="w-3 h-3" />
+                      <span>{run.events.length} events emitted</span>
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="flex items-center gap-1 mt-1.5 opacity-50 text-[10px]">
-                <Clock className="w-3 h-3" />
-                <span>{run.events.length} events emitted</span>
-              </div>
-            </button>
+            </section>
           ))}
         </div>
       </div>
@@ -310,6 +362,7 @@ const App: React.FC = () => {
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-400 border border-zinc-700">ID: {selectedRunId}</span>
+                    <span className="px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-400 border border-zinc-700">SESSION: {selectedRun.sessionId}</span>
                     <span className="text-xs text-zinc-500 ml-1">Started {new Date(selectedRun.startedAt).toLocaleString()}</span>
                   </div>
                 </div>
@@ -450,15 +503,26 @@ const App: React.FC = () => {
         {activePanel === 'chat' && (
           <>
             <div className="p-3 border-b border-zinc-800 space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold block">
-                Express Chat Endpoint
-              </label>
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold block">
+                  Express Chat Endpoint
+                </label>
+                <button
+                  onClick={startNewSession}
+                  className="text-[10px] uppercase tracking-widest text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 rounded px-2 py-1 transition-colors"
+                >
+                  New Session
+                </button>
+              </div>
               <input
                 value={chatEndpoint}
                 onChange={(event) => setChatEndpoint(event.target.value)}
                 placeholder="http://localhost:3000/chat"
                 className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-500"
               />
+              <div className="text-[10px] font-mono text-zinc-500 truncate">
+                SESSION ID: {chatSessionId}
+              </div>
             </div>
 
             <div ref={chatMessagesRef} className="flex-1 overflow-y-auto p-3 space-y-3">
