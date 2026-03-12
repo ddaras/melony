@@ -55,13 +55,19 @@ program
         let fullResponse = "";
 
         for await (const event of stream) {
-          if (event.type === "assistant:text-delta") {
-            const delta = (event.data as any).delta;
+          if (
+            event.type === "llm:text:delta" ||
+            event.type === "assistant:text:delta" ||
+            event.type === "assistant:text-delta"
+          ) {
+            const data = event.data as any;
+            const delta = data.text ?? data.delta ?? "";
             process.stdout.write(delta);
             fullResponse += delta;
-          } else if (event.type === "assistant:text") {
+          } else if (event.type === "llm:text" || event.type === "assistant:text") {
             if (!fullResponse) {
-              process.stdout.write((event.data as any).content);
+              const data = event.data as any;
+              process.stdout.write(data.text ?? data.content ?? "");
             }
           } else if (event.type.startsWith("action:")) {
             console.log(`\n[Action: ${JSON.stringify(event.data, null, 2)}]`);

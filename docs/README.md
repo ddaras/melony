@@ -1,12 +1,34 @@
-# Melony Documentation
+# Melony Docs
 
-Fast, unopinionated, minimalist event-based framework for AI agents.
+This folder documents the Melony ecosystem from first principles.
 
-## Table of Contents
+## Goals
 
-- [**Introduction**](./introduction.md): Overview of what Melony is and why it exists.
-- [**Getting Started**](./getting-started.md): Installation and your first agent.
-- [**Core Concepts**](./core-concepts.md): Events, Event Handlers, and the Plugin System.
-- [**Server-Driven UI**](./server-driven-ui.md): Building rich interactive interfaces from the server.
-- [**Serving & Client**](./adapters.md): Streaming your agent and consuming it on the frontend.
-- [**Advanced Usage**](./advanced-usage.md): HITL, Persistence, and recursive orchestration.
+- Keep docs simple and easy to scan.
+- Explain how packages fit together.
+- Capture current behavior without over-promising.
+- Make it easy to extend docs as packages evolve.
+
+## Start Here
+
+1. Read `docs/concepts/communication-model.md` for the shared runtime model.
+2. Read `docs/concepts/package-map.md` for package relationships.
+3. Read package pages under `docs/packages/`.
+
+## Package Docs
+
+- `docs/packages/melony.md`
+- `docs/packages/melony-agents.md`
+- `docs/packages/melony-actions.md`
+- `docs/packages/melony-llm.md`
+- `docs/packages/melony-memory.md`
+- `docs/packages/melony-workflows.md`
+- `docs/packages/melony-react.md`
+
+## Contributing
+
+When adding features, update docs in this order:
+
+1. Update the relevant package page.
+2. Update shared concepts if contracts changed (events, state shape, lifecycle).
+3. Add examples after behavior is stable.
