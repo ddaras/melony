@@ -4,6 +4,7 @@ import { llm, LlmMessage } from "@melony/llm";
 import { createOpenAIProvider } from "@melony/llm-openai";
 import { createGeminiProvider } from "@melony/llm-gemini";
 import { actions, defineAction } from "@melony/actions";
+import { planning } from "@melony/planning";
 import { inspector } from "@melony/inspector";
 import dotenv from "dotenv";
 
@@ -60,7 +61,8 @@ const myAgent = agent({
 })
   .use(actions({ actions: [weatherAction] }))
   .use(inspector({ url: "http://localhost:7777" }))
-  .use(llm({ provider: geminiProvider }));
+  .use(llm({ provider: geminiProvider }))
+  .use(planning({ provider: geminiProvider }));
 
 const sessionMessages = new Map<string, LlmMessage[]>();
 
@@ -112,11 +114,11 @@ app.post("/chat", async (req, res) => {
       // If it was, we just save the final nextMessages as is
       const historyUpdate = [...nextMessages];
       const lastMessage = historyUpdate[historyUpdate.length - 1];
-      
+
       if (!lastMessage || lastMessage.role !== "assistant" || lastMessage.content !== assistantText) {
         historyUpdate.push({ role: "assistant", content: assistantText });
       }
-      
+
       sessionMessages.set(activeSessionId, historyUpdate);
     } else {
       sessionMessages.set(activeSessionId, nextMessages);

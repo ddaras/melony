@@ -9,6 +9,7 @@ import {
   ActionResultEventData,
   ActionStateShape,
   ActionsPluginOptions,
+  toActionCallEventType,
 } from "./types";
 
 function setByPath(target: Record<string, any>, path: string, value: unknown): void {
@@ -43,7 +44,7 @@ export function actions<TState extends ActionStateShape = ActionStateShape, TEve
   options: ActionsPluginOptions<TState, TEvent>
 ): AgentPlugin<TState, TEvent> {
   const registry = createActionRegistry<TState, TEvent>(options.actions);
-  const callEventType = options.callEventType ?? ActionEvents.Call;
+  const callEventPrefix = options.callEventPrefix ?? ActionEvents.CallPrefix;
   const resultEventType = options.resultEventType ?? ActionEvents.Result;
   const errorEventType = options.errorEventType ?? ActionEvents.Error;
   const includeInState = options.includeInState ?? options.includeInCapabilities ?? true;
@@ -57,35 +58,31 @@ export function actions<TState extends ActionStateShape = ActionStateShape, TEve
       });
     }
 
-    builder.on(callEventType, async function* (event, context) {
-      const call = event.data as ActionCallEventData;
-      const action = registry.get(call.name);
+    for (const action of registry.list()) {
+      const callEventType = toActionCallEventType(action.name, callEventPrefix);
+      builder.on(callEventType as TEvent["type"], async function* (event, context) {
+        const call = event.data as ActionCallEventData;
 
-      if (!action) {
-        const errorData = toErrorData(call.name, call.id, new Error(`Unknown action "${call.name}"`));
-        yield { type: errorEventType, data: errorData } as TEvent;
-        return;
-      }
+        try {
+          const result = await action.run({
+            input: call.args,
+            context,
+            toolCallId: call.id,
+          });
 
-      try {
-        const result = await action.run({
-          input: call.args,
-          context,
-          toolCallId: call.id,
-        });
+          const resultData: ActionResultEventData = {
+            action: action.name,
+            toolCallId: call.id,
+            result,
+          };
 
-        const resultData: ActionResultEventData = {
-          action: action.name,
-          toolCallId: call.id,
-          result,
-        };
-
-        yield { type: resultEventType, data: resultData } as TEvent;
-      } catch (error) {
-        const errorData = toErrorData(action.name, call.id, error);
-        yield { type: errorEventType, data: errorData } as TEvent;
-      }
-    });
+          yield { type: resultEventType, data: resultData } as TEvent;
+        } catch (error) {
+          const errorData = toErrorData(action.name, call.id, error);
+          yield { type: errorEventType, data: errorData } as TEvent;
+        }
+      });
+    }
   };
 }
 

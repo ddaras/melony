@@ -10,7 +10,9 @@ import {
   Activity,
   Box,
   Cpu,
-  Layers
+  Layers,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { JsonView, darkStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
@@ -139,6 +141,8 @@ const App: React.FC = () => {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
 
+  const [showIntercepts, setShowIntercepts] = useState(false);
+
   // Inspector layout state
   const [inspectorTab, setInspectorTab] = useState<'payload' | 'state'>('payload');
 
@@ -250,29 +254,31 @@ const App: React.FC = () => {
     );
     const totalDuration = Math.max(1, runEnd - runStart);
 
-    return selectedRun.events.map((event, idx) => {
-      const nextEvent = selectedRun.events[idx + 1];
-      const startMs = Math.max(0, event.timestamp - runStart);
-      const rawDurationMs = nextEvent
-        ? Math.max(1, nextEvent.timestamp - event.timestamp)
-        : Math.max(1, runEnd - event.timestamp);
+    return selectedRun.events
+      .map((event, idx) => {
+        const nextEvent = selectedRun.events[idx + 1];
+        const startMs = Math.max(0, event.timestamp - runStart);
+        const rawDurationMs = nextEvent
+          ? Math.max(1, nextEvent.timestamp - event.timestamp)
+          : Math.max(1, runEnd - event.timestamp);
 
-      const leftPercent = Math.min(100, (startMs / totalDuration) * 100);
-      const requestedWidth = Math.max(0.9, (rawDurationMs / totalDuration) * 100);
-      const widthPercent = Math.max(0.9, Math.min(100 - leftPercent, requestedWidth));
-      const tone = getTraceTone(event.event.type);
+        const leftPercent = Math.min(100, (startMs / totalDuration) * 100);
+        const requestedWidth = Math.max(0.9, (rawDurationMs / totalDuration) * 100);
+        const widthPercent = Math.max(0.9, Math.min(100 - leftPercent, requestedWidth));
+        const tone = getTraceTone(event.event.type);
 
-      return {
-        event,
-        idx,
-        startMs,
-        durationMs: rawDurationMs,
-        leftPercent,
-        widthPercent,
-        tone
-      };
-    });
-  }, [selectedRun]);
+        return {
+          event,
+          idx,
+          startMs,
+          durationMs: rawDurationMs,
+          leftPercent,
+          widthPercent,
+          tone
+        };
+      })
+      .filter((row) => showIntercepts || row.event.type !== 'intercept');
+  }, [selectedRun, showIntercepts]);
 
   // Restore chat messages from run state when a run is selected
   useEffect(() => {
@@ -610,14 +616,27 @@ const App: React.FC = () => {
       </div>
 
       {/* 3. RIGHT PANEL: Inspector (Timeline & Details) */}
-      <div className="w-[480px] 2xl:w-[820px] border-l border-zinc-800 flex flex-col h-full bg-zinc-950 shadow-sm z-20">
+      <div className="w-[580px] 2xl:w-[820px] border-l border-zinc-800 flex flex-col h-full bg-zinc-950 shadow-sm z-20">
         
         {/* Top Half: Timeline */}
         <div className="flex-1 flex flex-col min-h-0 border-b border-zinc-800">
           <div className="p-3.5 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <Activity className="w-4 h-4" />
-              <h3 className="font-semibold text-[10px] uppercase tracking-widest">Waterfall</h3>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Activity className="w-4 h-4" />
+                <h3 className="font-semibold text-[10px] uppercase tracking-widest">Waterfall</h3>
+              </div>
+              <button
+                onClick={() => setShowIntercepts(!showIntercepts)}
+                title={showIntercepts ? "Hide intercepts" : "Show intercepts"}
+                className={`p-1 rounded transition-colors ${
+                  showIntercepts 
+                    ? 'text-amber-400 bg-amber-400/10 hover:bg-amber-400/20' 
+                    : 'text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                {showIntercepts ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
             </div>
             {selectedRunId && (
               <div className="flex items-center gap-2">
@@ -644,14 +663,14 @@ const App: React.FC = () => {
                     <button
                       key={row.idx}
                       onClick={() => setSelectedEventIndex(row.idx)}
-                      className={`w-full text-left px-3 py-2.5 rounded border transition-all ${
+                      className={`w-full text-left px-3 py-1.5 rounded border transition-all ${
                         selectedEventIndex === row.idx
                           ? 'bg-zinc-900 border-zinc-700'
                           : 'bg-transparent border-transparent hover:bg-zinc-900/50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="min-w-0 w-32 2xl:w-48">
+                        <div className="min-w-0 w-48 2xl:w-64">
                           <div className="flex items-center gap-2">
                             <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${row.tone.dot}`} />
                             <span className="text-[10px] font-bold text-zinc-300 font-mono truncate uppercase">

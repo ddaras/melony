@@ -105,7 +105,7 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
 
           for await (const actionEvent of context.runtime.run(
             {
-              type: "action:call",
+              type: `action:call:${toolCall.name}`,
               data: {
                 id: toolCall.id,
                 name: toolCall.name,

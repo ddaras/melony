@@ -17,6 +17,7 @@
     "@melony/llm-gemini": "workspace:*",
     "@melony/actions": "workspace:*",
     "@melony/inspector": "workspace:*",
+    "@melony/planning": "workspace:*",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

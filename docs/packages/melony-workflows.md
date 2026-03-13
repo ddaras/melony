@@ -21,7 +21,7 @@ Shared workflow events include:
 Current patterns:
 
 - `sequential`: runs agents one by one and emits step events
-- `parallel`: placeholder structure for fan-out/fan-in behavior
+- `parallel`: executes branches concurrently and emits branch lifecycle/events as streams are multiplexed
 - `loop`: repeatedly runs an agent while a condition returns `true`
 
 ## Good For
@@ -30,8 +30,8 @@ Current patterns:
 - Iterative refinement loops.
 - Structured execution boundaries around nested agent runs.
 
-## Next Documentation Additions
+## Operational Notes
 
-- Parallel multiplexing semantics.
-- Shared-state strategy between branches.
-- Failure and cancellation policy.
+- Branches in `parallel` share the same mutable `context.state`.
+- Branch-level failures emit `workflow:branch:error` and do not crash sibling branches.
+- `loop` and `sequential` continue to emit the nested branch/step events, so downstream tooling can observe full flow.

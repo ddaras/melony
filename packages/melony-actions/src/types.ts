@@ -56,7 +56,7 @@ export interface ActionStateShape {
 
 export interface ActionsPluginOptions<TState = any, TEvent extends Event = Event> {
   actions: ActionDefinition<TState, TEvent, any, any>[];
-  callEventType?: string;
+  callEventPrefix?: string;
   resultEventType?: string;
   errorEventType?: string;
   includeInState?: boolean;
@@ -72,7 +72,11 @@ export interface ActionsPluginOptions<TState = any, TEvent extends Event = Event
 }
 
 export const ActionEvents = {
-  Call: "action:call",
+  CallPrefix: "action:call:",
   Result: "action:result",
   Error: "action:error",
 } as const;
+
+export function toActionCallEventType(actionName: string, prefix: string = ActionEvents.CallPrefix): string {
+  return `${prefix}${actionName}`;
+}

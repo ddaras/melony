@@ -32,6 +32,10 @@ This is the current package layout and dependency direction.
   - Multi-agent orchestration patterns (sequential/parallel/loop).
   - Depends on `@melony/agents` and `melony`.
 
+- `@melony/planning`
+  - Planning lifecycle primitives (plan creation, step execution, retries, replans).
+  - Depends on `@melony/agents` and `melony`.
+
 ## UI Layer
 
 - `@melony/react`
