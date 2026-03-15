@@ -1,11 +1,11 @@
 import express from "express";
-import { agent } from "@melony/agents";
+import { agent, AgentEvents, AgentPlugin } from "@melony/agents";
 import { llm, LlmMessage } from "@melony/llm";
-import { createOpenAIProvider } from "@melony/llm-openai";
-import { createGeminiProvider } from "@melony/llm-gemini";
+import { createGeminiProvider } from "@melony/gemini";
 import { actions, defineAction } from "@melony/actions";
-import { planning } from "@melony/planning";
+import { planning, PlanningState, PlannerStrategy } from "@melony/planning";
 import { inspector } from "@melony/inspector";
+import { loop, parallel, sequential } from "@melony/workflows";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -21,13 +21,6 @@ app.use((req, res, next) => {
     return;
   }
   next();
-});
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const openAiProvider = createOpenAIProvider({
-  apiKey: OPENAI_API_KEY,
-  model: OPENAI_MODEL
 });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -64,49 +57,126 @@ const myAgent = agent({
   .use(llm({ provider: geminiProvider }))
   .use(planning({ provider: geminiProvider }));
 
+const classifierAgent = agent({
+  name: "Classifier",
+  description: "Classifies user requests before answering.",
+  instructions: `You classify the user's request for a second agent.
+Respond as concise JSON with keys:
+- intent
+- complexity
+- required_tools
+Do not include markdown.`
+}).use(llm({ provider: geminiProvider }));
+
+const answerAgent = agent({
+  name: "Answer",
+  description: "Produces the final response for the user.",
+  instructions:
+    "You are the final assistant. Use prior context in state.messages and provide a clear, helpful final answer."
+})
+  .use(actions({ actions: [weatherAction] }))
+  .use(
+    llm({
+      provider: geminiProvider,
+      messageSelector: (ctx) => {
+        const state = ctx.state as any;
+        const baseMessages = Array.isArray(state.messages) ? [...state.messages] : [];
+        const input = typeof state.input === "string" ? state.input.trim() : "";
+        const lastMessage = baseMessages[baseMessages.length - 1];
+
+        // Ensure the final step always has a current user turn to respond to.
+        if (input && (!lastMessage || lastMessage.role !== "user")) {
+          baseMessages.push({ role: "user", content: input });
+        }
+
+        return baseMessages;
+      }
+    })
+  )
+  .use(planning({ provider: geminiProvider }));
+
+const sequentialWorkflowAgent = agent({
+  name: "Sequential Assistant",
+  description: "Runs request classification before final response generation.",
+  instructions: "Run the configured sequential workflow and emit all step events."
+})
+  .use(inspector({ url: "http://localhost:7777" }))
+  .use(sequential([classifierAgent, answerAgent]));
+
 const sessionMessages = new Map<string, LlmMessage[]>();
 
-app.post("/chat", async (req, res) => {
-  const { message, sessionId } = req.body;
-  const resolvedSessionId = typeof sessionId === "string" && sessionId.trim() ? sessionId.trim() : undefined;
-  const activeSessionId = resolvedSessionId || "default";
+const resolveSessionId = (rawSessionId: unknown): string => {
+  const resolvedSessionId =
+    typeof rawSessionId === "string" && rawSessionId.trim() ? rawSessionId.trim() : undefined;
+  return resolvedSessionId || "default";
+};
 
-  if (typeof message !== "string" || !message.trim()) {
-    res.status(400).json({ error: "message must be a non-empty string" });
-    return;
+const extractTextEventPayload = (event: any): { text: string; type: string } | null => {
+  if (!event || typeof event !== "object") {
+    return null;
   }
 
+  if (event.type === "workflow:step:event") {
+    return extractTextEventPayload(event.data?.event);
+  }
+
+  if (event.type !== "llm:text:delta" && event.type !== "llm:text") {
+    return null;
+  }
+
+  const text = typeof event.data === "string" ? event.data : event.data?.text;
+  if (typeof text !== "string") {
+    return null;
+  }
+
+  return { text, type: event.type };
+};
+
+const streamAgentRun = async ({
+  runAgent,
+  message,
+  activeSessionId,
+  response
+}: {
+  runAgent: typeof myAgent;
+  message: string;
+  activeSessionId: string;
+  response: express.Response;
+}) => {
   const history = sessionMessages.get(activeSessionId) || [];
   const nextMessages: LlmMessage[] = [...history, { role: "user", content: message }];
   sessionMessages.set(activeSessionId, nextMessages);
 
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+  response.setHeader("Content-Type", "text/event-stream");
+  response.setHeader("Cache-Control", "no-cache");
+  response.setHeader("Connection", "keep-alive");
 
   let assistantText = "";
 
   try {
-    for await (const event of myAgent.run(message, {
+    for await (const event of runAgent.run(message, {
       state: {
         sessionId: activeSessionId,
+        input: message,
         // Pass a copy to prevent plugins from accidentally mutating our session history
         messages: [...nextMessages]
       }
     })) {
-      if (event.type === "llm:text:delta") {
-        const token = typeof event.data === "string" ? event.data : event.data?.text;
-        if (typeof token === "string") {
-          assistantText += token;
-        }
-      } else if (event.type === "llm:text") {
-        const finalText = typeof event.data === "string" ? event.data : event.data?.text;
-        if (typeof finalText === "string" && finalText.length > assistantText.length) {
-          assistantText = finalText;
+      if (event.type === "workflow:step:start") {
+        // In sequential workflows, keep only the current step's visible text.
+        assistantText = "";
+      } else {
+        const textPayload = extractTextEventPayload(event);
+        if (textPayload) {
+          if (textPayload.type === "llm:text:delta") {
+            assistantText += textPayload.text;
+          } else if (textPayload.type === "llm:text" && textPayload.text.length > assistantText.length) {
+            assistantText = textPayload.text;
+          }
         }
       }
 
-      res.write(`data: ${JSON.stringify(event)}\n\n`);
+      response.write(`data: ${JSON.stringify(event)}\n\n`);
     }
 
     if (assistantText.trim()) {
@@ -125,10 +195,46 @@ app.post("/chat", async (req, res) => {
     }
   } catch (error) {
     console.error("Agent execution failed:", error);
-    res.write(`data: ${JSON.stringify({ type: "error", data: { message: "Something went wrong" } })}\n\n`);
+    response.write(
+      `data: ${JSON.stringify({ type: "error", data: { message: "Something went wrong" } })}\n\n`
+    );
   } finally {
-    res.end();
+    response.end();
   }
+};
+
+app.post("/chat", async (req, res) => {
+  const { message, sessionId } = req.body;
+  const activeSessionId = resolveSessionId(sessionId);
+
+  if (typeof message !== "string" || !message.trim()) {
+    res.status(400).json({ error: "message must be a non-empty string" });
+    return;
+  }
+
+  await streamAgentRun({
+    runAgent: myAgent,
+    message,
+    activeSessionId,
+    response: res
+  });
+});
+
+app.post("/chat/sequential", async (req, res) => {
+  const { message, sessionId } = req.body;
+  const activeSessionId = resolveSessionId(sessionId);
+
+  if (typeof message !== "string" || !message.trim()) {
+    res.status(400).json({ error: "message must be a non-empty string" });
+    return;
+  }
+
+  await streamAgentRun({
+    runAgent: sequentialWorkflowAgent,
+    message,
+    activeSessionId,
+    response: res
+  });
 });
 
 const PORT = process.env.PORT || 3000;

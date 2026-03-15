@@ -1,0 +1,25 @@
+{
+  "name": "@melony/app-landing",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3003",
+    "build": "tsc && vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/marked": "^6.0.0",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "marked": "^17.0.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4"
+  }
+}

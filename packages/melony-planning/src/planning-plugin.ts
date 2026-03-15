@@ -1,21 +1,20 @@
-import { AgentEvents, AgentPlugin } from "@melony/agents";
-import { Event, generateId } from "melony";
+import { AgentPlugin } from "@melony/agents";
+import { Event, generateId, RuntimeContext } from "melony";
 import { createDefaultPlannerStrategy } from "./default-planner-strategy";
-import { executeActionStep } from "./execute-action-step";
 import { toPlanSteps } from "./plan-steps";
 import { Plan, PlannerOptions, PlanningEvents, PlanningState } from "./types";
 
 /**
- * Simplified planning plugin that provides a tool for the agent to decide when to plan.
+ * Simplified planning plugin that provides a todo list tool for the agent.
  */
 export function planning<TState extends PlanningState = PlanningState, TEvent extends Event = Event>(
   options: PlannerOptions<TState, TEvent> = {}
 ): AgentPlugin<TState, TEvent> {
   const {
     toolName = "plan",
-    toolDescription = "Create and execute a multi-step plan to achieve a goal.",
-    maxAttemptsPerStep = 3,
-    maxReplans = 2
+    toolDescription = "Create or replace a todo list of tasks to achieve a goal.",
+    updateToolName = "update_plan_step",
+    updateToolDescription = "Update the status of a specific task in the current plan."
   } = options;
 
   const strategy =
@@ -26,15 +25,18 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
           ...(options.strategyOptions ?? {})
         })
       : undefined);
-  const callEventType = `action:call:${toolName}`;
+
+  const planCallEventType = `action:call:${toolName}`;
+  const updateCallEventType = `action:call:${updateToolName}`;
 
   return (builder) => {
-    // Register the plan tool by intercepting any event and ensuring the tool is in state
+    // 1. Intercept to register tools and inject plan into instructions
     builder.intercept((event, context) => {
       const state = context.state as any;
       if (!state.actions) state.actions = [];
-      const hasTool = state.actions.some((a: any) => a.name === toolName);
-      if (!hasTool) {
+
+      // Add 'plan' tool
+      if (!state.actions.some((a: any) => a.name === toolName)) {
         state.actions.push({
           name: toolName,
           description: toolDescription,
@@ -47,11 +49,54 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
           }
         });
       }
+
+      // Add 'update_plan_step' tool
+      if (!state.actions.some((a: any) => a.name === updateToolName)) {
+        state.actions.push({
+          name: updateToolName,
+          description: updateToolDescription,
+          parameters: {
+            type: "object",
+            properties: {
+              taskIndex: { type: "number", description: "The 0-based index of the task to update" },
+              status: { 
+                type: "string", 
+                enum: ["pending", "in-progress", "completed"],
+                description: "The new status of the task"
+              }
+            },
+            required: ["taskIndex", "status"]
+          }
+        });
+      }
+
+      // Inject plan into instructions
+      if (state.plan && state.agent) {
+        const currentInstructions = state.agent.instructions;
+        const plan = state.plan as Plan;
+        
+        // Use a wrapper function to ensure instructions are always up-to-date
+        state.agent.instructions = async (ctx: RuntimeContext<TState, TEvent>) => {
+          let baseInstructions = "";
+          if (typeof currentInstructions === "function") {
+            baseInstructions = await currentInstructions(ctx);
+          } else if (typeof currentInstructions === "string") {
+            baseInstructions = currentInstructions;
+          }
+
+          const planStr = plan.steps
+            .map((s, i) => `${i}. [${s.status}] ${s.task}`)
+            .join("\n");
+
+          return `${baseInstructions}\n\n## CURRENT PLAN\nGoal: ${plan.goal}\n\nTasks:\n${planStr}\n\nUpdate your progress using '${updateToolName}' as you work through these tasks. If the plan needs to change, use '${toolName}' to create a new one.`;
+        };
+      }
+
       return event;
     });
 
-    // Handle the plan tool call
-    builder.on(callEventType as any, async function* (event: any, context) {
+    // 2. Handle 'plan' tool call
+    builder.on(planCallEventType as any, async function* (event: any, context) {
       const goal = String(event.data.args?.goal ?? "").trim();
       const toolCallId = event.data.id;
 
@@ -71,7 +116,7 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
         return;
       }
 
-      // 1. Create Plan
+      // Create Plan
       yield { type: PlanningEvents.Create, data: { goal } } as any;
       const created = await strategy.createPlan({ goal, input: event.data.args, context });
       
@@ -79,67 +124,12 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
         id: generateId(),
         goal,
         steps: toPlanSteps(created.steps),
-        cursor: 0,
         status: "active",
-        replans: 0,
         metadata: created.metadata
       };
       context.state.plan = plan;
 
-      // 2. Execute Steps
-      while (plan.cursor < plan.steps.length && plan.status === "active") {
-        const step = plan.steps[plan.cursor];
-        yield { type: PlanningEvents.StepStart, data: { stepId: step.id } } as any;
-
-        step.status = "running";
-        const execution = strategy.executeStep 
-          ? await strategy.executeStep({ step, plan, context })
-          : await executeActionStep({ step, context });
-
-        if (execution.replan && plan.replans < maxReplans) {
-          plan.replans++;
-          plan.status = "replanning";
-          yield { type: PlanningEvents.Replan, data: { reason: execution.replan.reason } } as any;
-          
-          if (strategy.replan) {
-            const replanned = await strategy.replan({ 
-              plan, 
-              reason: execution.replan.reason, 
-              input: execution.replan.input, 
-              context 
-            });
-            plan.steps = toPlanSteps(replanned.steps);
-            plan.cursor = 0;
-            plan.status = "active";
-            continue;
-          }
-        }
-
-        if (execution.error) {
-          step.attempts++;
-          if (step.attempts >= maxAttemptsPerStep) {
-            step.status = "failed";
-            plan.status = "failed";
-            yield { type: PlanningEvents.Failed, data: { error: execution.error } } as any;
-            break;
-          }
-          // Retry same step
-          continue;
-        }
-
-        step.status = "completed";
-        step.result = execution.result;
-        yield { type: PlanningEvents.StepResult, data: { stepId: step.id, result: step.result } } as any;
-        
-        plan.cursor++;
-      }
-
-      if (plan.status === "active" || plan.status === "completed") {
-        plan.status = "completed";
-        yield { type: PlanningEvents.Complete, data: { result: plan.steps.map(s => s.result) } } as any;
-      }
-      
-      // Return the final result to the agent as the tool output
+      // Return the result to the agent
       yield { 
         type: "action:result", 
         data: { 
@@ -148,7 +138,61 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
           result: { 
             status: plan.status, 
             goal: plan.goal, 
-            steps: plan.steps.map(s => ({ goal: s.goal, status: s.status, result: s.result, error: s.error })) 
+            todos: plan.steps.map((s, i) => ({ index: i, task: s.task, status: s.status })) 
+          } 
+        } 
+      } as any;
+    });
+
+    // 3. Handle 'update_plan_step' tool call
+    builder.on(updateCallEventType as any, async function* (event: any, context) {
+      const { taskIndex, status } = event.data.args;
+      const toolCallId = event.data.id;
+      const plan = context.state.plan as Plan | undefined;
+
+      if (!plan) {
+        yield {
+          type: "action:error",
+          data: { action: updateToolName, toolCallId, error: "No active plan found." }
+        } as any;
+        return;
+      }
+
+      if (typeof taskIndex !== "number" || taskIndex < 0 || taskIndex >= plan.steps.length) {
+        yield {
+          type: "action:error",
+          data: { action: updateToolName, toolCallId, error: `Invalid task index: ${taskIndex}. Valid indices: 0-${plan.steps.length - 1}` }
+        } as any;
+        return;
+      }
+
+      // Update the step
+      const step = plan.steps[taskIndex];
+      const oldStatus = step.status;
+      step.status = status;
+
+      yield { 
+        type: PlanningEvents.UpdateStep, 
+        data: { taskIndex, status, oldStatus, task: step.task } 
+      } as any;
+
+      // Check if all steps are completed
+      const allCompleted = plan.steps.every(s => s.status === "completed");
+      if (allCompleted && plan.status !== "completed") {
+        plan.status = "completed";
+        yield { type: PlanningEvents.Complete, data: { result: plan.steps } } as any;
+      } else if (!allCompleted && plan.status === "completed") {
+        plan.status = "active";
+      }
+
+      yield { 
+        type: "action:result", 
+        data: { 
+          action: updateToolName,
+          toolCallId, 
+          result: { 
+            message: `Task "${step.task}" status updated to ${status}`,
+            planStatus: plan.status
           } 
         } 
       } as any;

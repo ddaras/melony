@@ -84,9 +84,11 @@ export default function App() {
 - **`melony`**: The core framework: builder, runtime, and streaming utilities.
 - **`melony-react`**: React hooks and providers to connect your app to a Melony stream.
 
-## Examples in this repo
+## Apps in this repo
 
-- **`apps/nextjs`**: A full-stack example with a food ordering agent.
+- **`apps/landing`**: Minimal marketing site for Melony (Vite + React).
+- **`apps/studio`**: Interactive UI for working with Melony flows.
+- **`apps/express`**: Backend sandbox for runtime and workflow experiments.
 
 ## Why Melony
 

@@ -2,13 +2,15 @@ import { Event, RuntimeContext } from "melony";
 import { LlmProviderEvent, LlmTool } from "@melony/llm";
 import {
   DefaultPlannerStrategyOptions,
-  Plan,
   PlannerStrategy,
   PlanningState
 } from "./types";
 
-const DEFAULT_SYSTEM_PROMPT = `You are a planning engine. Return only JSON with this shape:
-{ "steps": [{ "goal": "string", "action": { "type": "string", "data": {} } }] }`;
+const DEFAULT_SYSTEM_PROMPT = `You are a todo list writer. Create a list of clear, actionable tasks to achieve the goal.
+Return only JSON with this shape:
+{ "steps": [{ "task": "string" }] }`;
+const MAX_ACTIONS_IN_CONTEXT = 30;
+const MAX_TEXT_LENGTH = 200;
 
 function extractJson(raw: string): any {
   const match = raw.match(/\{[\s\S]*\}/) || raw.match(/\[[\s\S]*\]/);
@@ -26,13 +28,40 @@ async function collectText(events: AsyncGenerator<LlmProviderEvent>): Promise<st
   return text;
 }
 
+function shorten(value: unknown, max = MAX_TEXT_LENGTH): string {
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!text) return "Unknown";
+  return text.length > max ? `${text.slice(0, max)}...` : text;
+}
+
+function buildPlannerContext<TState extends PlanningState, TEvent extends Event>(
+  context: RuntimeContext<TState, TEvent>
+): string {
+  const state = context.state as any;
+  const agent = state?.agent;
+  const actions = Array.isArray(state?.actions) ? state.actions : [];
+
+  const agentName = shorten(agent?.name);
+  const agentDescription = shorten(agent?.description);
+  const actionLines = actions
+    .slice(0, MAX_ACTIONS_IN_CONTEXT)
+    .map((action: any) => `- ${shorten(action?.name)}: ${shorten(action?.description)}`);
+
+  const actionsBlock = actionLines.length > 0 ? actionLines.join("\n") : "- None";
+
+  return `Agent:
+- Name: ${agentName}
+- Description: ${agentDescription}
+
+Available Actions:
+${actionsBlock}`;
+}
+
 export function createDefaultPlannerStrategy<
   TState extends PlanningState = PlanningState,
   TEvent extends Event = Event
 >(options: DefaultPlannerStrategyOptions<TState, TEvent>): PlannerStrategy<TState, TEvent> {
-  const { provider, maxPlanSteps = 8, systemPrompt = DEFAULT_SYSTEM_PROMPT } = options;
-
-  const toolSelector = options.toolSelector ?? ((context) => (context.state as any).actions ?? []);
+  const { provider, maxPlanSteps = 10, systemPrompt = DEFAULT_SYSTEM_PROMPT } = options;
 
   const generatePlan = async (prompt: string, context: RuntimeContext<TState, TEvent>) => {
     const rawText = await collectText(provider.generate({
@@ -47,11 +76,12 @@ export function createDefaultPlannerStrategy<
 
   return {
     createPlan: ({ goal, input, context }) => {
-      const tools = toolSelector(context).map((t: LlmTool) => `${t.name}: ${t.description}`).join("\n");
-      return generatePlan(`Goal: ${goal}\nInput: ${JSON.stringify(input)}\nAvailable tools:\n${tools}`, context);
-    },
-    replan: ({ plan, reason, context }) => {
-      return generatePlan(`Original Goal: ${plan.goal}\nReplan Reason: ${reason}\nCurrent Plan: ${JSON.stringify(plan.steps)}`, context);
+      const plannerContext = buildPlannerContext(context);
+      const prompt = `${plannerContext}
+
+Goal: ${goal}
+Input: ${JSON.stringify(input)}`;
+      return generatePlan(prompt, context);
     }
   };
 }

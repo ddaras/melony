@@ -3,25 +3,15 @@ import { AgentState } from "@melony/agents";
 import { LlmMessage, LlmProvider, LlmTool } from "@melony/llm";
 
 export interface PlanStep {
-  id: string;
-  goal: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
-  action?: {
-    type: string;
-    data: any;
-  };
-  result?: any;
-  error?: string;
-  attempts: number;
+  task: string;
+  status: "pending" | "in-progress" | "completed";
 }
 
 export interface Plan {
   id: string;
   goal: string;
   steps: PlanStep[];
-  cursor: number;
-  status: "active" | "completed" | "failed" | "replanning";
-  replans: number;
+  status: "active" | "completed";
   metadata?: Record<string, any>;
 }
 
@@ -31,26 +21,12 @@ export interface PlanningState extends AgentState {
 
 export const PlanningEvents = {
   Create: "plan:create",
-  StepStart: "plan:step:start",
-  StepResult: "plan:step:result",
-  Replan: "plan:replan",
-  Complete: "plan:complete",
-  Failed: "plan:failed"
+  UpdateStep: "plan:step:update",
+  Complete: "plan:complete"
 } as const;
 
 export interface PlanStepInput {
-  goal: string;
-  action?: {
-    type: string;
-    data: any;
-  };
-  metadata?: Record<string, any>;
-}
-
-export interface ExecuteStepResult {
-  result?: any;
-  error?: string;
-  replan?: { reason: string; input?: any };
+  task: string;
   metadata?: Record<string, any>;
 }
 
@@ -60,17 +36,6 @@ export interface PlannerStrategy<TState extends PlanningState = PlanningState, T
     input: any;
     context: RuntimeContext<TState, TEvent>;
   }) => Promise<{ steps: PlanStepInput[]; metadata?: Record<string, any> }>;
-  replan?: (args: {
-    plan: Plan;
-    reason: string;
-    input: any;
-    context: RuntimeContext<TState, TEvent>;
-  }) => Promise<{ steps: PlanStepInput[]; metadata?: Record<string, any> }>;
-  executeStep?: (args: {
-    step: PlanStep;
-    plan: Plan;
-    context: RuntimeContext<TState, TEvent>;
-  }) => Promise<ExecuteStepResult>;
 }
 
 export interface DefaultPlannerStrategyOptions<
@@ -90,6 +55,8 @@ export interface PlannerOptions<TState extends PlanningState = PlanningState, TE
   provider?: LlmProvider<TState, TEvent>;
   toolName?: string;
   toolDescription?: string;
+  updateToolName?: string;
+  updateToolDescription?: string;
   maxAttemptsPerStep?: number;
   maxReplans?: number;
   strategyOptions?: Omit<DefaultPlannerStrategyOptions<TState, TEvent>, "provider">;

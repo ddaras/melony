@@ -134,7 +134,7 @@ const App: React.FC = () => {
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(null);
   
   // Chat state
-  const [chatEndpoint, setChatEndpoint] = useState('http://localhost:3000/chat');
+  const [chatEndpoint, setChatEndpoint] = useState('http://localhost:3000/chat/sequential');
   const [chatSessionId, setChatSessionId] = useState(() => createId());
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
