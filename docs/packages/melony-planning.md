@@ -34,26 +34,41 @@ const assistant = agent("Assistant")
   );
 ```
 
-## Main Exports
+## API Reference
 
-- `planning(options)`
-- `planner(options)`
-- `createDefaultPlannerStrategy(options)`
-- `PlannerOptions`
-- `PlanningEvents`
+### `planner(options)`
 
-## Options
+Adds plan creation and step progress tracking to agents.
 
-- `provider`: LLM provider used to build the default strategy.
-- `strategy`: optional custom strategy with `createPlan(...)`.
-- `toolName`: name for the planning tool. Defaults to `plan`.
-- `updateToolName`: name for updating step state. Defaults to `update_plan_step`.
-- `maxAttemptsPerStep`: retry ceiling for a single step.
-- `maxReplans`: maximum number of replanning attempts.
-- `strategyOptions`: options forwarded to the default strategy.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `provider` | - | LLM provider used for the default strategy. |
+| `strategy` | - | Custom strategy implementation. |
+| `toolName` | `plan` | Name for the planning tool. |
+| `updateToolName` | `update_plan_step` | Name for updating step state. |
+| `maxAttemptsPerStep` | - | Retry ceiling for a single step. |
+| `maxReplans` | - | Maximum number of replanning attempts. |
+| `strategyOptions` | - | Options forwarded to the strategy. |
+
+**Events**
 
 - `plan:create`: emitted when a new plan is requested.
 - `plan:step:update`: emitted when a step status changes.
 - `plan:complete`: emitted when all steps become `completed`.
+
+---
+
+### `planning(options)`
+
+Alias for `planner(options)`.
+
+### `createDefaultPlannerStrategy(options)`
+
+Factory for the default planning strategy used by the planner.
+
+## Types & Interfaces
+
+- `PlannerOptions`
+- `PlanningEvents`

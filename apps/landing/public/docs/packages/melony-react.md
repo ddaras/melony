@@ -33,22 +33,39 @@ export function App({ client }: { client: any }) {
 }
 ```
 
-## Main Exports
+## API Reference
 
-- `MelonyProvider`
-- `useMelony()`
-- `convertEventsToAggregatedMessages(...)`
-- `MelonyProviderProps`
-- `AggregateOptions`
+### `MelonyProvider`
 
-## Options
+The core context provider that distributes the Melony client and state to your component tree.
 
-- `client`: required `MelonyClient` instance.
-- `children`: required React tree.
-- `initialEvents`: optional initial event list.
-- `aggregationOptions`: optional `AggregateOptions` for message grouping.
-- `eventHandlers`: optional per-event custom handlers.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `client`<span class="required-asterisk">*</span> | - | The `MelonyClient` instance. |
+| `children`<span class="required-asterisk">*</span> | - | React component tree. |
+| `initialEvents` | - | Initial list of events. |
+| `aggregationOptions` | - | Options for message grouping. |
+| `eventHandlers` | - | Custom per-event handlers. |
+
+---
+
+### `useMelony()`
+
+React hook to access the current agent state, messages, and dispatch actions.
+
+---
+
+### `convertEventsToAggregatedMessages(...)`
+
+Utility to transform raw Melony events into user-friendly message objects.
+
+**Events**
 
 `@melony/react` does not introduce runtime event types; it consumes and aggregates events from your Melony client.
+
+## Types & Interfaces
+
+- `MelonyProviderProps`
+- `AggregateOptions`

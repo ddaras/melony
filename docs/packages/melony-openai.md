@@ -25,19 +25,22 @@ const provider = createOpenAIProvider({
 const assistant = agent("Assistant").use(llm({ provider }));
 ```
 
-## Main Exports
+## API Reference
 
-- `createOpenAIProvider(options)`
-- `OpenAIProviderOptions`
+### `createOpenAIProvider(options)`
 
-## Options
+Provides an OpenAI Chat Completions adapter for the Melony LLM plugin.
 
-- `apiKey`: OpenAI API key. Falls back to `OPENAI_API_KEY` env var.
-- `model`: model name to use. Defaults to `gpt-4o-mini`.
-- `baseUrl`: OpenAI base URL. Defaults to the official v1 endpoint.
-- `fetchImpl`: optional custom fetch implementation.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `apiKey` | `OPENAI_API_KEY` | OpenAI API key. |
+| `model` | `gpt-4o-mini` | The OpenAI model name to use. |
+| `baseUrl` | Official v1 | The base URL for OpenAI API. |
+| `fetchImpl` | - | Custom fetch implementation. |
+
+**Events**
 
 This provider emits standard `@melony/llm` events:
 
@@ -46,3 +49,7 @@ This provider emits standard `@melony/llm` events:
 - `tool:call`: requested tool executions.
 - `done`: end of response stream.
 - `error`: provider-specific execution errors.
+
+## Types & Interfaces
+
+- `OpenAIProviderOptions`

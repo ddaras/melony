@@ -24,17 +24,20 @@ const assistant = agent("Assistant").use(
 );
 ```
 
-## Main Exports
+## API Reference
 
-- `memory(options)`
-- `MemoryOptions`
+### `memory(options)`
 
-## Options
+Provides a memory plugin surface for persistence-oriented workflows.
 
-- `type`: required backend type: `"memory" | "sqlite" | "redis"`.
-- `namespace`: optional namespace key for scoping stored data.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `type`<span class="required-asterisk">*</span> | - | Backend type: `"memory" \| "sqlite" \| "redis"`. |
+| `namespace` | - | Namespace key for scoping stored data. |
+
+**Events**
 
 - `memory:save`: listening for this event to trigger a save.
 - `memory:saved`: emitted when data is successfully persisted.
@@ -42,3 +45,7 @@ const assistant = agent("Assistant").use(
 ## Notes
 
 This package is intentionally minimal right now and acts as a skeleton for richer adapters.
+
+## Types & Interfaces
+
+- `MemoryOptions`

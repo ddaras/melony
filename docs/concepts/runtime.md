@@ -31,6 +31,50 @@ Each handler receives:
 4. Handlers may call `emit`, which schedules more events.
 5. The runtime drains emitted events until none remain, then finishes (or exits early on suspend/error).
 
+## Builder examples
+
+Use `.intercept(...)` for run-wide middleware logic:
+
+```ts
+import { Event, melony } from "melony";
+
+type AppEvent =
+  | (Event<{ content: string }> & { type: "user:text" })
+  | (Event<{ content: string }> & { type: "assistant:text" });
+
+const app = melony<unknown, AppEvent>()
+  .intercept((event) => {
+    console.log("incoming:", event.type);
+    return event; // can also return a modified event
+  })
+  .on("user:text", async function* (event) {
+    yield { type: "assistant:text", data: { content: `Echo: ${event.data.content}` } };
+  });
+```
+
+Use `.use(...)` to package reusable runtime behavior:
+
+```ts
+import { Event, MelonyPlugin, melony } from "melony";
+
+type AppEvent =
+  | (Event<{ content: string }> & { type: "user:text" })
+  | (Event<{ content: string }> & { type: "assistant:text" });
+
+const loggingPlugin: MelonyPlugin<unknown, AppEvent> = (builder) => {
+  builder.intercept((event) => {
+    console.log("[plugin]", event.type);
+    return event;
+  });
+};
+
+const app = melony<unknown, AppEvent>()
+  .use(loggingPlugin)
+  .on("user:text", async function* (event) {
+    yield { type: "assistant:text", data: { content: `Handled: ${event.data.content}` } };
+  });
+```
+
 ## Shared event conventions
 
 Plugins generally follow these event families:

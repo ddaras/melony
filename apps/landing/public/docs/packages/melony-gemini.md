@@ -25,19 +25,22 @@ const provider = createGeminiProvider({
 const assistant = agent("Assistant").use(llm({ provider }));
 ```
 
-## Main Exports
+## API Reference
 
-- `createGeminiProvider(options)`
-- `GeminiProviderOptions`
+### `createGeminiProvider(options)`
 
-## Options
+Provides a Google Gemini adapter for the Melony LLM plugin.
 
-- `apiKey`: Gemini API key. Falls back to `GEMINI_API_KEY` or `GOOGLE_API_KEY` env vars.
-- `model`: model name to use. Defaults to `gemini-2.0-flash`.
-- `baseUrl`: Gemini base URL. Defaults to the official v1beta endpoint.
-- `fetchImpl`: optional custom fetch implementation.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `apiKey` | `GEMINI_API_KEY` | Gemini API key. Also checks `GOOGLE_API_KEY`. |
+| `model` | `gemini-2.0-flash` | The Gemini model name to use. |
+| `baseUrl` | Official v1beta | The base URL for Gemini API. |
+| `fetchImpl` | - | Custom fetch implementation. |
+
+**Events**
 
 This provider emits standard `@melony/llm` events:
 
@@ -46,3 +49,7 @@ This provider emits standard `@melony/llm` events:
 - `tool:call`: requested tool executions.
 - `done`: end of response stream.
 - `error`: provider-specific execution errors.
+
+## Types & Interfaces
+
+- `GeminiProviderOptions`

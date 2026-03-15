@@ -2,50 +2,68 @@
 
 ## Purpose
 
-`@melony/llm` bridges LLM providers into Melony event flows.
+`@melony/llm` connects provider streaming and tool-calling to Melony agent runs.
 
-## Main Exports
+## Install
 
-- `llm(options)` plugin
-- LLM types (`LlmProvider`, `LlmProviderEvent`, `LlmMessage`, `LlmTool`)
+```bash
+pnpm add @melony/llm
+```
 
-## Current Contracts
+## Example
 
-Provider contract:
+```ts
+import { agent } from "@melony/agents";
+import { llm } from "@melony/llm";
+import { openaiProvider } from "@melony/openai";
 
-- implement `generate(args): AsyncGenerator<LlmProviderEvent>`
+const assistant = agent({
+  name: "Assistant",
+  instructions: "You are concise and helpful."
+}).use(
+  llm({
+    provider: openaiProvider({ model: "gpt-4o-mini" })
+  })
+);
+```
 
-Provider events supported:
+## API Reference
 
-- `text:delta`
-- `text:done`
-- `tool:call`
-- `done`
-- `error`
+### `llm(options)`
 
-Plugin outputs:
+The primary plugin for connecting LLM providers to Melony agents.
 
-- `llm:text:delta`
-- `llm:text`
-- `action:call` (when provider requests a tool)
-- `llm:error`
+**Options**
 
-State conventions (default selectors):
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `provider`<span class="required-asterisk">*</span> | - | The LLM provider implementation. |
+| `temperature` | - | Sampling temperature for the model. |
+| `maxOutputTokens` | - | Maximum number of tokens to generate. |
+| `maxSteps` | `6` | Maximum model-tool loop iterations per run. |
+| `messageSelector` | `state.messages` | Function to read message history from state. |
+| `toolSelector` | `state.actions` | Function to read available tools from state. |
 
-- reads messages from `state.messages`
-- reads tools from `state.actions`
+**Events**
+
+- `llm:text:delta`: streamed text chunks from the provider.
+- `llm:text`: completed text output for a generation pass.
+- `llm:error`: provider-level error event.
+
+## Provider Contract
+
+- Implement `generate(args): AsyncGenerator<LlmProviderEvent>`.
+- Supported provider event types: `text:delta`, `text:done`, `tool:call`, `done`, `error`.
 
 ## Good For
 
 - Streaming text output from providers.
-- Converting provider tool calls into action events.
+- Running multi-step tool-calling loops during a single agent run.
 
-## Current Limitation
+## Types & Interfaces
 
-Tool-calling loop is currently a skeleton and can be expanded to consume `action:result` events before continuing multi-step generation.
-
-## Next Documentation Additions
-
-- Provider implementation guide (OpenAI/Anthropic examples).
-- Message history lifecycle and memory integration.
-- Tool-call roundtrip pattern.
+- `LlmProvider`
+- `LlmProviderEvent`
+- `LlmMessage`
+- `LlmTool`
+- `LlmPluginOptions`

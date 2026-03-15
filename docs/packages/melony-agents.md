@@ -26,22 +26,29 @@ for await (const event of assistant.run({ message: "How do I reset my password?"
 }
 ```
 
-## Main Exports
+## API Reference
 
-- `agent(config)`
+### `agent(config)`
+
+The primary function for creating a new Melony agent.
+
+**Options**
+
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `name`<span class="required-asterisk">*</span> | - | The agent's name. |
+| `description` | - | A human-readable description of the agent. |
+| `instructions` | - | Instructions for the agent (string or async function). |
+
+**Events**
+
+- `agent:run`: emitted when a run starts.
+- `agent:complete`: emitted when a run finishes.
+
+## Types & Interfaces
+
 - `AgentBuilder`
 - `AgentEvents`
 - `AgentConfig`
 - `AgentState`
 - `AgentPlugin`
-
-## Options
-
-- `name`: required agent name.
-- `description`: optional human-readable description.
-- `instructions`: optional string or async function returning instructions.
-
-## Events
-
-- `agent:run`: emitted when a run starts.
-- `agent:complete`: emitted when a run finishes.

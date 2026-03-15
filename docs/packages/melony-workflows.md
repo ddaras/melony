@@ -32,25 +32,52 @@ const pipeline = agent("Pipeline")
   );
 ```
 
-## Main Exports
+## API Reference
 
-- `sequential(steps)`
-- `parallel(branches)`
-- `loop(options)`
-- `LoopOptions`
+### `sequential(steps)`
 
-## Options
+Runs a list of agents or plugins in sequence.
 
-- `sequential(steps)`: accepts an array of agent builders to run one-by-one.
-- `parallel(branches)`: accepts an array of agent builders to run concurrently.
-- `loop(run)`: the agent builder for each iteration.
-- `loop(while)`: predicate to decide whether to continue.
-- `loop(maxIterations)`: optional cap (defaults to `5`).
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `steps`<span class="required-asterisk">*</span> | - | Array of agent builders to run one-by-one. |
+
+---
+
+### `parallel(branches)`
+
+Runs multiple agents or plugins concurrently.
+
+**Options**
+
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `branches`<span class="required-asterisk">*</span> | - | Array of agent builders to run concurrently. |
+
+---
+
+### `loop(options)`
+
+Repeats an agent or plugin execution based on a condition.
+
+**Options**
+
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `run`<span class="required-asterisk">*</span> | - | The agent builder for each iteration. |
+| `while`<span class="required-asterisk">*</span> | - | Predicate to decide whether to continue. |
+| `maxIterations` | `5` | Optional cap on total iterations. |
+
+**Events**
 
 - `workflow:start`: emitted when a workflow begins.
 - `workflow:complete`: emitted when the workflow finishes.
 - `workflow:step:*`: emitted by sequential steps.
 - `workflow:branch:*`: emitted by parallel branches.
 - `workflow:loop:iteration:*`: emitted by loop iterations.
+
+## Types & Interfaces
+
+- `LoopOptions`

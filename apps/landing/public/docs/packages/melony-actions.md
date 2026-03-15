@@ -39,26 +39,38 @@ const assistant = agent("Assistant").use(
 );
 ```
 
-## Main Exports
+## API Reference
 
-- `actions(options)`
-- `defineAction(definition)`
-- `ActionEvents`
-- `ActionsPluginOptions`
-- `ActionDefinition`
-- `ActionContext`
+### `actions(options)`
 
-## Options
+The primary plugin for enabling tool-calling and action execution in Melony agents.
 
-- `actions`: required list of action definitions to register.
-- `callEventPrefix`: prefix for action call events. Defaults to `action:call:`.
-- `resultEventType`: event emitted when an action succeeds. Defaults to `action:result`.
-- `errorEventType`: event emitted when an action fails. Defaults to `action:error`.
-- `includeInState`: if `true`, tools are injected into state. Defaults to `true`.
-- `actionsPath`: state path used for injected tools. Defaults to `actions`.
+**Options**
 
-## Events
+| Param | Default | Description |
+| :--- | :--- | :--- |
+| `actions`<span class="required-asterisk">*</span> | - | List of action definitions to register. |
+| `callEventPrefix` | `action:call:` | Prefix for action call events. |
+| `resultEventType` | `action:result` | Event emitted when an action succeeds. |
+| `errorEventType` | `action:error` | Event emitted when an action fails. |
+| `includeInState` | `true` | Whether to inject tools into the run state. |
+| `actionsPath` | `actions` | State path used for injected tools. |
+
+**Events**
 
 - `action:call:<name>`: listens for specific action triggers.
 - `action:result`: emitted when an action succeeds.
 - `action:error`: emitted when an action fails.
+
+---
+
+### `defineAction(definition)`
+
+Utility to define a typed action with schema validation and a run handler.
+
+## Types & Interfaces
+
+- `ActionEvents`
+- `ActionsPluginOptions`
+- `ActionDefinition`
+- `ActionContext`

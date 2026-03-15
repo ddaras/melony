@@ -94,9 +94,10 @@ const DOCS_NAV = [
     category: "Core Plugins",
     items: [
       { id: "agents", label: "Agents", path: "/docs/packages/melony-agents" },
+      { id: "llm", label: "LLM", path: "/docs/packages/melony-llm" },
+      { id: "actions", label: "Actions", path: "/docs/packages/melony-actions" },
       { id: "planning", label: "Planning", path: "/docs/packages/melony-planning" },
       { id: "workflows", label: "Workflows", path: "/docs/packages/melony-workflows" },
-      { id: "actions", label: "Actions", path: "/docs/packages/melony-actions" },
       { id: "memory", label: "Memory", path: "/docs/packages/melony-memory" },
     ],
   },
@@ -197,8 +198,8 @@ function HomePage() {
       <section className="hero section" id="top">
         <div className="split">
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <p className="eyebrow">AI Agent Framework for TypeScript</p>
-            <h1>Engineer autonomous agents with explicit workflows.</h1>
+            <p className="eyebrow">AI Agent Framework</p>
+            <h1>Engineer autonomous agents with TypeScript.</h1>
             <p className="lead">
               Melony is a minimalist, event-native framework for building observable AI agents.
               Compose workflows and planning with a developer-first approach.

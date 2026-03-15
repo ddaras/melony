@@ -2,32 +2,47 @@
 
 Melony is a tiny runtime for event-driven agents: **event in -> handlers run -> events out**.
 
-## 1) Install
+## 1. Install
 
 ```bash
 pnpm add melony
 ```
 
-## 2) Tiny runtime in 60 seconds
+## 2. Tiny runtime in 60 seconds
 
 ```ts
-import { melony } from "melony";
+import { Event, melony } from "melony";
 
-const app = melony()
-  .on("user:text", async function* (event) {
+// Event types flowing through the runtime
+type UserTextEvent = Event<{ content: string }> & { type: "user:text" };
+type AssistantTextEvent = Event<{ content: string }> & { type: "assistant:text" };
+type ChatEvent = UserTextEvent | AssistantTextEvent;
+
+// Shared state for this run
+type ChatState = {
+  turns: number;
+  lastUserMessage?: string;
+};
+
+// Build a typed app: state + events
+const app = melony<ChatState, ChatEvent>()
+  .on("user:text", async function* (event, { state }) {
+    // Simple state update example
+    state.turns += 1;
+    state.lastUserMessage = event.data.content;
+
     yield {
       type: "assistant:text",
-      data: { content: `Echo: ${event.data.content}` },
+      data: { content: `Echo (${state.turns}): ${event.data.content}` },
     };
-  })
-  .intercept((event) => {
-    console.log("incoming:", event.type);
-    return event;
   });
 
+// Run once with an initial typed state value
 for await (const event of app.build().run({
   type: "user:text",
   data: { content: "Hello" },
+}, {
+  state: { turns: 0 },
 })) {
   console.log("out:", event.type, event.data);
 }
@@ -36,10 +51,9 @@ for await (const event of app.build().run({
 That is the whole idea:
 - `.on(type, handler)` reacts to events.
 - Handlers `yield` next events.
-- `.intercept(...)` is optional middleware.
 - `.build().run(event)` executes one run and streams events.
 
-## 3) HTTP helpers (optional)
+## 3. HTTP helpers (optional)
 
 If you are in a route handler:
 - `app.streamResponse(event)` -> stream events as an HTTP response.
