@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { marked, type Tokens } from "marked";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
@@ -412,6 +413,7 @@ export default function App() {
 
   return (
     <div className="page">
+      <Analytics />
       <header className="nav">
         <a className="brand" href="/">
           Melony

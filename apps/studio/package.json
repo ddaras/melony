@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.0.5",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.0",
     "cors": "^2.8.6",
     "express": "^4.19.2",

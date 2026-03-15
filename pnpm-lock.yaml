@@ -25,7 +25,7 @@ importers:
         version: link:../../packages/melony-agents
       '@melony/gemini':
         specifier: workspace:*
-        version: link:../../packages/melony-llm-gemini
+        version: link:../../packages/melony-gemini
       '@melony/inspector':
         specifier: workspace:*
         version: link:../../packages/melony-inspector
@@ -34,7 +34,7 @@ importers:
         version: link:../../packages/melony-llm
       '@melony/openai':
         specifier: workspace:*
-        version: link:../../packages/melony-llm-openai
+        version: link:../../packages/melony-openai
       '@melony/planning':
         specifier: workspace:*
         version: link:../../packages/melony-planning
@@ -66,6 +66,9 @@ importers:
 
   apps/landing:
     dependencies:
+      '@vercel/analytics':
+        specifier: ^2.0.1
+        version: 2.0.1(react@18.3.1)
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -106,6 +109,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.0.4
         version: 1.1.13(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@vercel/analytics':
+        specifier: ^2.0.1
+        version: 2.0.1(react@18.3.1)
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -231,6 +237,25 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
+  packages/melony-gemini:
+    dependencies:
+      '@melony/llm':
+        specifier: workspace:*
+        version: link:../melony-llm
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.27
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
   packages/melony-inspector:
     dependencies:
       '@melony/agents':
@@ -321,6 +346,25 @@ importers:
       melony:
         specifier: workspace:*
         version: link:../melony
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.27
+      rimraf:
+        specifier: ^5.0.0
+        version: 5.0.10
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
+  packages/melony-openai:
+    dependencies:
+      '@melony/llm':
+        specifier: workspace:*
+        version: link:../melony-llm
     devDependencies:
       '@types/node':
         specifier: ^20.11.0
@@ -1183,6 +1227,35 @@ packages:
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+
+  '@vercel/analytics@2.0.1':
+    resolution: {integrity: sha512-MTQG6V9qQrt1tsDeF+2Uoo5aPjqbVPys1xvnIftXSJYG2SrwXRHnqEvVoYID7BTruDz4lCd2Z7rM1BdkUehk2g==}
+    peerDependencies:
+      '@remix-run/react': ^2
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@vitejs/plugin-react@4.7.0':
     resolution: {integrity: sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA==}
@@ -2846,6 +2919,10 @@ snapshots:
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 20.19.27
+
+  '@vercel/analytics@2.0.1(react@18.3.1)':
+    optionalDependencies:
+      react: 18.3.1
 
   '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@24.10.4))':
     dependencies:

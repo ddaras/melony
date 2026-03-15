@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Analytics } from "@vercel/analytics/react";
 import { 
   Loader2,
   MessageSquare,
@@ -408,6 +409,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-zinc-950 text-zinc-300 overflow-hidden font-sans selection:bg-zinc-500/30">
+      <Analytics />
       
       {/* 1. LEFT PANEL: Session & Run Management */}
       <div className="w-72 border-r border-zinc-800 flex flex-col h-full bg-zinc-950 shadow-sm z-10">

@@ -1,4 +1,4 @@
-type AnalyticsProvider = "plausible" | "posthog" | "none";
+type AnalyticsProvider = "plausible" | "posthog" | "vercel" | "none";
 
 function getProvider(): AnalyticsProvider {
   const raw = (import.meta.env.VITE_ANALYTICS_PROVIDER ?? "none")
@@ -6,7 +6,7 @@ function getProvider(): AnalyticsProvider {
     .trim()
     .toLowerCase();
 
-  if (raw === "plausible" || raw === "posthog") {
+  if (raw === "plausible" || raw === "posthog" || raw === "vercel") {
     return raw;
   }
 
