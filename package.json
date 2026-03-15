@@ -15,7 +15,8 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "pub": "turbo run pub",
-    "version:patch": "npm version patch"
+    "version:patch": "npm version patch",
+    "push:landing": "git subtree push --prefix=apps/landing landing-remote main"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
