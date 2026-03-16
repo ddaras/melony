@@ -4,6 +4,8 @@
 
 `@melony/agents` is the high-level API for defining and running Melony agents.
 
+`agent()` is a thin convenience wrapper around `melony()`: it pre-wires agent conventions and events so you can start quickly without manually assembling the runtime builder.
+
 ## Install
 
 ```bash
@@ -31,6 +33,7 @@ for await (const event of assistant.run({ message: "How do I reset my password?"
 ### `agent(config)`
 
 The primary function for creating a new Melony agent.
+Internally, this composes the same core runtime from `melony()` with agent-focused defaults.
 
 **Options**
 

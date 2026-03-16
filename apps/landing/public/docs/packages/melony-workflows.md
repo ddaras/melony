@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`@melony/workflows` provides orchestration helpers for sequential, parallel, and looped agent execution.
+`@melony/workflows` provides harness orchestration helpers for sequential, parallel, and looped agent execution.
 
 ## Install
 

@@ -1,33 +1,36 @@
-# Getting Started with Melony
+# Quick Start
 
-Melony is a tiny runtime for event-driven agents: **event in -> handlers run -> events out**.
+This guide shows the core Melony mental model in one small example:
 
-## 1. Install
+1. Define your event types.
+2. Register handlers for the events you care about.
+3. Run the runtime with an initial event.
+4. Consume the emitted event stream.
+
+If you understand that loop, the rest of Melony will feel predictable.
+
+## Install
 
 ```bash
 pnpm add melony
 ```
 
-## 2. Tiny runtime in 60 seconds
+## Build a minimal runtime
 
 ```ts
 import { Event, melony } from "melony";
 
-// Event types flowing through the runtime
 type UserTextEvent = Event<{ content: string }> & { type: "user:text" };
 type AssistantTextEvent = Event<{ content: string }> & { type: "assistant:text" };
 type ChatEvent = UserTextEvent | AssistantTextEvent;
 
-// Shared state for this run
 type ChatState = {
   turns: number;
   lastUserMessage?: string;
 };
 
-// Build a typed app: state + events
 const app = melony<ChatState, ChatEvent>()
   .on("user:text", async function* (event, { state }) {
-    // Simple state update example
     state.turns += 1;
     state.lastUserMessage = event.data.content;
 
@@ -37,48 +40,64 @@ const app = melony<ChatState, ChatEvent>()
     };
   });
 
-// Run once with an initial typed state value
-for await (const event of app.build().run({
-  type: "user:text",
-  data: { content: "Hello" },
-}, {
-  state: { turns: 0 },
-})) {
-  console.log("out:", event.type, event.data);
+const runtime = app.build();
+
+for await (const event of runtime.run(
+  {
+    type: "user:text",
+    data: { content: "Hello" },
+  },
+  {
+    state: { turns: 0 },
+  },
+)) {
+  console.log(event.type, event.data);
 }
 ```
 
-That is the whole idea:
-- `.on(type, handler)` reacts to events.
-- Handlers `yield` next events.
-- `.build().run(event)` executes one run and streams events.
+## What this example does
 
-## 3. HTTP helpers (optional)
+- `melony<ChatState, ChatEvent>()` creates a typed builder for one runtime.
+- `.on("user:text", handler)` registers logic for a specific event type.
+- The handler updates run-scoped state and `yield`s the next event.
+- `runtime.run(...)` starts a run and returns an async stream of emitted events.
 
-If you are in a route handler:
-- `app.streamResponse(event)` -> stream events as an HTTP response.
-- `app.jsonResponse(event)` -> return all emitted events as JSON.
+One important detail: Melony emits the incoming event as part of the stream before any follow-up events. That makes the full execution trace observable from the first input onward.
 
-## Next steps by package
+## Add cross-cutting logic with interceptors
 
-### Core Plugins
+Use interceptors for logic that should run before handlers, such as logging, validation, or guardrails.
 
-- Agents: [`@melony/agents`](/docs/packages/melony-agents)
-- Actions/tools: [`@melony/actions`](/docs/packages/melony-actions)
-- Planning: [`@melony/planning`](/docs/packages/melony-planning)
-- Workflows/orchestration: [`@melony/workflows`](/docs/packages/melony-workflows)
-- Memory: [`@melony/memory`](/docs/packages/melony-memory)
+```ts
+const app = melony<ChatState, ChatEvent>()
+  .intercept((event, { runId }) => {
+    console.log(`[${runId}]`, event.type);
+    return event;
+  })
+  .on("user:text", async function* (event, { state }) {
+    state.turns += 1;
 
-### UI & Frameworks
+    yield {
+      type: "assistant:text",
+      data: { content: `Turn ${state.turns}: ${event.data.content}` },
+    };
+  });
+```
 
-- React integration: [`@melony/react`](/docs/packages/melony-react)
+## Return HTTP responses
 
-### LLM Providers
+If you are handling requests in a server route, the builder includes response helpers:
 
-- LLM abstraction: [`@melony/llm`](/docs/packages/melony-llm)
-- OpenAI provider: [`@melony/openai`](/docs/packages/melony-openai)
-- Gemini provider: [`@melony/gemini`](/docs/packages/melony-gemini)
+- `app.streamResponse(event, options)` streams events as an HTTP response.
+- `app.jsonResponse(event, options)` returns the collected event list as JSON.
 
-## Core concepts
+That lets you keep the same runtime model in local scripts, APIs, and UI-facing endpoints.
 
-- [Runtime](/docs/concepts/runtime)
+## Where to go next
+
+- Read [Melony Runtime](/docs/concepts/runtime) for the execution model and lifecycle.
+- Read [Melony Harness](/docs/concepts/harness) for the package architecture.
+- Start with [`@melony/agents`](/docs/packages/melony-agents) if you want higher-level agent primitives.
+- Add [`@melony/actions`](/docs/packages/melony-actions), [`@melony/planning`](/docs/packages/melony-planning), [`@melony/workflows`](/docs/packages/melony-workflows), or [`@melony/memory`](/docs/packages/melony-memory) as your system grows.
+- Use [`@melony/llm`](/docs/packages/melony-llm) plus providers such as [`@melony/openai`](/docs/packages/melony-openai) or [`@melony/gemini`](/docs/packages/melony-gemini) when you need model integration.
+- Use [`@melony/react`](/docs/packages/melony-react) when you want to connect a React UI to the event stream.

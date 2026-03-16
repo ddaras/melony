@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`melony` is the core, unopinionated event runtime.
+`melony` is the core, unopinionated event runtime. It is the engine that powers the **Melony Harness**.
 
 It provides:
 
@@ -29,7 +29,7 @@ It provides:
 
 - Building custom event-driven agents.
 - Reusable plugin systems.
-- Framework-level agent orchestration.
+- Harness-level agent orchestration.
 
 ## Next Documentation Additions
 

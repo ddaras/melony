@@ -87,7 +87,8 @@ const DOCS_NAV = [
   {
     category: "Concepts",
     items: [
-      { id: "core-model", label: "Runtime", path: "/docs/concepts/runtime" },
+      { id: "melony-runtime", label: "Melony Runtime", path: "/docs/concepts/runtime" },
+      { id: "melony-harness", label: "Melony Harness", path: "/docs/concepts/harness" },
     ],
   },
   {
@@ -102,7 +103,7 @@ const DOCS_NAV = [
     ],
   },
   {
-    category: "UI & Frameworks",
+    category: "UI & Integrations",
     items: [
       { id: "react", label: "React", path: "/docs/packages/melony-react" },
     ],
@@ -198,11 +199,11 @@ function HomePage() {
       <section className="hero section" id="top">
         <div className="split">
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <p className="eyebrow">AI Agent Framework</p>
+            <p className="eyebrow">AI Agent Harness</p>
             <h1>Engineer autonomous agents with TypeScript.</h1>
             <p className="lead">
-              Melony is a minimalist, event-native framework for building observable AI agents.
-              Compose workflows and planning with a developer-first approach.
+              Melony Harness is a suite of tools for building AI agents, powered by the <strong>Melony</strong> core runtime.
+              Wire tools, planning, memory, and workflows with explicit control.
             </p>
             <div className="cta-row">
               <a className="button primary" href="/docs">
@@ -315,11 +316,11 @@ export default function App() {
       const currentDoc = DOCS_NAV.flatMap((cat) => cat.items).find((item) => item.path === route);
       document.title = currentDoc
         ? `${currentDoc.label} - Melony Docs`
-        : "Melony Docs - Event-native AI Agent Framework";
+        : "Melony Docs - Event-native AI Agent Harness";
       return;
     }
 
-    document.title = "Melony - Event-native framework for reliable AI workflows";
+    document.title = "Melony - Event-native harness for reliable AI workflows";
   }, [route]);
 
   useEffect(() => {
