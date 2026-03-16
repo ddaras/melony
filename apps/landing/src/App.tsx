@@ -121,29 +121,37 @@ const DEFAULT_DOCS_PATH = "/docs/README";
 
 const featureCards = [
   {
-    title: "Agent-first primitives",
-    description: "Model agents as typed actors with explicit context, memory, and message-driven behavior.",
+    title: "Agent building blocks",
+    description: "Compose agents, tools, planning, workflows, memory, and UI from one system.",
   },
   {
-    title: "Controlled autonomy",
-    description: "Coordinate tool calls, planning loops, and approvals with deterministic workflow orchestration.",
+    title: "Observable execution",
+    description: "Keep execution explicit enough to inspect, debug, and productize.",
   },
   {
-    title: "Observable runtime",
-    description: "Trace every decision, action, and replan through lifecycle events built for production debugging.",
+    title: "Runtime underneath",
+    description: "Melony Harness sits on a small event-native runtime instead of opaque framework magic.",
   },
 ];
 
 const homeSnippet = `import { agent } from "@melony/agents";
+import { llm } from "@melony/llm";
+import { createOpenAIProvider } from "@melony/openai";
+import { actions, defineAction } from "@melony/actions";
 
-// define the agent
-const assistant = agent("Support");
+const refundOrder = defineAction({...});
 
-// run the agent
-const result = await assistant.run("Hey!");
+const assistant = agent("Support")
+  .use(llm({
+    provider: createOpenAIProvider({ model: "gpt-4o-mini" }),
+  }))
+  .use(actions({
+    actions: [refundOrder],
+  }));
 
-// log the result
-console.log(result);`;
+for await (const event of assistant.run("Refund order #4821")) {
+  console.log(event.type, event.data);
+}`;
 
 function getDocsPathFromRoute(pathname: string): string {
   if (pathname === "/docs" || pathname === "/docs/") {
@@ -200,14 +208,14 @@ function HomePage() {
         <div className="split">
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <p className="eyebrow">AI Agent Harness</p>
-            <h1>Engineer autonomous agents with TypeScript.</h1>
+            <h1>Build reliable AI agents in TypeScript.</h1>
             <p className="lead">
-              Melony Harness is a suite of tools for building AI agents, powered by the <strong>Melony</strong> core runtime.
-              Wire tools, planning, memory, and workflows with explicit control.
+              <strong>Melony Harness</strong> gives you agents, tools, planning, workflows, memory, and React integration,
+              powered by the <strong>Melony</strong> runtime underneath.
             </p>
             <div className="cta-row">
               <a className="button primary" href="/docs">
-                Get started
+                Read docs
               </a>
               <a className="button secondary" href="https://github.com/ddaras/melony" target="_blank" rel="noreferrer">
                 GitHub
@@ -217,7 +225,7 @@ function HomePage() {
           <div>
             <CodeSnippet
               id="home-code"
-              label="Defining an agent"
+              label="Agent harness"
               code={homeSnippet}
               language="typescript"
               highlight={renderHighlightedCode}
@@ -240,19 +248,40 @@ function HomePage() {
       <section className="section">
         <div className="split">
           <div>
-            <h2>Built for developers</h2>
+            <p className="eyebrow">Two Layers, One Model</p>
+            <h2>Start at the harness layer. Drop lower only when you need to.</h2>
             <p>
-              Melony doesn't hide logic behind complex abstractions. Every state transition
-              is an event you can observe, log, or hook into.
+              The homepage should sell the outcome first. Melony Harness is the developer-facing entry point, while the
+              runtime explains why the system stays explicit and composable underneath.
             </p>
           </div>
+          <div>
+            <ul className="bullet-list">
+              <li><strong>Melony Harness</strong> gives you agents, LLM providers, actions, planning, workflows, memory, and React integration.</li>
+              <li><strong>Melony Runtime</strong> provides the event-native execution model that keeps everything explicit underneath.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="split">
+          <div>
+            <p className="eyebrow">Why Teams Choose It</p>
+            <h2>Less magic. More leverage.</h2>
+          </div>
+          <ul className="bullet-list">
+            <li>Keep control over execution flow instead of delegating core behavior to opaque framework internals.</li>
+            <li>Make intermediate reasoning and side effects observable enough for debugging, review, and product UX.</li>
+            <li>Adopt only the packages you need, without committing to a monolithic agent architecture on day one.</li>
+          </ul>
         </div>
       </section>
 
       <section className="section final-cta">
         <div className="cta-content">
           <h2>Ready to build?</h2>
-          <p>Read the documentation to learn how to compose agents with Melony.</p>
+          <p>Start with the quick start, then add the harness packages that match your system.</p>
           <div className="cta-row">
             <a className="button primary" href="/docs">
               Read docs
@@ -320,7 +349,7 @@ export default function App() {
       return;
     }
 
-    document.title = "Melony - Event-native harness for reliable AI workflows";
+    document.title = "Melony - Event-native runtime and harness for AI systems";
   }, [route]);
 
   useEffect(() => {
@@ -440,8 +469,7 @@ export default function App() {
       <footer className="site-footer">
         <div className="site-footer-inner">
           <p>
-            Built for production AI agents: explicit workflows, observable decisions, and
-            controllable autonomy.
+            Event-native runtime for explicit execution, observable systems, and composable AI building blocks.
           </p>
           <div className="site-footer-links">
             <a href="/docs">Docs</a>

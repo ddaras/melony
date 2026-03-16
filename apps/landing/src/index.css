@@ -199,10 +199,6 @@ h3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.grid.two {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .card {
   background: transparent;
 }
@@ -233,26 +229,6 @@ h3 {
   margin: 0;
   color: var(--text-muted);
   max-width: 58ch;
-}
-
-.mini-panel {
-  border-radius: var(--radius);
-  background: var(--surface);
-  padding: 1rem;
-}
-
-.mini-panel p {
-  margin: 0 0 0.6rem;
-  font-size: 0.86rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
-}
-
-.mini-panel strong {
-  font-size: 0.95rem;
-  line-height: 1.45;
 }
 
 .final-cta {
