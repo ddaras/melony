@@ -1,6 +1,6 @@
 {
   "name": "@melony/memory",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
