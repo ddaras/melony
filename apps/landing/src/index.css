@@ -218,6 +218,15 @@ h3 {
   max-width: 65ch;
 }
 
+.section-copy {
+  max-width: 65ch;
+}
+
+.section-list {
+  margin-top: 2rem;
+  max-width: 45ch;
+}
+
 .split {
   display: grid;
   gap: 4rem;

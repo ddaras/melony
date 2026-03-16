@@ -246,36 +246,32 @@ function HomePage() {
       </section>
 
       <section className="section">
-        <div className="split">
-          <div>
-            <p className="eyebrow">Two Layers, One Model</p>
-            <h2>Start at the harness layer. Drop lower only when you need to.</h2>
-            <p>
-              The homepage should sell the outcome first. Melony Harness is the developer-facing entry point, while the
-              runtime explains why the system stays explicit and composable underneath.
-            </p>
-          </div>
-          <div>
-            <ul className="bullet-list">
-              <li><strong>Melony Harness</strong> gives you agents, LLM providers, actions, planning, workflows, memory, and React integration.</li>
-              <li><strong>Melony Runtime</strong> provides the event-native execution model that keeps everything explicit underneath.</li>
-            </ul>
-          </div>
+        <div className="section-copy">
+          <p className="eyebrow">Two Layers, One Model</p>
+          <h2>Start at the harness layer.<br/>Drop lower only when you need to.</h2>
+          <p>
+            The homepage should sell the outcome first. Melony Harness is the developer-facing entry point, while the
+            runtime explains why the system stays explicit and composable underneath.
+          </p>
+        </div>
+        <div className="section-copy section-list">
+          <ul className="bullet-list">
+            <li><strong>Melony Harness</strong> gives you agents, LLM providers, actions, planning, workflows, memory, and React integration.</li>
+            <li><strong>Melony Runtime</strong> provides the event-native execution model that keeps everything explicit underneath.</li>
+          </ul>
         </div>
       </section>
 
       <section className="section">
-        <div className="split">
-          <div>
-            <p className="eyebrow">Why Teams Choose It</p>
-            <h2>Less magic. More leverage.</h2>
-          </div>
-          <ul className="bullet-list">
-            <li>Keep control over execution flow instead of delegating core behavior to opaque framework internals.</li>
-            <li>Make intermediate reasoning and side effects observable enough for debugging, review, and product UX.</li>
-            <li>Adopt only the packages you need, without committing to a monolithic agent architecture on day one.</li>
-          </ul>
+        <div className="section-copy">
+          <p className="eyebrow">Why Teams Choose It</p>
+          <h2>Less magic. More leverage.</h2>
         </div>
+        <ul className="bullet-list section-copy section-list">
+          <li>Keep control over execution flow instead of delegating core behavior to opaque framework internals.</li>
+          <li>Make intermediate reasoning and side effects observable enough for debugging, review, and product UX.</li>
+          <li>Adopt only the packages you need, without committing to a monolithic agent architecture on day one.</li>
+        </ul>
       </section>
 
       <section className="section final-cta">
