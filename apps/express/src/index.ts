@@ -204,8 +204,10 @@ const streamAgentRun = async ({
 };
 
 app.post("/chat", async (req, res) => {
-  const { message, sessionId } = req.body;
+  const { event, sessionId } = req.body;
   const activeSessionId = resolveSessionId(sessionId);
+
+  const message = event.data?.text;
 
   if (typeof message !== "string" || !message.trim()) {
     res.status(400).json({ error: "message must be a non-empty string" });
@@ -221,8 +223,10 @@ app.post("/chat", async (req, res) => {
 });
 
 app.post("/chat/sequential", async (req, res) => {
-  const { message, sessionId } = req.body;
+  const { event, sessionId } = req.body;
   const activeSessionId = resolveSessionId(sessionId);
+  
+  const message = event.data?.text;
 
   if (typeof message !== "string" || !message.trim()) {
     res.status(400).json({ error: "message must be a non-empty string" });
