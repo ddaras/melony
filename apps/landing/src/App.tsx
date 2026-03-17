@@ -136,18 +136,13 @@ const featureCards = [
 
 const homeSnippet = `import { agent } from "@melony/agents";
 import { llm } from "@melony/llm";
-import { createOpenAIProvider } from "@melony/openai";
-import { actions, defineAction } from "@melony/actions";
+import { actions } from "@melony/actions";
 
-const refundOrder = defineAction({...});
-
-const assistant = agent("Support")
-  .use(llm({
-    provider: createOpenAIProvider({ model: "gpt-4o-mini" }),
-  }))
-  .use(actions({
-    actions: [refundOrder],
-  }));
+const assistant = agent("Support").use(
+  llm({
+    provider: openai("gpt-4o-mini"),
+  }),
+);
 
 for await (const event of assistant.run("Refund order #4821")) {
   console.log(event.type, event.data);
@@ -222,7 +217,7 @@ function HomePage() {
               </a>
             </div>
           </div>
-          <div>
+          <div className="hero-code">
             <CodeSnippet
               id="home-code"
               label="Agent harness"

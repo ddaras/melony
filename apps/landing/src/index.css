@@ -76,6 +76,7 @@ button:focus-visible {
 .site-footer-links {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
   color: var(--text-muted);
   font-size: 0.88rem;
@@ -100,6 +101,7 @@ button:focus-visible {
 
 .nav-links {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   font-size: 0.92rem;
   color: var(--text-muted);
@@ -234,6 +236,10 @@ h3 {
   align-items: start;
 }
 
+.split > * {
+  min-width: 0;
+}
+
 .split p {
   margin: 0;
   color: var(--text-muted);
@@ -301,6 +307,7 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .docs-sidebar a {
@@ -579,10 +586,15 @@ h3 {
 
   .docs-sidebar {
     position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 2rem;
-    padding-bottom: 2rem;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .sidebar-group {
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: calc(var(--radius) - 2px);
+    background: rgba(255, 255, 255, 0.02);
   }
 }
 
@@ -602,10 +614,20 @@ h3 {
 
 .code-card {
   margin-top: 0.9rem;
+  width: 100%;
+  max-width: 100%;
   border-radius: var(--radius);
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+}
+
+.hero-code {
+  min-width: 0;
+}
+
+.hero-code .code-card {
+  margin-top: 0;
 }
 
 .code-card-head {
@@ -614,11 +636,13 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
+  min-width: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .code-card-head p {
   margin: 0;
+  min-width: 0;
   color: #d2d2d2;
   font-size: 0.75rem;
   letter-spacing: 0.02em;
@@ -654,10 +678,14 @@ h3 {
 .code-card pre {
   margin: 0;
   padding: 0.95rem;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .code-card code {
+  display: block;
+  min-width: max-content;
   font-family: var(--font-mono);
   font-size: 0.84rem;
   line-height: 1.55;
@@ -688,21 +716,153 @@ h3 {
 
 @media (max-width: 620px) {
   .nav {
+    width: min(var(--max-width), calc(100vw - 2rem));
+    padding: 1.15rem 0;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.88rem;
   }
 
   .site-footer-inner {
+    width: min(var(--max-width), calc(100vw - 2rem));
     flex-direction: column;
     align-items: flex-start;
     gap: 0.7rem;
   }
 
   .hero {
-    padding-top: 3.5rem;
+    padding-top: 2.25rem;
   }
 
   .section {
-    padding: 3.5rem 0;
+    width: min(var(--max-width), calc(100vw - 2rem));
+    padding: 3rem 0;
+  }
+
+  .split {
+    gap: 2rem;
+  }
+
+  .hero-code .code-card {
+    max-width: 100%;
+  }
+
+  .hero-code .code-card-head {
+    padding: 0.65rem 0.8rem;
+  }
+
+  .hero-code {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .hero-code .code-card pre {
+    max-height: min(24rem, 65vh);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 11vw, 3rem);
+    max-width: 12ch;
+  }
+
+  h2 {
+    font-size: clamp(1.55rem, 8vw, 2.2rem);
+  }
+
+  .lead,
+  .split p,
+  .card p,
+  .bullet-list,
+  .final-cta p {
+    font-size: 0.98rem;
+  }
+
+  .cta-row {
+    gap: 0.7rem;
+  }
+
+  .button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .docs-layout {
+    width: min(var(--max-width), calc(100vw - 2rem));
+    gap: 1.5rem;
+    padding: 2rem 0 2.5rem;
+  }
+
+  .docs-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    margin-inline: -0.15rem;
+    padding: 0 0.15rem 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-group {
+    min-width: min(78vw, 18rem);
+    scroll-snap-align: start;
+  }
+
+  .docs-sidebar a {
+    padding: 0.28rem 0;
+  }
+
+  .markdown-body h1 {
+    font-size: clamp(2rem, 11vw, 2.5rem);
+  }
+
+  .markdown-body h2 {
+    font-size: clamp(1.5rem, 8vw, 1.9rem);
+  }
+
+  .markdown-body pre,
+  .code-card pre {
+    padding: 0.85rem;
+  }
+
+  .markdown-body table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .code-card code {
+    font-size: 0.78rem;
+  }
+
+  .hero-code .code-card code {
+    font-size: 0.74rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-links {
+    justify-content: flex-start;
+  }
+
+  .brand {
+    font-size: 1.45rem;
+  }
+
+  .button {
+    padding-inline: 1rem;
+  }
+
+  .docs-sidebar {
+    margin-inline: -0.35rem;
+    padding-inline: 0.35rem;
   }
 }
