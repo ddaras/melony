@@ -59,7 +59,7 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
             if (typeof providerEvent.text === "string") {
               assistantText += providerEvent.text;
             }
-            yield { type: "llm:text:delta", data: { text: providerEvent.text } } as any;
+            yield { type: "llm:text:delta", data: { delta: providerEvent.text } } as any;
           } else if (providerEvent.type === "text:done") {
             if (typeof providerEvent.text === "string" && providerEvent.text.length > 0) {
               assistantText = providerEvent.text;

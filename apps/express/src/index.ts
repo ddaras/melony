@@ -111,7 +111,7 @@ const resolveSessionId = (rawSessionId: unknown): string => {
   return resolvedSessionId || "default";
 };
 
-const extractTextEventPayload = (event: any): { text: string; type: string } | null => {
+const extractTextEventPayload = (event: any): { text: string; type: string; delta?: string } | null => {
   if (!event || typeof event !== "object") {
     return null;
   }
@@ -169,7 +169,7 @@ const streamAgentRun = async ({
         const textPayload = extractTextEventPayload(event);
         if (textPayload) {
           if (textPayload.type === "llm:text:delta") {
-            assistantText += textPayload.text;
+            assistantText += textPayload.delta;
           } else if (textPayload.type === "llm:text" && textPayload.text.length > assistantText.length) {
             assistantText = textPayload.text;
           }

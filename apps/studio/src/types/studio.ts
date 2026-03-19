@@ -30,23 +30,6 @@ export type RuntimeMessage = {
   content?: unknown;
 };
 
-export type InspectorTab = 'payload' | 'state';
-
-export interface TraceTone {
-  dot: string;
-  bar: string;
-}
-
-export interface TimelineRow {
-  event: MelonyEvent;
-  idx: number;
-  startMs: number;
-  durationMs: number;
-  leftPercent: number;
-  widthPercent: number;
-  tone: TraceTone;
-}
-
 export interface RunGroup {
   sessionId: string;
   runs: Run[];

@@ -9,9 +9,21 @@ const client = new MelonyClient({
   url: 'http://localhost:3000/chat', // Default URL
 })
 
+const getEventRole = (event: { type?: string }): 'user' | 'assistant' | 'error' => {
+  if (event.type?.startsWith('user:')) {
+    return 'user'
+  }
+
+  if (event.type?.startsWith('error:')) {
+    return 'error'
+  }
+
+  return 'assistant'
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MelonyProvider client={client}>
+    <MelonyProvider client={client} aggregationOptions={{ getRole: getEventRole }}>
       <App />
     </MelonyProvider>
   </React.StrictMode>,
