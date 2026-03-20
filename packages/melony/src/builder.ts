@@ -29,7 +29,7 @@ export class MelonyBuilder<
   constructor(initialConfig?: Partial<Config<TState, TEvent>>) {
     this.config = {
       eventHandlers: initialConfig?.eventHandlers ?? new Map(),
-      interceptors: initialConfig?.interceptors ?? [],
+      interceptors: initialConfig?.interceptors ?? new Map(),
     };
   }
 
@@ -38,9 +38,9 @@ export class MelonyBuilder<
    * The handler receives the narrowed event type based on the eventType string.
    */
   on<K extends TEvent["type"]>(
-    eventType: K,
+    eventType: K | "*",
     handler: (
-      event: Extract<TEvent, { type: K }>,
+      event: K extends "*" ? TEvent : Extract<TEvent, { type: K }>,
       context: RuntimeContext<TState, TEvent>
     ) => AsyncGenerator<TEvent, void, unknown> | void
   ): this {
@@ -56,8 +56,32 @@ export class MelonyBuilder<
    * Register an interceptor that runs before any handlers.
    * Useful for logging, validation, or suspending for approval.
    */
-  intercept(interceptor: Interceptor<TState, TEvent>): this {
-    this.config.interceptors.push(interceptor);
+  intercept(interceptor: Interceptor<TState, TEvent>): this;
+  intercept<K extends TEvent["type"]>(
+    eventType: K,
+    interceptor: (
+      event: Extract<TEvent, { type: K }>,
+      context: RuntimeContext<TState, TEvent>
+    ) => Promise<TEvent | void> | TEvent | void
+  ): this;
+  intercept(
+    arg1: string | Interceptor<TState, TEvent>,
+    arg2?: any
+  ): this {
+    if (typeof arg1 === "string") {
+      const type = arg1;
+      const interceptor = arg2!;
+      if (!this.config.interceptors.has(type)) {
+        this.config.interceptors.set(type, []);
+      }
+      this.config.interceptors.get(type)!.push(interceptor as Interceptor<TState, TEvent>);
+    } else {
+      const interceptor = arg1;
+      if (!this.config.interceptors.has("*")) {
+        this.config.interceptors.set("*", []);
+      }
+      this.config.interceptors.get("*")!.push(interceptor);
+    }
     return this;
   }
 

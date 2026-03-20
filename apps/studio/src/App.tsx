@@ -16,7 +16,6 @@ const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {
 const App: React.FC = () => {
   const { send, messages: melonyMessages, streaming: isSendingMessage, reset } = useMelony();
 
-  console.log(melonyMessages);
   // Chat state
   const [chatSessionId, setChatSessionId] = useState(() => generateId());
   const [chatInput, setChatInput] = useState('');

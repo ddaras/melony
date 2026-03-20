@@ -63,5 +63,5 @@ export type EventHandler<TState = any, TEvent extends Event = Event> = (
 
 export interface Config<TState = any, TEvent extends Event = Event> {
   eventHandlers: Map<string, EventHandler<TState, TEvent>[]>;
-  interceptors: Interceptor<TState, TEvent>[];
+  interceptors: Map<string, Interceptor<TState, TEvent>[]>;
 }

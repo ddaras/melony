@@ -76,13 +76,24 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
   ): AsyncGenerator<TEvent> {
     let currentEvent = event;
 
-    // Run all interceptors sequentially
-    for (const interceptor of this.config.interceptors) {
+    // 1. Run global interceptors first
+    const globalInterceptors = this.config.interceptors.get("*") || [];
+    for (const interceptor of globalInterceptors) {
       const result = await interceptor(currentEvent, context);
-      
-      // If interceptor returns a new event object, we use it for subsequent steps
       if (result && typeof result === "object" && "type" in result) {
         currentEvent = result as TEvent;
+      }
+    }
+
+    // 2. Run specific interceptors for the (possibly new) event type
+    // If currentEvent.type is "*", it's already been handled by the global interceptors
+    if (currentEvent.type !== "*") {
+      const specificInterceptors = this.config.interceptors.get(currentEvent.type) || [];
+      for (const interceptor of specificInterceptors) {
+        const result = await interceptor(currentEvent, context);
+        if (result && typeof result === "object" && "type" in result) {
+          currentEvent = result as TEvent;
+        }
       }
     }
 
