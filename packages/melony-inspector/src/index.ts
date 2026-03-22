@@ -1,4 +1,4 @@
-import { AgentPlugin } from "@melony/agents";
+import { MelonyPlugin } from "melony";
 
 const runSequences = new Map<string, number>();
 
@@ -18,27 +18,32 @@ export interface InspectorOptions {
    * If true, the inspector will not send events.
    */
   disabled?: boolean;
+  /**
+   * The name of the application or abstraction being inspected.
+   * If not provided, it will try to find a name in the state or use 'Anonymous'
+   */
+  name?: string;
 }
 
 /**
- * An Agent Plugin that captures all events and state changes
+ * A Melony Plugin that captures all events and state changes
  * and sends them to the Melony Studio.
  */
-export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
-  const { url = "http://localhost:7777", disabled = false } = options;
+export const inspector = (options: InspectorOptions = {}): MelonyPlugin => {
+  const { url = "http://localhost:7777", disabled = false, name: overrideName } = options;
   const endpoint = `${url.replace(/\/$/, "")}/api/events`;
 
   return (builder) => {
     if (disabled) return;
 
     builder.intercept(async (event, context) => {
-      const agentState = (context.state as any)?.agent;
-      const agentName = agentState?.name || 'Anonymous Agent';
+      // Try to find a name for identification: override -> state.name -> state.agent.name -> Anonymous
+      const name = overrideName || (context.state as any)?.name || (context.state as any)?.agent?.name || 'Anonymous';
       const sequence = nextSequence(context.runId);
 
       const payload = {
         runId: context.runId,
-        agentName,
+        name,
         sequence,
         timestamp: Date.now(),
         event,
@@ -60,13 +65,12 @@ export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
 
     // We can also listen to all events emitted to ensure we capture yielded events
     builder.on("*", (event, context) => {
-      const agentState = (context.state as any)?.agent;
-      const agentName = agentState?.name || 'Anonymous Agent';
+      const name = overrideName || (context.state as any)?.name || (context.state as any)?.agent?.name || 'Anonymous';
       const sequence = nextSequence(context.runId);
 
       const payload = {
         runId: context.runId,
-        agentName,
+        name,
         sequence,
         timestamp: Date.now(),
         event,
@@ -80,7 +84,7 @@ export const inspector = (options: InspectorOptions = {}): AgentPlugin => {
         body: JSON.stringify(payload),
       }).catch(() => {});
 
-      if ((event as any)?.type === "agent:complete") {
+      if ((event as any)?.type === "agent:complete" || (event as any)?.type === "complete") {
         runSequences.delete(context.runId);
       }
     });

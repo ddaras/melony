@@ -8,3 +8,6 @@ examples/**/node_modules
 *.original
 
 .env
+
+**/*tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo

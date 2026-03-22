@@ -34,14 +34,15 @@ wss.on('connection', (ws) => {
 
 // Endpoint for the Inspector to send events
 app.post('/api/events', (req, res) => {
-  const { runId, sessionId: incomingSessionId, agentName, sequence, timestamp, event, state, type } = req.body;
+  const { runId, sessionId: incomingSessionId, name, agentName, sequence, timestamp, event, state, type } = req.body;
+  const resolvedName = name || agentName || 'Anonymous';
   const sessionId = incomingSessionId || state?.sessionId || 'default';
   
   if (!runs.has(runId)) {
     runs.set(runId, { 
       runId,
       sessionId,
-      agentName,
+      agentName: resolvedName,
       events: [], 
       startedAt: timestamp, 
       lastUpdatedAt: timestamp,
@@ -54,9 +55,9 @@ app.post('/api/events', (req, res) => {
     run.sessionId = sessionId;
   }
   
-  // Update agent name if it was previously unknown
-  if (agentName && (!run.agentName || run.agentName === 'Anonymous Agent')) {
-    run.agentName = agentName;
+  // Update name if it was previously unknown
+  if (resolvedName && (!run.agentName || run.agentName === 'Anonymous' || run.agentName === 'Anonymous Agent')) {
+    run.agentName = resolvedName;
   }
   
   // We only store the event if it's an emission (to avoid duplicates from intercept)
@@ -72,7 +73,7 @@ app.post('/api/events', (req, res) => {
   // Broadcast to all connected Studio UI clients
   const payload = JSON.stringify({ 
     type: 'event', 
-    data: { runId, sessionId: run.sessionId, agentName: run.agentName, sequence, timestamp, event, state, type } 
+    data: { runId, sessionId: run.sessionId, name: run.agentName, sequence, timestamp, event, state, type } 
   });
   
   wss.clients.forEach((client) => {

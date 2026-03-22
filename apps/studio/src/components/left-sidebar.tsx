@@ -11,7 +11,7 @@ interface LeftSidebarProps {
   onSelectSession: (sessionId: string, runs: Run[]) => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({
+export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   groupedRuns,
   chatSessionId,
   onClearRuns,
@@ -92,4 +92,3 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   );
 };
 
-export default LeftSidebar;

@@ -9,19 +9,20 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "melony": "workspace:*",
+    "@melony/actions": "workspace:*",
     "@melony/agents": "workspace:*",
-    "@melony/workflows": "workspace:*",
+    "@melony/gemini": "workspace:*",
+    "@melony/inspector": "workspace:*",
     "@melony/llm": "workspace:*",
     "@melony/openai": "workspace:*",
-    "@melony/gemini": "workspace:*",
-    "@melony/actions": "workspace:*",
-    "@melony/inspector": "workspace:*",
     "@melony/planning": "workspace:*",
-    "dotenv": "^16.4.5"
+    "@melony/workflows": "workspace:*",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "melony": "workspace:*"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.24",
     "tsx": "^4.7.1",

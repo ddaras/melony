@@ -12,7 +12,7 @@ interface ChatPanelProps {
   onSendChatMessage: () => Promise<void>;
 }
 
-const ChatPanel: React.FC<ChatPanelProps> = ({
+export const ChatPanel: React.FC<ChatPanelProps> = ({
   chatMessages,
   chatInput,
   isSendingMessage,
@@ -40,13 +40,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 <div key={entry.id} className={`group animate-in fade-in slide-in-from-bottom-2 duration-300 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex flex-col gap-2 max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
                     <div className={`flex items-center gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        isUser
-                          ? 'bg-zinc-100 text-zinc-900'
-                          : isError
-                            ? 'bg-red-500/20 text-red-300'
-                            : 'bg-zinc-800 text-zinc-300'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isUser
+                        ? 'bg-zinc-100 text-zinc-900'
+                        : isError
+                          ? 'bg-red-500/20 text-red-300'
+                          : 'bg-zinc-800 text-zinc-300'
+                        }`}>
                         {isError ? '!' : isUser ? 'U' : 'A'}
                       </div>
                       <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
@@ -54,13 +53,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                       </span>
                     </div>
 
-                    <div className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap break-words ${
-                      isUser
-                        ? 'bg-zinc-100 text-zinc-950'
-                        : isError
-                          ? 'bg-red-500/10 border border-red-400/30 text-red-300'
-                          : 'bg-zinc-900 text-zinc-300 border border-zinc-800/80'
-                    }`}>
+                    <div className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap break-words ${isUser
+                      ? 'bg-zinc-100 text-zinc-950'
+                      : isError
+                        ? 'bg-red-500/10 border border-red-400/30 text-red-300'
+                        : 'bg-zinc-900 text-zinc-300 border border-zinc-800/80'
+                      }`}>
                       {entry.content ||
                         (isSendingMessage && entry.role === 'assistant' ? (
                           <span className="flex gap-1 items-center h-5">
@@ -108,5 +106,3 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     </div>
   );
 };
-
-export default ChatPanel;

@@ -1,6 +1,6 @@
 {
-  "name": "@melony/inspector",
-  "version": "0.3.0",
+  "name": "@melony/cloud",
+  "version": "0.1.0",
   "main": "dist/index.js",
   "type": "module",
   "sideEffects": false,
@@ -8,20 +8,19 @@
     "build": "tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
-    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "ai",
     "agents",
     "melony",
-    "inspector",
-    "studio"
+    "cloud",
+    "observability",
+    "auth"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Real-time inspection and observability for Melony agents.",
+  "description": "Ready-to-use observability and auth for Melony via Melony Cloud.",
   "publishConfig": {
     "access": "public"
   },

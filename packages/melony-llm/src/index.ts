@@ -74,6 +74,17 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
               continue;
             }
             const callId = providerEvent.callId || `tool_call_${context.runId}_${steps}_${pendingToolCalls.length}`;
+            
+            // Emit the tool call event
+            yield {
+              type: "llm:tool:call",
+              data: {
+                id: callId,
+                name: providerEvent.name,
+                input: providerEvent.input
+              }
+            } as any;
+            
             pendingToolCalls.push({
               id: callId,
               name: providerEvent.name,
@@ -121,6 +132,14 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
 
             if ((actionEvent as any).type === "action:result" && matchesToolCall) {
               sawResult = true;
+              yield {
+                type: "llm:tool:result",
+                data: {
+                  id: toolCall.id,
+                  name: toolCall.name,
+                  result: eventData?.result
+                }
+              } as any;
               messages.push({
                 role: "tool",
                 name: toolCall.name,
@@ -129,6 +148,14 @@ export function llm<TState extends AgentState = AgentState, TEvent extends Event
               });
             } else if ((actionEvent as any).type === "action:error" && matchesToolCall) {
               sawResult = true;
+              yield {
+                type: "llm:tool:error",
+                data: {
+                  id: toolCall.id,
+                  name: toolCall.name,
+                  error: eventData?.error ?? "Unknown action error"
+                }
+              } as any;
               messages.push({
                 role: "tool",
                 name: toolCall.name,

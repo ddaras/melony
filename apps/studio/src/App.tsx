@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { useMelony } from '@melony/react';
-import ChatPanel from './components/chat-panel';
-import LeftSidebar from './components/left-sidebar';
+import { ChatPanel } from './components/chat-panel';
+import { LeftSidebar } from './components/left-sidebar';
 import { generateId } from 'melony';
 
 const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {

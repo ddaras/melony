@@ -8,13 +8,15 @@ import { Runtime } from "./runtime";
  * The core Event structure.
  * Fully unopinionated - just type, data, and optional metadata.
  */
-export type Event<TData = any> = {
+export type Event<TData = any, TMeta = Record<string, any>> = {
   /** Unique identifier for the event */
   id?: string;
   /** The type of the event */
   type: string;
   /** The data associated with the event */
-  data: TData;
+  data?: TData;
+  /** Optional metadata associated with the event */
+  meta?: TMeta;
 };
 
 /**
