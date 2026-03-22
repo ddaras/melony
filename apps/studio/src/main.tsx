@@ -6,7 +6,7 @@ import App from './App'
 import './index.css'
 
 const client = new MelonyClient({
-  url: 'http://localhost:3000/chat', // Default URL
+  url: 'http://localhost:7777/chat', // Default URL
 })
 
 const getEventRole = (event: { type?: string }): 'user' | 'assistant' | 'error' => {

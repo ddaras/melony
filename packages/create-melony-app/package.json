@@ -1,0 +1,35 @@
+{
+  "name": "create-melony-app",
+  "version": "0.1.0",
+  "description": "Scaffold a new Melony agent app in seconds",
+  "main": "dist/index.js",
+  "bin": {
+    "create-melony-app": "bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "dev": "tsup src/index.ts --format cjs --watch --dts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.1.1",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.2",
+    "@types/node": "^20.8.2",
+    "@types/prompts": "^2.4.5",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
