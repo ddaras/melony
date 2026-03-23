@@ -80,22 +80,21 @@ export const registerChatRoutes = (app: express.Express): void => {
     })();
   });
 
-  app.get("/threads", (req, res) => {
+  app.get("/runs", (req, res) => {
     const { threadId } = req.query;
-
-    if (threadId && typeof threadId === "string") {
-      const events = runManager.getEvents({ threadId });
-      if (events.length === 0) {
-        return res.status(404).json({ error: `Thread ${threadId} not found` });
-      }
-      return res.json({ threadId, events });
-    }
-
-    const allThreads = runManager.getAllThreadsWithEvents();
-    res.json({ threads: allThreads });
+    const runs = runManager.listRuns({ 
+      threadId: threadId as string 
+    });
+    res.json({ runs });
   });
 
-  app.get("/events", (req, res) => {
+  app.get("/threads", (req, res) => {
+    const threadIds = runManager.listThreads();
+    const threads = threadIds.map(id => ({ id }));
+    res.json({ threads });
+  });
+
+  app.get("/stream", (req, res) => {
     const { runId, threadId } = req.query;
 
     res.setHeader("Content-Type", "text/event-stream");
@@ -104,7 +103,10 @@ export const registerChatRoutes = (app: express.Express): void => {
 
     const filter = { runId: runId as string, threadId: threadId as string };
     
-    // Historical events
+    // Optional: Send historical events first if requested, or just start streaming new ones.
+    // The user contract says "stream events from specific runId or threadId".
+    // Usually SSE streams start with current state or just new events.
+    // I'll include historical events to be helpful, as the previous implementation did.
     const historicalEvents = runManager.getEvents(filter);
     for (const event of historicalEvents) {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
@@ -119,5 +121,12 @@ export const registerChatRoutes = (app: express.Express): void => {
       unsubscribe();
       res.end();
     });
+  });
+
+  app.get("/events", (req, res) => {
+    const { runId, threadId } = req.query;
+    const filter = { runId: runId as string, threadId: threadId as string };
+    const events = runManager.getEvents(filter);
+    res.json({ events });
   });
 };

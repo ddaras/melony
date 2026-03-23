@@ -9,7 +9,8 @@ export function createServer(): express.Express {
 
   // Configure CORS for Studio access (console.melony.dev)
   app.use(cors({
-    origin: '*', // For development, allow all origins
+    origin: true, // Echo back the request origin for better CORS support with credentials/Authorization
+    credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
@@ -76,54 +77,59 @@ export function createServer(): express.Express {
     })();
   });
 
-  // Get thread history or list all threads
-  app.get('/threads', (req: Request, res: Response) => {
+  // List all runs, optionally filtered by threadId
+  app.get('/runs', (req: Request, res: Response) => {
     const { threadId } = req.query;
-
-    if (threadId && typeof threadId === 'string') {
-      const events = runManager.getEvents({ threadId });
-      if (events.length === 0) {
-        return res.status(404).json({ error: `Thread ${threadId} not found` });
-      }
-      return res.json({ threadId, events });
-    }
-
-    const allThreads = runManager.getAllThreadsWithEvents();
-    res.json({ threads: allThreads });
+    const runs = runManager.listRuns({ 
+      threadId: threadId as string 
+    });
+    res.json({ runs });
   });
 
-  // Subscribe to events for a specific run or thread
-  app.get('/events', (req: Request, res: Response) => {
-    const { runId, threadId, after } = req.query;
+  // List all threads
+  app.get('/threads', (req: Request, res: Response) => {
+    const threadIds = runManager.listThreads();
+    const threads = threadIds.map(id => ({ id }));
+    res.json({ threads });
+  });
 
-    // Set headers for SSE
+  // Stream events from specific runId or threadId
+  app.get('/stream', (req: Request, res: Response) => {
+    const { runId, threadId } = req.query;
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Filter by runId or threadId
     const filter = { 
       runId: runId as string, 
       threadId: threadId as string 
     };
 
-    // 1. Send historical events if "after" is not provided (replaying full history for thread/run)
-    // In a real system, "after" would be used for pagination/offset.
     const historicalEvents = runManager.getEvents(filter);
     for (const event of historicalEvents) {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     }
 
-    // 2. Subscribe to new real-time events
     const unsubscribe = runManager.subscribe(filter, (event: Event) => {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
 
-    // Cleanup when the connection is closed
     req.on('close', () => {
       unsubscribe();
       res.end();
     });
+  });
+
+  // Get historical events for a run or thread
+  app.get('/events', (req: Request, res: Response) => {
+    const { runId, threadId } = req.query;
+    const filter = { 
+      runId: runId as string, 
+      threadId: threadId as string 
+    };
+    const events = runManager.getEvents(filter);
+    res.json({ events });
   });
 
   return app;

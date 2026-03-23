@@ -126,22 +126,27 @@ export class RunManager {
   }
 
   /**
-   * Get all unique threads with their combined historical events.
+   * List all runs, optionally filtered by thread ID.
    */
-  public getAllThreadsWithEvents(): Record<string, Event[]> {
-    const threadMap: Record<string, Event[]> = {};
+  public listRuns(filter?: { threadId?: string }): Run[] {
+    const allRuns = Array.from(this.runs.values());
+    if (filter?.threadId) {
+      return allRuns.filter(run => run.threadId === filter.threadId);
+    }
+    return allRuns;
+  }
+
+  /**
+   * List all unique thread IDs.
+   */
+  public listThreads(): string[] {
+    const threadIds = new Set<string>();
     for (const run of this.runs.values()) {
       if (run.threadId) {
-        if (!threadMap[run.threadId]) {
-          threadMap[run.threadId] = [];
-        }
-        threadMap[run.threadId].push(...run.events);
+        threadIds.add(run.threadId);
       }
     }
-    for (const threadId in threadMap) {
-      threadMap[threadId].sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
-    }
-    return threadMap;
+    return Array.from(threadIds);
   }
 }
 

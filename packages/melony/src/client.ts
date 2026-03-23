@@ -106,13 +106,37 @@ export class MelonyClient<TEvent extends Event = Event> {
         throw new Error(`HTTP error! status: ${runResponse.status}`);
       
       const { runId, threadId } = await runResponse.json();
+      yield* this.stream({ runId, threadId });
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        this.setState({ streaming: false });
+        return;
+      }
+      const error = err instanceof Error ? err : new Error(String(err));
+      this.setState({ error, streaming: false });
+      throw error;
+    }
+  }
 
-      // 2. Subscribe to Events
-      const eventsUrl = new URL(`${this.url}/events`);
-      eventsUrl.searchParams.set("runId", runId);
-      if (threadId) eventsUrl.searchParams.set("threadId", threadId);
+  /**
+   * Stream events from a specific run or thread.
+   */
+  async *stream(filter: { runId?: string; threadId?: string }): AsyncGenerator<TEvent> {
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
 
-      const response = await fetch(eventsUrl.toString(), {
+    this.setState({
+      streaming: true,
+      error: null,
+    });
+
+    try {
+      const headers = await this.getRequestHeaders();
+      const streamUrl = new URL(`${this.url}/stream`);
+      if (filter.runId) streamUrl.searchParams.set("runId", filter.runId);
+      if (filter.threadId) streamUrl.searchParams.set("threadId", filter.threadId);
+
+      const response = await fetch(streamUrl.toString(), {
         headers: {
           ...headers,
           "Accept": "text/event-stream",
@@ -167,6 +191,56 @@ export class MelonyClient<TEvent extends Event = Event> {
       this.setState({ error, streaming: false });
       throw error;
     }
+  }
+
+  /**
+   * List all unique threads.
+   */
+  async listThreads(): Promise<{ id: string }[]> {
+    const headers = await this.getRequestHeaders();
+    const response = await fetch(`${this.url}/threads`, { headers });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return data.threads;
+  }
+
+  /**
+   * List all runs, optionally filtered by thread ID.
+   */
+  async listRuns(filter?: { threadId?: string }): Promise<any[]> {
+    const headers = await this.getRequestHeaders();
+    const runsUrl = new URL(`${this.url}/runs`);
+    if (filter?.threadId) runsUrl.searchParams.set("threadId", filter.threadId);
+    
+    const response = await fetch(runsUrl.toString(), { headers });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return data.runs;
+  }
+
+  /**
+   * Get historical events for a run or thread.
+   */
+  async listEvents(filter: { runId?: string; threadId?: string }): Promise<TEvent[]> {
+    const headers = await this.getRequestHeaders();
+    const eventsUrl = new URL(`${this.url}/events`);
+    if (filter.runId) eventsUrl.searchParams.set("runId", filter.runId);
+    if (filter.threadId) eventsUrl.searchParams.set("threadId", filter.threadId);
+
+    const response = await fetch(eventsUrl.toString(), { headers });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return data.events;
+  }
+
+  /**
+   * Check server health.
+   */
+  async getHealth(): Promise<any> {
+    const headers = await this.getRequestHeaders();
+    const response = await fetch(`${this.url}/health`, { headers });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
   }
 
   private handleIncomingEvent(event: TEvent) {
