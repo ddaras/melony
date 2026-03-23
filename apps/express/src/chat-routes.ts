@@ -80,6 +80,21 @@ export const registerChatRoutes = (app: express.Express): void => {
     })();
   });
 
+  app.get("/threads", (req, res) => {
+    const { threadId } = req.query;
+
+    if (threadId && typeof threadId === "string") {
+      const events = runManager.getEvents({ threadId });
+      if (events.length === 0) {
+        return res.status(404).json({ error: `Thread ${threadId} not found` });
+      }
+      return res.json({ threadId, events });
+    }
+
+    const allThreads = runManager.getAllThreadsWithEvents();
+    res.json({ threads: allThreads });
+  });
+
   app.get("/events", (req, res) => {
     const { runId, threadId } = req.query;
 

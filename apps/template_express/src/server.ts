@@ -76,6 +76,22 @@ export function createServer(): express.Express {
     })();
   });
 
+  // Get thread history or list all threads
+  app.get('/threads', (req: Request, res: Response) => {
+    const { threadId } = req.query;
+
+    if (threadId && typeof threadId === 'string') {
+      const events = runManager.getEvents({ threadId });
+      if (events.length === 0) {
+        return res.status(404).json({ error: `Thread ${threadId} not found` });
+      }
+      return res.json({ threadId, events });
+    }
+
+    const allThreads = runManager.getAllThreadsWithEvents();
+    res.json({ threads: allThreads });
+  });
+
   // Subscribe to events for a specific run or thread
   app.get('/events', (req: Request, res: Response) => {
     const { runId, threadId, after } = req.query;

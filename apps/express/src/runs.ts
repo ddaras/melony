@@ -124,6 +124,25 @@ export class RunManager {
     }
     return [];
   }
+
+  /**
+   * Get all unique threads with their combined historical events.
+   */
+  public getAllThreadsWithEvents(): Record<string, Event[]> {
+    const threadMap: Record<string, Event[]> = {};
+    for (const run of this.runs.values()) {
+      if (run.threadId) {
+        if (!threadMap[run.threadId]) {
+          threadMap[run.threadId] = [];
+        }
+        threadMap[run.threadId].push(...run.events);
+      }
+    }
+    for (const threadId in threadMap) {
+      threadMap[threadId].sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
+    }
+    return threadMap;
+  }
 }
 
 // Global run manager singleton for convenience
