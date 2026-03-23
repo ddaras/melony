@@ -3,7 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { useMelony } from '@melony/react';
 import { ChatPanel } from './components/chat-panel';
 import { LeftSidebar } from './components/left-sidebar';
-import { generateId } from 'melony';
+import { Event, generateId } from 'melony';
 
 const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {
   if (role === 'user' || role === 'assistant' || role === 'error') {
@@ -12,6 +12,58 @@ const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {
 
   return 'assistant';
 };
+
+const TEXT_DELTA_TYPES = new Set([
+  'llm:text:delta',
+  'assistant:text:delta',
+  'assistant:text-delta',
+]);
+
+const FULL_ASSISTANT_TEXT_TYPES = new Set(['llm:text', 'assistant:text']);
+
+function displayTextFromAssistantEvents(events: Event[]): string {
+  let fromDeltas = '';
+  for (const e of events) {
+    if (TEXT_DELTA_TYPES.has(e.type)) {
+      const d = e.data as { text?: string; delta?: string } | undefined;
+      fromDeltas += d?.text ?? d?.delta ?? '';
+    }
+  }
+  if (fromDeltas) return fromDeltas;
+
+  for (const e of events) {
+    if (FULL_ASSISTANT_TEXT_TYPES.has(e.type)) {
+      const d = e.data as { text?: string; content?: string } | undefined;
+      const text = d?.text ?? d?.content;
+      if (text != null && String(text).length > 0) return String(text);
+    }
+  }
+  return '';
+}
+
+function displayTextFromUserEvents(events: Event[]): string {
+  for (const e of events) {
+    const d = e.data as { text?: string; content?: string } | undefined;
+    const text = d?.text ?? d?.content;
+    if (text != null && String(text).length > 0) return String(text);
+  }
+  return '';
+}
+
+function displayTextFromErrorEvents(events: Event[]): string {
+  for (const e of events) {
+    const d = e.data as { message?: string; error?: string; text?: string } | undefined;
+    const text = d?.message ?? d?.error ?? d?.text;
+    if (text != null && String(text).length > 0) return String(text);
+  }
+  return '';
+}
+
+function displayTextForMessage(role: string, content: Event[]): string {
+  if (role === 'user') return displayTextFromUserEvents(content);
+  if (role === 'error') return displayTextFromErrorEvents(content);
+  return displayTextFromAssistantEvents(content);
+}
 
 const App: React.FC = () => {
   const { send, messages: melonyMessages, streaming: isSendingMessage, reset } = useMelony();
@@ -26,7 +78,7 @@ const App: React.FC = () => {
     return melonyMessages.map(msg => ({
       id: msg.runId || generateId(),
       role: toDisplayRole(msg.role),
-      content: msg?.content?.find(e => !!e?.data?.text)?.data?.text ?? msg.content.map(e => e.data?.delta ?? '').join('')
+      content: displayTextForMessage(msg.role, msg.content),
     }));
   }, [melonyMessages]);
 

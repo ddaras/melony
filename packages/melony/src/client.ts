@@ -90,13 +90,33 @@ export class MelonyClient<TEvent extends Event = Event> {
 
     try {
       const headers = await this.getRequestHeaders();
-      const response = await fetch(this.url, {
+      
+      // 1. Create a Run
+      const runResponse = await fetch(`${this.url}/runs`, {
         method: "POST",
         headers,
         body: JSON.stringify({
           event: optimisticEvent,
           ...additionalBody,
         }),
+        signal: this.abortController.signal,
+      });
+
+      if (!runResponse.ok)
+        throw new Error(`HTTP error! status: ${runResponse.status}`);
+      
+      const { runId, threadId } = await runResponse.json();
+
+      // 2. Subscribe to Events
+      const eventsUrl = new URL(`${this.url}/events`);
+      eventsUrl.searchParams.set("runId", runId);
+      if (threadId) eventsUrl.searchParams.set("threadId", threadId);
+
+      const response = await fetch(eventsUrl.toString(), {
+        headers: {
+          ...headers,
+          "Accept": "text/event-stream",
+        },
         signal: this.abortController.signal,
       });
 
@@ -123,6 +143,15 @@ export class MelonyClient<TEvent extends Event = Event> {
             const handled = this.handleIncomingEvent(incomingEvent);
             if (!handled) continue;
             yield incomingEvent;
+
+            // If we receive a run:status:updated event with completed/failed, we can stop
+            if (incomingEvent.type === "run:status:updated") {
+              const data = incomingEvent.data as { status?: string };
+              if (data?.status === "completed" || data?.status === "failed") {
+                this.setState({ streaming: false });
+                return;
+              }
+            }
           } catch (e) {
             console.error("Failed to parse event", e);
           }

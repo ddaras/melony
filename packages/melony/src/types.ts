@@ -17,6 +17,8 @@ export type Event<TData = any, TMeta = Record<string, any>> = {
   data?: TData;
   /** Optional metadata associated with the event */
   meta?: TMeta;
+  /** Timestamp of when the event occurred */
+  timestamp?: number;
 };
 
 /**
@@ -27,6 +29,22 @@ export interface ErrorEvent extends Event<{
   stack?: string;
 }> {
   type: "error";
+}
+
+// ============================================
+// Runs & Status
+// ============================================
+
+export type RunStatus = "pending" | "running" | "completed" | "failed" | "suspended";
+
+export interface Run<TState = any, TEvent extends Event = Event> {
+  id: string;
+  threadId?: string;
+  status: RunStatus;
+  events: TEvent[];
+  state: TState;
+  startTime: number;
+  endTime?: number;
 }
 
 // ============================================
