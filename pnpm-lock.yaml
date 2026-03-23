@@ -189,8 +189,8 @@ importers:
         specifier: latest
         version: 0.3.0
       '@melony/llm':
-        specifier: latest
-        version: 0.3.0
+        specifier: workspace:*
+        version: link:../../packages/melony-llm
       '@melony/openai':
         specifier: latest
         version: 0.3.0

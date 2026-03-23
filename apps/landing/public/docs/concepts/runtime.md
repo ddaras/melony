@@ -36,8 +36,8 @@ Handlers do not call `emit()` directly. Instead, they `yield` events from the ha
 import { Event, melony } from "melony";
 
 type AppEvent =
-  | (Event<{ content: string }> & { type: "user:text" })
-  | (Event<{ content: string }> & { type: "assistant:text" });
+  | (Event & { type: "user:text"; data: { content: string } })
+  | (Event & { type: "assistant:text"; data: { content: string } });
 
 const app = melony<unknown, AppEvent>()
   .on("user:text", async function* (event) {
@@ -73,8 +73,8 @@ Use the two extension points differently:
 import { Event, melony } from "melony";
 
 type AppEvent =
-  | (Event<{ content: string }> & { type: "user:text" })
-  | (Event<{ content: string }> & { type: "assistant:text" });
+  | (Event & { type: "user:text"; data: { content: string } })
+  | (Event & { type: "assistant:text"; data: { content: string } });
 
 const app = melony<unknown, AppEvent>()
   .intercept((event, { runId }) => {
@@ -97,8 +97,8 @@ Melony plugins are just functions that receive the builder and register behavior
 import { Event, MelonyPlugin, melony } from "melony";
 
 type AppEvent =
-  | (Event<{ content: string }> & { type: "user:text" })
-  | (Event<{ content: string }> & { type: "assistant:text" });
+  | (Event & { type: "user:text"; data: { content: string } })
+  | (Event & { type: "assistant:text"; data: { content: string } });
 
 const loggingPlugin: MelonyPlugin<unknown, AppEvent> = (builder) => {
   builder.intercept((event) => {

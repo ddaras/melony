@@ -57,7 +57,7 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
             message: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
           },
-        } as TEvent;
+        } as unknown as TEvent;
       }
 
       if (eventToEmit) {

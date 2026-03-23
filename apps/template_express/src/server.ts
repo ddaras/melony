@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { sampleAgent } from './agent.js';
-import { ErrorEvent, generateId, Event } from 'melony';
+import { generateId, Event } from 'melony';
 import { runManager } from './runs.js';
 
 export function createServer(): express.Express {
@@ -65,7 +65,7 @@ export function createServer(): express.Express {
         runManager.updateRunStatus(run.id, 'completed');
       } catch (error) {
         console.error(`Run ${run.id} failed:`, error);
-        const runtimeErrorEvent: ErrorEvent = {
+        const runtimeErrorEvent = {
           type: "error",
           data: {
             message: error instanceof Error ? error.message : "Unknown agent error"

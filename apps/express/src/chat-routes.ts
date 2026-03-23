@@ -2,7 +2,6 @@ import express from "express";
 import { defaultChatAgent, sequentialChatAgent } from "./agents.js";
 import { resolveSessionId, getSessionMessages, setSessionMessages } from "./session-store.js";
 import { validateMessage } from "./utils.js";
-import { generateId, ErrorEvent } from "melony";
 import { runManager } from "./runs.js";
 
 type RunRequestBody = {
@@ -68,7 +67,7 @@ export const registerChatRoutes = (app: express.Express): void => {
         runManager.updateRunStatus(run.id, "completed");
       } catch (error) {
         console.error(`Run ${run.id} failed:`, error);
-        const runtimeErrorEvent: ErrorEvent = {
+        const runtimeErrorEvent = {
           type: "error",
           data: {
             message: error instanceof Error ? error.message : "Unknown agent error"

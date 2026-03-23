@@ -6,46 +6,14 @@ import { Runtime } from "./runtime";
 
 /**
  * The core Event structure.
- * Fully unopinionated - just type, data, and optional metadata.
+ * Truly unopinionated - only 'type' is strictly required for dispatching.
  */
-export type Event<TData = any, TMeta = Record<string, any>> = {
-  /** Unique identifier for the event */
-  id?: string;
-  /** The type of the event */
+export type Event = {
+  /** The type of the event (required for runtime dispatching) */
   type: string;
-  /** The data associated with the event */
-  data?: TData;
-  /** Optional metadata associated with the event */
-  meta?: TMeta;
-  /** Timestamp of when the event occurred */
-  timestamp?: number;
+  /** Catch-all for any other custom fields */
+  [key: string]: any;
 };
-
-/**
- * Built-in error event emitted by the runtime.
- */
-export interface ErrorEvent extends Event<{
-  message: string;
-  stack?: string;
-}> {
-  type: "error";
-}
-
-// ============================================
-// Runs & Status
-// ============================================
-
-export type RunStatus = "pending" | "running" | "completed" | "failed" | "suspended";
-
-export interface Run<TState = any, TEvent extends Event = Event> {
-  id: string;
-  threadId?: string;
-  status: RunStatus;
-  events: TEvent[];
-  state: TState;
-  startTime: number;
-  endTime?: number;
-}
 
 // ============================================
 // Runtime & Hooks

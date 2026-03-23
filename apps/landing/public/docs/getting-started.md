@@ -20,8 +20,8 @@ pnpm add melony
 ```ts
 import { Event, melony } from "melony";
 
-type UserTextEvent = Event<{ content: string }> & { type: "user:text" };
-type AssistantTextEvent = Event<{ content: string }> & { type: "assistant:text" };
+type UserTextEvent = Event & { type: "user:text"; data: { content: string } };
+type AssistantTextEvent = Event & { type: "assistant:text"; data: { content: string } };
 type ChatEvent = UserTextEvent | AssistantTextEvent;
 
 type ChatState = {

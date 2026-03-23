@@ -1,4 +1,16 @@
-import { Event, Run, RunStatus, generateId } from 'melony';
+import { Event, generateId } from 'melony';
+
+interface Run {
+  id: string;
+  threadId?: string;
+  status: "pending" | "running" | "completed" | "failed";
+  events: Event[];
+  state: any;
+  startTime: number;
+  endTime?: number;
+}
+
+type RunStatus = "pending" | "running" | "completed" | "failed";
 
 type EventHandler = (event: Event) => void;
 
@@ -36,7 +48,7 @@ export class RunManager {
       if (status === "completed" || status === "failed") {
         run.endTime = Date.now();
       }
-      this.emitEvent(runId, { type: "run:status:updated", data: { status } });
+      this.emitEvent(runId, { type: "run:status", data: { status } });
     }
   }
 
@@ -52,7 +64,11 @@ export class RunManager {
         timestamp: event.timestamp ?? Date.now(),
         meta: { ...event.meta, runId, threadId: run.threadId },
       };
-      run.events.push(enrichedEvent);
+
+      // Skip storing volatile events (like deltas) while still notifying listeners
+      if (!enrichedEvent.meta?.volatile) {
+        run.events.push(enrichedEvent);
+      }
 
       this.notify(`events:${runId}`, enrichedEvent);
       if (run.threadId) {

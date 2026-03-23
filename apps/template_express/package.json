@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@melony/agents": "latest",
-    "@melony/llm": "latest",
+    "@melony/llm": "workspace:*",
     "@melony/openai": "latest",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

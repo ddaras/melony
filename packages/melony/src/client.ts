@@ -24,7 +24,6 @@ export class MelonyClient<TEvent extends Event = Event> {
   private state: ClientState<TEvent>;
   public readonly url: string;
   private headers?: MelonyClientOptions<TEvent>["headers"];
-  private lastServerState: any = null;
   private abortController: AbortController | null = null;
   private stateListeners: Set<(state: ClientState<TEvent>) => void> = new Set();
 
@@ -168,8 +167,8 @@ export class MelonyClient<TEvent extends Event = Event> {
             if (!handled) continue;
             yield incomingEvent;
 
-            // If we receive a run:status:updated event with completed/failed, we can stop
-            if (incomingEvent.type === "run:status:updated") {
+            // If we receive a run:status event with completed/failed, we can stop
+            if (incomingEvent.type === "run:status") {
               const data = incomingEvent.data as { status?: string };
               if (data?.status === "completed" || data?.status === "failed") {
                 this.setState({ streaming: false });
@@ -191,56 +190,6 @@ export class MelonyClient<TEvent extends Event = Event> {
       this.setState({ error, streaming: false });
       throw error;
     }
-  }
-
-  /**
-   * List all unique threads.
-   */
-  async listThreads(): Promise<{ id: string }[]> {
-    const headers = await this.getRequestHeaders();
-    const response = await fetch(`${this.url}/threads`, { headers });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.threads;
-  }
-
-  /**
-   * List all runs, optionally filtered by thread ID.
-   */
-  async listRuns(filter?: { threadId?: string }): Promise<any[]> {
-    const headers = await this.getRequestHeaders();
-    const runsUrl = new URL(`${this.url}/runs`);
-    if (filter?.threadId) runsUrl.searchParams.set("threadId", filter.threadId);
-    
-    const response = await fetch(runsUrl.toString(), { headers });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.runs;
-  }
-
-  /**
-   * Get historical events for a run or thread.
-   */
-  async listEvents(filter: { runId?: string; threadId?: string }): Promise<TEvent[]> {
-    const headers = await this.getRequestHeaders();
-    const eventsUrl = new URL(`${this.url}/events`);
-    if (filter.runId) eventsUrl.searchParams.set("runId", filter.runId);
-    if (filter.threadId) eventsUrl.searchParams.set("threadId", filter.threadId);
-
-    const response = await fetch(eventsUrl.toString(), { headers });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.events;
-  }
-
-  /**
-   * Check server health.
-   */
-  async getHealth(): Promise<any> {
-    const headers = await this.getRequestHeaders();
-    const response = await fetch(`${this.url}/health`, { headers });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
   }
 
   private handleIncomingEvent(event: TEvent) {
