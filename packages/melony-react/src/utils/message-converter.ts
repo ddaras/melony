@@ -1,13 +1,13 @@
-import { Event, RuntimeContext } from "melony";
+import { RuntimeContext } from "melony";
 
 /**
  * A message aggregated from multiple events.
  */
-export interface AggregatedMessage {
+export interface AggregatedMessage<TEvent = any> {
   /** The role of the sender (user, assistant, or system) */
   role: string;
   /** The content of the message, containing the events */
-  content: Event[];
+  content: TEvent[];
   /** The unique ID for the run that produced this message */
   runId?: string;
   /** The ID of the session this message belongs to */
@@ -17,7 +17,7 @@ export interface AggregatedMessage {
 /**
  * Options for configuring how events are aggregated into messages.
  */
-export interface AggregateOptions<TEvent extends Event = Event> {
+export interface AggregateOptions<TEvent = any> {
   /**
    * Custom logic to extract the role from an event.
    * Defaults to event.meta.role or 'assistant'.
@@ -45,7 +45,7 @@ export interface AggregateOptions<TEvent extends Event = Event> {
    */
   shouldStartNewMessage?: (
     event: TEvent,
-    currentMessage: AggregatedMessage | null,
+    currentMessage: AggregatedMessage<TEvent> | null,
     options: { getRole: (e: TEvent) => string; getRunId: (e: TEvent) => string | undefined }
   ) => boolean;
 
@@ -55,35 +55,35 @@ export interface AggregateOptions<TEvent extends Event = Event> {
    */
   processEvent?: (
     event: TEvent,
-    currentMessage: AggregatedMessage,
+    currentMessage: AggregatedMessage<TEvent>,
   ) => void;
 }
 
 /**
  * Default implementation for extracting role from an event.
  */
-export const defaultGetRole = <T extends Event>(e: T): string => e.type === "user:text" ? "user" : "assistant";
+export const defaultGetRole = <T = any>(e: T): string => (e as any).type === "user:text" ? "user" : "assistant";
 
 /**
  * Default implementation for extracting runId from an event.
  */
-export const defaultGetRunId = <T extends Event>(e: T, context?: RuntimeContext<any, T>): string | undefined => {
+export const defaultGetRunId = <T = any>(e: T, context?: RuntimeContext<any, T>): string | undefined => {
   return context?.runId;
 };
 
 /**
  * Default implementation for extracting sessionId from an event.
  */
-export const defaultGetSessionId = <T extends Event>(e: T): string | undefined => {
-  return e.data?.sessionId || e.data?.threadId;
+export const defaultGetSessionId = <T = any>(e: T): string | undefined => {
+  return (e as any).data?.sessionId || (e as any).data?.threadId;
 };
 
 /**
  * Default logic for determining if a new message should start.
  */
-export const defaultShouldStartNewMessage = <T extends Event>(
+export const defaultShouldStartNewMessage = <T = any>(
   event: T,
-  current: AggregatedMessage | null,
+  current: AggregatedMessage<T> | null,
   utils: { getRole: (e: T) => string; getRunId: (e: T) => string | undefined; getSessionId: (e: T) => string | undefined }
 ): boolean => {
   if (!current) return true;
@@ -102,7 +102,7 @@ export const defaultShouldStartNewMessage = <T extends Event>(
 /**
  * Default logic for processing an event into a message.
  */
-export const defaultProcessEvent = <T extends Event>(event: T, current: AggregatedMessage): void => {
+export const defaultProcessEvent = <T = any>(event: T, current: AggregatedMessage<T>): void => {
   current.content.push(event);
 };
 
@@ -114,10 +114,10 @@ export const defaultProcessEvent = <T extends Event>(event: T, current: Aggregat
  * @param options Configuration for aggregation logic.
  * @returns An array of aggregated messages.
  */
-export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
+export function convertEventsToAggregatedMessages<TEvent = any>(
   events: TEvent[],
   options: AggregateOptions<TEvent> = {}
-): AggregatedMessage[] {
+): AggregatedMessage<TEvent>[] {
   const getRole = options.getRole || defaultGetRole;
   const getRunId = options.getRunId || defaultGetRunId;
   const getSessionId = options.getSessionId || defaultGetSessionId;
@@ -126,8 +126,8 @@ export function convertEventsToAggregatedMessages<TEvent extends Event = Event>(
 
   if (events.length === 0) return [];
 
-  const messages: AggregatedMessage[] = [];
-  let currentMessage: AggregatedMessage | null = null;
+  const messages: AggregatedMessage<TEvent>[] = [];
+  let currentMessage: AggregatedMessage<TEvent> | null = null;
 
   for (const event of events) {
     if (shouldStartNewMessage(event, currentMessage, { getRole, getRunId, getSessionId })) {

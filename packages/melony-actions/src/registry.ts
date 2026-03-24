@@ -1,7 +1,6 @@
-import { Event } from "melony";
 import { ActionDefinition, ActionTool } from "./types";
 
-export class ActionRegistry<TState = any, TEvent extends Event = Event> {
+export class ActionRegistry<TState = any, TEvent = any> {
   private readonly actions = new Map<string, ActionDefinition<TState, TEvent, any, any>>();
 
   register(...items: ActionDefinition<TState, TEvent, any, any>[]): this {
@@ -35,7 +34,7 @@ export class ActionRegistry<TState = any, TEvent extends Event = Event> {
   }
 }
 
-export function createActionRegistry<TState = any, TEvent extends Event = Event>(
+export function createActionRegistry<TState = any, TEvent = any>(
   actions: ActionDefinition<TState, TEvent, any, any>[] = []
 ): ActionRegistry<TState, TEvent> {
   const registry = new ActionRegistry<TState, TEvent>();

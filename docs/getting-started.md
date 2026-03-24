@@ -18,10 +18,10 @@ pnpm add melony
 ## Build a minimal runtime
 
 ```ts
-import { Event, melony } from "melony";
+import { melony } from "melony";
 
-type UserTextEvent = Event & { type: "user:text"; data: { content: string } };
-type AssistantTextEvent = Event & { type: "assistant:text"; data: { content: string } };
+type UserTextEvent = { type: "user:text"; data: { content: string } };
+type AssistantTextEvent = { type: "assistant:text"; data: { content: string } };
 type ChatEvent = UserTextEvent | AssistantTextEvent;
 
 type ChatState = {
@@ -71,7 +71,7 @@ Use interceptors for logic that should run before handlers, such as logging, val
 ```ts
 const app = melony<ChatState, ChatEvent>()
   .intercept((event, { runId }) => {
-    console.log(`[${runId}]`, event.type);
+    console.log(`[${runId}] event received`);
     return event;
   })
   .on("user:text", async function* (event, { state }) {

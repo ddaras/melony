@@ -1,22 +1,14 @@
 import {
-  Event,
   RuntimeContext,
   Config,
 } from "./types";
 import { generateId } from "./utils/generate-id";
 
 /**
- * Helper to check if a value is a Melony Event.
- */
-function isEvent(val: any): val is Event {
-  return val && typeof val === "object" && typeof val.type === "string";
-}
-
-/**
  * The Melony Runtime.
  * Fully unopinionated - processes events through handlers.
  */
-export class Runtime<TState = any, TEvent extends Event = Event> {
+export class Runtime<TState = any, TEvent = any> {
   public readonly config: Config<TState, TEvent>;
 
   constructor(config: Config<TState, TEvent>) {
@@ -24,21 +16,38 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
   }
 
   /**
+   * Helper to get the event type from an event object based on configuration.
+   */
+  private getEventType(event: TEvent): string {
+    const key = this.config.eventKey || "type";
+    return (event as any)[key] || "*";
+  }
+
+  /**
+   * Helper to check if a value is a Melony Event.
+   */
+  private isEvent(val: any): val is TEvent {
+    const key = this.config.eventKey || "type";
+    return val && typeof val === "object" && typeof (val as any)[key] === "string";
+  }
+
+  /**
    * Process an incoming event through the runtime.
    * All event processing is handled by user-defined event handlers.
    */
   public async *run(
-    event: TEvent, 
+    event: TEvent,
     options?: { state?: TState; runId?: string }
   ): AsyncGenerator<TEvent> {
     const runId = options?.runId ?? generateId();
-    
+    const eventKey = this.config.eventKey || "type";
+
     const context: RuntimeContext<TState, TEvent> = {
       state: (options?.state ?? {}) as TState,
       runtime: this,
       runId,
       suspend: (event?: TEvent) => {
-        throw event || { type: "run-suspended", data: {} };
+        throw event || { [eventKey]: "run-suspended", data: {} };
       },
     };
 
@@ -48,11 +57,11 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
     } catch (error) {
       let eventToEmit: TEvent | undefined;
 
-      if (isEvent(error)) {
+      if (this.isEvent(error)) {
         eventToEmit = error as TEvent;
       } else {
         eventToEmit = {
-          type: "error",
+          [eventKey]: "error",
           data: {
             message: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
@@ -61,7 +70,7 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
       }
 
       if (eventToEmit) {
-        yield* this.emit(eventToEmit, context);
+        yield* this.emit(eventToEmit);
       }
     }
   }
@@ -75,35 +84,37 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
     context: RuntimeContext<TState, TEvent>,
   ): AsyncGenerator<TEvent> {
     let currentEvent = event;
+    const eventKey = this.config.eventKey || "type";
 
     // 1. Run global interceptors first
     const globalInterceptors = this.config.interceptors.get("*") || [];
     for (const interceptor of globalInterceptors) {
       const result = await interceptor(currentEvent, context);
-      if (result && typeof result === "object" && "type" in result) {
+      if (result && typeof result === "object" && eventKey in (result as any)) {
         currentEvent = result as TEvent;
       }
     }
 
     // 2. Run specific interceptors for the (possibly new) event type
-    // If currentEvent.type is "*", it's already been handled by the global interceptors
-    if (currentEvent.type !== "*") {
-      const specificInterceptors = this.config.interceptors.get(currentEvent.type) || [];
+    // If currentEvent type is "*", it's already been handled by the global interceptors
+    const eventType = this.getEventType(currentEvent);
+    if (eventType !== "*") {
+      const specificInterceptors = this.config.interceptors.get(eventType) || [];
       for (const interceptor of specificInterceptors) {
         const result = await interceptor(currentEvent, context);
-        if (result && typeof result === "object" && "type" in result) {
+        if (result && typeof result === "object" && eventKey in (result as any)) {
           currentEvent = result as TEvent;
         }
       }
     }
 
     const handlers = [
-      ...(this.config.eventHandlers.get("*") || []),
-      ...(this.config.eventHandlers.get(currentEvent.type) || []),
+      ...(this.config.handlers.get("*") || []),
+      ...(this.config.handlers.get(this.getEventType(currentEvent)) || []),
     ];
-    
+
     // First emit the event itself
-    yield* this.emit(currentEvent, context);
+    yield* this.emit(currentEvent);
 
     for (const handler of handlers) {
       const result = handler(currentEvent, context);
@@ -120,8 +131,7 @@ export class Runtime<TState = any, TEvent extends Event = Event> {
    * Internal helper to yield an event with metadata.
    */
   private async *emit(
-    event: TEvent,
-    context?: RuntimeContext<TState, TEvent>,
+    event: TEvent
   ): AsyncGenerator<TEvent> {
     yield event;
   }

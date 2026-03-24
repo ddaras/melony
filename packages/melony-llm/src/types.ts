@@ -1,4 +1,4 @@
-import { Event, RuntimeContext } from "melony";
+import { RuntimeContext } from "melony";
 
 export interface LlmToolCallMessage {
   id: string;
@@ -30,7 +30,7 @@ export interface LlmProviderEvent {
   error?: any;
 }
 
-export interface LlmProvider<TState = any, TEvent extends Event = Event> {
+export interface LlmProvider<TState = any, TEvent = any> {
   name: string;
   generate(args: {
     system?: string;
@@ -42,7 +42,7 @@ export interface LlmProvider<TState = any, TEvent extends Event = Event> {
   }): AsyncGenerator<LlmProviderEvent>;
 }
 
-export interface LlmPluginOptions<TState = any, TEvent extends Event = Event> {
+export interface LlmPluginOptions<TState = any, TEvent = any> {
   provider: LlmProvider<TState, TEvent>;
   temperature?: number;
   maxOutputTokens?: number;

@@ -1,5 +1,4 @@
 import { AgentPlugin } from "@melony/agents";
-import { Event } from "melony";
 import { ActionRegistry, createActionRegistry } from "./registry";
 import {
   ActionCallEventData,
@@ -40,7 +39,7 @@ function toErrorData(action: string, toolCallId: string | undefined, error: unkn
   };
 }
 
-export function actions<TState extends ActionStateShape = ActionStateShape, TEvent extends Event = Event>(
+export function actions<TState extends ActionStateShape = ActionStateShape, TEvent = any>(
   options: ActionsPluginOptions<TState, TEvent>
 ): AgentPlugin<TState, TEvent> {
   const registry = createActionRegistry<TState, TEvent>(options.actions);
@@ -60,8 +59,8 @@ export function actions<TState extends ActionStateShape = ActionStateShape, TEve
 
     for (const action of registry.list()) {
       const callEventType = toActionCallEventType(action.name, callEventPrefix);
-      builder.on(callEventType as TEvent["type"], async function* (event, context) {
-        const call = event.data as ActionCallEventData;
+      builder.on(callEventType, async function* (event, context) {
+        const call = (event as any).data as ActionCallEventData;
 
         try {
           const result = await action.run({
@@ -76,10 +75,12 @@ export function actions<TState extends ActionStateShape = ActionStateShape, TEve
             result,
           };
 
-          yield { type: resultEventType, data: resultData } as TEvent;
+          const eventKey = (builder as any).config.eventKey || "type";
+          yield { [eventKey]: resultEventType, data: resultData } as any as TEvent;
         } catch (error) {
           const errorData = toErrorData(action.name, call.id, error);
-          yield { type: errorEventType, data: errorData } as TEvent;
+          const eventKey = (builder as any).config.eventKey || "type";
+          yield { [eventKey]: errorEventType, data: errorData } as any as TEvent;
         }
       });
     }
@@ -88,7 +89,7 @@ export function actions<TState extends ActionStateShape = ActionStateShape, TEve
 
 export function defineAction<
   TState = any,
-  TEvent extends Event = Event,
+  TEvent = any,
   TInput = any,
   TResult = any
 >(
@@ -99,7 +100,7 @@ export function defineAction<
 
 export function createActionsPlugin<
   TState extends ActionStateShape = ActionStateShape,
-  TEvent extends Event = Event
+  TEvent = any
 >(
   options: ActionsPluginOptions<TState, TEvent>
 ): AgentPlugin<TState, TEvent> {

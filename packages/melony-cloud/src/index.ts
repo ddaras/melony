@@ -1,4 +1,4 @@
-import { MelonyPlugin, Event } from "melony";
+import { MelonyPlugin } from "melony";
 
 export interface MelonyCloudOptions {
   /** 
@@ -25,7 +25,7 @@ export interface MelonyCloudOptions {
  * 
  * Provides instant observability, event persistence, and auth integration.
  */
-export const cloud = <TState = any, TEvent extends Event = Event>(
+export const cloud = <TState = any, TEvent = any>(
   options: MelonyCloudOptions = {}
 ): MelonyPlugin<TState, TEvent> => {
   const { 
@@ -37,7 +37,7 @@ export const cloud = <TState = any, TEvent extends Event = Event>(
   } = options;
 
   // Resolve API Key from options or environment
-  const apiKey = providedApiKey || (typeof process !== "undefined" ? process.env.MELONY_API_KEY : undefined);
+  const apiKey = providedApiKey || (typeof process !== "undefined" ? (process.env as any).MELONY_API_KEY : undefined);
   const endpoint = `${baseUrl.replace(/\/$/, "")}/api/v1/ingest`;
 
   return (builder) => {
@@ -48,11 +48,14 @@ export const cloud = <TState = any, TEvent extends Event = Event>(
       return;
     }
 
+    const eventKey = (builder as any).config.eventKey || "type";
+
     // --- 1. Observability & Persistence ---
     // We listen to all events (*) and forward them to Melony Cloud if they match the whitelist.
     builder.on("*", (event, context) => {
+      const eventType = (event as any)[eventKey];
       // Check if event is whitelisted
-      if (whitelistedEvents && !whitelistedEvents.includes(event.type)) {
+      if (whitelistedEvents && !whitelistedEvents.includes(eventType)) {
         return;
       }
 
@@ -93,11 +96,11 @@ export const cloud = <TState = any, TEvent extends Event = Event>(
     // --- 3. Managed Auth Handlers ---
     // Built-in handlers for 'auth:verify' events
     // We use any casting to avoid type errors with narrowed TEvent unions
-    builder.on("auth:verify" as any, (async function* (event: any, context: any) {
+    builder.on("auth:verify", (async function* (event: any, context: any) {
       const { token } = event.data || {};
       
       if (!token) {
-        yield { type: "auth:fail", data: { message: "No token provided" } };
+        yield { [eventKey]: "auth:fail", data: { message: "No token provided" } } as any as TEvent;
         return;
       }
 
@@ -114,12 +117,12 @@ export const cloud = <TState = any, TEvent extends Event = Event>(
         if (response.ok) {
           const userData = await response.json();
           context.state.user = userData;
-          yield { type: "auth:success", data: userData };
+          yield { [eventKey]: "auth:success", data: userData } as any as TEvent;
         } else {
-          yield { type: "auth:fail", data: { message: "Invalid token" } };
+          yield { [eventKey]: "auth:fail", data: { message: "Invalid token" } } as any as TEvent;
         }
       } catch (err) {
-        yield { type: "auth:fail", data: { message: "Auth service unavailable" } };
+        yield { [eventKey]: "auth:fail", data: { message: "Auth service unavailable" } } as any as TEvent;
       }
     }) as any);
   };

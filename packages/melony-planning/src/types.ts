@@ -1,4 +1,4 @@
-import { Event, RuntimeContext } from "melony";
+import { RuntimeContext } from "melony";
 import { AgentState } from "@melony/agents";
 import { LlmMessage, LlmProvider, LlmTool } from "@melony/llm";
 
@@ -30,7 +30,7 @@ export interface PlanStepInput {
   metadata?: Record<string, any>;
 }
 
-export interface PlannerStrategy<TState extends PlanningState = PlanningState, TEvent extends Event = Event> {
+export interface PlannerStrategy<TState extends PlanningState = PlanningState, TEvent = any> {
   createPlan: (args: {
     goal: string;
     input: any;
@@ -40,7 +40,7 @@ export interface PlannerStrategy<TState extends PlanningState = PlanningState, T
 
 export interface DefaultPlannerStrategyOptions<
   TState extends PlanningState = PlanningState,
-  TEvent extends Event = Event
+  TEvent = any
 > {
   provider: LlmProvider<TState, TEvent>;
   temperature?: number;
@@ -50,7 +50,7 @@ export interface DefaultPlannerStrategyOptions<
   toolSelector?: (context: RuntimeContext<TState, TEvent>) => LlmTool[];
 }
 
-export interface PlannerOptions<TState extends PlanningState = PlanningState, TEvent extends Event = Event> {
+export interface PlannerOptions<TState extends PlanningState = PlanningState, TEvent = any> {
   strategy?: PlannerStrategy<TState, TEvent>;
   provider?: LlmProvider<TState, TEvent>;
   toolName?: string;

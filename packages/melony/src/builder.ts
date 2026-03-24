@@ -1,9 +1,8 @@
 import {
-  Event,
   EventHandler,
   Config,
   RuntimeContext,
-  Interceptor,
+  EventInterceptor,
 } from "./types";
 import { Runtime } from "./runtime";
 import { createStreamResponse } from "./utils/create-stream-response";
@@ -12,7 +11,7 @@ import { createStreamResponse } from "./utils/create-stream-response";
  * A Melony plugin is a function that receives the builder and extends it.
  * This allows for modularizing common handlers.
  */
-export type MelonyPlugin<TState = any, TEvent extends Event = Event> = (
+export type MelonyPlugin<TState = any, TEvent = any> = (
   builder: MelonyBuilder<TState, TEvent>
 ) => void;
 
@@ -22,33 +21,43 @@ export type MelonyPlugin<TState = any, TEvent extends Event = Event> = (
  */
 export class MelonyBuilder<
   TState = any,
-  TEvent extends Event = Event
+  TEvent = any
 > {
   private config: Config<TState, TEvent>;
 
   constructor(initialConfig?: Partial<Config<TState, TEvent>>) {
     this.config = {
-      eventHandlers: initialConfig?.eventHandlers ?? new Map(),
+      handlers: initialConfig?.handlers ?? new Map(),
       interceptors: initialConfig?.interceptors ?? new Map(),
+      eventKey: initialConfig?.eventKey ?? "type",
     };
+  }
+
+  /**
+   * Configure the key in the event object that defines its type.
+   * Defaults to "type".
+   */
+  eventKey(key: string): this {
+    this.config.eventKey = key;
+    return this;
   }
 
   /**
    * Add an event handler for a specific event type. Supports method chaining.
    * The handler receives the narrowed event type based on the eventType string.
    */
-  on<K extends TEvent["type"]>(
-    eventType: K | "*",
+  on(
+    eventType: string | "*",
     handler: (
-      event: K extends "*" ? TEvent : Extract<TEvent, { type: K }>,
+      event: TEvent,
       context: RuntimeContext<TState, TEvent>
     ) => AsyncGenerator<TEvent, void, unknown> | void
   ): this {
-    if (!this.config.eventHandlers.has(eventType)) {
-      this.config.eventHandlers.set(eventType, []);
+    if (!this.config.handlers.has(eventType)) {
+      this.config.handlers.set(eventType, []);
     }
     // Cast is safe because runtime only calls this handler for matching event types
-    this.config.eventHandlers.get(eventType)!.push(handler as EventHandler<TState, TEvent>);
+    this.config.handlers.get(eventType)!.push(handler as EventHandler<TState, TEvent>);
     return this;
   }
 
@@ -56,16 +65,16 @@ export class MelonyBuilder<
    * Register an interceptor that runs before any handlers.
    * Useful for logging, validation, or suspending for approval.
    */
-  intercept(interceptor: Interceptor<TState, TEvent>): this;
-  intercept<K extends TEvent["type"]>(
-    eventType: K,
+  intercept(interceptor: EventInterceptor<TState, TEvent>): this;
+  intercept(
+    eventType: string,
     interceptor: (
-      event: Extract<TEvent, { type: K }>,
+      event: TEvent,
       context: RuntimeContext<TState, TEvent>
     ) => Promise<TEvent | void> | TEvent | void
   ): this;
   intercept(
-    arg1: string | Interceptor<TState, TEvent>,
+    arg1: string | EventInterceptor<TState, TEvent>,
     arg2?: any
   ): this {
     if (typeof arg1 === "string") {
@@ -74,7 +83,7 @@ export class MelonyBuilder<
       if (!this.config.interceptors.has(type)) {
         this.config.interceptors.set(type, []);
       }
-      this.config.interceptors.get(type)!.push(interceptor as Interceptor<TState, TEvent>);
+      this.config.interceptors.get(type)!.push(interceptor as EventInterceptor<TState, TEvent>);
     } else {
       const interceptor = arg1;
       if (!this.config.interceptors.has("*")) {
@@ -152,7 +161,7 @@ export class MelonyBuilder<
  */
 export function melony<
   TState = any,
-  TEvent extends Event = Event
+  TEvent = any
 >(initialConfig?: Partial<Config<TState, TEvent>>): MelonyBuilder<TState, TEvent> {
   return new MelonyBuilder<TState, TEvent>(initialConfig);
 }

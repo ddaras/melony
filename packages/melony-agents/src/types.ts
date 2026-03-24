@@ -1,6 +1,6 @@
-import { Event, MelonyBuilder, RuntimeContext } from "melony";
+import { MelonyBuilder, RuntimeContext } from "melony";
 
-export type Instructions<TState = any, TEvent extends Event = Event> =
+export type Instructions<TState = any, TEvent = any> =
   | string
   | ((context: RuntimeContext<TState, TEvent>) => string | Promise<string>);
 
@@ -13,11 +13,11 @@ export interface AgentState {
   [key: string]: any;
 }
 
-export type AgentPlugin<TState = any, TEvent extends Event = Event> = (
+export type AgentPlugin<TState = any, TEvent = any> = (
   builder: MelonyBuilder<TState, TEvent>
 ) => void;
 
-export interface AgentConfig<TState = any, TEvent extends Event = Event> {
+export interface AgentConfig<TState = any, TEvent = any> {
   name: string;
   description?: string;
   instructions?: Instructions<TState, TEvent>;

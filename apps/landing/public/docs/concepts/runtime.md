@@ -33,11 +33,11 @@ Each handler receives:
 Handlers do not call `emit()` directly. Instead, they `yield` events from the handler itself:
 
 ```ts
-import { Event, melony } from "melony";
+import { melony } from "melony";
 
 type AppEvent =
-  | (Event & { type: "user:text"; data: { content: string } })
-  | (Event & { type: "assistant:text"; data: { content: string } });
+  | { type: "user:text"; data: { content: string } }
+  | { type: "assistant:text"; data: { content: string } };
 
 const app = melony<unknown, AppEvent>()
   .on("user:text", async function* (event) {
@@ -56,7 +56,7 @@ When you call `runtime.run(initialEvent, options)`, Melony executes a run with t
 2. Run-scoped `state` is created from `options.state`.
 3. Interceptors run for the current event and may replace it or suspend execution.
 4. The current event is emitted into the output stream.
-5. Matching `*` handlers and type-specific handlers run.
+5. Matching `*` handlers and type-specific handlers run (based on the `eventKey`, which defaults to `"type"`).
 6. Any event yielded by a handler is processed recursively through the same lifecycle.
 7. Execution ends when there are no more yielded events, or immediately if execution is suspended or an error is raised.
 
@@ -70,15 +70,15 @@ Use the two extension points differently:
 - Use **handlers** for business logic that reacts to specific event types and yields follow-up events.
 
 ```ts
-import { Event, melony } from "melony";
+import { melony } from "melony";
 
 type AppEvent =
-  | (Event & { type: "user:text"; data: { content: string } })
-  | (Event & { type: "assistant:text"; data: { content: string } });
+  | { type: "user:text"; data: { content: string } }
+  | { type: "assistant:text"; data: { content: string } };
 
 const app = melony<unknown, AppEvent>()
   .intercept((event, { runId }) => {
-    console.log(`[${runId}] incoming:`, event.type);
+    console.log(`[${runId}] incoming event`);
     return event;
   })
   .on("user:text", async function* (event) {
@@ -89,20 +89,36 @@ const app = melony<unknown, AppEvent>()
   });
 ```
 
+## Custom Event Keys
+
+By default, Melony watches the `type` key in your event objects to determine which handlers to run. You can customize this if your event structure uses a different key:
+
+```ts
+import { melony } from "melony";
+
+type CustomEvent = { kind: "msg"; text: string };
+
+const app = melony<unknown, CustomEvent>()
+  .eventKey("kind")
+  .on("msg", async function* (event) {
+    // ...
+  });
+```
+
 ## Packaging runtime behavior with plugins
 
 Melony plugins are just functions that receive the builder and register behavior. This keeps reuse simple and transparent.
 
 ```ts
-import { Event, MelonyPlugin, melony } from "melony";
+import { MelonyPlugin, melony } from "melony";
 
 type AppEvent =
-  | (Event & { type: "user:text"; data: { content: string } })
-  | (Event & { type: "assistant:text"; data: { content: string } });
+  | { type: "user:text"; data: { content: string } }
+  | { type: "assistant:text"; data: { content: string } };
 
 const loggingPlugin: MelonyPlugin<unknown, AppEvent> = (builder) => {
   builder.intercept((event) => {
-    console.log("[plugin]", event.type);
+    console.log("[plugin] event received");
     return event;
   });
 };

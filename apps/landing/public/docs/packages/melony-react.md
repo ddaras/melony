@@ -47,7 +47,7 @@ The core context provider that distributes the Melony client and state to your c
 | `children`<span class="required-asterisk">*</span> | - | React component tree. |
 | `initialEvents` | - | Initial list of events. |
 | `aggregationOptions` | - | Options for message grouping. |
-| `eventHandlers` | - | Custom per-event handlers. |
+| `handlers` | - | Custom per-event handlers. |
 
 ---
 

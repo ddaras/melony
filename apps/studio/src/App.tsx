@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { ChatPanel } from './components/chat-panel';
 import { LeftSidebar } from './components/left-sidebar';
-import { Event, generateId } from 'melony';
+import { generateId } from 'melony';
 import { useStudioMelony } from './hooks/use-studio-melony';
 
 const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {
@@ -21,7 +21,7 @@ const TEXT_DELTA_TYPES = new Set([
 
 const FULL_ASSISTANT_TEXT_TYPES = new Set(['llm:text', 'assistant:text']);
 
-function displayTextFromAssistantEvents(events: Event[]): string {
+function displayTextFromAssistantEvents(events: any[]): string {
   let fromDeltas = '';
   for (const e of events) {
     if (TEXT_DELTA_TYPES.has(e.type)) {
@@ -41,7 +41,7 @@ function displayTextFromAssistantEvents(events: Event[]): string {
   return '';
 }
 
-function displayTextFromUserEvents(events: Event[]): string {
+function displayTextFromUserEvents(events: any[]): string {
   for (const e of events) {
     const d = e.data as { text?: string; content?: string } | undefined;
     const text = d?.text ?? d?.content;
@@ -50,7 +50,7 @@ function displayTextFromUserEvents(events: Event[]): string {
   return '';
 }
 
-function displayTextFromErrorEvents(events: Event[]): string {
+function displayTextFromErrorEvents(events: any[]): string {
   for (const e of events) {
     const d = e.data as { message?: string; error?: string; text?: string } | undefined;
     const text = d?.message ?? d?.error ?? d?.text;
@@ -59,7 +59,7 @@ function displayTextFromErrorEvents(events: Event[]): string {
   return '';
 }
 
-function displayTextForMessage(role: string, content: Event[]): string {
+function displayTextForMessage(role: string, content: any[]): string {
   if (role === 'user') return displayTextFromUserEvents(content);
   if (role === 'error') return displayTextFromErrorEvents(content);
   return displayTextFromAssistantEvents(content);

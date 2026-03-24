@@ -1,6 +1,6 @@
 import { AgentEvents, AgentPlugin, AgentState, Instructions } from "@melony/agents";
 import { LlmPluginOptions, LlmMessage, LlmTool } from "./types";
-import { RuntimeContext, Event } from "melony";
+import { RuntimeContext } from "melony";
 
 export * from "./types";
 
@@ -24,7 +24,7 @@ async function resolveInstructions(context: RuntimeContext<any, any>): Promise<s
   return instructions;
 }
 
-export function llm<TState extends AgentState = AgentState, TEvent extends Event = Event>(
+export function llm<TState extends AgentState = AgentState, TEvent = any>(
   options: LlmPluginOptions<TState, TEvent>
 ): AgentPlugin<TState, TEvent> {
   return (builder) => {

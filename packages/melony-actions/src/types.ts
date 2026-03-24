@@ -1,4 +1,4 @@
-import { Event, RuntimeContext } from "melony";
+import { RuntimeContext } from "melony";
 
 export interface ActionTool {
   name: string;
@@ -24,7 +24,7 @@ export interface ActionErrorEventData {
   error: any;
 }
 
-export interface ActionContext<TState = any, TEvent extends Event = Event, TInput = any> {
+export interface ActionContext<TState = any, TEvent = any, TInput = any> {
   input: TInput;
   context: RuntimeContext<TState, TEvent>;
   toolCallId?: string;
@@ -32,7 +32,7 @@ export interface ActionContext<TState = any, TEvent extends Event = Event, TInpu
 
 export interface ActionDefinition<
   TState = any,
-  TEvent extends Event = Event,
+  TEvent = any,
   TInput = any,
   TResult = any
 > {
@@ -54,7 +54,7 @@ export interface ActionStateShape {
   [key: string]: any;
 }
 
-export interface ActionsPluginOptions<TState = any, TEvent extends Event = Event> {
+export interface ActionsPluginOptions<TState = any, TEvent = any> {
   actions: ActionDefinition<TState, TEvent, any, any>[];
   callEventPrefix?: string;
   resultEventType?: string;

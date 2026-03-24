@@ -1,10 +1,10 @@
-import { Event, generateId } from "melony";
+import { generateId } from "melony";
 
 export interface Run {
   id: string;
   threadId?: string;
   status: "pending" | "running" | "completed" | "failed";
-  events: Event[];
+  events: any[];
   state: any;
   startTime: number;
   endTime?: number;
@@ -12,7 +12,7 @@ export interface Run {
 
 export type RunStatus = "pending" | "running" | "completed" | "failed";
 
-type EventHandler = (event: Event) => void;
+type EventHandler = (event: any) => void;
 
 /**
  * Manages runs and events for a Melony server.
@@ -55,7 +55,7 @@ export class RunManager {
   /**
    * Add an event to a run and emit it to subscribers.
    */
-  public emitEvent(runId: string, event: Event) {
+  public emitEvent(runId: string, event: any) {
     const run = this.runs.get(runId);
     if (run) {
       const enrichedEvent = {
@@ -78,7 +78,7 @@ export class RunManager {
     }
   }
 
-  private notify(eventName: string, event: Event) {
+  private notify(eventName: string, event: any) {
     const handlers = this.listeners.get(eventName);
     if (handlers) {
       handlers.forEach(handler => handler(event));
@@ -125,12 +125,12 @@ export class RunManager {
   /**
    * Get historical events for a run or thread.
    */
-  public getEvents(filter: { runId?: string; threadId?: string }): Event[] {
+  public getEvents(filter: { runId?: string; threadId?: string }): any[] {
     if (filter.runId) {
       return this.runs.get(filter.runId)?.events ?? [];
     }
     if (filter.threadId) {
-      const threadEvents: Event[] = [];
+      const threadEvents: any[] = [];
       for (const run of this.runs.values()) {
         if (run.threadId === filter.threadId) {
           threadEvents.push(...run.events);

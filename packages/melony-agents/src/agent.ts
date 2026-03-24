@@ -1,11 +1,11 @@
-import { melony, MelonyBuilder, Event, generateId } from "melony";
+import { melony, MelonyBuilder, generateId } from "melony";
 import { AgentConfig, AgentPlugin, AgentEvents, AgentState } from "./types";
 
 /**
  * The AgentBuilder provides a delightful, fluent API for defining agents.
  * It's built on top of the Melony event runtime, treating everything as a plugin.
  */
-export class AgentBuilder<TState extends AgentState = AgentState, TEvent extends Event = Event> {
+export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> {
   private config: AgentConfig<TState, TEvent>;
   private builder: MelonyBuilder<TState, TEvent>;
 

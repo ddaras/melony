@@ -1,4 +1,4 @@
-import { Event, RuntimeContext } from "melony";
+import { RuntimeContext } from "melony";
 import { LlmProviderEvent, LlmTool } from "@melony/llm";
 import {
   DefaultPlannerStrategyOptions,
@@ -34,7 +34,7 @@ function shorten(value: unknown, max = MAX_TEXT_LENGTH): string {
   return text.length > max ? `${text.slice(0, max)}...` : text;
 }
 
-function buildPlannerContext<TState extends PlanningState, TEvent extends Event>(
+function buildPlannerContext<TState extends PlanningState, TEvent = any>(
   context: RuntimeContext<TState, TEvent>
 ): string {
   const state = context.state as any;
@@ -59,7 +59,7 @@ ${actionsBlock}`;
 
 export function createDefaultPlannerStrategy<
   TState extends PlanningState = PlanningState,
-  TEvent extends Event = Event
+  TEvent = any
 >(options: DefaultPlannerStrategyOptions<TState, TEvent>): PlannerStrategy<TState, TEvent> {
   const { provider, maxPlanSteps = 10, systemPrompt = DEFAULT_SYSTEM_PROMPT } = options;
 

@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { sampleAgent } from './agent.js';
-import { generateId, Event } from 'melony';
+import { generateId } from 'melony';
 import { runManager } from './runs.js';
 
 export function createServer(): express.Express {
@@ -111,7 +111,7 @@ export function createServer(): express.Express {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     }
 
-    const unsubscribe = runManager.subscribe(filter, (event: Event) => {
+    const unsubscribe = runManager.subscribe(filter, (event: any) => {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
 

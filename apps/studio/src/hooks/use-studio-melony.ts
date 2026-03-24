@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Event, generateId } from 'melony';
+import { generateId } from 'melony';
 
 export interface AggregatedMessage {
   role: string;
-  content: Event[];
+  content: any[];
   runId?: string;
 }
 
-const getEventRole = (event: Event): 'user' | 'assistant' | 'error' => {
+const getEventRole = (event: any): 'user' | 'assistant' | 'error' => {
   if (event.type?.startsWith('user:')) {
     return 'user';
   }
@@ -19,14 +19,14 @@ const getEventRole = (event: Event): 'user' | 'assistant' | 'error' => {
   return 'assistant';
 };
 
-const getRunId = (event: Event): string | undefined => {
+const getRunId = (event: any): string | undefined => {
   if (typeof event.runId === 'string') return event.runId;
   if (typeof event.meta?.runId === 'string') return event.meta.runId;
   if (typeof event.data?.runId === 'string') return event.data.runId;
   return undefined;
 };
 
-const convertEventsToAggregatedMessages = (events: Event[]): AggregatedMessage[] => {
+const convertEventsToAggregatedMessages = (events: any[]): AggregatedMessage[] => {
   if (events.length === 0) {
     return [];
   }
@@ -73,7 +73,7 @@ interface UseStudioMelonyOptions {
 }
 
 export const useStudioMelony = ({ url = 'http://localhost:7777' }: UseStudioMelonyOptions = {}) => {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [streaming, setStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -91,12 +91,12 @@ export const useStudioMelony = ({ url = 'http://localhost:7777' }: UseStudioMelo
   }, [stop]);
 
   const send = useCallback(
-    async (event: Event, options?: SendOptions) => {
+    async (event: any, options?: SendOptions) => {
       stop();
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
-      const optimisticEvent: Event = {
+      const optimisticEvent: any = {
         id: generateId(),
         ...event,
       };
@@ -157,7 +157,7 @@ export const useStudioMelony = ({ url = 'http://localhost:7777' }: UseStudioMelo
             if (!line.startsWith('data: ')) continue;
 
             try {
-              const incomingEvent = JSON.parse(line.slice(6)) as Event;
+              const incomingEvent = JSON.parse(line.slice(6));
               setEvents(prev => {
                 const index = incomingEvent.id
                   ? prev.findIndex(existing => existing.id === incomingEvent.id)

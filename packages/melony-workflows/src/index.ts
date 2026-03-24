@@ -1,5 +1,4 @@
 import { AgentPlugin, AgentEvents, AgentBuilder } from "@melony/agents";
-import { Event } from "melony";
 
 type BranchIterator = AsyncIterator<any>;
 

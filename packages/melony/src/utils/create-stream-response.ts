@@ -1,11 +1,9 @@
-import { Event } from "../types";
-
 /**
  * Convert an async generator of events to an HTTP streaming response
  * Exported for backward compatibility and standalone usage
  */
-export function createStreamResponse(
-  generator: AsyncGenerator<Event>,
+export function createStreamResponse<TEvent = any>(
+  generator: AsyncGenerator<TEvent>,
 ): Response {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({

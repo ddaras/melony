@@ -9,7 +9,6 @@ import React, {
 import { MelonyClient, ClientState } from "melony/client";
 import {
   Config,
-  Event,
 } from "melony";
 import {
   AggregatedMessage,
@@ -17,42 +16,42 @@ import {
   convertEventsToAggregatedMessages
 } from "../utils/message-converter";
 
-export interface MelonyContextValue extends ClientState {
-  send: (event: Event, additionalBody?: Record<string, any>) => Promise<void>;
-  reset: (events?: Event[]) => void;
+export interface MelonyContextValue<TEvent = any> extends ClientState<TEvent> {
+  send: (event: TEvent, additionalBody?: Record<string, any>) => Promise<void>;
+  reset: (events?: TEvent[]) => void;
   stop: () => void;
-  client: MelonyClient;
-  config?: Config;
+  client: MelonyClient<TEvent>;
+  config?: Config<any, TEvent>;
   messages: AggregatedMessage[];
 }
 
-export const MelonyContext = createContext<MelonyContextValue | undefined>(
+export const MelonyContext = createContext<MelonyContextValue<any> | undefined>(
   undefined,
 );
 
-export type ClientHandler<TEvent extends Event = Event> = (
+export type ClientHandler<TEvent = any> = (
   event: TEvent,
   context: { client: MelonyClient<TEvent> }
 ) => void | Promise<void>;
 
-export interface MelonyProviderProps {
+export interface MelonyProviderProps<TEvent = any> {
   children: ReactNode;
-  client: MelonyClient;
-  initialEvents?: Event[];
+  client: MelonyClient<TEvent>;
+  initialEvents?: TEvent[];
   initialAdditionalBody?: Record<string, any>;
   aggregationOptions?: AggregateOptions;
-  eventHandlers?: Record<string, ClientHandler>;
+  handlers?: Record<string, ClientHandler<TEvent>>;
 }
 
-export const MelonyProvider: React.FC<MelonyProviderProps> = ({
+export const MelonyProvider: React.FC<MelonyProviderProps<any>> = ({
   children,
   client,
   initialEvents,
   initialAdditionalBody,
   aggregationOptions,
-  eventHandlers,
+  handlers,
 }) => {
-  const [state, setState] = useState<ClientState>(client.getState());
+  const [state, setState] = useState<ClientState<any>>(client.getState());
 
   // Handle initial events on mount only
   useEffect(() => {
@@ -72,8 +71,9 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     [state.events, aggregationOptions]
   );
 
-  const send = useCallback(async (event: Event, additionalBody?: Record<string, any>) => {
-    const handler = eventHandlers?.[event.type];
+  const send = useCallback(async (event: any, additionalBody?: Record<string, any>) => {
+    const eventKey = (client as any).eventKey || "type";
+    const handler = handlers?.[(event as any)[eventKey]];
     if (handler) {
       await handler(event, { client });
       return;
@@ -84,9 +84,9 @@ export const MelonyProvider: React.FC<MelonyProviderProps> = ({
     for await (const _ of generator) {
       // Events are handled by the client subscription
     }
-  }, [client, eventHandlers, initialAdditionalBody]);
+  }, [client, handlers, initialAdditionalBody]);
 
-  const reset = useCallback((events: Event[] = []) => {
+  const reset = useCallback((events: any[] = []) => {
     client.reset(events);
   }, [client]);
 

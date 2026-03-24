@@ -33,7 +33,7 @@ import { Runtime } from "melony";
 
 // 1. Create the runtime
 const agent = new Runtime({
-  eventHandlers: new Map([
+  handlers: new Map([
     ["user:text", [async function* (event, { runtime }) {
       if (event.data.content.includes("weather")) {
         yield { type: "assistant:text", data: { content: "Weather in London is sunny!" } };

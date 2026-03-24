@@ -1,5 +1,5 @@
 import { AgentPlugin } from "@melony/agents";
-import { Event, generateId, RuntimeContext } from "melony";
+import { generateId, RuntimeContext } from "melony";
 import { createDefaultPlannerStrategy } from "./default-planner-strategy";
 import { toPlanSteps } from "./plan-steps";
 import { Plan, PlannerOptions, PlanningEvents, PlanningState } from "./types";
@@ -7,7 +7,7 @@ import { Plan, PlannerOptions, PlanningEvents, PlanningState } from "./types";
 /**
  * Simplified planning plugin that provides a todo list tool for the agent.
  */
-export function planning<TState extends PlanningState = PlanningState, TEvent extends Event = Event>(
+export function planning<TState extends PlanningState = PlanningState, TEvent = any>(
   options: PlannerOptions<TState, TEvent> = {}
 ): AgentPlugin<TState, TEvent> {
   const {
@@ -30,6 +30,8 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
   const updateCallEventType = `action:call:${updateToolName}`;
 
   return (builder) => {
+    const eventKey = (builder as any).config.eventKey || "type";
+
     // 1. Intercept to register tools and inject plan into instructions
     builder.intercept((event, context) => {
       const state = context.state as any;
@@ -96,13 +98,13 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
     });
 
     // 2. Handle 'plan' tool call
-    builder.on(planCallEventType as any, async function* (event: any, context) {
+    builder.on(planCallEventType, async function* (event: any, context) {
       const goal = String(event.data.args?.goal ?? "").trim();
       const toolCallId = event.data.id;
 
       if (!goal) {
         yield {
-          type: "action:error",
+          [eventKey]: "action:error",
           data: { action: toolName, toolCallId, error: "Goal is required for planning." }
         } as any;
         return;
@@ -110,14 +112,14 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
 
       if (!strategy) {
         yield {
-          type: "action:error",
+          [eventKey]: "action:error",
           data: { action: toolName, toolCallId, error: "No planner strategy configured." }
         } as any;
         return;
       }
 
       // Create Plan
-      yield { type: PlanningEvents.Create, data: { goal } } as any;
+      yield { [eventKey]: PlanningEvents.Create, data: { goal } } as any;
       const created = await strategy.createPlan({ goal, input: event.data.args, context });
       
       const plan: Plan = {
@@ -131,7 +133,7 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
 
       // Return the result to the agent
       yield { 
-        type: "action:result", 
+        [eventKey]: "action:result", 
         data: { 
           action: toolName,
           toolCallId, 
@@ -145,14 +147,14 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
     });
 
     // 3. Handle 'update_plan_step' tool call
-    builder.on(updateCallEventType as any, async function* (event: any, context) {
+    builder.on(updateCallEventType, async function* (event: any, context) {
       const { taskIndex, status } = event.data.args;
       const toolCallId = event.data.id;
       const plan = context.state.plan as Plan | undefined;
 
       if (!plan) {
         yield {
-          type: "action:error",
+          [eventKey]: "action:error",
           data: { action: updateToolName, toolCallId, error: "No active plan found." }
         } as any;
         return;
@@ -160,7 +162,7 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
 
       if (typeof taskIndex !== "number" || taskIndex < 0 || taskIndex >= plan.steps.length) {
         yield {
-          type: "action:error",
+          [eventKey]: "action:error",
           data: { action: updateToolName, toolCallId, error: `Invalid task index: ${taskIndex}. Valid indices: 0-${plan.steps.length - 1}` }
         } as any;
         return;
@@ -172,7 +174,7 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
       step.status = status;
 
       yield { 
-        type: PlanningEvents.UpdateStep, 
+        [eventKey]: PlanningEvents.UpdateStep, 
         data: { taskIndex, status, oldStatus, task: step.task } 
       } as any;
 
@@ -180,13 +182,13 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
       const allCompleted = plan.steps.every(s => s.status === "completed");
       if (allCompleted && plan.status !== "completed") {
         plan.status = "completed";
-        yield { type: PlanningEvents.Complete, data: { result: plan.steps } } as any;
+        yield { [eventKey]: PlanningEvents.Complete, data: { result: plan.steps } } as any;
       } else if (!allCompleted && plan.status === "completed") {
         plan.status = "active";
       }
 
       yield { 
-        type: "action:result", 
+        [eventKey]: "action:result", 
         data: { 
           action: updateToolName,
           toolCallId, 
@@ -200,7 +202,7 @@ export function planning<TState extends PlanningState = PlanningState, TEvent ex
   };
 }
 
-export function planner<TState extends PlanningState = PlanningState, TEvent extends Event = Event>(
+export function planner<TState extends PlanningState = PlanningState, TEvent = any>(
   options: PlannerOptions<TState, TEvent> = {}
 ): AgentPlugin<TState, TEvent> {
   return planning(options);
