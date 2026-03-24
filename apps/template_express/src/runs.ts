@@ -2,7 +2,6 @@ import { generateId } from 'melony';
 
 interface Run {
   id: string;
-  threadId?: string;
   status: "pending" | "running" | "completed" | "failed";
   events: any[];
   state: any;
@@ -25,10 +24,9 @@ export class RunManager {
   /**
    * Create a new run and start tracking it.
    */
-  public createRun(threadId?: string, state: any = {}): Run {
+  public createRun(threadId?: string, state: any = { threadId: '' }): Run {
     const run: Run = {
       id: generateId(),
-      threadId,
       status: "pending",
       events: [],
       state,
@@ -62,7 +60,7 @@ export class RunManager {
         ...event,
         id: event.id ?? generateId(),
         timestamp: event.timestamp ?? Date.now(),
-        meta: { ...event.meta, runId, threadId: run.threadId },
+        meta: { ...event.meta, runId, threadId: run?.state?.threadId },
       };
 
       // Skip storing volatile events (like deltas) while still notifying listeners
@@ -71,8 +69,8 @@ export class RunManager {
       }
 
       this.notify(`events:${runId}`, enrichedEvent);
-      if (run.threadId) {
-        this.notify(`events:thread:${run.threadId}`, enrichedEvent);
+      if (run?.state?.threadId) {
+        this.notify(`events:thread:${run?.state?.threadId}`, enrichedEvent);
       }
       this.notify("events:*", enrichedEvent);
     }
@@ -132,7 +130,7 @@ export class RunManager {
     if (filter.threadId) {
       const threadEvents: any[] = [];
       for (const run of this.runs.values()) {
-        if (run.threadId === filter.threadId) {
+        if (run?.state?.threadId === filter.threadId) {
           threadEvents.push(...run.events);
         }
       }
@@ -147,7 +145,7 @@ export class RunManager {
   public listRuns(filter?: { threadId?: string }): Run[] {
     const allRuns = Array.from(this.runs.values());
     if (filter?.threadId) {
-      return allRuns.filter(run => run.threadId === filter.threadId);
+      return allRuns.filter(run => run?.state?.threadId === filter.threadId);
     }
     return allRuns;
   }
@@ -158,8 +156,8 @@ export class RunManager {
   public listThreads(): string[] {
     const threadIds = new Set<string>();
     for (const run of this.runs.values()) {
-      if (run.threadId) {
-        threadIds.add(run.threadId);
+      if (run?.state?.threadId) {
+        threadIds.add(run?.state?.threadId);
       }
     }
     return Array.from(threadIds);

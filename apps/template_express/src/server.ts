@@ -29,7 +29,9 @@ export function createServer(): express.Express {
 
   // Create a new run
   app.post('/runs', async (req: Request, res: Response) => {
-    const { event, threadId, sessionId } = req.body;
+    const { event, state, runId } = req.body ?? {};
+    const requestState = (state && typeof state === 'object') ? state : {};
+    const { threadId, sessionId } = requestState as { threadId?: string; sessionId?: string };
     const messageText = event?.data?.text;
 
     if (!messageText) {
@@ -40,7 +42,10 @@ export function createServer(): express.Express {
     const activeThreadId = (threadId || sessionId || generateId()) as string;
 
     // Create a new run
-    const run = runManager.createRun(activeThreadId);
+    const run = runManager.createRun(activeThreadId, {
+      ...requestState,
+      runId
+    });
 
     // Respond immediately with the run ID
     res.json({ 
@@ -54,6 +59,7 @@ export function createServer(): express.Express {
       runManager.updateRunStatus(run.id, 'running');
       try {
         const state = {
+          ...requestState,
           messages: [{ role: 'user', content: messageText }],
           threadId: activeThreadId
         };
