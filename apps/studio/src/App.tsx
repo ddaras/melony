@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import { useMelony } from '@melony/react';
 import { ChatPanel } from './components/chat-panel';
 import { LeftSidebar } from './components/left-sidebar';
 import { Event, generateId } from 'melony';
+import { useStudioMelony } from './hooks/use-studio-melony';
 
 const toDisplayRole = (role: string): 'user' | 'assistant' | 'error' => {
   if (role === 'user' || role === 'assistant' || role === 'error') {
@@ -66,7 +66,7 @@ function displayTextForMessage(role: string, content: Event[]): string {
 }
 
 const App: React.FC = () => {
-  const { send, messages: melonyMessages, streaming: isSendingMessage, reset } = useMelony();
+  const { send, messages: melonyMessages, streaming: isSendingMessage, reset } = useStudioMelony();
 
   // Chat state
   const [chatSessionId, setChatSessionId] = useState(() => generateId());
