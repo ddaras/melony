@@ -1,17 +1,29 @@
 import { generateId } from 'melony';
+import { RunEvent } from './events.js';
+
+export type RunState = {
+  threadId: string;
+  sessionId: string;
+};
 
 interface Run {
   id: string;
   status: "pending" | "running" | "completed" | "failed";
-  events: any[];
-  state: any;
+  events: (RunBaseEvent & RunEvent)[];
+  state: RunState;
   startTime: number;
   endTime?: number;
 }
 
 type RunStatus = "pending" | "running" | "completed" | "failed";
 
-type EventHandler = (event: any) => void;
+type EventHandler = (event: RunEvent) => void;
+
+type RunBaseEvent = {
+  id: string;
+  timestamp: number;
+  meta: { runId: string; threadId: string, volatile?: boolean };
+};
 
 /**
  * Manages runs and events for a Melony server.
@@ -24,7 +36,7 @@ export class RunManager {
   /**
    * Create a new run and start tracking it.
    */
-  public createRun(threadId?: string, state: any = { threadId: '' }): Run {
+  public createRun(state: RunState = { threadId: '', sessionId: '' }): Run {
     const run: Run = {
       id: generateId(),
       status: "pending",
@@ -46,14 +58,23 @@ export class RunManager {
       if (status === "completed" || status === "failed") {
         run.endTime = Date.now();
       }
-      this.emitEvent(runId, { type: "run:status", data: { status } });
+      this.emitEvent(runId, {
+        id: generateId(),
+        timestamp: Date.now(),
+        meta: {
+          runId,
+          threadId: run?.state?.threadId
+        },
+        type: "run:status",
+        status
+      });
     }
   }
 
   /**
    * Add an event to a run and emit it to subscribers.
    */
-  public emitEvent(runId: string, event: any) {
+  public emitEvent(runId: string, event: Partial<RunBaseEvent> & RunEvent) {
     const run = this.runs.get(runId);
     if (run) {
       const enrichedEvent = {
@@ -76,7 +97,7 @@ export class RunManager {
     }
   }
 
-  private notify(eventName: string, event: any) {
+  private notify(eventName: string, event: RunEvent) {
     const handlers = this.listeners.get(eventName);
     if (handlers) {
       handlers.forEach(handler => handler(event));
@@ -123,12 +144,12 @@ export class RunManager {
   /**
    * Get historical events for a run or thread.
    */
-  public getEvents(filter: { runId?: string; threadId?: string }): any[] {
+  public getEvents(filter: { runId?: string; threadId?: string }): RunEvent[] {
     if (filter.runId) {
       return this.runs.get(filter.runId)?.events ?? [];
     }
     if (filter.threadId) {
-      const threadEvents: any[] = [];
+      const threadEvents: (RunBaseEvent & RunEvent)[] = [];
       for (const run of this.runs.values()) {
         if (run?.state?.threadId === filter.threadId) {
           threadEvents.push(...run.events);

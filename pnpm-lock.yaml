@@ -186,8 +186,8 @@ importers:
   apps/template_express:
     dependencies:
       '@melony/agents':
-        specifier: latest
-        version: 0.3.0
+        specifier: workspace:*
+        version: link:../../packages/melony-agents
       '@melony/llm':
         specifier: workspace:*
         version: link:../../packages/melony-llm

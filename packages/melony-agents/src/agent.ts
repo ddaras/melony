@@ -62,7 +62,7 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> 
 /**
  * Factory function to create a new agent.
  */
-export function agent(config: string | AgentConfig) {
+export function agent<TState extends AgentState = AgentState, TEvent = any>(config: string | AgentConfig<TState, TEvent>) {
   const actualConfig = typeof config === "string" ? { name: config } : config;
-  return new AgentBuilder(actualConfig);
+  return new AgentBuilder<TState, TEvent>(actualConfig);
 }

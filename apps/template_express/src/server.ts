@@ -3,6 +3,7 @@ import cors from 'cors';
 import { sampleAgent } from './agent.js';
 import { generateId } from 'melony';
 import { runManager } from './runs.js';
+import { RunErrorEvent } from './events.js';
 
 export function createServer(): express.Express {
   const app = express();
@@ -19,9 +20,9 @@ export function createServer(): express.Express {
 
   // Health check endpoint
   app.get('/health', (req: Request, res: Response) => {
-    res.json({ 
-      status: 'healthy', 
-      version: '0.0.1', 
+    res.json({
+      status: 'healthy',
+      version: '0.0.1',
       platform: 'melony',
       runtime: 'express'
     });
@@ -42,14 +43,15 @@ export function createServer(): express.Express {
     const activeThreadId = (threadId || sessionId || generateId()) as string;
 
     // Create a new run
-    const run = runManager.createRun(activeThreadId, {
+    const run = runManager.createRun({
       ...requestState,
-      runId
+      threadId: activeThreadId,
+      sessionId: sessionId as string
     });
 
     // Respond immediately with the run ID
-    res.json({ 
-      runId: run.id, 
+    res.json({
+      runId: run.id,
       threadId: activeThreadId,
       status: 'running'
     });
@@ -71,12 +73,11 @@ export function createServer(): express.Express {
         runManager.updateRunStatus(run.id, 'completed');
       } catch (error) {
         console.error(`Run ${run.id} failed:`, error);
-        const runtimeErrorEvent = {
-          type: "error",
-          data: {
-            message: error instanceof Error ? error.message : "Unknown agent error"
-          }
+        const runtimeErrorEvent: RunErrorEvent = {
+          type: "run:error",
+          message: error instanceof Error ? error.message : "Unknown agent error"
         };
+
         runManager.emitEvent(run.id, runtimeErrorEvent);
         runManager.updateRunStatus(run.id, 'failed');
       }
@@ -86,8 +87,8 @@ export function createServer(): express.Express {
   // List all runs, optionally filtered by threadId
   app.get('/runs', (req: Request, res: Response) => {
     const { threadId } = req.query;
-    const runs = runManager.listRuns({ 
-      threadId: threadId as string 
+    const runs = runManager.listRuns({
+      threadId: threadId as string
     });
     res.json({ runs });
   });
@@ -107,9 +108,9 @@ export function createServer(): express.Express {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const filter = { 
-      runId: runId as string, 
-      threadId: threadId as string 
+    const filter = {
+      runId: runId as string,
+      threadId: threadId as string
     };
 
     const historicalEvents = runManager.getEvents(filter);
@@ -130,9 +131,9 @@ export function createServer(): express.Express {
   // Get historical events for a run or thread
   app.get('/events', (req: Request, res: Response) => {
     const { runId, threadId } = req.query;
-    const filter = { 
-      runId: runId as string, 
-      threadId: threadId as string 
+    const filter = {
+      runId: runId as string,
+      threadId: threadId as string
     };
     const events = runManager.getEvents(filter);
     res.json({ events });

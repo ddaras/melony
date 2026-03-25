@@ -9,7 +9,7 @@
     "build": "tsup src/index.ts --format esm --clean"
   },
   "dependencies": {
-    "@melony/agents": "latest",
+    "@melony/agents": "workspace:*",
     "@melony/llm": "workspace:*",
     "@melony/openai": "latest",
     "cors": "^2.8.5",
