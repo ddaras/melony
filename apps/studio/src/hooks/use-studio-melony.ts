@@ -72,7 +72,7 @@ interface UseStudioMelonyOptions {
   url?: string;
 }
 
-export const useStudioMelony = ({ url = 'http://localhost:7777' }: UseStudioMelonyOptions = {}) => {
+export const useStudioMelony = ({ url = 'http://localhost:7123' }: UseStudioMelonyOptions = {}) => {
   const [events, setEvents] = useState<any[]>([]);
   const [streaming, setStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);

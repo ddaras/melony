@@ -41,7 +41,7 @@ program
         type: 'number',
         name: 'port',
         message: 'Which port should the server run on?',
-        initial: 7777
+        initial: 7123
       }
     ]);
 

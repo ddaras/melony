@@ -46,6 +46,7 @@ export function llm<TState extends AgentState = AgentState, TEvent = any>(
         const tools = toolSelector(context);
         const pendingToolCalls: Array<{ id?: string; name: string; args: any }> = [];
         let assistantText = "";
+        const messageId = `msg_${context.runId}_${steps}`;
 
         for await (const providerEvent of options.provider.generate({
           system,
@@ -59,12 +60,19 @@ export function llm<TState extends AgentState = AgentState, TEvent = any>(
             if (typeof providerEvent.text === "string") {
               assistantText += providerEvent.text;
             }
-            yield { type: "llm:text:delta", data: { delta: providerEvent.text }, meta: { volatile: true } } as any;
+            yield { 
+              type: "llm:text:delta", 
+              data: { delta: providerEvent.text, messageId }, 
+              meta: { volatile: true } 
+            } as any;
           } else if (providerEvent.type === "text:done") {
             if (typeof providerEvent.text === "string" && providerEvent.text.length > 0) {
               assistantText = providerEvent.text;
             }
-            yield { type: "llm:text", data: { text: providerEvent.text } } as any;
+            yield { 
+              type: "llm:text", 
+              data: { text: providerEvent.text, messageId } 
+            } as any;
           } else if (providerEvent.type === "tool:call") {
             if (!providerEvent.name) {
               yield {

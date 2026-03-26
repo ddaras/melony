@@ -23,7 +23,7 @@ export const defaultChatAgent = agent({
   instructions: "You are a helpful assistant. Use tools when necessary."
 })
   .use(actions({ actions: [weatherAction] }))
-  .use(inspector({ url: "http://localhost:7777" }))
+  .use(inspector({ url: "http://localhost:7123" }))
   .use(llm({ provider: geminiProvider }))
   .use(planning({ provider: geminiProvider }));
 
@@ -93,5 +93,5 @@ export const sequentialChatAgent = agent({
   description: "Runs request classification before final response generation.",
   instructions: "Run the configured sequential workflow and emit all step events."
 })
-  .use(inspector({ url: "http://localhost:7777" }))
+  .use(inspector({ url: "http://localhost:7123" }))
   .use(sequential([classifierAgent, answerAgent]));

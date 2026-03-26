@@ -11,4 +11,4 @@ export const geminiProvider = createGeminiProvider({
   model: GEMINI_MODEL
 });
 
-export const PORT = process.env.PORT || 3000;
+export const PORT = process.env.PORT || 7123;

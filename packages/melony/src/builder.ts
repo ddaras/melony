@@ -6,6 +6,7 @@ import {
 } from "./types";
 import { Runtime } from "./runtime";
 import { createStreamResponse } from "./utils/create-stream-response";
+import { generateId } from "./utils/generate-id";
 
 /**
  * A Melony plugin is a function that receives the builder and extends it.
@@ -122,6 +123,61 @@ export class MelonyBuilder<
     const runtime = this.build();
     const generator = runtime.run(event, options);
     return createStreamResponse(generator);
+  }
+
+  /**
+   * A unified Web-Standard Request Handler.
+   * Automatically parses a Request and returns a streaming Response.
+   */
+  async handle(request: Request, options?: { 
+    state?: (req: Request) => Promise<TState> | TState 
+  }): Promise<Response> {
+    // 1. Handle Preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, x-melony-thread-id, x-melony-run-id, Authorization",
+        },
+      });
+    }
+
+    // 2. Extract Event from Body
+    let event: TEvent;
+    try {
+      if (request.method === "POST") {
+        event = await request.json();
+      } else {
+        const url = new URL(request.url);
+        event = { 
+          [this.config.eventKey || "type"]: url.searchParams.get("type") || "run",
+          data: Object.fromEntries(url.searchParams.entries())
+        } as unknown as TEvent;
+      }
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { 
+        status: 400, 
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      });
+    }
+
+    // 3. Resolve State and Run Metadata
+    const threadId = request.headers.get("x-melony-thread-id") || (event as any).threadId || generateId();
+    const runId = request.headers.get("x-melony-run-id") || generateId();
+
+    const state = options?.state 
+      ? await options.state(request) 
+      : ({ threadId, runId } as unknown as TState);
+
+    // 4. Stream Response
+    const response = await this.streamResponse(event, { state, runId });
+    
+    // Add CORS to response
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    
+    return response;
   }
 
   /**

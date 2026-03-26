@@ -16,7 +16,7 @@ import { inspector } from "@melony/inspector";
 
 const myAgent = agent("my-agent")
   .use(inspector({
-    url: "http://localhost:7777" // Optional: default studio URL
+    url: "http://localhost:7123" // Optional: default studio URL
   }))
   .use(llm(...));
 ```

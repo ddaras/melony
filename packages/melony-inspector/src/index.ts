@@ -11,7 +11,7 @@ const nextSequence = (runId: string): number => {
 export interface InspectorOptions {
   /**
    * The URL of the Melony Studio server.
-   * Defaults to http://localhost:7777
+   * Defaults to http://localhost:7123
    */
   url?: string;
   /**
@@ -30,7 +30,7 @@ export interface InspectorOptions {
  * and sends them to the Melony Studio.
  */
 export const inspector = (options: InspectorOptions = {}): MelonyPlugin => {
-  const { url = "http://localhost:7777", disabled = false, name: overrideName } = options;
+  const { url = "http://localhost:7123", disabled = false, name: overrideName } = options;
   const endpoint = `${url.replace(/\/$/, "")}/api/events`;
 
   return (builder) => {

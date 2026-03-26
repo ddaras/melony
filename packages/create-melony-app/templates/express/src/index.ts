@@ -5,7 +5,7 @@ import { createServer } from './server.js';
 dotenv.config();
 
 const app = createServer();
-const PORT = process.env.PORT || 7777;
+const PORT = process.env.PORT || 7123;
 
 // Start the server
 app.listen(PORT, () => {

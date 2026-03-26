@@ -1,14 +1,8 @@
 import dotenv from 'dotenv';
-import { createServer } from './server.js';
+import { sampleAgent } from './agent.js';
+import { serveNode } from '@melony/server-node';
 
 // Load environment variables
 dotenv.config();
 
-const app = createServer();
-const PORT = process.env.PORT || 7777;
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Melony Agent Server running on http://localhost:${PORT}`);
-  console.log(`Ready to connect: https://studio.melony.dev?agent=http://localhost:${PORT}/chat`);
-});
+serveNode(sampleAgent, { port: process.env.PORT });

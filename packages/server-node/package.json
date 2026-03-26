@@ -1,0 +1,45 @@
+{
+  "name": "@melony/server-node",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepack": "node ../../scripts/replace-workspace-protocols.mjs && npm run build",
+    "postpack": "node ../../scripts/restore-workspace-protocols.mjs"
+  },
+  "keywords": [
+    "melony",
+    "server",
+    "node",
+    "events"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "Node.js server adapter for Melony Request handlers.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  }
+}

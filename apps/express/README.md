@@ -16,7 +16,7 @@ A simple Express application that demonstrates how to use Melony agents and acti
 
 3.  Send a message to the agent:
     ```bash
-    curl -X POST http://localhost:3000/chat \
+    curl -X POST http://localhost:7123 \
       -H "Content-Type: application/json" \
       -d '{"message": "What is the weather in London?"}'
     ```

@@ -57,6 +57,14 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> 
       }
     })();
   }
+
+  /**
+   * Handle a web-standard Request and return a streaming Response.
+   */
+  async handle(request: Request, options?: { state?: (req: Request) => Promise<TState> | TState }): Promise<Response> {
+    return this.builder.handle(request, options);
+  }
+
 }
 
 /**

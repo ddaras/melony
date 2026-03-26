@@ -96,7 +96,7 @@ app.delete('/api/runs', (req, res) => {
   res.sendStatus(200);
 });
 
-const PORT = process.env.PORT || 7777;
+const PORT = process.env.PORT || 7123;
 server.listen(PORT, () => {
   console.log(`Melony Studio Server running on http://localhost:${PORT}`);
 });
