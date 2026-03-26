@@ -1,40 +1,64 @@
-import { agent, AgentState as BaseAgentState } from '@melony/agents';
+import { agent } from '@melony/agents';
 import { llm } from '@melony/llm';
 import { createOpenAIProvider } from '@melony/openai';
-import { RunEvent } from './events.js';
+import { AgentState, AgentEvent, AgentEventTypes, isUserIntentEvent, isEventsListEvent } from './types.js';
 import { appStorage, inMemoryStoragePlugin } from './storage.js';
 
-type AgentState = BaseAgentState & {
-  messages: { role: 'user' | 'assistant'; content: string }[];
-};
-
 // Define a simple agent that responds to messages
-export const sampleAgent = agent<AgentState, RunEvent>({
+export const sampleAgent = agent<AgentState, AgentEvent>({
   name: 'Sample Agent',
   instructions: 'You are a helpful Melony agent. Respond to the user with enthusiasm!',
 })
-  .use(inMemoryStoragePlugin<AgentState>(appStorage))
+  .use(inMemoryStoragePlugin<AgentState, AgentEvent>(appStorage))
   .use((builder) => {
-    // Treat runs:list as an internal telemetry event
-    builder.intercept('runs:list', (event) => {
-      (event as any).meta ??= {};
-      (event as any).meta.internal = true;
-      return event;
+    // Automatically emit status events during the run lifecycle
+    builder.on(AgentEventTypes.AgentRun, async function* () {
+      yield { type: AgentEventTypes.AgentStatus, data: { status: 'thinking' } };
     });
 
-    builder.on('runs:list', async function* () {
+    builder.on(AgentEventTypes.AgentComplete, async function* () {
+      yield { type: AgentEventTypes.AgentStatus, data: { status: 'completed' } };
+    });
+
+    builder.on(AgentEventTypes.RunError, async function* () {
+      yield { type: AgentEventTypes.AgentStatus, data: { status: 'failed' } };
+    });
+
+    builder.on('llm:error', async function* () {
+      yield { type: AgentEventTypes.AgentStatus, data: { status: 'failed' } };
+    });
+
+    builder.on(AgentEventTypes.RunsList, async function* () {
+      const runs = appStorage.listRuns();
+
       yield {
-        type: 'runs:listed',
-        data: { runs: appStorage.listRuns() },
+        type: AgentEventTypes.RunsListed,
+        data: { runs },
         meta: { internal: true },
-      } as RunEvent;
+      };
+    });
+
+    builder.on(AgentEventTypes.EventsList, async function* (event) {
+      if (!isEventsListEvent(event)) {
+        return;
+      }
+      const events = appStorage.listEvents(event.data.runId);
+
+      yield {
+        type: AgentEventTypes.EventsListed,
+        data: { events },
+        meta: { internal: true },
+      };
     });
 
     // Handle the user's intent by adding it to the state and triggering the agent run
-    builder.on('user:intent', async function* (event, { state }) {
-      const text = (event as any).data?.text;
-      if (typeof text !== 'string' || text.trim() === '') {
-        yield { type: 'run:error', message: 'No text provided in user intent' } as RunEvent;
+    builder.on(AgentEventTypes.UserIntent, async function* (event, { state }) {
+      if (!isUserIntentEvent(event)) {
+        return;
+      }
+      const text = event.data.text;
+      if (text.trim() === '') {
+        yield { type: AgentEventTypes.RunError, data: { message: 'No text provided in user intent' } };
         return;
       }
 
@@ -42,12 +66,7 @@ export const sampleAgent = agent<AgentState, RunEvent>({
       state.messages.push({ role: 'user', content: text });
 
       // Signal that we are starting to process the run
-      yield { type: 'agent:run', data: { text } } as any;
-    });
-
-    // API to Runtime: Handlers yield events directly to the HTTP stream.
-    builder.on('agent:run', async function* (event, { state }) {
-      yield { type: 'agent:status', status: 'thinking' } as RunEvent;
+      yield { type: AgentEventTypes.AgentRun, data: { text } };
     });
   })
   .use(llm({

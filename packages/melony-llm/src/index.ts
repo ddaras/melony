@@ -21,7 +21,7 @@ async function resolveInstructions(context: RuntimeContext<any, any>): Promise<s
   if (typeof instructions === "function") {
     return await instructions(context);
   }
-  return instructions;
+  return instructions as string | undefined;
 }
 
 export function llm<TState extends AgentState = AgentState, TEvent = any>(
@@ -60,18 +60,18 @@ export function llm<TState extends AgentState = AgentState, TEvent = any>(
             if (typeof providerEvent.text === "string") {
               assistantText += providerEvent.text;
             }
-            yield { 
-              type: "llm:text:delta", 
-              data: { delta: providerEvent.text, messageId }, 
-              meta: { volatile: true } 
+            yield {
+              type: "llm:text:delta",
+              data: { delta: providerEvent.text, messageId },
+              meta: { volatile: true }
             } as any;
           } else if (providerEvent.type === "text:done") {
             if (typeof providerEvent.text === "string" && providerEvent.text.length > 0) {
               assistantText = providerEvent.text;
             }
-            yield { 
-              type: "llm:text", 
-              data: { text: providerEvent.text, messageId } 
+            yield {
+              type: "llm:text",
+              data: { text: providerEvent.text, messageId }
             } as any;
           } else if (providerEvent.type === "tool:call") {
             if (!providerEvent.name) {
@@ -82,7 +82,7 @@ export function llm<TState extends AgentState = AgentState, TEvent = any>(
               continue;
             }
             const callId = providerEvent.callId || `tool_call_${context.runId}_${steps}_${pendingToolCalls.length}`;
-            
+
             // Emit the tool call event
             yield {
               type: "llm:tool:call",
@@ -92,7 +92,7 @@ export function llm<TState extends AgentState = AgentState, TEvent = any>(
                 input: providerEvent.input
               }
             } as any;
-            
+
             pendingToolCalls.push({
               id: callId,
               name: providerEvent.name,
