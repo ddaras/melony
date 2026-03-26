@@ -172,7 +172,9 @@ export const useStudioMelony = ({ url = 'http://localhost:7123' }: UseStudioMelo
                 return next;
               });
 
-              if (incomingEvent.type === 'run:status') {
+              if (
+                incomingEvent.type === 'run:status'
+              ) {
                 const status = incomingEvent.data?.status;
                 if (status === 'completed' || status === 'failed') {
                   setStreaming(false);

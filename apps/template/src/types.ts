@@ -1,4 +1,4 @@
-import { AgentState as BaseAgentState } from '@melony/agents';
+import { AgentState as BaseAgentState, AgentEvents } from '@melony/agents';
 import type { StoredEvent, StoredRun } from './storage.js';
 
 export type AgentStatus = 'thinking' | 'running' | 'completed' | 'failed';
@@ -16,32 +16,19 @@ type EventMeta = {
 
 export const AgentEventTypes = {
   UserIntent: 'user:intent',
-  AgentRun: 'agent:run',
-  RunStatus: 'run:status',
   AgentStatus: 'agent:status',
   RunError: 'run:error',
   RunsList: 'runs:list',
   RunsListed: 'runs:listed',
   EventsList: 'events:list',
   EventsListed: 'events:listed',
-  AgentComplete: 'agent:complete',
+  AgentRun: 'agent:run',
+  AgentComplete: AgentEvents.Complete,
 } as const;
 
 export type UserIntentEvent = {
   type: typeof AgentEventTypes.UserIntent;
   data: { text: string };
-};
-
-export type AgentRunEvent = {
-  type: typeof AgentEventTypes.AgentRun;
-  data: { text: string };
-};
-
-export type RunStatusEvent = {
-  type: typeof AgentEventTypes.RunStatus;
-  data: {
-    status: "pending" | "running" | "completed" | "failed";
-  }
 };
 
 export type AgentStatusEvent = {
@@ -83,24 +70,16 @@ export type EventsListedEvent = {
   meta?: EventMeta;
 };
 
-export type AgentCompleteEvent = {
-  type: typeof AgentEventTypes.AgentComplete;
-  data: {
-    agent: string;
-  }
-};
-
 export type AgentEvent =
   | UserIntentEvent
-  | AgentRunEvent
-  | RunStatusEvent
   | RunErrorEvent
   | AgentStatusEvent
-  | AgentCompleteEvent
   | RunsListEvent
   | RunsListedEvent
   | EventsListEvent
-  | EventsListedEvent;
+  | EventsListedEvent
+  | { type: typeof AgentEvents.Run; data: { text: string } }
+  | { type: typeof AgentEvents.Complete; data: { agent: string } };
 
 export function isRunsListEvent(event: AgentEvent): event is RunsListEvent {
   return event.type === AgentEventTypes.RunsList;

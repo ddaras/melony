@@ -11,23 +11,6 @@ export const sampleAgent = agent<AgentState, AgentEvent>({
 })
   .use(inMemoryStoragePlugin<AgentState, AgentEvent>(appStorage))
   .use((builder) => {
-    // Automatically emit status events during the run lifecycle
-    builder.on(AgentEventTypes.AgentRun, async function* () {
-      yield { type: AgentEventTypes.AgentStatus, data: { status: 'thinking' } };
-    });
-
-    builder.on(AgentEventTypes.AgentComplete, async function* () {
-      yield { type: AgentEventTypes.AgentStatus, data: { status: 'completed' } };
-    });
-
-    builder.on(AgentEventTypes.RunError, async function* () {
-      yield { type: AgentEventTypes.AgentStatus, data: { status: 'failed' } };
-    });
-
-    builder.on('llm:error', async function* () {
-      yield { type: AgentEventTypes.AgentStatus, data: { status: 'failed' } };
-    });
-
     builder.on(AgentEventTypes.RunsList, async function* () {
       const runs = appStorage.listRuns();
 
@@ -66,7 +49,7 @@ export const sampleAgent = agent<AgentState, AgentEvent>({
       state.messages.push({ role: 'user', content: text });
 
       // Signal that we are starting to process the run
-      yield { type: AgentEventTypes.AgentRun, data: { text } };
+      yield { type: 'agent:run', data: { text } };
     });
   })
   .use(llm({

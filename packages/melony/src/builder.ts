@@ -3,6 +3,7 @@ import {
   Config,
   RuntimeContext,
   EventInterceptor,
+  RunOptions,
 } from "./types";
 import { Runtime } from "./runtime";
 import { createStreamResponse } from "./utils/create-stream-response";
@@ -113,8 +114,20 @@ export class MelonyBuilder<
   }
 
   /**
+   * Execute the runtime for a specific event.
+   */
+  async run(
+    event: TEvent,
+    options?: RunOptions<TState>
+  ): Promise<AsyncGenerator<TEvent>> {
+    const runtime = this.build();
+    return runtime.run(event, options);
+  }
+
+  /**
    * Execute and stream the response for an event.
    * This is a convenience method that builds the runtime and calls run().
+   * Automatically emits system events to track the run lifecycle.
    */
   async streamResponse(
     event: TEvent,
@@ -129,8 +142,8 @@ export class MelonyBuilder<
    * A unified Web-Standard Request Handler.
    * Automatically parses a Request and returns a streaming Response.
    */
-  async handle(request: Request, options?: { 
-    state?: (req: Request) => Promise<TState> | TState 
+  async handle(request: Request, options?: {
+    state?: (req: Request) => Promise<TState> | TState
   }): Promise<Response> {
     // 1. Handle Preflight
     if (request.method === "OPTIONS") {
@@ -151,15 +164,15 @@ export class MelonyBuilder<
         event = await request.json();
       } else {
         const url = new URL(request.url);
-        event = { 
+        event = {
           [this.config.eventKey || "type"]: url.searchParams.get("type") || "run",
           data: Object.fromEntries(url.searchParams.entries())
         } as unknown as TEvent;
       }
     } catch (e) {
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { 
-        status: 400, 
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
 
@@ -167,16 +180,16 @@ export class MelonyBuilder<
     const threadId = request.headers.get("x-melony-thread-id") || (event as any).threadId || generateId();
     const runId = request.headers.get("x-melony-run-id") || generateId();
 
-    const state = options?.state 
-      ? await options.state(request) 
+    const state = options?.state
+      ? await options.state(request)
       : ({ threadId, runId } as unknown as TState);
 
     // 4. Stream Response
     const response = await this.streamResponse(event, { state, runId });
-    
+
     // Add CORS to response
     response.headers.set("Access-Control-Allow-Origin", "*");
-    
+
     return response;
   }
 
@@ -191,7 +204,7 @@ export class MelonyBuilder<
       runId?: string;
     }
   ): Promise<Response> {
-    const events = [];
+    const events: TEvent[] = [];
     const runtime = this.build();
 
     for await (const e of runtime.run(event, options)) {

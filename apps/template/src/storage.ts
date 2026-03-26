@@ -1,6 +1,7 @@
 import type { AgentPlugin } from "@melony/agents";
 import { AgentEventTypes } from "./types.js";
 import type { AgentState, AgentEvent } from "./types.js";
+import { SystemEvents } from "melony";
 
 type EventEnvelope = {
   type?: string;
@@ -31,6 +32,17 @@ export type StoredRun<TState = unknown, TEvent = unknown> = {
 export class InMemoryRunStorage<TState extends { threadId?: string } = { threadId?: string }, TEvent extends EventEnvelope = EventEnvelope> {
   private runs = new Map<string, StoredRun<TState, TEvent>>();
 
+  private shouldPersistEvent(event: TEvent): boolean {
+    const eventType = event.type ?? "unknown";
+
+    return !(
+      event.meta?.internal ||
+      event.meta?.volatile ||
+      eventType === AgentEventTypes.RunsList ||
+      eventType === AgentEventTypes.RunsListed
+    );
+  }
+
   start(runId: string, threadId?: string): StoredRun<TState, TEvent> {
     const now = Date.now();
     const current = this.runs.get(runId);
@@ -50,8 +62,12 @@ export class InMemoryRunStorage<TState extends { threadId?: string } = { threadI
     return run;
   }
 
-  saveEvent(runId: string, event: TEvent): void {
-    const run = this.runs.get(runId) ?? this.start(runId);
+  saveEvent(runId: string, event: TEvent, threadId?: string): boolean {
+    if (!this.shouldPersistEvent(event)) {
+      return false;
+    }
+
+    const run = this.runs.get(runId) ?? this.start(runId, threadId);
     const eventType = event.type ?? "unknown";
 
     run.events.push({
@@ -60,21 +76,8 @@ export class InMemoryRunStorage<TState extends { threadId?: string } = { threadI
       at: Date.now(),
     });
 
-    if (eventType === AgentEventTypes.RunError || eventType === "llm:error") run.status = "failed";
-    if (eventType === AgentEventTypes.AgentRun) run.status = "running";
-    if (eventType === AgentEventTypes.AgentComplete) run.status = "completed";
-
-    // Handle explicit status events
-    if (eventType === AgentEventTypes.AgentStatus || eventType === AgentEventTypes.RunStatus) {
-      const status = (event as any).status;
-      if (status === "thinking" || status === "running") {
-        run.status = "running";
-      } else if (status === "completed" || status === "failed") {
-        run.status = status;
-      }
-    }
-
     run.updatedAt = Date.now();
+    return true;
   }
 
   saveState(runId: string, state: TState): void {
@@ -108,24 +111,14 @@ export function inMemoryStoragePlugin<
 >(storage: InMemoryRunStorage<TState, TEvent>): AgentPlugin<TState, TEvent> {
   return (builder) => {
     builder.intercept((event, context) => {
-      const eventType = event.type ?? "unknown";
-      const isNonPersistentEvent =
-        event.meta?.internal ||
-        event.meta?.volatile ||
-        eventType === AgentEventTypes.RunsList ||
-        eventType === AgentEventTypes.RunsListed;
-
-      if (isNonPersistentEvent) {
-        return event;
+      const didPersist = storage.saveEvent(context.runId, event, context.state.threadId);
+      if (didPersist) {
+        storage.saveState(context.runId, context.state);
       }
-
-      storage.start(context.runId, context.state.threadId);
-      storage.saveEvent(context.runId, event);
-      storage.saveState(context.runId, context.state);
       return event;
     });
 
-    builder.on(AgentEventTypes.AgentComplete, async function* (_, context) {
+    builder.on("agent:complete", async function* (_, context) {
       // Do not create run records for non-persistent/internal-only flows.
       if (!storage.getRun(context.runId)) {
         return;
