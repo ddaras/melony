@@ -54,6 +54,31 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> 
         return event;
       });
 
+      if (this.config.handleUserIntent !== false) {
+        b.on(AgentEvents.UserIntent, async function* (event: any, context) {
+          const text = event?.data?.text;
+          if (typeof text !== "string" || text.trim() === "") {
+            yield {
+              type: AgentEvents.Error,
+              data: { message: "No text provided in user intent" }
+            } as any;
+            return;
+          }
+
+          const state = context.state as any;
+          state.messages ??= [];
+          state.messages.push({
+            role: "user",
+            content: text
+          });
+
+          yield {
+            type: AgentEvents.Run,
+            data: { text }
+          } as any;
+        });
+      }
+
       // Standard Agent Loop: agent:run -> agent:step -> agent:step:next
       b.on(AgentEvents.Run, async function* (event: any) {
         yield { 

@@ -1,4 +1,4 @@
-import { agent, AgentEvents } from '@melony/agents';
+import { agent } from '@melony/agents';
 import { llm } from '@melony/llm';
 import { createOpenAIProvider } from '@melony/openai';
 import { AgentState, AgentEvent } from './types.js';
@@ -16,28 +16,4 @@ export const sampleAgent = agent<AgentState, AgentEvent>({
         model: 'gpt-4o-mini',
       }),
     }),
-  )
-  .on(AgentEvents.UserIntent, async function* (event: any, { state }) {
-    const text = event.data?.text;
-    if (!text || text.trim() === '') {
-      yield {
-        type: AgentEvents.Error,
-        data: {
-          message: 'No text provided in user intent',
-        },
-      };
-      return;
-    }
-
-    state.messages ??= [];
-    state.messages.push({
-      role: 'user',
-      content: text,
-    });
-
-    // Signal that we are starting to process the run
-    yield {
-      type: AgentEvents.Run,
-      data: { text },
-    };
-  });
+  );
