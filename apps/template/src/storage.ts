@@ -1,7 +1,6 @@
 import type { AgentPlugin } from "@melony/agents";
 import { AgentEventTypes } from "./types.js";
 import type { AgentState, AgentEvent } from "./types.js";
-import { SystemEvents } from "melony";
 
 type EventEnvelope = {
   type?: string;

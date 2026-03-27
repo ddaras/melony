@@ -1,8 +1,6 @@
 import {
   RuntimeContext,
   Config,
-  SystemEvents,
-  RunStatus,
   RunOptions,
 } from "./types";
 import { generateId } from "./utils/generate-id";
@@ -44,10 +42,24 @@ export class Runtime<TState = any, TEvent = any> {
   ): AsyncGenerator<TEvent> {
     const runId = options?.runId ?? generateId();
     const eventKey = this.config.eventKey || "type";
-    const silent = options?.silent ?? false;
+
+    // Resolve initial state: options.state > config.initialState > {}
+    let state: TState;
+    if (options?.state) {
+      state = options.state;
+    } else if (typeof this.config.initialState === "function") {
+      state = await (this.config.initialState as any)();
+    } else if (this.config.initialState) {
+      // Use structuredClone if available, otherwise fallback to simple spread for safety
+      state = typeof (globalThis as any).structuredClone === "function"
+        ? (globalThis as any).structuredClone(this.config.initialState)
+        : { ...this.config.initialState };
+    } else {
+      state = {} as TState;
+    }
 
     const context: RuntimeContext<TState, TEvent> = {
-      state: (options?.state ?? {}) as TState,
+      state,
       runtime: this,
       runId,
       suspend: (event?: TEvent) => {
@@ -55,33 +67,9 @@ export class Runtime<TState = any, TEvent = any> {
       },
     };
 
-    // 1. Initial status event (through full pipeline)
-    if (!silent) {
-      yield* this.runEventHandlers(
-        {
-          [eventKey]: SystemEvents.RunStatus,
-          data: { status: "running" as RunStatus },
-          meta: { internal: true, runId },
-        } as unknown as TEvent,
-        context
-      );
-    }
-
     try {
       // Process the incoming event through handlers
       yield* this.runEventHandlers(event, context);
-
-      // 2. Final success status event (through full pipeline)
-      if (!silent) {
-        yield* this.runEventHandlers(
-          {
-            [eventKey]: SystemEvents.RunStatus,
-            data: { status: "completed" as RunStatus },
-            meta: { internal: true, runId },
-          } as unknown as TEvent,
-          context
-        );
-      }
     } catch (error) {
       let eventToEmit: TEvent | undefined;
 
@@ -99,21 +87,6 @@ export class Runtime<TState = any, TEvent = any> {
 
       if (eventToEmit) {
         yield* this.runEventHandlers(eventToEmit, context);
-      }
-
-      // 3. Final failure status event (through full pipeline)
-      if (!silent) {
-        yield* this.runEventHandlers(
-          {
-            [eventKey]: SystemEvents.RunStatus,
-            data: {
-              status: "failed" as RunStatus,
-              error: error instanceof Error ? error.message : String(error),
-            },
-            meta: { internal: true, runId },
-          } as unknown as TEvent,
-          context
-        );
       }
     }
   }

@@ -62,7 +62,12 @@ export interface AggregateOptions<TEvent = any> {
 /**
  * Default implementation for extracting role from an event.
  */
-export const defaultGetRole = <T = any>(e: T): string => (e as any).type === "user:text" ? "user" : "assistant";
+export const defaultGetRole = <T = any>(e: T): string => {
+  const type = (e as any).type;
+  if (type === "user:intent" || type === "user:text") return "user";
+  if (type === "agent:error" || type === "error") return "error";
+  return "assistant";
+};
 
 /**
  * Default implementation for extracting runId from an event.

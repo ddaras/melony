@@ -1,7 +1,7 @@
-import { agent } from '@melony/agents';
+import { agent, AgentEvents } from '@melony/agents';
 import { llm } from '@melony/llm';
 import { createOpenAIProvider } from '@melony/openai';
-import { AgentState, AgentEvent, AgentEventTypes, isUserIntentEvent, isEventsListEvent } from './types.js';
+import { AgentState, AgentEvent, AgentEventTypes, isEventsListEvent } from './types.js';
 import { appStorage, inMemoryStoragePlugin } from './storage.js';
 
 // Define a simple agent that responds to messages
@@ -35,25 +35,35 @@ export const sampleAgent = agent<AgentState, AgentEvent>({
     });
 
     // Handle the user's intent by adding it to the state and triggering the agent run
-    builder.on(AgentEventTypes.UserIntent, async function* (event, { state }) {
-      if (!isUserIntentEvent(event)) {
-        return;
-      }
-      const text = event.data.text;
-      if (text.trim() === '') {
-        yield { type: AgentEventTypes.RunError, data: { message: 'No text provided in user intent' } };
+    builder.on(AgentEvents.UserIntent, async function* (event: any, { state }) {
+      const text = event.data?.text;
+      if (!text || text.trim() === '') {
+        yield {
+          type: AgentEvents.Error,
+          data: {
+            message: 'No text provided in user intent',
+          },
+        };
         return;
       }
 
       state.messages ??= [];
-      state.messages.push({ role: 'user', content: text });
+      state.messages.push({
+        role: 'user',
+        content: text,
+      });
 
       // Signal that we are starting to process the run
-      yield { type: 'agent:run', data: { text } };
+      yield {
+        type: AgentEvents.Run,
+        data: { text },
+      };
     });
   })
-  .use(llm({
-    provider: createOpenAIProvider({
-      model: 'gpt-4o-mini',
+  .use(
+    llm({
+      provider: createOpenAIProvider({
+        model: 'gpt-4o-mini',
+      }),
     }),
-  }));
+  );

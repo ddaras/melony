@@ -1,24 +1,7 @@
 // ============================================
 // Runtime & Hooks
 // ============================================
-
 import { Runtime } from "./runtime";
-
-/**
- * Reserved system event types for Melony.
- * Using the melony: prefix ensures no collision with user events.
- */
-export const SystemEvents = {
-  /**
-   * Emitted automatically by the builder to track the lifecycle of a run.
-   */
-  RunStatus: "run:status",
-} as const;
-
-/**
- * Standard statuses for a Melony run.
- */
-export type RunStatus = "pending" | "running" | "completed" | "failed";
 
 /**
  * Options for executing a Melony run.
@@ -26,11 +9,6 @@ export type RunStatus = "pending" | "running" | "completed" | "failed";
 export interface RunOptions<TState = any> {
   state?: TState;
   runId?: string;
-  /**
-   * If true, do not emit system lifecycle events (run:status).
-   * Useful for internal/sub-runs or cleanup logic.
-   */
-  silent?: boolean;
 }
 
 export interface RuntimeContext<TState = any, TEvent = any> {
@@ -74,4 +52,9 @@ export interface Config<TState = any, TEvent = any> {
    * Defaults to "type".
    */
   eventKey?: string;
+  /**
+   * The initial state for the runtime.
+   * Can be an object or a factory function (sync or async).
+   */
+  initialState?: TState | (() => TState | Promise<TState>);
 }

@@ -15,14 +15,14 @@ type EventMeta = {
 };
 
 export const AgentEventTypes = {
-  UserIntent: 'user:intent',
+  UserIntent: AgentEvents.UserIntent,
   AgentStatus: 'agent:status',
-  RunError: 'run:error',
+  RunError: AgentEvents.Error,
   RunsList: 'runs:list',
   RunsListed: 'runs:listed',
   EventsList: 'events:list',
   EventsListed: 'events:listed',
-  AgentRun: 'agent:run',
+  AgentRun: AgentEvents.Run,
   AgentComplete: AgentEvents.Complete,
 } as const;
 
