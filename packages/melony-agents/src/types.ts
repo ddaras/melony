@@ -22,11 +22,12 @@ export interface AgentConfig<TState = unknown, TEvent = unknown> {
   description?: string;
   instructions?: Instructions<TState, TEvent>;
   /**
-   * Enable default mapping for `user:intent` events:
-   * validates `data.text`, appends to `state.messages`, then emits `agent:run`.
-   * Set to false to fully handle `user:intent` yourself.
+   * Enable default memory management:
+   * automatically manages `state.messages` by listening to `user:intent`,
+   * `agent:thought`, `agent:action`, and `agent:result`.
+   * Set to false to fully handle memory yourself.
    */
-  handleUserIntent?: boolean;
+  enableMemory?: boolean;
   /**
    * The initial state for the agent.
    * Can be an object or a factory function (sync or async).

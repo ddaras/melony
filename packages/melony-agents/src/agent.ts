@@ -1,5 +1,6 @@
 import { melony, MelonyBuilder, RunOptions, RuntimeContext } from "melony";
 import { AgentConfig, AgentPlugin, AgentEvents, AgentState } from "./types";
+import { memoryPlugin } from "./memory";
 
 /**
  * Helper to resolve agent instructions from state.
@@ -54,43 +55,14 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> 
         return event;
       });
 
-      if (this.config.handleUserIntent !== false) {
-        b.on(AgentEvents.UserIntent, async function* (event: any, context) {
-          const text = event?.data?.text;
-          if (typeof text !== "string" || text.trim() === "") {
-            yield {
-              type: AgentEvents.Error,
-              data: { message: "No text provided in user intent" }
-            } as any;
-            return;
-          }
-
-          const state = context.state as any;
-          state.messages ??= [];
-          state.messages.push({
-            role: "user",
-            content: text
-          });
-
-          yield {
-            type: AgentEvents.Run,
-            data: { text }
-          } as any;
-        });
+      // Short-term memory plugin
+      if (this.config.enableMemory !== false) {
+        b.use(memoryPlugin());
       }
 
       // Standard Agent Loop: agent:run -> agent:step -> agent:step:next
-      b.on(AgentEvents.Run, async function* (event: any) {
-        yield { 
-          type: AgentEvents.Step, 
-          data: { step: 1, input: event.data } 
-        } as any;
-      });
-
-      b.on(AgentEvents.StepNext, async function* (event: any) {
-        const step = event.data?.step || 1;
-        // Limit steps to prevent infinite loops if not configured otherwise
-        if (step > 10) {
+      const executeStep = async function* (stepIndex: number, input: any, context: RuntimeContext<TState, TEvent>) {
+        if (stepIndex > 10) {
           yield { 
             type: AgentEvents.Error, 
             data: { message: "Max steps reached" } 
@@ -98,10 +70,61 @@ export class AgentBuilder<TState extends AgentState = AgentState, TEvent = any> 
           return;
         }
 
-        yield { 
-          type: AgentEvents.Step, 
-          data: { step } 
-        } as any;
+        let actionCount = 0;
+        
+        // Execute the public step event
+        const stepRun = context.runtime.run({
+          type: AgentEvents.Step,
+          data: { step: stepIndex, input }
+        } as any, { state: context.state, runId: context.runId });
+
+        for await (const stepEvent of stepRun) {
+          // Skip the triggering event to avoid double-handling in the parent run
+          if ((stepEvent as any).type === AgentEvents.Step) {
+            continue;
+          }
+
+          yield stepEvent as any;
+
+          // If a plugin emitted an action, the core handles its execution
+          if ((stepEvent as any).type === AgentEvents.Action) {
+            actionCount++;
+            const action = (stepEvent as any).data;
+            
+            const actionRun = context.runtime.run({
+              type: `action:call:${action.name}`,
+              data: action
+            } as any, { state: context.state, runId: context.runId });
+
+            for await (const actionResult of actionRun) {
+              // Skip the triggering event
+              if ((actionResult as any).type === `action:call:${action.name}`) {
+                continue;
+              }
+              yield actionResult as any;
+            }
+          }
+        }
+
+        // If actions were taken, we likely need another step to process results
+        if (actionCount > 0) {
+          yield { type: AgentEvents.StepNext, data: { step: stepIndex + 1 } } as any;
+        } else {
+          // If no actions were taken, the agent has reached a terminal state (usually just text)
+          yield { 
+            type: AgentEvents.Complete, 
+            data: { agent: (context.state as any).agent?.name ?? "Agent" } 
+          } as any;
+        }
+      };
+
+      b.on(AgentEvents.Run, async function* (event: any, context) {
+        yield* executeStep(1, event.data, context);
+      });
+
+      b.on(AgentEvents.StepNext, async function* (event: any, context) {
+        const step = event.data?.step || 1;
+        yield* executeStep(step, event.data, context);
       });
 
       // No completion mapping from run:status.
