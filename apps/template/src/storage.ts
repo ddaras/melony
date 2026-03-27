@@ -4,6 +4,7 @@ import type { AgentState, AgentEvent } from "./types.js";
 
 type EventEnvelope = {
   type?: string;
+  data?: unknown;
   meta?: {
     internal?: boolean;
     volatile?: boolean;
@@ -38,7 +39,9 @@ export class InMemoryRunStorage<TState extends { threadId?: string } = { threadI
       event.meta?.internal ||
       event.meta?.volatile ||
       eventType === AgentEventTypes.RunsList ||
-      eventType === AgentEventTypes.RunsListed
+      eventType === AgentEventTypes.RunsListed ||
+      eventType === AgentEventTypes.EventsList ||
+      eventType === AgentEventTypes.EventsListed
     );
   }
 
@@ -109,6 +112,31 @@ export function inMemoryStoragePlugin<
   TEvent extends EventEnvelope
 >(storage: InMemoryRunStorage<TState, TEvent>): AgentPlugin<TState, TEvent> {
   return (builder) => {
+    builder.on(AgentEventTypes.RunsList, async function* () {
+      const runs = storage.listRuns();
+
+      yield {
+        type: AgentEventTypes.RunsListed,
+        data: { runs },
+        meta: { internal: true },
+      } as unknown as TEvent;
+    });
+
+    builder.on(AgentEventTypes.EventsList, async function* (event) {
+      const runId = (event.data as { runId?: string } | undefined)?.runId;
+      if (!runId) {
+        return;
+      }
+
+      const events = storage.listEvents(runId);
+
+      yield {
+        type: AgentEventTypes.EventsListed,
+        data: { events },
+        meta: { internal: true },
+      } as unknown as TEvent;
+    });
+
     builder.intercept((event, context) => {
       const didPersist = storage.saveEvent(context.runId, event, context.state.threadId);
       if (didPersist) {
